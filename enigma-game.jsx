@@ -341,8 +341,8 @@ const CSS = `
   .q-text { font-size: 14px; color: var(--text); line-height: 1.5; }
   .q-ans {
     display: inline-flex; align-items: center; gap: 4px;
-    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-    margin-top: 7px; padding: 2px 10px; border-radius: 20px;
+    font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    margin-top: 7px; padding: 3px 12px; border-radius: 20px;
   }
   .q-yes { background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid rgba(34,197,94,0.2); }
   .q-no { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
@@ -378,7 +378,7 @@ const CSS = `
   .action-area {
     position: sticky; bottom: 0;
     background: linear-gradient(to top, var(--bg) 80%, transparent);
-    padding: 12px 0 4px; margin-top: 8px;
+    padding: 12px 0 24px; margin-top: 8px;
   }
 
   /* ── Chip ── */
@@ -1084,8 +1084,8 @@ export default function Enigma() {
 
         {/* Solve modal */}
         {solveModalOpen && (
-          <div className="overlay" onClick={() => setSolveModalOpen(false)}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="overlay" style={{ alignItems: "flex-start", paddingTop: "15vh" }} onClick={() => setSolveModalOpen(false)}>
+            <div className="modal" style={{ borderRadius: 24 }} onClick={(e) => e.stopPropagation()}>
               <div className="modal-handle" />
               <div className="modal-title">Make Your Guess</div>
               <div className="modal-sub">Be confident — a wrong guess eliminates you from the round!</div>
