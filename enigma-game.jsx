@@ -503,7 +503,7 @@ export default function Enigma() {
   const av = (idx) => AVATAR_COLORS[idx % AVATAR_COLORS.length];
 
   // ─── Session API ──
-  const API = "http://localhost:3001/api";
+  const API = `http://${window.location.hostname}:3001/api`;
 
   // ─── Actions ──
   const createGame = async () => {
