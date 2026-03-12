@@ -490,9 +490,9 @@ export default function Enigma() {
         setScreen((cur) => {
           if (updated.status === "lobby") return "lobby";
           if (updated.status === "theme_select") return "theme";
+          if (updated.status === "secret_entry") return cur; // host stays on secret, others wait
           if (updated.status === "playing") return "game";
           if (updated.status === "round_end") return "result";
-          // Keep "secret" screen for the host entering the secret answer
           return cur;
         });
       } catch {}
@@ -609,7 +609,7 @@ export default function Enigma() {
 
   const confirmTheme = async () => {
     if (!selectedTheme) return;
-    const newGame = { ...game, theme: selectedTheme };
+    const newGame = { ...game, theme: selectedTheme, status: "secret_entry" };
     setGame(newGame);
     setScreen("secret");
     await syncGame(newGame);
