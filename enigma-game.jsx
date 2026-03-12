@@ -1049,8 +1049,11 @@ export default function Enigma() {
               <div style={{ textAlign: "center", padding: "10px 0 20px" }}>
                 <div style={{ fontSize: 52, marginBottom: 12 }}>⚖️</div>
                 <div className="modal-title">Host is deciding...</div>
-                <div className="modal-sub">{game.pendingSolve.playerName} submitted an answer. Awaiting the host's verdict.</div>
-                <p style={{ fontSize: 12, color: "var(--gold)", marginTop: 12, background: "rgba(200,168,74,0.08)", border: "1px solid var(--gold-dim)", borderRadius: 8, padding: "8px 12px" }}>👆 Tap the <strong>👑 Host</strong> button in the bar above to give your verdict</p>
+                <div className="modal-sub">{game.pendingSolve.playerName} submitted an answer — waiting for the verdict.</div>
+                <div style={{ background: "var(--card)", borderRadius: 12, padding: 16, marginTop: 14 }}>
+                  <div style={{ fontSize: 11, color: "var(--dim)", letterSpacing: 1, marginBottom: 6 }}>ANSWER SUBMITTED</div>
+                  <div style={{ fontFamily: "Cinzel, serif", fontSize: 22, color: "var(--gold)" }}>{game.pendingSolve.answer}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -1229,9 +1232,10 @@ export default function Enigma() {
         <div className="screen">
           <div className="winner-block">
             <div className="winner-crown">{hostWon ? "🎩" : "🎉"}</div>
-            <div className="winner-label">{hostWon ? "Host Wins the Round" : "Round Winner"}</div>
             <div className="winner-name">{hostWon ? host?.name : winner?.name}</div>
-            {hostWon && <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 6 }}>Nobody guessed the secret!</p>}
+            <div className="winner-label" style={{ marginTop: 8 }}>
+              {hostWon ? "defended the secret — nobody cracked it!" : "cracked the secret!"}
+            </div>
           </div>
 
           <div className="secret-box" style={{ marginBottom: 16 }}>
