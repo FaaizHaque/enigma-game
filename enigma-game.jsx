@@ -469,11 +469,36 @@ export default function Enigma() {
   const [howToPlayOpen, setHowToPlayOpen] = useState(false);
 
   const feedRef = useRef(null);
+  const lastWriteRef = useRef(0);
 
   // Scroll feed on new questions
   useEffect(() => {
     if (feedRef.current) feedRef.current.scrollTop = feedRef.current.scrollHeight;
   }, [game?.questions?.length]);
+
+  // Poll server every 2s to sync state across devices
+  useEffect(() => {
+    if (!game?.roomCode) return;
+    const id = setInterval(async () => {
+      if (Date.now() - lastWriteRef.current < 1500) return;
+      try {
+        const res = await fetch(`${API}/sessions/${game.roomCode}`);
+        if (!res.ok) return;
+        const updated = await res.json();
+        setGame(updated);
+        // Navigate all clients to correct screen based on server status
+        setScreen((cur) => {
+          if (updated.status === "lobby") return "lobby";
+          if (updated.status === "theme_select") return "theme";
+          if (updated.status === "playing") return "game";
+          if (updated.status === "round_end") return "result";
+          // Keep "secret" screen for the host entering the secret answer
+          return cur;
+        });
+      } catch {}
+    }, 2000);
+    return () => clearInterval(id);
+  }, [game?.roomCode]);
 
   // Check for game over after state changes
   useEffect(() => {
@@ -481,7 +506,7 @@ export default function Enigma() {
     const activeG = game.players.filter((p) => !p.isHost && !p.isEliminated);
     const qUsed = game.questions.filter((q) => q.answer !== null).length;
     if (activeG.length === 0 || qUsed >= 20) {
-      endRound(null); // host wins
+      endRound(null, game); // host wins
     }
   }, [game?.players, game?.questions]);
 
@@ -504,6 +529,18 @@ export default function Enigma() {
 
   // ─── Session API ──
   const API = `http://${window.location.hostname}:3001/api`;
+
+  const syncGame = async (g) => {
+    if (!g?.roomCode) return;
+    lastWriteRef.current = Date.now();
+    try {
+      await fetch(`${API}/sessions/${g.roomCode}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(g),
+      });
+    } catch {}
+  };
 
   // ─── Actions ──
   const createGame = async () => {
@@ -554,93 +591,108 @@ export default function Enigma() {
     }
   };
 
-  const addDemoPlayer = (dp) => {
+  const addDemoPlayer = async (dp) => {
     if (!game) return;
     const id = `p${game.players.length + 1}`;
     const p = { id, name: dp.name, score: 0, isHost: false, isEliminated: false, avatarIdx: dp.avatarIdx };
-    setGame((g) => ({ ...g, players: [...g.players, p] }));
+    const newGame = { ...game, players: [...game.players, p] };
+    setGame(newGame);
+    await syncGame(newGame);
   };
 
-  const startGame = () => {
-    setGame((g) => ({ ...g, status: "theme_select" }));
+  const startGame = async () => {
+    const newGame = { ...game, status: "theme_select" };
+    setGame(newGame);
     setScreen("theme");
+    await syncGame(newGame);
   };
 
-  const confirmTheme = () => {
+  const confirmTheme = async () => {
     if (!selectedTheme) return;
-    setGame((g) => ({ ...g, theme: selectedTheme }));
+    const newGame = { ...game, theme: selectedTheme };
+    setGame(newGame);
     setScreen("secret");
+    await syncGame(newGame);
   };
 
-  const lockSecret = () => {
+  const lockSecret = async () => {
     if (!secretInput.trim()) return;
-    setGame((g) => ({ ...g, secretAnswer: secretInput.trim(), hostHint: hintInput.trim(), status: "playing", questions: [], currentQuestionerIndex: 0, pendingSolve: null }));
+    const newGame = { ...game, secretAnswer: secretInput.trim(), hostHint: hintInput.trim(), status: "playing", questions: [], currentQuestionerIndex: 0, pendingSolve: null };
+    setGame(newGame);
     setSecretInput("");
     setHintInput("");
     setScreen("game");
+    await syncGame(newGame);
   };
 
-  const submitQuestion = () => {
+  const submitQuestion = async () => {
     if (!questionInput.trim() || !isMyTurn || pendingQ) return;
     const q = { id: Date.now(), askerId: viewerId, askerName: viewer.name, askerAvatarIdx: viewer.avatarIdx, text: questionInput.trim(), answer: null };
-    setGame((g) => ({ ...g, questions: [...g.questions, q] }));
+    const newGame = { ...game, questions: [...game.questions, q] };
+    setGame(newGame);
     setQuestionInput("");
+    await syncGame(newGame);
   };
 
-  const answerQ = (ans) => {
-    setGame((g) => {
-      const questions = g.questions.map((q) => (q.answer === null ? { ...q, answer: ans } : q));
-      const nextIdx = g.currentQuestionerIndex + 1;
-      return { ...g, questions, currentQuestionerIndex: nextIdx };
-    });
+  const answerQ = async (ans) => {
+    const questions = game.questions.map((q) => (q.answer === null ? { ...q, answer: ans } : q));
+    const nextIdx = game.currentQuestionerIndex + 1;
+    const newGame = { ...game, questions, currentQuestionerIndex: nextIdx };
+    setGame(newGame);
+    await syncGame(newGame);
   };
 
   const openSolve = () => { setSolveInput(""); setSolveModalOpen(true); };
 
-  const submitSolve = () => {
+  const submitSolve = async () => {
     if (!solveInput.trim()) return;
     setSolveModalOpen(false);
-    // Always send to host — host is the final judge, not the algorithm
-    setGame((g) => ({ ...g, pendingSolve: { playerId: viewerId, playerName: viewer.name, answer: solveInput.trim() } }));
+    const newGame = { ...game, pendingSolve: { playerId: viewerId, playerName: viewer.name, answer: solveInput.trim() } };
+    setGame(newGame);
     setSolveInput("");
+    await syncGame(newGame);
   };
 
-  const hostVerify = (correct) => {
+  const hostVerify = async (correct) => {
     if (correct) {
-      endRound(game.pendingSolve.playerId);
+      await endRound(game.pendingSolve.playerId);
     } else {
-      setGame((g) => ({
-        ...g,
-        players: g.players.map((p) => (p.id === g.pendingSolve.playerId ? { ...p, isEliminated: true } : p)),
+      const newGame = {
+        ...game,
+        players: game.players.map((p) => (p.id === game.pendingSolve.playerId ? { ...p, isEliminated: true } : p)),
         pendingSolve: null,
-      }));
+      };
+      setGame(newGame);
+      await syncGame(newGame);
     }
   };
 
-  const endRound = (winnerId) => {
-    setGame((g) => ({
-      ...g,
+  const endRound = async (winnerId, currentGame = game) => {
+    const newGame = {
+      ...currentGame,
       roundWinnerId: winnerId,
       status: "round_end",
       pendingSolve: null,
-      players: g.players.map((p) => {
+      players: currentGame.players.map((p) => {
         if (winnerId && p.id === winnerId) return { ...p, score: p.score + 10 };
         if (!winnerId && p.isHost) return { ...p, score: p.score + 5 };
         return p;
       }),
-    }));
+    };
+    setGame(newGame);
     setScreen("result");
+    await syncGame(newGame);
   };
 
-  const nextRound = () => {
-    setGame((g) => {
-      const currHostIdx = g.players.findIndex((p) => p.isHost);
-      const newHostIdx = (currHostIdx + 1) % g.players.length;
-      const players = g.players.map((p, i) => ({ ...p, isHost: i === newHostIdx, isEliminated: false }));
-      return { ...g, players, round: g.round + 1, theme: null, secretAnswer: "", hostHint: "", questions: [], currentQuestionerIndex: 0, status: "theme_select", pendingSolve: null, roundWinnerId: undefined };
-    });
+  const nextRound = async () => {
+    const currHostIdx = game.players.findIndex((p) => p.isHost);
+    const newHostIdx = (currHostIdx + 1) % game.players.length;
+    const players = game.players.map((p, i) => ({ ...p, isHost: i === newHostIdx, isEliminated: false }));
+    const newGame = { ...game, players, round: game.round + 1, theme: null, secretAnswer: "", hostHint: "", questions: [], currentQuestionerIndex: 0, status: "theme_select", pendingSolve: null, roundWinnerId: undefined };
+    setGame(newGame);
     setSelectedTheme(null);
     setScreen("theme");
+    await syncGame(newGame);
   };
 
   const goHome = () => {
