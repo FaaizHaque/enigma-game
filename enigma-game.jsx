@@ -502,16 +502,56 @@ export default function Enigma() {
   // ─── Helpers ──
   const av = (idx) => AVATAR_COLORS[idx % AVATAR_COLORS.length];
 
+  // ─── Session API ──
+  const API = "http://localhost:3001/api";
+
   // ─── Actions ──
-  const createGame = () => {
+  const createGame = async () => {
     if (!nameInput.trim()) return;
-    const id = "p1";
-    const p = { id, name: nameInput.trim(), score: 0, isHost: true, isEliminated: false, avatarIdx: 0 };
-    const roomCode = genCode();
-    setGame({ roomCode, players: [p], round: 1, theme: null, secretAnswer: "", hostHint: "", questions: [], currentQuestionerIndex: 0, status: "lobby", pendingSolve: null, roundWinnerId: undefined });
-    setViewerId(id);
+    try {
+      const res = await fetch(`${API}/sessions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hostName: nameInput.trim(), avatarIdx: 0 }),
+      });
+      if (!res.ok) throw new Error("Failed to create session");
+      const { playerId, session } = await res.json();
+      setGame(session);
+      setViewerId(playerId);
+    } catch {
+      // Fallback: create session client-side if server is unavailable
+      const id = "p1";
+      const p = { id, name: nameInput.trim(), score: 0, isHost: true, isEliminated: false, avatarIdx: 0 };
+      const roomCode = genCode();
+      setGame({ roomCode, players: [p], round: 1, theme: null, secretAnswer: "", hostHint: "", questions: [], currentQuestionerIndex: 0, status: "lobby", pendingSolve: null, roundWinnerId: undefined });
+      setViewerId(id);
+    }
     setNameInput("");
     setScreen("lobby");
+  };
+
+  const joinGame = async () => {
+    if (codeInput.length !== 6 || !nameInput.trim()) return;
+    try {
+      const res = await fetch(`${API}/sessions/${codeInput}/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerName: nameInput.trim(), avatarIdx: Math.floor(Math.random() * 6) }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "Could not join session");
+        return;
+      }
+      const { playerId, session } = await res.json();
+      setGame(session);
+      setViewerId(playerId);
+      setNameInput("");
+      setCodeInput("");
+      setScreen("lobby");
+    } catch {
+      alert("Could not connect to session server. Make sure the server is running.");
+    }
   };
 
   const addDemoPlayer = (dp) => {
@@ -762,12 +802,9 @@ export default function Enigma() {
           <label className="field-label">Your Name</label>
           <input className="input" placeholder="Enter your name..." value={nameInput} onChange={(e) => setNameInput(e.target.value)} maxLength={20} />
         </div>
-        <button className="btn btn-gold" disabled={codeInput.length !== 6 || !nameInput.trim()}>
+        <button className="btn btn-gold" onClick={joinGame} disabled={codeInput.length !== 6 || !nameInput.trim()}>
           Join →
         </button>
-        <p className="muted tc mt16" style={{ fontSize: 11 }}>
-          (In this demo, create a game and add players in the lobby to simulate friends joining)
-        </p>
       </div>
     </div>
   );
