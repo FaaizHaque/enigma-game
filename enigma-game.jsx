@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { QRCodeSVG } from "qrcode.react";
 
 // ─── Constants ────────────────────────────────────────────────────────────
 const THEMES = [
@@ -471,6 +472,17 @@ export default function Enigma() {
   const feedRef = useRef(null);
   const lastWriteRef = useRef(0);
 
+  // Auto-fill room code from ?join=XXXXXX in URL (QR code scans)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("join");
+    if (code) {
+      setCodeInput(code.toUpperCase());
+      setScreen("join");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
   // Scroll feed on new questions
   useEffect(() => {
     if (feedRef.current) feedRef.current.scrollTop = feedRef.current.scrollHeight;
@@ -880,7 +892,18 @@ export default function Enigma() {
         <div className="code-box">
           <div className="code-box-label">Room Code</div>
           <div className="code-box-value">{game.roomCode}</div>
-          <div className="code-box-sub">Share with your friends to join</div>
+          <div className="code-box-sub">Share the code or scan the QR below to join</div>
+          <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
+            <div style={{ background: "#fff", borderRadius: 12, padding: 10, display: "inline-block" }}>
+              <QRCodeSVG
+                value={`http://${window.location.hostname}:${window.location.port}/?join=${game.roomCode}`}
+                size={140}
+                bgColor="#ffffff"
+                fgColor="#06060f"
+                level="M"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="card">
