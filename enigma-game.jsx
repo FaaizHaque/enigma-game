@@ -476,6 +476,20 @@ export default function Enigma() {
 
   const feedRef = useRef(null);
   const lastWriteRef = useRef(0);
+  const [kbOffset, setKbOffset] = useState(0);
+
+  // Track keyboard height via visualViewport so fixed elements stay above keyboard
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      const offset = window.innerHeight - vv.height - vv.offsetTop;
+      setKbOffset(Math.max(0, offset));
+    };
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => { vv.removeEventListener("resize", update); vv.removeEventListener("scroll", update); };
+  }, []);
 
   // Auto-fill room code from ?join=XXXXXX in URL (QR code scans)
   useEffect(() => {
@@ -1089,8 +1103,8 @@ export default function Enigma() {
 
         {/* Solve modal */}
         {solveModalOpen && (
-          <div className="overlay" style={{ alignItems: "flex-start", paddingTop: "15vh" }} onClick={() => setSolveModalOpen(false)}>
-            <div className="modal" style={{ borderRadius: 24 }} onClick={(e) => e.stopPropagation()}>
+          <div className="overlay" style={{ alignItems: "flex-end", paddingBottom: kbOffset }} onClick={() => setSolveModalOpen(false)}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-handle" />
               <div className="modal-title">Make Your Guess</div>
               <div className="modal-sub">Be confident — a wrong guess eliminates you from the round!</div>
@@ -1198,7 +1212,7 @@ export default function Enigma() {
           </div>
 
           {/* Action area */}
-          <div className="action-area">
+          <div className="action-area" style={{ bottom: kbOffset }}>
             {viewerIsHost && pendingQ ? (
               <div>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 8 }}>
