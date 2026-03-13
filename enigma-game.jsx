@@ -382,6 +382,7 @@ const CSS = `
     background: linear-gradient(to top, var(--bg) 90%, transparent);
     padding: 10px 0 max(16px, env(safe-area-inset-bottom));
     flex-shrink: 0;
+    scroll-margin-bottom: 8px;
   }
 
   /* ── Chip ── */
@@ -473,6 +474,7 @@ export default function Enigma() {
   const [howToPlayOpen, setHowToPlayOpen] = useState(false);
 
   const feedRef = useRef(null);
+  const actionAreaRef = useRef(null);
   const lastWriteRef = useRef(0);
 
   // Auto-fill room code from ?join=XXXXXX in URL (QR code scans)
@@ -1103,7 +1105,7 @@ export default function Enigma() {
           </div>
         )}
 
-        <div className="screen" style={{ paddingBottom: 0, overflowY: "hidden" }}>
+        <div className="screen" style={{ paddingBottom: 0 }}>
           {/* Top bar */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 12px" }}>
             <div>
@@ -1170,7 +1172,7 @@ export default function Enigma() {
           )}
 
           {/* Q Feed */}
-          <div className="scrollable" ref={feedRef} style={{ flex: 1, minHeight: 0, paddingBottom: 8 }}>
+          <div className="scrollable" ref={feedRef} style={{ maxHeight: 260, paddingBottom: 8 }}>
             {game.questions.length === 0 ? (
               <div className="empty-state">No questions yet.<br />The first guesser will set the tone...</div>
             ) : (
@@ -1196,7 +1198,7 @@ export default function Enigma() {
           </div>
 
           {/* Action area */}
-          <div className="action-area">
+          <div className="action-area" ref={actionAreaRef}>
             {viewerIsHost && pendingQ ? (
               <div>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 8 }}>
@@ -1215,7 +1217,7 @@ export default function Enigma() {
               canAsk ? (
                 <div>
                   <div className="row" style={{ marginBottom: 8 }}>
-                    <input className="input" style={{ flex: 1, padding: "12px 14px", fontSize: 14 }} placeholder="Ask a yes/no question..." value={questionInput} onChange={(e) => setQuestionInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitQuestion()} />
+                    <input className="input" style={{ flex: 1, padding: "12px 14px", fontSize: 14 }} placeholder="Ask a yes/no question..." value={questionInput} onChange={(e) => setQuestionInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitQuestion()} onFocus={() => setTimeout(() => actionAreaRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 350)} />
                     <button className="btn btn-gold" style={{ width: "auto", padding: "0 18px", borderRadius: 10, flexShrink: 0 }} onClick={submitQuestion} disabled={!questionInput.trim()}>
                       Ask
                     </button>
