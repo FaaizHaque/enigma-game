@@ -85,18 +85,19 @@ const CSS = `
     font-family: 'Outfit', sans-serif;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
+    min-height: 100dvh;
+    overscroll-behavior: none;
   }
 
   .app {
-    min-height: 100vh;
+    height: 100dvh;
     max-width: 430px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     position: relative;
     background: var(--bg);
-    overflow: hidden;
+    overflow-x: hidden;
   }
 
   /* Starfield bg */
@@ -119,6 +120,8 @@ const CSS = `
     position: relative;
     z-index: 1;
     animation: fadeUp 0.3s ease both;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
@@ -378,7 +381,7 @@ const CSS = `
   .action-area {
     position: sticky; bottom: 0;
     background: linear-gradient(to top, var(--bg) 80%, transparent);
-    padding: 12px 0 24px; margin-top: 8px;
+    padding: 12px 0 max(24px, env(safe-area-inset-bottom)); margin-top: 8px;
   }
 
   /* ── Chip ── */
