@@ -1,5 +1,15 @@
 const express = require("express");
 const cors = require("cors");
+const os = require("os");
+
+const getLocalIP = () => {
+  for (const ifaces of Object.values(os.networkInterfaces())) {
+    for (const iface of ifaces) {
+      if (iface.family === "IPv4" && !iface.internal) return iface.address;
+    }
+  }
+  return "localhost";
+};
 
 const app = express();
 app.use(express.json());
@@ -23,6 +33,11 @@ const uniqueCode = () => {
 };
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
+
+// GET /api/info — returns server's LAN IP so clients can build correct QR URLs
+app.get("/api/info", (req, res) => {
+  res.json({ ip: getLocalIP() });
+});
 
 // POST /api/sessions — create a new game session
 app.post("/api/sessions", (req, res) => {

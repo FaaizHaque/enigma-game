@@ -461,6 +461,11 @@ export default function Enigma() {
   const [screen, setScreen] = useState("home");
   const [game, setGame] = useState(null);
   const [viewerId, setViewerId] = useState(null); // simulated current user
+  const [serverIP, setServerIP] = useState(window.location.hostname);
+
+  useEffect(() => {
+    fetch("/api/info").then(r => r.json()).then(d => { if (d.ip) setServerIP(d.ip); }).catch(() => {});
+  }, []);
 
   // Form inputs
   const [nameInput, setNameInput] = useState("");
@@ -910,7 +915,7 @@ export default function Enigma() {
           <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
             <div style={{ background: "#fff", borderRadius: 12, padding: 10, display: "inline-block" }}>
               <QRCodeSVG
-                value={`http://${window.location.hostname}:${window.location.port}/?join=${game.roomCode}`}
+                value={`http://${serverIP}:${window.location.port}/?join=${game.roomCode}`}
                 size={140}
                 bgColor="#ffffff"
                 fgColor="#06060f"
