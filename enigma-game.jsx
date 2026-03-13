@@ -90,7 +90,7 @@ const CSS = `
   }
 
   .app {
-    height: 100svh;
+    height: 100dvh;
     max-width: 430px;
     margin: 0 auto;
     display: flex;
@@ -379,11 +379,9 @@ const CSS = `
 
   /* ── Action area ── */
   .action-area {
-    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 100%; max-width: 430px;
     background: linear-gradient(to top, var(--bg) 90%, transparent);
-    padding: 12px 16px max(20px, env(safe-area-inset-bottom));
-    z-index: 10;
+    padding: 10px 0 max(16px, env(safe-area-inset-bottom));
+    flex-shrink: 0;
   }
 
   /* ── Chip ── */
@@ -476,20 +474,6 @@ export default function Enigma() {
 
   const feedRef = useRef(null);
   const lastWriteRef = useRef(0);
-  const [kbOffset, setKbOffset] = useState(0);
-
-  // Track keyboard height via visualViewport so fixed elements stay above keyboard
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const update = () => {
-      const offset = window.innerHeight - vv.height - vv.offsetTop;
-      setKbOffset(Math.max(0, offset));
-    };
-    vv.addEventListener("resize", update);
-    vv.addEventListener("scroll", update);
-    return () => { vv.removeEventListener("resize", update); vv.removeEventListener("scroll", update); };
-  }, []);
 
   // Auto-fill room code from ?join=XXXXXX in URL (QR code scans)
   useEffect(() => {
@@ -1103,7 +1087,7 @@ export default function Enigma() {
 
         {/* Solve modal */}
         {solveModalOpen && (
-          <div className="overlay" style={{ alignItems: "flex-end", paddingBottom: kbOffset }} onClick={() => setSolveModalOpen(false)}>
+          <div className="overlay" onClick={() => setSolveModalOpen(false)}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-handle" />
               <div className="modal-title">Make Your Guess</div>
@@ -1119,7 +1103,7 @@ export default function Enigma() {
           </div>
         )}
 
-        <div className="screen" style={{ paddingBottom: 0 }}>
+        <div className="screen" style={{ paddingBottom: 0, overflowY: "hidden" }}>
           {/* Top bar */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 12px" }}>
             <div>
@@ -1186,7 +1170,7 @@ export default function Enigma() {
           )}
 
           {/* Q Feed */}
-          <div className="scrollable" ref={feedRef} style={{ flex: 1, maxHeight: 'none', paddingBottom: 140 }}>
+          <div className="scrollable" ref={feedRef} style={{ flex: 1, minHeight: 0, paddingBottom: 8 }}>
             {game.questions.length === 0 ? (
               <div className="empty-state">No questions yet.<br />The first guesser will set the tone...</div>
             ) : (
@@ -1212,7 +1196,7 @@ export default function Enigma() {
           </div>
 
           {/* Action area */}
-          <div className="action-area" style={{ bottom: kbOffset }}>
+          <div className="action-area">
             {viewerIsHost && pendingQ ? (
               <div>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 8 }}>
