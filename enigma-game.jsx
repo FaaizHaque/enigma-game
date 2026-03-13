@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { QRCodeSVG } from "qrcode.react";
 
 // ─── Constants ────────────────────────────────────────────────────────────
 const THEMES = [
@@ -84,18 +85,19 @@ const CSS = `
     font-family: 'Outfit', sans-serif;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
+    min-height: 100svh;
+    overscroll-behavior: none;
   }
 
   .app {
-    min-height: 100vh;
+    height: 100dvh;
     max-width: 430px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     position: relative;
     background: var(--bg);
-    overflow: hidden;
+    overflow-x: hidden;
   }
 
   /* Starfield bg */
@@ -118,6 +120,8 @@ const CSS = `
     position: relative;
     z-index: 1;
     animation: fadeUp 0.3s ease both;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
@@ -340,8 +344,8 @@ const CSS = `
   .q-text { font-size: 14px; color: var(--text); line-height: 1.5; }
   .q-ans {
     display: inline-flex; align-items: center; gap: 4px;
-    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-    margin-top: 7px; padding: 2px 10px; border-radius: 20px;
+    font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    margin-top: 7px; padding: 4px 14px; border-radius: 20px;
   }
   .q-yes { background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid rgba(34,197,94,0.2); }
   .q-no { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
@@ -375,9 +379,10 @@ const CSS = `
 
   /* ── Action area ── */
   .action-area {
-    position: sticky; bottom: 0;
-    background: linear-gradient(to top, var(--bg) 80%, transparent);
-    padding: 12px 0 4px; margin-top: 8px;
+    background: linear-gradient(to top, var(--bg) 90%, transparent);
+    padding: 10px 0 max(16px, env(safe-area-inset-bottom));
+    flex-shrink: 0;
+    scroll-margin-bottom: 8px;
   }
 
   /* ── Chip ── */
@@ -456,6 +461,11 @@ export default function Enigma() {
   const [screen, setScreen] = useState("home");
   const [game, setGame] = useState(null);
   const [viewerId, setViewerId] = useState(null); // simulated current user
+  const [serverIP, setServerIP] = useState(window.location.hostname);
+
+  useEffect(() => {
+    fetch("/api/info").then(r => r.json()).then(d => { if (d.ip) setServerIP(d.ip); }).catch(() => {});
+  }, []);
 
   // Form inputs
   const [nameInput, setNameInput] = useState("");
@@ -469,11 +479,57 @@ export default function Enigma() {
   const [howToPlayOpen, setHowToPlayOpen] = useState(false);
 
   const feedRef = useRef(null);
+  const actionAreaRef = useRef(null);
+  const lastWriteRef = useRef(0);
+  const [kbHeight, setKbHeight] = useState(0);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => setKbHeight(Math.max(0, window.innerHeight - vv.height));
+    vv.addEventListener("resize", update);
+    return () => vv.removeEventListener("resize", update);
+  }, []);
+
+  // Auto-fill room code from ?join=XXXXXX in URL (QR code scans)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("join");
+    if (code) {
+      setCodeInput(code.toUpperCase());
+      setScreen("join");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
 
   // Scroll feed on new questions
   useEffect(() => {
     if (feedRef.current) feedRef.current.scrollTop = feedRef.current.scrollHeight;
   }, [game?.questions?.length]);
+
+  // Poll server every 2s to sync state across devices
+  useEffect(() => {
+    if (!game?.roomCode) return;
+    const id = setInterval(async () => {
+      if (Date.now() - lastWriteRef.current < 1500) return;
+      try {
+        const res = await fetch(`${API}/sessions/${game.roomCode}`);
+        if (!res.ok) return;
+        const updated = await res.json();
+        setGame(updated);
+        // Navigate all clients to correct screen based on server status
+        setScreen((cur) => {
+          if (updated.status === "lobby") return "lobby";
+          if (updated.status === "theme_select") return "theme";
+          if (updated.status === "secret_entry") return cur; // host stays on secret, others wait
+          if (updated.status === "playing") return "game";
+          if (updated.status === "round_end") return cur === "scoreboard" ? "scoreboard" : "result";
+          return cur;
+        });
+      } catch {}
+    }, 2000);
+    return () => clearInterval(id);
+  }, [game?.roomCode]);
 
   // Check for game over after state changes
   useEffect(() => {
@@ -481,7 +537,7 @@ export default function Enigma() {
     const activeG = game.players.filter((p) => !p.isHost && !p.isEliminated);
     const qUsed = game.questions.filter((q) => q.answer !== null).length;
     if (activeG.length === 0 || qUsed >= 20) {
-      endRound(null); // host wins
+      endRound(null, game); // host wins
     }
   }, [game?.players, game?.questions]);
 
@@ -502,105 +558,167 @@ export default function Enigma() {
   // ─── Helpers ──
   const av = (idx) => AVATAR_COLORS[idx % AVATAR_COLORS.length];
 
+  // ─── Session API ──
+  const API = `/api`;
+
+  const syncGame = async (g) => {
+    if (!g?.roomCode) return;
+    lastWriteRef.current = Date.now();
+    try {
+      await fetch(`${API}/sessions/${g.roomCode}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(g),
+      });
+    } catch {}
+  };
+
   // ─── Actions ──
-  const createGame = () => {
+  const createGame = async () => {
     if (!nameInput.trim()) return;
-    const id = "p1";
-    const p = { id, name: nameInput.trim(), score: 0, isHost: true, isEliminated: false, avatarIdx: 0 };
-    const roomCode = genCode();
-    setGame({ roomCode, players: [p], round: 1, theme: null, secretAnswer: "", hostHint: "", questions: [], currentQuestionerIndex: 0, status: "lobby", pendingSolve: null, roundWinnerId: undefined });
-    setViewerId(id);
+    try {
+      const res = await fetch(`${API}/sessions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hostName: nameInput.trim(), avatarIdx: 0 }),
+      });
+      if (!res.ok) throw new Error("Failed to create session");
+      const { playerId, session } = await res.json();
+      setGame(session);
+      setViewerId(playerId);
+    } catch {
+      alert("Could not connect to the game server. Please make sure the server is running and try again.");
+    }
     setNameInput("");
     setScreen("lobby");
   };
 
-  const addDemoPlayer = (dp) => {
+  const joinGame = async () => {
+    if (codeInput.length !== 6 || !nameInput.trim()) return;
+    try {
+      const res = await fetch(`${API}/sessions/${codeInput}/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerName: nameInput.trim(), avatarIdx: Math.floor(Math.random() * 6) }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "Could not join session");
+        return;
+      }
+      const { playerId, session } = await res.json();
+      setGame(session);
+      setViewerId(playerId);
+      setNameInput("");
+      setCodeInput("");
+      setScreen("lobby");
+    } catch {
+      alert("Could not connect to session server. Make sure the server is running.");
+    }
+  };
+
+  const addDemoPlayer = async (dp) => {
     if (!game) return;
     const id = `p${game.players.length + 1}`;
     const p = { id, name: dp.name, score: 0, isHost: false, isEliminated: false, avatarIdx: dp.avatarIdx };
-    setGame((g) => ({ ...g, players: [...g.players, p] }));
+    const newGame = { ...game, players: [...game.players, p] };
+    setGame(newGame);
+    await syncGame(newGame);
   };
 
-  const startGame = () => {
-    setGame((g) => ({ ...g, status: "theme_select" }));
+  const startGame = async () => {
+    const newGame = { ...game, status: "theme_select" };
+    setGame(newGame);
     setScreen("theme");
+    await syncGame(newGame);
   };
 
-  const confirmTheme = () => {
+  const confirmTheme = async () => {
     if (!selectedTheme) return;
-    setGame((g) => ({ ...g, theme: selectedTheme }));
+    const newGame = { ...game, theme: selectedTheme, status: "secret_entry" };
+    setGame(newGame);
     setScreen("secret");
+    await syncGame(newGame);
   };
 
-  const lockSecret = () => {
+  const lockSecret = async () => {
     if (!secretInput.trim()) return;
-    setGame((g) => ({ ...g, secretAnswer: secretInput.trim(), hostHint: hintInput.trim(), status: "playing", questions: [], currentQuestionerIndex: 0, pendingSolve: null }));
+    const newGame = { ...game, secretAnswer: secretInput.trim(), hostHint: hintInput.trim(), status: "playing", questions: [], currentQuestionerIndex: 0, pendingSolve: null };
+    setGame(newGame);
     setSecretInput("");
     setHintInput("");
     setScreen("game");
+    await syncGame(newGame);
   };
 
-  const submitQuestion = () => {
+  const submitQuestion = async () => {
     if (!questionInput.trim() || !isMyTurn || pendingQ) return;
     const q = { id: Date.now(), askerId: viewerId, askerName: viewer.name, askerAvatarIdx: viewer.avatarIdx, text: questionInput.trim(), answer: null };
-    setGame((g) => ({ ...g, questions: [...g.questions, q] }));
+    const newGame = { ...game, questions: [...game.questions, q] };
+    setGame(newGame);
     setQuestionInput("");
+    await syncGame(newGame);
   };
 
-  const answerQ = (ans) => {
-    setGame((g) => {
-      const questions = g.questions.map((q) => (q.answer === null ? { ...q, answer: ans } : q));
-      const nextIdx = g.currentQuestionerIndex + 1;
-      return { ...g, questions, currentQuestionerIndex: nextIdx };
-    });
+  const answerQ = async (ans) => {
+    const questions = game.questions.map((q) => (q.answer === null ? { ...q, answer: ans } : q));
+    const nextIdx = game.currentQuestionerIndex + 1;
+    const newGame = { ...game, questions, currentQuestionerIndex: nextIdx };
+    setGame(newGame);
+    await syncGame(newGame);
   };
 
   const openSolve = () => { setSolveInput(""); setSolveModalOpen(true); };
 
-  const submitSolve = () => {
+  const submitSolve = async () => {
     if (!solveInput.trim()) return;
     setSolveModalOpen(false);
-    // Always send to host — host is the final judge, not the algorithm
-    setGame((g) => ({ ...g, pendingSolve: { playerId: viewerId, playerName: viewer.name, answer: solveInput.trim() } }));
+    const newGame = { ...game, pendingSolve: { playerId: viewerId, playerName: viewer.name, answer: solveInput.trim() } };
+    setGame(newGame);
     setSolveInput("");
+    await syncGame(newGame);
   };
 
-  const hostVerify = (correct) => {
+  const hostVerify = async (correct) => {
     if (correct) {
-      endRound(game.pendingSolve.playerId);
+      await endRound(game.pendingSolve.playerId);
     } else {
-      setGame((g) => ({
-        ...g,
-        players: g.players.map((p) => (p.id === g.pendingSolve.playerId ? { ...p, isEliminated: true } : p)),
+      const newGame = {
+        ...game,
+        players: game.players.map((p) => (p.id === game.pendingSolve.playerId ? { ...p, isEliminated: true } : p)),
         pendingSolve: null,
-      }));
+      };
+      setGame(newGame);
+      await syncGame(newGame);
     }
   };
 
-  const endRound = (winnerId) => {
-    setGame((g) => ({
-      ...g,
+  const endRound = async (winnerId, currentGame = game) => {
+    const newGame = {
+      ...currentGame,
       roundWinnerId: winnerId,
       status: "round_end",
       pendingSolve: null,
-      players: g.players.map((p) => {
+      players: currentGame.players.map((p) => {
         if (winnerId && p.id === winnerId) return { ...p, score: p.score + 10 };
         if (!winnerId && p.isHost) return { ...p, score: p.score + 5 };
         return p;
       }),
-    }));
+    };
+    setGame(newGame);
     setScreen("result");
+    await syncGame(newGame);
   };
 
-  const nextRound = () => {
-    setGame((g) => {
-      const currHostIdx = g.players.findIndex((p) => p.isHost);
-      const newHostIdx = (currHostIdx + 1) % g.players.length;
-      const players = g.players.map((p, i) => ({ ...p, isHost: i === newHostIdx, isEliminated: false }));
-      return { ...g, players, round: g.round + 1, theme: null, secretAnswer: "", hostHint: "", questions: [], currentQuestionerIndex: 0, status: "theme_select", pendingSolve: null, roundWinnerId: undefined };
-    });
+  const nextRound = async () => {
+    const currHostIdx = game.players.findIndex((p) => p.isHost);
+    const newHostIdx = (currHostIdx + 1) % game.players.length;
+    const players = game.players.map((p, i) => ({ ...p, isHost: i === newHostIdx, isEliminated: false }));
+    const newGame = { ...game, players, round: game.round + 1, theme: null, secretAnswer: "", hostHint: "", questions: [], currentQuestionerIndex: 0, status: "theme_select", pendingSolve: null, roundWinnerId: undefined };
+    setGame(newGame);
     setSelectedTheme(null);
     setScreen("theme");
+    await syncGame(newGame);
   };
 
   const goHome = () => {
@@ -762,12 +880,9 @@ export default function Enigma() {
           <label className="field-label">Your Name</label>
           <input className="input" placeholder="Enter your name..." value={nameInput} onChange={(e) => setNameInput(e.target.value)} maxLength={20} />
         </div>
-        <button className="btn btn-gold" disabled={codeInput.length !== 6 || !nameInput.trim()}>
+        <button className="btn btn-gold" onClick={joinGame} disabled={codeInput.length !== 6 || !nameInput.trim()}>
           Join →
         </button>
-        <p className="muted tc mt16" style={{ fontSize: 11 }}>
-          (In this demo, create a game and add players in the lobby to simulate friends joining)
-        </p>
       </div>
     </div>
   );
@@ -791,7 +906,18 @@ export default function Enigma() {
         <div className="code-box">
           <div className="code-box-label">Room Code</div>
           <div className="code-box-value">{game.roomCode}</div>
-          <div className="code-box-sub">Share with your friends to join</div>
+          <div className="code-box-sub">Share the code or scan the QR below to join</div>
+          <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
+            <div style={{ background: "#fff", borderRadius: 12, padding: 10, display: "inline-block" }}>
+              <QRCodeSVG
+                value={`http://${serverIP}:${window.location.port}/?join=${game.roomCode}`}
+                size={140}
+                bgColor="#ffffff"
+                fgColor="#06060f"
+                level="M"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="card">
@@ -960,8 +1086,11 @@ export default function Enigma() {
               <div style={{ textAlign: "center", padding: "10px 0 20px" }}>
                 <div style={{ fontSize: 52, marginBottom: 12 }}>⚖️</div>
                 <div className="modal-title">Host is deciding...</div>
-                <div className="modal-sub">{game.pendingSolve.playerName} submitted an answer. Awaiting the host's verdict.</div>
-                <p style={{ fontSize: 12, color: "var(--gold)", marginTop: 12, background: "rgba(200,168,74,0.08)", border: "1px solid var(--gold-dim)", borderRadius: 8, padding: "8px 12px" }}>👆 Tap the <strong>👑 Host</strong> button in the bar above to give your verdict</p>
+                <div className="modal-sub">{game.pendingSolve.playerName} submitted an answer — waiting for the verdict.</div>
+                <div style={{ background: "var(--card)", borderRadius: 12, padding: 16, marginTop: 14 }}>
+                  <div style={{ fontSize: 11, color: "var(--dim)", letterSpacing: 1, marginBottom: 6 }}>ANSWER SUBMITTED</div>
+                  <div style={{ fontFamily: "Cinzel, serif", fontSize: 22, color: "var(--gold)" }}>{game.pendingSolve.answer}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -969,7 +1098,7 @@ export default function Enigma() {
 
         {/* Solve modal */}
         {solveModalOpen && (
-          <div className="overlay" onClick={() => setSolveModalOpen(false)}>
+          <div className="overlay" style={{ paddingBottom: kbHeight }} onClick={() => setSolveModalOpen(false)}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-handle" />
               <div className="modal-title">Make Your Guess</div>
@@ -1052,7 +1181,7 @@ export default function Enigma() {
           )}
 
           {/* Q Feed */}
-          <div className="scrollable" ref={feedRef} style={{ maxHeight: 260 }}>
+          <div className="scrollable" ref={feedRef} style={{ maxHeight: 260, paddingBottom: 8 }}>
             {game.questions.length === 0 ? (
               <div className="empty-state">No questions yet.<br />The first guesser will set the tone...</div>
             ) : (
@@ -1078,7 +1207,7 @@ export default function Enigma() {
           </div>
 
           {/* Action area */}
-          <div className="action-area">
+          <div className="action-area" ref={actionAreaRef}>
             {viewerIsHost && pendingQ ? (
               <div>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 8 }}>
@@ -1097,7 +1226,7 @@ export default function Enigma() {
               canAsk ? (
                 <div>
                   <div className="row" style={{ marginBottom: 8 }}>
-                    <input className="input" style={{ flex: 1, padding: "12px 14px", fontSize: 14 }} placeholder="Ask a yes/no question..." value={questionInput} onChange={(e) => setQuestionInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitQuestion()} />
+                    <input className="input" style={{ flex: 1, padding: "12px 14px", fontSize: 14 }} placeholder="Ask a yes/no question..." value={questionInput} onChange={(e) => setQuestionInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitQuestion()} onFocus={() => setTimeout(() => actionAreaRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 350)} />
                     <button className="btn btn-gold" style={{ width: "auto", padding: "0 18px", borderRadius: 10, flexShrink: 0 }} onClick={submitQuestion} disabled={!questionInput.trim()}>
                       Ask
                     </button>
@@ -1140,9 +1269,10 @@ export default function Enigma() {
         <div className="screen">
           <div className="winner-block">
             <div className="winner-crown">{hostWon ? "🎩" : "🎉"}</div>
-            <div className="winner-label">{hostWon ? "Host Wins the Round" : "Round Winner"}</div>
             <div className="winner-name">{hostWon ? host?.name : winner?.name}</div>
-            {hostWon && <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 6 }}>Nobody guessed the secret!</p>}
+            <div className="winner-label" style={{ marginTop: 8 }}>
+              {hostWon ? "defended the secret — nobody cracked it!" : "cracked the secret!"}
+            </div>
           </div>
 
           <div className="secret-box" style={{ marginBottom: 16 }}>
