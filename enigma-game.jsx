@@ -476,6 +476,15 @@ export default function Enigma() {
   const feedRef = useRef(null);
   const actionAreaRef = useRef(null);
   const lastWriteRef = useRef(0);
+  const [kbHeight, setKbHeight] = useState(0);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => setKbHeight(Math.max(0, window.innerHeight - vv.height));
+    vv.addEventListener("resize", update);
+    return () => vv.removeEventListener("resize", update);
+  }, []);
 
   // Auto-fill room code from ?join=XXXXXX in URL (QR code scans)
   useEffect(() => {
@@ -1089,7 +1098,7 @@ export default function Enigma() {
 
         {/* Solve modal */}
         {solveModalOpen && (
-          <div className="overlay" onClick={() => setSolveModalOpen(false)}>
+          <div className="overlay" style={{ paddingBottom: kbHeight }} onClick={() => setSolveModalOpen(false)}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-handle" />
               <div className="modal-title">Make Your Guess</div>
