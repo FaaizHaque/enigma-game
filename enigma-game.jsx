@@ -85,12 +85,12 @@ const CSS = `
     font-family: 'Outfit', sans-serif;
     background: var(--bg);
     color: var(--text);
-    min-height: 100dvh;
+    min-height: 100svh;
     overscroll-behavior: none;
   }
 
   .app {
-    height: 100dvh;
+    height: 100svh;
     max-width: 430px;
     margin: 0 auto;
     display: flex;
