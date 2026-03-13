@@ -587,12 +587,7 @@ export default function Enigma() {
       setGame(session);
       setViewerId(playerId);
     } catch {
-      // Fallback: create session client-side if server is unavailable
-      const id = "p1";
-      const p = { id, name: nameInput.trim(), score: 0, isHost: true, isEliminated: false, avatarIdx: 0 };
-      const roomCode = genCode();
-      setGame({ roomCode, players: [p], round: 1, theme: null, secretAnswer: "", hostHint: "", questions: [], currentQuestionerIndex: 0, status: "lobby", pendingSolve: null, roundWinnerId: undefined });
-      setViewerId(id);
+      alert("Could not connect to the game server. Please make sure the server is running and try again.");
     }
     setNameInput("");
     setScreen("lobby");
