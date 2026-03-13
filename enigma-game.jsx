@@ -344,8 +344,8 @@ const CSS = `
   .q-text { font-size: 14px; color: var(--text); line-height: 1.5; }
   .q-ans {
     display: inline-flex; align-items: center; gap: 4px;
-    font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-    margin-top: 7px; padding: 3px 12px; border-radius: 20px;
+    font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    margin-top: 7px; padding: 4px 14px; border-radius: 20px;
   }
   .q-yes { background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid rgba(34,197,94,0.2); }
   .q-no { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
@@ -379,9 +379,11 @@ const CSS = `
 
   /* ── Action area ── */
   .action-area {
-    position: sticky; bottom: 0;
-    background: linear-gradient(to top, var(--bg) 80%, transparent);
-    padding: 12px 0 max(24px, env(safe-area-inset-bottom)); margin-top: 8px;
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    background: linear-gradient(to top, var(--bg) 90%, transparent);
+    padding: 12px 16px max(20px, env(safe-area-inset-bottom));
+    z-index: 10;
   }
 
   /* ── Chip ── */
@@ -507,7 +509,7 @@ export default function Enigma() {
           if (updated.status === "theme_select") return "theme";
           if (updated.status === "secret_entry") return cur; // host stays on secret, others wait
           if (updated.status === "playing") return "game";
-          if (updated.status === "round_end") return "result";
+          if (updated.status === "round_end") return cur === "scoreboard" ? "scoreboard" : "result";
           return cur;
         });
       } catch {}
@@ -1170,7 +1172,7 @@ export default function Enigma() {
           )}
 
           {/* Q Feed */}
-          <div className="scrollable" ref={feedRef} style={{ maxHeight: 260 }}>
+          <div className="scrollable" ref={feedRef} style={{ flex: 1, maxHeight: 'none', paddingBottom: 140 }}>
             {game.questions.length === 0 ? (
               <div className="empty-state">No questions yet.<br />The first guesser will set the tone...</div>
             ) : (
