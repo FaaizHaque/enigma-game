@@ -247,6 +247,13 @@ const CSS = `
   }
   .btn-no:hover { background: rgba(239,68,68,0.2); }
 
+  .btn-partly {
+    flex: 1; background: rgba(245,158,11,0.12); color: var(--warn);
+    border: 1px solid rgba(245,158,11,0.3); padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 700;
+  }
+  .btn-partly:hover { background: rgba(245,158,11,0.2); }
+  .btn-partly.active { background: rgba(245,158,11,0.25); border-color: rgba(245,158,11,0.6); }
+
   .btn-solve {
     flex: 1; background: linear-gradient(135deg, var(--violet) 0%, var(--violet2) 100%);
     color: white; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 700;
@@ -368,7 +375,9 @@ const CSS = `
   }
   .q-yes { background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid rgba(34,197,94,0.2); }
   .q-no { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+  .q-partly { background: rgba(245,158,11,0.1); color: var(--warn); border: 1px solid rgba(245,158,11,0.3); }
   .q-pending { background: rgba(245,158,11,0.1); color: var(--warn); border: 1px solid rgba(245,158,11,0.2); animation: pulse 1.5s ease-in-out infinite; }
+  .q-note { display: block; font-size: 11px; font-weight: 400; letter-spacing: 0; text-transform: none; margin-top: 3px; opacity: 0.85; }
 
   /* ── Secret reveal ── */
   .secret-box {
@@ -491,6 +500,8 @@ export default function Enigma() {
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [solveModalOpen, setSolveModalOpen] = useState(false);
   const [howToPlayOpen, setHowToPlayOpen] = useState(false);
+  const [partlyMode, setPartlyMode] = useState(false);
+  const [partlyNote, setPartlyNote] = useState("");
 
   const feedRef = useRef(null);
   const actionAreaRef = useRef(null);
@@ -693,11 +704,13 @@ export default function Enigma() {
     await syncGame(newGame);
   };
 
-  const answerQ = async (ans) => {
-    const questions = game.questions.map((q) => (q.answer === null ? { ...q, answer: ans } : q));
+  const answerQ = async (ans, note = "") => {
+    const questions = game.questions.map((q) => (q.answer === null ? { ...q, answer: ans, note: note.trim() } : q));
     const nextIdx = game.currentQuestionerIndex + 1;
     const newGame = { ...game, questions, currentQuestionerIndex: nextIdx };
     setGame(newGame);
+    setPartlyMode(false);
+    setPartlyNote("");
     await syncGame(newGame);
   };
 
@@ -1196,7 +1209,7 @@ export default function Enigma() {
           {pendingQ && viewerIsHost ? (
             <div className="turn-banner host-mode">
               <div className="turn-dot" />
-              <div className="turn-text">A question awaits your Yes or No!</div>
+              <div className="turn-text">A question awaits your answer!</div>
             </div>
           ) : (
             <div className="turn-banner">
@@ -1235,7 +1248,9 @@ export default function Enigma() {
                       <div className="q-text">{q.text}</div>
                       {q.answer === null
                         ? <span className="q-ans q-pending">⏳ Awaiting answer</span>
-                        : <span className={`q-ans ${q.answer === "YES" ? "q-yes" : "q-no"}`}>{q.answer === "YES" ? "✓ Yes" : "✗ No"}</span>}
+                        : q.answer === "PARTLY"
+                          ? <span className="q-ans q-partly">~ Partly{q.note ? <span className="q-note">"{q.note}"</span> : null}</span>
+                          : <span className={`q-ans ${q.answer === "YES" ? "q-yes" : "q-no"}`}>{q.answer === "YES" ? "✓ Yes" : "✗ No"}</span>}
                     </div>
                   );
                 })}
@@ -1250,10 +1265,27 @@ export default function Enigma() {
                 <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 8 }}>
                   Answering: <strong style={{ color: "var(--text)" }}>"{pendingQ.text}"</strong>
                 </div>
-                <div className="row">
+                <div className="row" style={{ marginBottom: partlyMode ? 8 : 0 }}>
                   <button className="btn-yes btn" onClick={() => answerQ("YES")}>✓ YES</button>
+                  <button className={`btn-partly btn${partlyMode ? " active" : ""}`} onClick={() => { setPartlyMode((m) => !m); setPartlyNote(""); }}>~ PARTLY</button>
                   <button className="btn-no btn" onClick={() => answerQ("NO")}>✗ NO</button>
                 </div>
+                {partlyMode && (
+                  <div className="row" style={{ gap: 8 }}>
+                    <input
+                      className="input"
+                      style={{ flex: 1, padding: "10px 12px", fontSize: 13 }}
+                      placeholder="Add a note (optional)..."
+                      value={partlyNote}
+                      onChange={(e) => setPartlyNote(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && answerQ("PARTLY", partlyNote)}
+                      autoFocus
+                    />
+                    <button className="btn btn-partly" style={{ flexShrink: 0, padding: "10px 16px", fontSize: 13, fontWeight: 700 }} onClick={() => answerQ("PARTLY", partlyNote)}>
+                      Submit
+                    </button>
+                  </div>
+                )}
               </div>
             ) : viewerIsEliminated ? (
               <div style={{ padding: 14, background: "rgba(239,68,68,0.07)", borderRadius: 10, border: "1px solid rgba(239,68,68,0.2)", textAlign: "center", fontSize: 13, color: "var(--danger)" }}>
