@@ -976,12 +976,16 @@ export default function Enigma() {
           </div>
         </div>
 
-        {viewerIsHost && (
-          game.players.length >= 2
-            ? <button className="btn btn-gold mt16" onClick={startGame}>Start Game →</button>
-            : <p className="muted tc mt16">Need at least 2 players to start</p>
-        )}
       </div>
+
+      {viewerIsHost && (
+        <div style={{ padding: "12px 16px", background: "var(--bg)", borderTop: "1px solid var(--border)" }}>
+          {game.players.length >= 2
+            ? <button className="btn btn-gold" style={{ width: "100%" }} onClick={startGame}>Start Game →</button>
+            : <p className="muted tc">Need at least 2 players to start</p>
+          }
+        </div>
+      )}
     </div>
   );
 
