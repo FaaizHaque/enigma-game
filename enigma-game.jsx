@@ -101,6 +101,8 @@ const CSS = `
     color: var(--text);
     min-height: 100svh;
     overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   .app {
@@ -136,6 +138,7 @@ const CSS = `
     animation: fadeUp 0.3s ease both;
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
@@ -205,6 +208,7 @@ const CSS = `
     display: flex; align-items: center; justify-content: center; gap: 8px;
     border: none; cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 600;
     border-radius: 12px; transition: all 0.18s; text-decoration: none; width: 100%;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
   .btn:active { transform: scale(0.97); }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
@@ -256,8 +260,9 @@ const CSS = `
   .input {
     width: 100%; background: var(--card); border: 1px solid var(--border2);
     border-radius: 12px; padding: 14px 16px; color: var(--text);
-    font-family: 'Outfit', sans-serif; font-size: 15px; outline: none;
+    font-family: 'Outfit', sans-serif; font-size: 16px; outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-tap-highlight-color: transparent;
   }
   .input:focus { border-color: var(--gold-dim); box-shadow: 0 0 0 3px rgba(200,168,74,0.1); }
   .input::placeholder { color: var(--dim); }
@@ -437,7 +442,7 @@ const CSS = `
   .back-btn:hover { color: var(--text); }
 
   /* ── Misc ── */
-  .scrollable { overflow-y: auto; flex: 1; }
+  .scrollable { overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
   .scrollable::-webkit-scrollbar { width: 3px; }
   .scrollable::-webkit-scrollbar-track { background: transparent; }
   .scrollable::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
@@ -770,7 +775,7 @@ export default function Enigma() {
 
   // HOME
   if (screen === "home") return (
-    <div className="app">
+    <div className="app" key="home">
       <style>{CSS}</style>
 
       {howToPlayOpen && (
@@ -871,7 +876,7 @@ export default function Enigma() {
 
   // CREATE
   if (screen === "create") return (
-    <div className="app">
+    <div className="app" key="create">
       <style>{CSS}</style>
       <div className="screen">
         <div className="screen-header">
@@ -892,7 +897,7 @@ export default function Enigma() {
 
   // JOIN
   if (screen === "join") return (
-    <div className="app">
+    <div className="app" key="join">
       <style>{CSS}</style>
       <div className="screen">
         <div className="screen-header">
@@ -922,7 +927,7 @@ export default function Enigma() {
 
   // LOBBY
   if (screen === "lobby") return (
-    <div className="app">
+    <div className="app" key="lobby">
       <style>{CSS}</style>
       <SBar />
       <div className="screen">
@@ -991,7 +996,7 @@ export default function Enigma() {
 
   // THEME SELECT
   if (screen === "theme") return (
-    <div className="app">
+    <div className="app" key="theme">
       <style>{CSS}</style>
       <SBar />
       <div className="screen">
@@ -1035,7 +1040,7 @@ export default function Enigma() {
 
   // SECRET
   if (screen === "secret") return (
-    <div className="app">
+    <div className="app" key="secret">
       <style>{CSS}</style>
       <SBar />
       <div className="screen">
@@ -1079,7 +1084,7 @@ export default function Enigma() {
     const canAsk = !viewerIsHost && !viewerIsEliminated && isMyTurn && !pendingQ;
 
     return (
-      <div className="app">
+      <div className="app" key="game">
         <style>{CSS}</style>
         <SBar />
 
@@ -1146,7 +1151,7 @@ export default function Enigma() {
           </div>
         )}
 
-        <div className="screen" style={{ paddingBottom: 0 }}>
+        <div className="screen" style={{ paddingBottom: 0, overflow: "hidden" }}>
           {/* Top bar */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 12px" }}>
             <div>
@@ -1213,7 +1218,7 @@ export default function Enigma() {
           )}
 
           {/* Q Feed */}
-          <div className="scrollable" ref={feedRef} style={{ maxHeight: 260, paddingBottom: 8 }}>
+          <div className="scrollable" ref={feedRef} style={{ minHeight: 80, paddingBottom: 8 }}>
             {game.questions.length === 0 ? (
               <div className="empty-state">No questions yet.<br />The first guesser will set the tone...</div>
             ) : (
@@ -1295,7 +1300,7 @@ export default function Enigma() {
     const sorted = [...game.players].sort((a, b) => b.score - a.score);
 
     return (
-      <div className="app">
+      <div className="app" key="result">
         <style>{CSS}</style>
         <SBar />
         <div className="screen">
@@ -1345,7 +1350,7 @@ export default function Enigma() {
   if (screen === "scoreboard") {
     const sorted = [...game.players].sort((a, b) => b.score - a.score);
     return (
-      <div className="app">
+      <div className="app" key="scoreboard">
         <style>{CSS}</style>
         <div className="screen">
           <div style={{ textAlign: "center", padding: "32px 0 20px" }}>
