@@ -49,6 +49,103 @@ const genCode = () => {
 const getInitials = (name) =>
   name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
 
+// ─── Sounds (Web Audio API — no files needed) ─────────────────────────────
+const getACtx = (() => {
+  let ctx = null;
+  return () => {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === "suspended") ctx.resume();
+    return ctx;
+  };
+})();
+
+const play = (setup) => { try { setup(getACtx()); } catch {} };
+
+const sounds = {
+  question: () => play((ctx) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.setValueAtTime(700, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.12);
+    g.gain.setValueAtTime(0.12, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+    o.start(); o.stop(ctx.currentTime + 0.18);
+  }),
+  yes: () => play((ctx) => {
+    [[523, 0], [659, 0.09], [784, 0.18]].forEach(([freq, d]) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      const t = ctx.currentTime + d;
+      g.gain.setValueAtTime(0.14, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+      o.start(t); o.stop(t + 0.28);
+    });
+  }),
+  no: () => play((ctx) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sawtooth"; o.connect(g); g.connect(ctx.destination);
+    o.frequency.setValueAtTime(280, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.28);
+    g.gain.setValueAtTime(0.1, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+    o.start(); o.stop(ctx.currentTime + 0.28);
+  }),
+  partly: () => play((ctx) => {
+    [[440, 0], [554, 0.12]].forEach(([freq, d]) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "triangle"; o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      const t = ctx.currentTime + d;
+      g.gain.setValueAtTime(0.12, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+      o.start(t); o.stop(t + 0.26);
+    });
+  }),
+  solve: () => play((ctx) => {
+    [380, 480, 600, 760].forEach((freq, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      const t = ctx.currentTime + i * 0.07;
+      g.gain.setValueAtTime(0.13, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      o.start(t); o.stop(t + 0.22);
+    });
+  }),
+  win: () => play((ctx) => {
+    [[523, 0], [659, 0.1], [784, 0.2], [1047, 0.34]].forEach(([freq, d]) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      const t = ctx.currentTime + d;
+      g.gain.setValueAtTime(0.18, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+      o.start(t); o.stop(t + 0.45);
+    });
+  }),
+  hostWin: () => play((ctx) => {
+    [[220, 0], [277, 0.16], [330, 0.32]].forEach(([freq, d]) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "triangle"; o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      const t = ctx.currentTime + d;
+      g.gain.setValueAtTime(0.16, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+      o.start(t); o.stop(t + 0.5);
+    });
+  }),
+  eliminated: () => play((ctx) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "triangle"; o.connect(g); g.connect(ctx.destination);
+    o.frequency.setValueAtTime(440, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.45);
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+    o.start(); o.stop(ctx.currentTime + 0.45);
+  }),
+};
+
 const normalize = (s) =>
   s.toLowerCase().trim().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ");
 
@@ -701,6 +798,7 @@ export default function Enigma() {
     const newGame = { ...game, questions: [...game.questions, q] };
     setGame(newGame);
     setQuestionInput("");
+    sounds.question();
     await syncGame(newGame);
   };
 
@@ -711,6 +809,9 @@ export default function Enigma() {
     setGame(newGame);
     setPartlyMode(false);
     setPartlyNote("");
+    if (ans === "YES") sounds.yes();
+    else if (ans === "NO") sounds.no();
+    else sounds.partly();
     await syncGame(newGame);
   };
 
@@ -722,6 +823,7 @@ export default function Enigma() {
     const newGame = { ...game, pendingSolve: { playerId: viewerId, playerName: viewer.name, answer: solveInput.trim() } };
     setGame(newGame);
     setSolveInput("");
+    sounds.solve();
     await syncGame(newGame);
   };
 
@@ -729,6 +831,7 @@ export default function Enigma() {
     if (correct) {
       await endRound(game.pendingSolve.playerId);
     } else {
+      sounds.eliminated();
       const newGame = {
         ...game,
         players: game.players.map((p) => (p.id === game.pendingSolve.playerId ? { ...p, isEliminated: true } : p)),
@@ -753,6 +856,7 @@ export default function Enigma() {
     };
     setGame(newGame);
     setScreen("result");
+    if (winnerId) sounds.win(); else sounds.hostWin();
     await syncGame(newGame);
   };
 
@@ -801,7 +905,7 @@ export default function Enigma() {
             <div style={{marginBottom:18}}>
               <div style={{fontSize:11,fontWeight:700,color:"var(--gold)",letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>🎯 Objective</div>
               <div style={{fontSize:13,color:"var(--muted)",lineHeight:1.8}}>
-                One player is the <strong style={{color:"var(--text)"}}>Host</strong> who picks a secret. All other players are <strong style={{color:"var(--text)"}}>Guessers</strong> who must figure out the secret by asking up to <strong style={{color:"var(--gold)"}}>20 Yes/No questions</strong> between them.
+                One player is the <strong style={{color:"var(--text)"}}>Host</strong> who picks a secret. All other players are <strong style={{color:"var(--text)"}}>Guessers</strong> who must figure out the secret by asking up to <strong style={{color:"var(--gold)"}}>20 questions</strong> between them. The Host answers each with <strong style={{color:"var(--success)"}}>Yes</strong>, <strong style={{color:"var(--danger)"}}>No</strong>, or <strong style={{color:"var(--warn)"}}>Partly</strong>.
               </div>
             </div>
 
@@ -810,11 +914,11 @@ export default function Enigma() {
               <div style={{fontSize:11,fontWeight:700,color:"var(--gold)",letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>👥 The Roles</div>
               <div style={{background:"var(--card2)",borderRadius:10,padding:"12px 14px",marginBottom:8,border:"1px solid var(--border)"}}>
                 <div style={{fontSize:13,fontWeight:700,color:"var(--gold)",marginBottom:4}}>👑 The Host</div>
-                <div style={{fontSize:12,color:"var(--muted)",lineHeight:1.7}}>Selects a theme, thinks of a secret that fits it, and answers every question with only <strong style={{color:"var(--success)"}}>Yes</strong> or <strong style={{color:"var(--danger)"}}>No</strong>. The Host wins the round if nobody guesses correctly.</div>
+                <div style={{fontSize:12,color:"var(--muted)",lineHeight:1.7}}>Selects a theme, thinks of a secret that fits it, and answers every question with <strong style={{color:"var(--success)"}}>Yes</strong>, <strong style={{color:"var(--danger)"}}>No</strong>, or <strong style={{color:"var(--warn)"}}>Partly</strong>. A <strong style={{color:"var(--warn)"}}>Partly</strong> answer can include a short clarifying note. The Host wins the round if nobody guesses correctly.</div>
               </div>
               <div style={{background:"var(--card2)",borderRadius:10,padding:"12px 14px",border:"1px solid var(--border)"}}>
                 <div style={{fontSize:13,fontWeight:700,color:"var(--violet2)",marginBottom:4}}>🕵️ The Guessers</div>
-                <div style={{fontSize:12,color:"var(--muted)",lineHeight:1.7}}>Take turns asking one question at a time. All players can see every question and answer. Questions <em>must</em> be answerable with Yes or No — no open-ended questions!</div>
+                <div style={{fontSize:12,color:"var(--muted)",lineHeight:1.7}}>Take turns asking one question at a time. All players can see every question and answer. Questions should be answerable with Yes, No, or Partly — keep them focused!</div>
               </div>
             </div>
 
