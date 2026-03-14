@@ -801,7 +801,7 @@ export default function Enigma() {
             <div style={{marginBottom:18}}>
               <div style={{fontSize:11,fontWeight:700,color:"var(--gold)",letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>🎯 Objective</div>
               <div style={{fontSize:13,color:"var(--muted)",lineHeight:1.8}}>
-                One player is the <strong style={{color:"var(--text)"}}>Host</strong> who picks a secret. All other players are <strong style={{color:"var(--text)"}}>Guessers</strong> who must figure out the secret by asking up to <strong style={{color:"var(--gold)"}}>20 Yes/No questions</strong> between them.
+                One player is the <strong style={{color:"var(--text)"}}>Host</strong> who picks a secret. All other players are <strong style={{color:"var(--text)"}}>Guessers</strong> who must figure out the secret by asking up to <strong style={{color:"var(--gold)"}}>20 questions</strong> between them. The Host answers each with <strong style={{color:"var(--success)"}}>Yes</strong>, <strong style={{color:"var(--danger)"}}>No</strong>, or <strong style={{color:"var(--warn)"}}>Partly</strong>.
               </div>
             </div>
 
@@ -810,11 +810,11 @@ export default function Enigma() {
               <div style={{fontSize:11,fontWeight:700,color:"var(--gold)",letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>👥 The Roles</div>
               <div style={{background:"var(--card2)",borderRadius:10,padding:"12px 14px",marginBottom:8,border:"1px solid var(--border)"}}>
                 <div style={{fontSize:13,fontWeight:700,color:"var(--gold)",marginBottom:4}}>👑 The Host</div>
-                <div style={{fontSize:12,color:"var(--muted)",lineHeight:1.7}}>Selects a theme, thinks of a secret that fits it, and answers every question with only <strong style={{color:"var(--success)"}}>Yes</strong> or <strong style={{color:"var(--danger)"}}>No</strong>. The Host wins the round if nobody guesses correctly.</div>
+                <div style={{fontSize:12,color:"var(--muted)",lineHeight:1.7}}>Selects a theme, thinks of a secret that fits it, and answers every question with <strong style={{color:"var(--success)"}}>Yes</strong>, <strong style={{color:"var(--danger)"}}>No</strong>, or <strong style={{color:"var(--warn)"}}>Partly</strong>. A <strong style={{color:"var(--warn)"}}>Partly</strong> answer can include a short clarifying note. The Host wins the round if nobody guesses correctly.</div>
               </div>
               <div style={{background:"var(--card2)",borderRadius:10,padding:"12px 14px",border:"1px solid var(--border)"}}>
                 <div style={{fontSize:13,fontWeight:700,color:"var(--violet2)",marginBottom:4}}>🕵️ The Guessers</div>
-                <div style={{fontSize:12,color:"var(--muted)",lineHeight:1.7}}>Take turns asking one question at a time. All players can see every question and answer. Questions <em>must</em> be answerable with Yes or No — no open-ended questions!</div>
+                <div style={{fontSize:12,color:"var(--muted)",lineHeight:1.7}}>Take turns asking one question at a time. All players can see every question and answer. Questions should be answerable with Yes, No, or Partly — keep them focused!</div>
               </div>
             </div>
 
