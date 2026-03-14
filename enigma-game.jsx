@@ -1,5 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction } from "firebase/firestore";
+
+// ─── Firebase ─────────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: "enigma-game-dc20c.firebaseapp.com",
+  projectId: "enigma-game-dc20c",
+  storageBucket: "enigma-game-dc20c.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
 
 // ─── Constants ────────────────────────────────────────────────────────────
 const THEMES = [
@@ -461,11 +475,6 @@ export default function Enigma() {
   const [screen, setScreen] = useState("home");
   const [game, setGame] = useState(null);
   const [viewerId, setViewerId] = useState(null); // simulated current user
-  const [serverIP, setServerIP] = useState(window.location.hostname);
-
-  useEffect(() => {
-    fetch("/api/info").then(r => r.json()).then(d => { if (d.ip) setServerIP(d.ip); }).catch(() => {});
-  }, []);
 
   // Form inputs
   const [nameInput, setNameInput] = useState("");
@@ -480,7 +489,6 @@ export default function Enigma() {
 
   const feedRef = useRef(null);
   const actionAreaRef = useRef(null);
-  const lastWriteRef = useRef(0);
   const [kbHeight, setKbHeight] = useState(0);
 
   useEffect(() => {
@@ -507,28 +515,24 @@ export default function Enigma() {
     if (feedRef.current) feedRef.current.scrollTop = feedRef.current.scrollHeight;
   }, [game?.questions?.length]);
 
-  // Poll server every 2s to sync state across devices
+  // Real-time sync via Firestore onSnapshot
   useEffect(() => {
     if (!game?.roomCode) return;
-    const id = setInterval(async () => {
-      if (Date.now() - lastWriteRef.current < 1500) return;
-      try {
-        const res = await fetch(`${API}/sessions/${game.roomCode}`);
-        if (!res.ok) return;
-        const updated = await res.json();
-        setGame(updated);
-        // Navigate all clients to correct screen based on server status
-        setScreen((cur) => {
-          if (updated.status === "lobby") return "lobby";
-          if (updated.status === "theme_select") return "theme";
-          if (updated.status === "secret_entry") return cur; // host stays on secret, others wait
-          if (updated.status === "playing") return "game";
-          if (updated.status === "round_end") return cur === "scoreboard" ? "scoreboard" : "result";
-          return cur;
-        });
-      } catch {}
-    }, 2000);
-    return () => clearInterval(id);
+    const unsubscribe = onSnapshot(doc(db, "sessions", game.roomCode), (snap) => {
+      if (!snap.exists()) return;
+      const updated = snap.data();
+      setGame(updated);
+      // Navigate all clients to correct screen based on server status
+      setScreen((cur) => {
+        if (updated.status === "lobby") return "lobby";
+        if (updated.status === "theme_select") return "theme";
+        if (updated.status === "secret_entry") return cur; // host stays on secret, others wait
+        if (updated.status === "playing") return "game";
+        if (updated.status === "round_end") return cur === "scoreboard" ? "scoreboard" : "result";
+        return cur;
+      });
+    });
+    return () => unsubscribe();
   }, [game?.roomCode]);
 
   // Check for game over after state changes
@@ -558,18 +562,21 @@ export default function Enigma() {
   // ─── Helpers ──
   const av = (idx) => AVATAR_COLORS[idx % AVATAR_COLORS.length];
 
-  // ─── Session API ──
-  const API = `/api`;
+  // ─── Session helpers ──
+  const uniqueCode = async () => {
+    let code;
+    do {
+      code = genCode();
+      const snap = await getDoc(doc(db, "sessions", code));
+      if (!snap.exists()) break;
+    } while (true);
+    return code;
+  };
 
   const syncGame = async (g) => {
     if (!g?.roomCode) return;
-    lastWriteRef.current = Date.now();
     try {
-      await fetch(`${API}/sessions/${g.roomCode}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(g),
-      });
+      await setDoc(doc(db, "sessions", g.roomCode), g);
     } catch {}
   };
 
@@ -577,17 +584,27 @@ export default function Enigma() {
   const createGame = async () => {
     if (!nameInput.trim()) return;
     try {
-      const res = await fetch(`${API}/sessions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hostName: nameInput.trim(), avatarIdx: 0 }),
-      });
-      if (!res.ok) throw new Error("Failed to create session");
-      const { playerId, session } = await res.json();
+      const roomCode = await uniqueCode();
+      const playerId = "p1";
+      const session = {
+        roomCode,
+        players: [{ id: playerId, name: nameInput.trim(), score: 0, isHost: true, isEliminated: false, avatarIdx: 0 }],
+        round: 1,
+        theme: null,
+        secretAnswer: "",
+        hostHint: "",
+        questions: [],
+        currentQuestionerIndex: 0,
+        status: "lobby",
+        pendingSolve: null,
+        roundWinnerId: null,
+        createdAt: new Date().toISOString(),
+      };
+      await setDoc(doc(db, "sessions", roomCode), session);
       setGame(session);
       setViewerId(playerId);
     } catch {
-      alert("Could not connect to the game server. Please make sure the server is running and try again.");
+      alert("Could not create game session. Please check your connection and try again.");
     }
     setNameInput("");
     setScreen("lobby");
@@ -595,25 +612,36 @@ export default function Enigma() {
 
   const joinGame = async () => {
     if (codeInput.length !== 6 || !nameInput.trim()) return;
+    const roomCode = codeInput.toUpperCase();
     try {
-      const res = await fetch(`${API}/sessions/${codeInput}/join`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerName: nameInput.trim(), avatarIdx: Math.floor(Math.random() * 6) }),
+      let playerId, sessionData;
+      await runTransaction(db, async (tx) => {
+        const ref = doc(db, "sessions", roomCode);
+        const snap = await tx.get(ref);
+        if (!snap.exists()) throw new Error("Session not found");
+        const session = snap.data();
+        if (session.status !== "lobby") throw new Error("Game already in progress");
+        playerId = `p${session.players.length + 1}`;
+        sessionData = {
+          ...session,
+          players: [...session.players, {
+            id: playerId,
+            name: nameInput.trim(),
+            score: 0,
+            isHost: false,
+            isEliminated: false,
+            avatarIdx: Math.floor(Math.random() * 6),
+          }],
+        };
+        tx.set(ref, sessionData);
       });
-      if (!res.ok) {
-        const err = await res.json();
-        alert(err.error || "Could not join session");
-        return;
-      }
-      const { playerId, session } = await res.json();
-      setGame(session);
+      setGame(sessionData);
       setViewerId(playerId);
       setNameInput("");
       setCodeInput("");
       setScreen("lobby");
-    } catch {
-      alert("Could not connect to session server. Make sure the server is running.");
+    } catch (e) {
+      alert(e.message || "Could not join session");
     }
   };
 
@@ -910,7 +938,7 @@ export default function Enigma() {
           <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
             <div style={{ background: "#fff", borderRadius: 12, padding: 10, display: "inline-block" }}>
               <QRCodeSVG
-                value={`http://${serverIP}:${window.location.port}/?join=${game.roomCode}`}
+                value={`${window.location.origin}/?join=${game.roomCode}`}
                 size={140}
                 bgColor="#ffffff"
                 fgColor="#06060f"
