@@ -49,6 +49,103 @@ const genCode = () => {
 const getInitials = (name) =>
   name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
 
+// ─── Sounds (Web Audio API — no files needed) ─────────────────────────────
+const getACtx = (() => {
+  let ctx = null;
+  return () => {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === "suspended") ctx.resume();
+    return ctx;
+  };
+})();
+
+const play = (setup) => { try { setup(getACtx()); } catch {} };
+
+const sounds = {
+  question: () => play((ctx) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.setValueAtTime(700, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.12);
+    g.gain.setValueAtTime(0.12, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+    o.start(); o.stop(ctx.currentTime + 0.18);
+  }),
+  yes: () => play((ctx) => {
+    [[523, 0], [659, 0.09], [784, 0.18]].forEach(([freq, d]) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      const t = ctx.currentTime + d;
+      g.gain.setValueAtTime(0.14, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+      o.start(t); o.stop(t + 0.28);
+    });
+  }),
+  no: () => play((ctx) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sawtooth"; o.connect(g); g.connect(ctx.destination);
+    o.frequency.setValueAtTime(280, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.28);
+    g.gain.setValueAtTime(0.1, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+    o.start(); o.stop(ctx.currentTime + 0.28);
+  }),
+  partly: () => play((ctx) => {
+    [[440, 0], [554, 0.12]].forEach(([freq, d]) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "triangle"; o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      const t = ctx.currentTime + d;
+      g.gain.setValueAtTime(0.12, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+      o.start(t); o.stop(t + 0.26);
+    });
+  }),
+  solve: () => play((ctx) => {
+    [380, 480, 600, 760].forEach((freq, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      const t = ctx.currentTime + i * 0.07;
+      g.gain.setValueAtTime(0.13, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      o.start(t); o.stop(t + 0.22);
+    });
+  }),
+  win: () => play((ctx) => {
+    [[523, 0], [659, 0.1], [784, 0.2], [1047, 0.34]].forEach(([freq, d]) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      const t = ctx.currentTime + d;
+      g.gain.setValueAtTime(0.18, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+      o.start(t); o.stop(t + 0.45);
+    });
+  }),
+  hostWin: () => play((ctx) => {
+    [[220, 0], [277, 0.16], [330, 0.32]].forEach(([freq, d]) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "triangle"; o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      const t = ctx.currentTime + d;
+      g.gain.setValueAtTime(0.16, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+      o.start(t); o.stop(t + 0.5);
+    });
+  }),
+  eliminated: () => play((ctx) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "triangle"; o.connect(g); g.connect(ctx.destination);
+    o.frequency.setValueAtTime(440, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.45);
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+    o.start(); o.stop(ctx.currentTime + 0.45);
+  }),
+};
+
 const normalize = (s) =>
   s.toLowerCase().trim().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ");
 
@@ -701,6 +798,7 @@ export default function Enigma() {
     const newGame = { ...game, questions: [...game.questions, q] };
     setGame(newGame);
     setQuestionInput("");
+    sounds.question();
     await syncGame(newGame);
   };
 
@@ -711,6 +809,9 @@ export default function Enigma() {
     setGame(newGame);
     setPartlyMode(false);
     setPartlyNote("");
+    if (ans === "YES") sounds.yes();
+    else if (ans === "NO") sounds.no();
+    else sounds.partly();
     await syncGame(newGame);
   };
 
@@ -722,6 +823,7 @@ export default function Enigma() {
     const newGame = { ...game, pendingSolve: { playerId: viewerId, playerName: viewer.name, answer: solveInput.trim() } };
     setGame(newGame);
     setSolveInput("");
+    sounds.solve();
     await syncGame(newGame);
   };
 
@@ -729,6 +831,7 @@ export default function Enigma() {
     if (correct) {
       await endRound(game.pendingSolve.playerId);
     } else {
+      sounds.eliminated();
       const newGame = {
         ...game,
         players: game.players.map((p) => (p.id === game.pendingSolve.playerId ? { ...p, isEliminated: true } : p)),
@@ -753,6 +856,7 @@ export default function Enigma() {
     };
     setGame(newGame);
     setScreen("result");
+    if (winnerId) sounds.win(); else sounds.hostWin();
     await syncGame(newGame);
   };
 
