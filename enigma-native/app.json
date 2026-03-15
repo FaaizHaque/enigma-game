@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "Enigma",
+    "slug": "enigma-game",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#06060f",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#06060f"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.enigmagame.app",
+      "buildNumber": "1",
+      "requireFullScreen": true,
+      "infoPlist": {
+        "UIStatusBarStyle": "UIStatusBarStyleLightContent",
+        "UIRequiresFullScreen": true,
+        "NSFaceIDUsageDescription": "Used for secure authentication"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#06060f"
+      },
+      "package": "com.enigmagame.app",
+      "versionCode": 1
+    },
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "scheme": "enigma",
+    "extra": {
+      "firebaseApiKey": "AIzaSyDDMAkyTlTDqAKfw7OM7WE2rHSC11E7RaY",
+      "firebaseMessagingSenderId": "460030305413",
+      "firebaseAppId": "1:460030305413:web:c299e4c8fae396a3f7b5ec",
+      "eas": {
+        "projectId": "36474895-baa2-4659-9f17-dc1b5ada3501"
+      }
+    }
+  }
+}
