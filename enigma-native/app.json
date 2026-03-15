@@ -42,9 +42,9 @@
     ],
     "scheme": "enigma",
     "extra": {
-      "firebaseApiKey": "",
-      "firebaseMessagingSenderId": "",
-      "firebaseAppId": "",
+      "firebaseApiKey": "AIzaSyDDMAkyTlTDqAKfw7OM7WE2rHSC11E7RaY",
+      "firebaseMessagingSenderId": "460030305413",
+      "firebaseAppId": "1:460030305413:web:c299e4c8fae396a3f7b5ec",
       "eas": {
         "projectId": "36474895-baa2-4659-9f17-dc1b5ada3501"
       }
