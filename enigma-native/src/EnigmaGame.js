@@ -13,23 +13,23 @@ import { sounds } from './utils/sounds';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  bg: '#06060f',
-  surface: '#0c0c1a',
-  card: '#111122',
-  card2: '#161628',
-  border: '#1e1e38',
-  border2: '#282848',
-  gold: '#c8a84a',
-  gold2: '#e8cc70',
-  goldDim: '#7a6420',
-  violet: '#6d28d9',
-  violet2: '#8b5cf6',
-  text: '#eeeef8',
-  muted: '#8888aa',
-  dim: '#4a4a66',
-  success: '#22c55e',
-  danger: '#ef4444',
-  warn: '#f59e0b',
+  bg: '#0a0a1e',
+  surface: '#10102a',
+  card: '#161634',
+  card2: '#1c1c3e',
+  border: '#252550',
+  border2: '#30305a',
+  gold: '#d4a84a',
+  gold2: '#f0d070',
+  goldDim: '#8a7030',
+  violet: '#7c3aed',
+  violet2: '#a78bfa',
+  text: '#f4f4ff',
+  muted: '#9999cc',
+  dim: '#5a5a88',
+  success: '#34d058',
+  danger: '#f85149',
+  warn: '#f0a030',
 };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -76,11 +76,12 @@ function PlayerAvatar({ p, size = 36 }) {
   );
 }
 
-function SimBar({ players, viewerId, onSwitch, onHome }) {
+function SimBar({ players, viewerId, onSwitch, onHome, topInset = 0 }) {
   return (
     <View style={{
       backgroundColor: C.surface, borderBottomWidth: 1, borderBottomColor: C.border2,
-      paddingHorizontal: 10, paddingVertical: 6, flexDirection: 'row', alignItems: 'center',
+      paddingHorizontal: 12, paddingTop: topInset + 10, paddingBottom: 10,
+      flexDirection: 'row', alignItems: 'center',
     }}>
       <TouchableOpacity
         onPress={onHome}
@@ -137,7 +138,7 @@ function Chip({ label, style = 'gold' }) {
       borderColor: isGold ? C.goldDim : 'rgba(109,40,217,0.3)',
       borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, alignSelf: 'flex-start',
     }}>
-      <Text style={{ fontSize: 11, fontFamily: 'Outfit_600SemiBold', color: isGold ? C.gold : C.violet2 }}>
+      <Text style={{ fontSize: 13, fontFamily: 'Outfit_600SemiBold', color: isGold ? C.gold : C.violet2 }}>
         {label}
       </Text>
     </View>
@@ -437,7 +438,7 @@ export default function EnigmaGame() {
     : `enigma://join?code=${game?.roomCode}`;
 
   const SBar = () => game
-    ? <SimBar players={game.players} viewerId={viewerId} onSwitch={setViewerId} onHome={goHome} />
+    ? <SimBar players={game.players} viewerId={viewerId} onSwitch={setViewerId} onHome={goHome} topInset={insets.top} />
     : null;
 
   // ─── HOME ─────────────────────────────────────────────────────────────────
@@ -857,9 +858,9 @@ export default function EnigmaGame() {
               <Chip label={`Round ${game.round}`} />
             </View>
             {game.hostHint ? (
-              <View style={{ backgroundColor: 'rgba(245,158,11,0.08)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.25)', borderRadius: 8, padding: 8, maxWidth: 160 }}>
-                <Text style={{ fontSize: 10, color: C.warn, letterSpacing: 1, marginBottom: 2, fontFamily: 'Outfit_700Bold' }}>HINT</Text>
-                <Text style={{ fontSize: 11, color: C.text, fontFamily: 'Outfit_400Regular' }}>{game.hostHint}</Text>
+              <View style={{ backgroundColor: 'rgba(245,158,11,0.1)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.35)', borderRadius: 8, padding: 10, maxWidth: 170 }}>
+                <Text style={{ fontSize: 11, color: C.warn, letterSpacing: 1, marginBottom: 3, fontFamily: 'Outfit_700Bold' }}>HINT</Text>
+                <Text style={{ fontSize: 14, color: C.text, fontFamily: 'Outfit_500Medium' }}>{game.hostHint}</Text>
               </View>
             ) : null}
           </View>
@@ -882,13 +883,15 @@ export default function EnigmaGame() {
               const isCur = currentQuestioner?.id === p.id && !p.isHost;
               return (
                 <View key={p.id} style={[S.stripItem, isCur && S.stripItemCur, p.isEliminated && { opacity: 0.4 }]}>
-                  <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ color: c.fg, fontSize: 9, fontFamily: 'Outfit_700Bold' }}>{getInitials(p.name)}</Text>
+                  <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Text style={{ color: c.fg, fontSize: 10, fontFamily: 'Outfit_700Bold' }}>{getInitials(p.name)}</Text>
                   </View>
-                  <Text style={{ fontSize: 9, color: C.muted, fontFamily: 'Outfit_400Regular' }} numberOfLines={1}>
-                    {p.isHost ? '👑' : p.isEliminated ? '❌' : ''}{p.name.split(' ')[0]}
-                  </Text>
-                  <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 11, color: C.gold }}>{p.score}</Text>
+                  <View style={{ flexShrink: 1 }}>
+                    <Text style={{ fontSize: 11, color: C.muted, fontFamily: 'Outfit_500Medium', maxWidth: 60 }} numberOfLines={1}>
+                      {p.isHost ? '👑 ' : p.isEliminated ? '❌ ' : ''}{p.name.split(' ')[0]}
+                    </Text>
+                    <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 12, color: C.gold }}>{p.score} pts</Text>
+                  </View>
                 </View>
               );
             })}
@@ -936,17 +939,17 @@ export default function EnigmaGame() {
                       <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' }}>
                         <Text style={{ color: c.fg, fontSize: 9, fontFamily: 'Outfit_700Bold' }}>{getInitials(q.askerName)}</Text>
                       </View>
-                      <Text style={{ fontSize: 11, fontFamily: 'Outfit_700Bold', color: C.muted, textTransform: 'uppercase', letterSpacing: 1, flex: 1 }}>{q.askerName}</Text>
-                      <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular' }}>Q{i + 1}</Text>
+                      <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: C.muted, textTransform: 'uppercase', letterSpacing: 1, flex: 1 }}>{q.askerName}</Text>
+                      <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>Q{i + 1}</Text>
                     </View>
-                    <Text style={{ fontSize: 14, color: C.text, lineHeight: 20, fontFamily: 'Outfit_400Regular' }}>{q.text}</Text>
+                    <Text style={{ fontSize: 16, color: C.text, lineHeight: 23, fontFamily: 'Outfit_400Regular' }}>{q.text}</Text>
                     {q.answer === null ? (
                       <View style={[S.qBadge, { backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.2)' }]}>
-                        <Text style={{ color: C.warn, fontSize: 12, fontFamily: 'Outfit_700Bold' }}>⏳ Awaiting answer</Text>
+                        <Text style={{ color: C.warn, fontSize: 14, fontFamily: 'Outfit_700Bold' }}>⏳ Awaiting answer</Text>
                       </View>
                     ) : q.answer === 'PARTLY' ? (
                       <View style={[S.qBadge, { backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.3)' }]}>
-                        <Text style={{ color: C.warn, fontSize: 12, fontFamily: 'Outfit_700Bold' }}>
+                        <Text style={{ color: C.warn, fontSize: 14, fontFamily: 'Outfit_700Bold' }}>
                           {'~ Partly'}{q.note ? `\n"${q.note}"` : ''}
                         </Text>
                       </View>
@@ -955,7 +958,7 @@ export default function EnigmaGame() {
                         backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
                         borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)',
                       }]}>
-                        <Text style={{ color: q.answer === 'YES' ? C.success : C.danger, fontSize: 12, fontFamily: 'Outfit_700Bold' }}>
+                        <Text style={{ color: q.answer === 'YES' ? C.success : C.danger, fontSize: 14, fontFamily: 'Outfit_700Bold' }}>
                           {q.answer === 'YES' ? '✓ Yes' : '✗ No'}
                         </Text>
                       </View>
@@ -1212,7 +1215,7 @@ const S = StyleSheet.create({
   turnText: { fontSize: 13, color: C.gold, fontFamily: 'Outfit_500Medium', flex: 1 },
 
   // Player strip
-  stripItem: { alignItems: 'center', gap: 3, paddingVertical: 8, paddingHorizontal: 10, borderRadius: 10, minWidth: 58, backgroundColor: C.card, borderWidth: 1, borderColor: C.border, marginRight: 6 },
+  stripItem: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingVertical: 7, paddingHorizontal: 10, borderRadius: 10, backgroundColor: C.card, borderWidth: 1, borderColor: C.border, marginRight: 6 },
   stripItemCur: { borderColor: C.goldDim, backgroundColor: 'rgba(200,168,74,0.08)' },
 
   // Q badge
