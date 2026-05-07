@@ -1,19 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { initializeApp } from "firebase/app";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction } from "firebase/firestore";
+import { createClient } from "@supabase/supabase-js";
 
-// ─── Firebase ─────────────────────────────────────────────────────────────
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: "enigma-game-dc20c.firebaseapp.com",
-  projectId: "enigma-game-dc20c",
-  storageBucket: "enigma-game-dc20c.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-};
-const fbApp = initializeApp(firebaseConfig);
-const db = getFirestore(fbApp);
+// ─── Supabase ─────────────────────────────────────────────────────────────
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 // ─── Constants ────────────────────────────────────────────────────────────
 const THEMES = [
@@ -628,24 +621,30 @@ export default function Enigma() {
     if (feedRef.current) feedRef.current.scrollTop = feedRef.current.scrollHeight;
   }, [game?.questions?.length]);
 
-  // Real-time sync via Firestore onSnapshot
+  // Real-time sync via Supabase Realtime
   useEffect(() => {
     if (!game?.roomCode) return;
-    const unsubscribe = onSnapshot(doc(db, "sessions", game.roomCode), (snap) => {
-      if (!snap.exists()) return;
-      const updated = snap.data();
-      setGame(updated);
-      // Navigate all clients to correct screen based on server status
-      setScreen((cur) => {
-        if (updated.status === "lobby") return "lobby";
-        if (updated.status === "theme_select") return "theme";
-        if (updated.status === "secret_entry") return cur; // host stays on secret, others wait
-        if (updated.status === "playing") return "game";
-        if (updated.status === "round_end") return cur === "scoreboard" ? "scoreboard" : "result";
-        return cur;
-      });
-    });
-    return () => unsubscribe();
+    const channel = supabase
+      .channel(`session:${game.roomCode}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "sessions", filter: `room_code=eq.${game.roomCode}` },
+        (payload) => {
+          const updated = payload.new?.data;
+          if (!updated) return;
+          setGame(updated);
+          setScreen((cur) => {
+            if (updated.status === "lobby") return "lobby";
+            if (updated.status === "theme_select") return "theme";
+            if (updated.status === "secret_entry") return cur;
+            if (updated.status === "playing") return "game";
+            if (updated.status === "round_end") return cur === "scoreboard" ? "scoreboard" : "result";
+            return cur;
+          });
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [game?.roomCode]);
 
   // Check for game over after state changes
@@ -680,8 +679,8 @@ export default function Enigma() {
     let code;
     do {
       code = genCode();
-      const snap = await getDoc(doc(db, "sessions", code));
-      if (!snap.exists()) break;
+      const { data } = await supabase.from("sessions").select("room_code").eq("room_code", code).maybeSingle();
+      if (!data) break;
     } while (true);
     return code;
   };
@@ -689,7 +688,7 @@ export default function Enigma() {
   const syncGame = async (g) => {
     if (!g?.roomCode) return;
     try {
-      await setDoc(doc(db, "sessions", g.roomCode), g);
+      await supabase.from("sessions").upsert({ room_code: g.roomCode, data: g });
     } catch {}
   };
 
@@ -713,7 +712,7 @@ export default function Enigma() {
         roundWinnerId: null,
         createdAt: new Date().toISOString(),
       };
-      await setDoc(doc(db, "sessions", roomCode), session);
+      await supabase.from("sessions").upsert({ room_code: roomCode, data: session });
       setGame(session);
       setViewerId(playerId);
     } catch {
@@ -727,27 +726,27 @@ export default function Enigma() {
     if (codeInput.length !== 6 || !nameInput.trim()) return;
     const roomCode = codeInput.toUpperCase();
     try {
-      let playerId, sessionData;
-      await runTransaction(db, async (tx) => {
-        const ref = doc(db, "sessions", roomCode);
-        const snap = await tx.get(ref);
-        if (!snap.exists()) throw new Error("Session not found");
-        const session = snap.data();
-        if (session.status !== "lobby") throw new Error("Game already in progress");
-        playerId = `p${session.players.length + 1}`;
-        sessionData = {
-          ...session,
-          players: [...session.players, {
-            id: playerId,
-            name: nameInput.trim(),
-            score: 0,
-            isHost: false,
-            isEliminated: false,
-            avatarIdx: Math.floor(Math.random() * 6),
-          }],
-        };
-        tx.set(ref, sessionData);
-      });
+      const { data: row, error } = await supabase
+        .from("sessions")
+        .select("data")
+        .eq("room_code", roomCode)
+        .single();
+      if (error || !row) throw new Error("Session not found");
+      const session = row.data;
+      if (session.status !== "lobby") throw new Error("Game already in progress");
+      const playerId = `p${session.players.length + 1}`;
+      const sessionData = {
+        ...session,
+        players: [...session.players, {
+          id: playerId,
+          name: nameInput.trim(),
+          score: 0,
+          isHost: false,
+          isEliminated: false,
+          avatarIdx: Math.floor(Math.random() * 6),
+        }],
+      };
+      await supabase.from("sessions").upsert({ room_code: roomCode, data: sessionData });
       setGame(sessionData);
       setViewerId(playerId);
       setNameInput("");

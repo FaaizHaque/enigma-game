@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.enigmagame.app",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "requireFullScreen": true,
       "infoPlist": {
         "UIStatusBarStyle": "UIStatusBarStyleLightContent",
@@ -30,7 +30,7 @@
         "backgroundColor": "#06060f"
       },
       "package": "com.enigmagame.app",
-      "versionCode": 1
+      "versionCode": 2
     },
     "plugins": [
       [
@@ -42,9 +42,8 @@
     ],
     "scheme": "enigma",
     "extra": {
-      "firebaseApiKey": "AIzaSyDDMAkyTlTDqAKfw7OM7WE2rHSC11E7RaY",
-      "firebaseMessagingSenderId": "460030305413",
-      "firebaseAppId": "1:460030305413:web:c299e4c8fae396a3f7b5ec",
+      "supabaseUrl": "",
+      "supabaseAnonKey": "",
       "eas": {
         "projectId": "36474895-baa2-4659-9f17-dc1b5ada3501"
       }
