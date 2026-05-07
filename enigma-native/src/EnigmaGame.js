@@ -116,6 +116,35 @@ function SimBar({ players, viewerId, onSwitch, onHome }) {
   );
 }
 
+function AvatarPicker({ selected, onSelect }) {
+  return (
+    <View>
+      <Text style={{ fontSize: 11, fontFamily: 'Outfit_700Bold', color: C.muted, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>
+        Choose Avatar
+      </Text>
+      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 20 }}>
+        {AVATAR_COLORS.map((c, i) => (
+          <TouchableOpacity
+            key={i}
+            onPress={() => onSelect(i)}
+            style={{
+              width: 46, height: 46, borderRadius: 23,
+              backgroundColor: c.bg,
+              borderWidth: selected === i ? 3 : 1.5,
+              borderColor: selected === i ? C.gold : C.border2,
+              alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            {selected === i && (
+              <Text style={{ color: c.fg, fontSize: 20, fontFamily: 'Outfit_700Bold' }}>✓</Text>
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 function Divider({ label = 'or' }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 18 }}>
@@ -163,8 +192,12 @@ export default function EnigmaGame() {
   const [howToPlayOpen, setHowToPlayOpen] = useState(false);
   const [partlyMode, setPartlyMode] = useState(false);
   const [partlyNote, setPartlyNote] = useState('');
+  const [selectedAvatarIdx, setSelectedAvatarIdx] = useState(0);
 
   const feedScrollRef = useRef(null);
+  const gameRef = useRef(game);
+  const [guesserSecsLeft, setGuesserSecsLeft] = useState(30);
+  const [hostSecsLeft, setHostSecsLeft] = useState(15);
 
   // Deep link handling (QR code scans)
   useEffect(() => {
@@ -221,6 +254,50 @@ export default function EnigmaGame() {
     if (activeG.length === 0 || qUsed >= 20) endRound(null, game);
   }, [game?.players, game?.questions]);
 
+  // Keep gameRef in sync for use inside timer callbacks
+  useEffect(() => { gameRef.current = game; }, [game]);
+
+  // Guesser: 30-second turn timer — auto-advances to next player
+  useEffect(() => {
+    if (screen !== 'game' || !isMyTurn || viewerIsHost || viewerIsEliminated || !!pendingQ) return;
+    setGuesserSecsLeft(30);
+    const iv = setInterval(() => {
+      setGuesserSecsLeft((s) => {
+        if (s <= 1) {
+          clearInterval(iv);
+          const g = gameRef.current;
+          const ng = { ...g, currentQuestionerIndex: g.currentQuestionerIndex + 1 };
+          setGame(ng);
+          syncGame(ng);
+          return 30;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [screen, isMyTurn, viewerIsHost, viewerIsEliminated, pendingQ?.id]);
+
+  // Host: 15-second answer timer — auto-answers NO on expiry
+  useEffect(() => {
+    if (screen !== 'game' || !pendingQ || !viewerIsHost) return;
+    setHostSecsLeft(15);
+    const iv = setInterval(() => {
+      setHostSecsLeft((s) => {
+        if (s <= 1) {
+          clearInterval(iv);
+          const g = gameRef.current;
+          const questions = g.questions.map((q) => q.answer === null ? { ...q, answer: 'NO', note: '' } : q);
+          const ng = { ...g, questions, currentQuestionerIndex: g.currentQuestionerIndex + 1 };
+          setGame(ng);
+          syncGame(ng);
+          return 15;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [screen, pendingQ?.id, viewerIsHost]);
+
   // ─── Derived ──────────────────────────────────────────────────────────────
   const viewer = game?.players.find((p) => p.id === viewerId);
   const host = game?.players.find((p) => p.isHost);
@@ -258,7 +335,7 @@ export default function EnigmaGame() {
       const playerId = 'p1';
       const session = {
         roomCode,
-        players: [{ id: playerId, name: nameInput.trim(), score: 0, isHost: true, isEliminated: false, avatarIdx: 0 }],
+        players: [{ id: playerId, name: nameInput.trim(), score: 0, isHost: true, isEliminated: false, avatarIdx: selectedAvatarIdx }],
         round: 1, theme: null, secretAnswer: '', hostHint: '',
         questions: [], currentQuestionerIndex: 0, status: 'lobby',
         pendingSolve: null, roundWinnerId: null, createdAt: new Date().toISOString(),
@@ -290,7 +367,7 @@ export default function EnigmaGame() {
         ...session,
         players: [...session.players, {
           id: playerId, name: nameInput.trim(), score: 0,
-          isHost: false, isEliminated: false, avatarIdx: Math.floor(Math.random() * 6),
+          isHost: false, isEliminated: false, avatarIdx: selectedAvatarIdx,
         }],
       };
       await supabase.from('sessions').upsert({ room_code: roomCode, data: sessionData });
@@ -540,6 +617,7 @@ export default function EnigmaGame() {
             value={nameInput} onChangeText={setNameInput} maxLength={20}
             autoFocus onSubmitEditing={createGame} returnKeyType="go"
           />
+          <AvatarPicker selected={selectedAvatarIdx} onSelect={setSelectedAvatarIdx} />
           <TouchableOpacity style={[S.btnGold, !nameInput.trim() && S.btnDisabled]} onPress={createGame} disabled={!nameInput.trim()}>
             <Text style={S.btnGoldText}>Create Room →</Text>
           </TouchableOpacity>
@@ -574,6 +652,7 @@ export default function EnigmaGame() {
             value={nameInput} onChangeText={setNameInput}
             maxLength={20} onSubmitEditing={joinGame} returnKeyType="go"
           />
+          <AvatarPicker selected={selectedAvatarIdx} onSelect={setSelectedAvatarIdx} />
           <TouchableOpacity style={[S.btnGold, !joinReady && S.btnDisabled]} onPress={joinGame} disabled={!joinReady}>
             <Text style={S.btnGoldText}>Join →</Text>
           </TouchableOpacity>
@@ -850,16 +929,22 @@ export default function EnigmaGame() {
 
         {/* Game content */}
         <View style={{ flex: 1, paddingHorizontal: 16 }}>
-          {/* Top bar */}
-          <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', paddingTop: 10, paddingBottom: 8 }}>
-            <View style={{ gap: 4 }}>
-              <Chip label={`${game.theme?.icon} ${game.theme?.label}`} style="violet" />
-              <Chip label={`Round ${game.round}`} />
+          {/* Top bar — Round top-right, Category centered, Hint below */}
+          <View style={{ paddingTop: 10, paddingBottom: 6 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 4 }}>
+              <View style={{ backgroundColor: 'rgba(200,168,74,0.14)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 5 }}>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 13, color: C.gold }}>Round {game.round}</Text>
+              </View>
+            </View>
+            <View style={{ alignItems: 'center', marginBottom: 8 }}>
+              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.violet2, textAlign: 'center' }}>
+                {game.theme?.icon}{'  '}{game.theme?.label}
+              </Text>
             </View>
             {game.hostHint ? (
-              <View style={{ backgroundColor: 'rgba(245,158,11,0.08)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.25)', borderRadius: 8, padding: 8, maxWidth: 160 }}>
-                <Text style={{ fontSize: 10, color: C.warn, letterSpacing: 1, marginBottom: 2, fontFamily: 'Outfit_700Bold' }}>HINT</Text>
-                <Text style={{ fontSize: 11, color: C.text, fontFamily: 'Outfit_400Regular' }}>{game.hostHint}</Text>
+              <View style={{ backgroundColor: 'rgba(245,158,11,0.1)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.4)', borderRadius: 10, padding: 10, alignItems: 'center' }}>
+                <Text style={{ fontSize: 10, color: C.warn, letterSpacing: 2, marginBottom: 4, fontFamily: 'Outfit_700Bold' }}>💡 HINT</Text>
+                <Text style={{ fontSize: 15, color: C.text, fontFamily: 'Outfit_500Medium', textAlign: 'center' }}>{game.hostHint}</Text>
               </View>
             ) : null}
           </View>
@@ -876,19 +961,25 @@ export default function EnigmaGame() {
           </View>
 
           {/* Player strip */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
+          <ScrollView
+            horizontal showsHorizontalScrollIndicator={false}
+            style={{ marginBottom: 8 }}
+            contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 2 }}
+          >
             {game.players.map((p) => {
               const c = av(p.avatarIdx);
               const isCur = currentQuestioner?.id === p.id && !p.isHost;
               return (
                 <View key={p.id} style={[S.stripItem, isCur && S.stripItemCur, p.isEliminated && { opacity: 0.4 }]}>
-                  <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ color: c.fg, fontSize: 9, fontFamily: 'Outfit_700Bold' }}>{getInitials(p.name)}</Text>
+                  <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ color: c.fg, fontSize: 10, fontFamily: 'Outfit_700Bold' }}>{getInitials(p.name)}</Text>
                   </View>
-                  <Text style={{ fontSize: 9, color: C.muted, fontFamily: 'Outfit_400Regular' }} numberOfLines={1}>
-                    {p.isHost ? '👑' : p.isEliminated ? '❌' : ''}{p.name.split(' ')[0]}
-                  </Text>
-                  <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 11, color: C.gold }}>{p.score}</Text>
+                  <View>
+                    <Text style={{ fontSize: 11, color: C.muted, fontFamily: 'Outfit_500Medium' }} numberOfLines={1}>
+                      {p.isHost ? '👑 ' : p.isEliminated ? '❌ ' : ''}{p.name.split(' ')[0]}
+                    </Text>
+                    <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 11, color: C.gold }}>{p.score}pt</Text>
+                  </View>
                 </View>
               );
             })}
@@ -973,6 +1064,15 @@ export default function EnigmaGame() {
                 <Text style={{ fontSize: 12, color: C.muted, marginBottom: 8, fontFamily: 'Outfit_400Regular' }}>
                   {'Answering: '}<Text style={{ color: C.text, fontFamily: 'Outfit_600SemiBold' }}>"{pendingQ.text}"</Text>
                 </Text>
+                <View style={{ marginBottom: 8 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <Text style={{ fontSize: 11, color: hostSecsLeft <= 5 ? C.danger : C.warn, fontFamily: 'Outfit_400Regular' }}>⏱ Answer now</Text>
+                    <Text style={{ fontSize: 11, fontFamily: 'Outfit_700Bold', color: hostSecsLeft <= 5 ? C.danger : C.warn }}>{hostSecsLeft}s</Text>
+                  </View>
+                  <View style={{ height: 3, backgroundColor: C.border2, borderRadius: 2 }}>
+                    <View style={{ height: 3, width: `${(hostSecsLeft / 15) * 100}%`, backgroundColor: hostSecsLeft <= 5 ? C.danger : C.warn, borderRadius: 2 }} />
+                  </View>
+                </View>
                 <View style={{ flexDirection: 'row', gap: 6, marginBottom: partlyMode ? 8 : 0 }}>
                   <TouchableOpacity style={[S.btnYes, { flex: 1 }]} onPress={() => answerQ('YES')}>
                     <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>✓ YES</Text>
@@ -1008,6 +1108,15 @@ export default function EnigmaGame() {
             ) : !viewerIsHost ? (
               canAsk ? (
                 <View>
+                  <View style={{ marginBottom: 8 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
+                      <Text style={{ fontSize: 11, color: guesserSecsLeft <= 10 ? C.danger : C.gold, fontFamily: 'Outfit_400Regular' }}>⏱ Your turn</Text>
+                      <Text style={{ fontSize: 11, fontFamily: 'Outfit_700Bold', color: guesserSecsLeft <= 10 ? C.danger : C.gold }}>{guesserSecsLeft}s</Text>
+                    </View>
+                    <View style={{ height: 3, backgroundColor: C.border2, borderRadius: 2 }}>
+                      <View style={{ height: 3, width: `${(guesserSecsLeft / 30) * 100}%`, backgroundColor: guesserSecsLeft <= 10 ? C.danger : C.gold, borderRadius: 2 }} />
+                    </View>
+                  </View>
                   <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
                     <TextInput
                       style={[S.input, { flex: 1, paddingVertical: 12, fontSize: 14, marginBottom: 0 }]}
