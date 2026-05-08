@@ -57,6 +57,58 @@ const AVATARS = [
   { emoji: '🦅', bg: '#2a2a1a' },
 ];
 
+// ─── Content Library ──────────────────────────────────────────────────────────
+const CONTENT_LIBRARY = {
+  personality: [
+    { secret: 'Nikola Tesla', hint: 'A visionary inventor from the 19th century', facts: ['Serbian-American inventor born in 1856 in modern-day Croatia', 'Developed the AC (alternating current) electrical system used worldwide today', 'Had a famous rivalry with Thomas Edison over AC vs DC power', 'Invented the Tesla coil and pioneered radio and wireless power transmission', 'Died alone in a New York hotel room in 1943; his papers were seized by the US government'] },
+    { secret: 'Cleopatra VII', hint: 'A ruler of ancient Egypt', facts: ['Last active pharaoh of ancient Egypt, reigning from 51–30 BC', 'Of Greek Macedonian descent — not ethnically Egyptian', 'First Ptolemaic ruler who could actually speak the Egyptian language', 'Had romantic alliances with both Julius Caesar and Mark Antony', 'Died by suicide aged 39, reportedly from a snake bite, ending Egyptian independence'] },
+    { secret: 'Mahatma Gandhi', hint: 'A leader of non-violent resistance', facts: ['Born Mohandas Karamchand Gandhi in 1869 in Gujarat, India', 'Led India\'s non-violent independence movement against British rule', 'Developed "Satyagraha" — the philosophy of peaceful civil disobedience', 'Famous for the 1930 Salt March, a 240-mile protest against British salt taxes', 'Assassinated on 30 January 1948, just months after Indian independence'] },
+    { secret: 'Marie Curie', hint: 'A pioneering scientist who won two Nobel Prizes', facts: ['Born Maria Skłodowska in Warsaw, Poland in 1867', 'First woman to win a Nobel Prize; the only person to win in two different sciences', 'Discovered two elements: Polonium (named after Poland) and Radium', 'Her notebooks are still radioactive today, stored in lead-lined boxes', 'Died in 1934 from aplastic anaemia caused by decades of radiation exposure'] },
+    { secret: 'Napoleon Bonaparte', hint: 'A French military commander who became emperor', facts: ['Born in Corsica in 1769; rose from artillery officer to Emperor of France by age 35', 'His Napoleonic Code legal reforms still underpin law in many countries today', 'At his peak he controlled most of continental Europe', 'Invaded Russia in 1812 with 685,000 soldiers — fewer than 100,000 returned', 'Exiled twice: first to Elba, then to remote Saint Helena where he died in 1821'] },
+    { secret: 'Leonardo da Vinci', hint: 'A Renaissance genius known for art and invention', facts: ['Born in 1452 in Vinci, Italy — illegitimate son of a notary and a peasant woman', 'Painter of the Mona Lisa and The Last Supper', 'Designed flying machines, tanks, and solar power centuries before they were invented', 'Wrote all his notebooks in mirror script — right to left, reversed', 'Died in 1519 in France, reportedly in the arms of King Francis I'] },
+  ],
+  event: [
+    { secret: 'Moon Landing (Apollo 11)', hint: 'A historic 1969 space mission', facts: ['Apollo 11 launched on 16 July 1969, carrying Armstrong, Aldrin, and Collins', 'Neil Armstrong became the first human to walk on the Moon on 20 July 1969', 'His words: "That\'s one small step for man, one giant leap for mankind"', 'Buzz Aldrin joined him on the surface; Michael Collins orbited above alone', 'Fulfilled President Kennedy\'s 1961 pledge to land on the Moon before the decade\'s end'] },
+    { secret: 'Fall of the Berlin Wall', hint: 'A pivotal 1989 event in European history', facts: ['The Berlin Wall divided East and West Germany from 1961 to 1989', 'Built to stop mass emigration from Communist East Germany to the West', 'On 9 November 1989 a misread announcement triggered crowds to rush the checkpoints', 'Guards stood down and Berliners began demolishing the wall with hammers', 'Led directly to German reunification in 1990 and the end of the Cold War'] },
+    { secret: 'The French Revolution', hint: 'A late 18th century uprising that transformed a nation', facts: ['Began in 1789, driven by financial crisis, food shortages, and extreme inequality', 'Storming of the Bastille on 14 July 1789 is its symbolic start', 'King Louis XVI was executed by guillotine in January 1793', 'The Reign of Terror (1793–94) saw over 17,000 people officially executed', 'Ended with Napoleon\'s coup in 1799, replacing the republic with his rule'] },
+    { secret: 'The Black Death', hint: 'A devastating 14th century pandemic', facts: ['A bubonic plague epidemic that swept Europe from 1347 to 1351', 'Killed an estimated 30–60% of Europe\'s population — roughly 25 million people', 'Spread by fleas on rats that arrived on merchant ships from Asia', 'Took Europe over 200 years to recover its pre-plague population', 'Indirectly ended feudalism by creating labour shortages that gave peasants bargaining power'] },
+    { secret: 'Signing of the Magna Carta', hint: 'A 1215 document that changed the rule of law', facts: ['Signed on 15 June 1215 by King John of England at Runnymede', 'Rebellious barons forced the king to sign it to limit royal power', 'Established that even the king must obey the law — a revolutionary idea', 'Introduced the right to a fair trial that underpins modern legal systems', 'Only four original copies survive, all kept in England'] },
+    { secret: 'World War II', hint: 'The largest and most destructive war in history', facts: ['Fought from 1939 to 1945, involving more than 30 countries', 'Started when Nazi Germany invaded Poland on 1 September 1939', 'Approximately 70–85 million people died — around 3% of the world\'s population', 'The Holocaust saw the systematic murder of 6 million Jewish people by the Nazi regime', 'Ended in Europe on 8 May 1945 (VE Day) and in the Pacific on 2 September 1945 (VJ Day)'] },
+  ],
+  object: [
+    { secret: 'Excalibur', hint: 'A legendary sword from Arthurian legend', facts: ['The magical sword of King Arthur in British legend and medieval romance', 'In most versions, pulled from a stone or given by the Lady of the Lake', 'Symbolised Arthur\'s divine right to rule as King of Britain', 'Said to be unbreakable and grant its bearer extraordinary power', 'Returned to the lake at Arthur\'s death — thrown by the knight Sir Bedivere'] },
+    { secret: 'The Rosetta Stone', hint: 'An ancient stone that unlocked a forgotten script', facts: ['A granodiorite stele discovered in 1799 by French soldiers in Egypt', 'Inscribed with the same decree in three scripts: hieroglyphs, Demotic, and Ancient Greek', 'The Greek section let scholars decode Egyptian hieroglyphics for the first time', 'Jean-François Champollion cracked the hieroglyphic code in 1822', 'Held in the British Museum since 1802; Egypt regularly requests its return'] },
+    { secret: 'The Hope Diamond', hint: 'A famously cursed blue gemstone', facts: ['One of the world\'s largest blue diamonds, weighing 45.52 carats', 'Believed to have originated in India; first recorded in the 17th century', 'Said to carry a curse bringing misfortune and death to its owners', 'Its history includes French royal ownership and theft during the Revolution', 'Now on display at the Smithsonian Natural History Museum in Washington D.C.'] },
+    { secret: 'The Holy Grail', hint: 'A sacred vessel from Christian and Arthurian tradition', facts: ['Believed to be the cup used by Jesus at the Last Supper', 'Also said to be the cup that caught Christ\'s blood at the Crucifixion', 'The supreme quest of the Knights of the Round Table in Arthurian legend', 'No verified physical version has ever been confirmed to exist', 'Inspired works from medieval romance to Monty Python and Indiana Jones'] },
+    { secret: 'The Mona Lisa', hint: 'The world\'s most famous painting', facts: ['Painted by Leonardo da Vinci between approximately 1503 and 1519', 'Subject is believed to be Lisa Gherardini, wife of a Florentine merchant', 'Famous for her ambiguous smile and eyes that seem to follow the viewer', 'Stolen from the Louvre in 1911 by an Italian employee; recovered two years later', 'Now behind bulletproof glass at the Louvre, Paris — visited by millions yearly'] },
+    { secret: 'The Ark of the Covenant', hint: 'A sacred container from ancient Hebrew scripture', facts: ['A gold-covered wooden chest said to hold the stone tablets of the Ten Commandments', 'Built under Moses\' instructions during the Israelites\' time in the wilderness', 'Said to have miraculous powers — killing those who touched it improperly', 'Kept in Solomon\'s Temple until the Babylonian conquest around 597 BC', 'Its current location is unknown and has inspired centuries of legend and searching'] },
+  ],
+  place: [
+    { secret: 'The Great Wall of China', hint: 'A massive ancient fortification in East Asia', facts: ['A series of walls built across northern China over many centuries', 'Most of what stands today is from the Ming dynasty (1368–1644)', 'Stretches roughly 21,196 km in total length including all branches', 'Popular myth: it is NOT visible from space with the naked eye', 'Built primarily to defend against Mongol and nomadic invasions from the north'] },
+    { secret: 'The Eiffel Tower', hint: 'A famous iron structure in a European capital', facts: ['Designed by engineer Gustave Eiffel for the 1889 World\'s Fair in Paris', 'Standing 330 metres tall, it was the world\'s tallest structure for 41 years', 'Made from 18,038 pieces of iron, assembled with 2.5 million rivets', 'Originally planned to be demolished after 20 years; saved because it served as a radio tower', 'Receives about 7 million visitors per year — one of the world\'s most visited monuments'] },
+    { secret: 'Machu Picchu', hint: 'An ancient citadel high in the South American Andes', facts: ['A 15th-century Inca citadel in Peru, at 2,430 metres elevation', 'Built around 1450 AD, abandoned less than 100 years later during the Spanish conquest', 'Rediscovered by American historian Hiram Bingham in 1911', 'Built without mortar — the stones fit so precisely a knife cannot fit between them', 'A UNESCO World Heritage Site and one of the New Seven Wonders of the World'] },
+    { secret: 'The Colosseum', hint: 'An ancient amphitheatre in the heart of Rome', facts: ['An oval amphitheatre in Rome built between 70–80 AD under Emperor Vespasian', 'Could hold 50,000 to 80,000 spectators for gladiatorial and other public events', 'Used for gladiator fights, animal hunts, public executions, and dramatic performances', 'Estimated over 400,000 people and 1 million animals died within its walls', 'Two-thirds of the original structure was lost to earthquakes and stone robbing over centuries'] },
+    { secret: 'The Taj Mahal', hint: 'A white marble mausoleum in India', facts: ['A white marble mausoleum in Agra, India, built by Mughal Emperor Shah Jahan', 'Commissioned in 1632 as a tomb for his wife Mumtaz Mahal, who died in childbirth', 'Took approximately 22 years and 22,000 workers to complete', 'The minarets lean slightly outward so they fall away from the tomb in an earthquake', 'A UNESCO World Heritage Site and one of the New Seven Wonders of the World'] },
+    { secret: 'Mount Everest', hint: 'The world\'s highest mountain above sea level', facts: ['Located in the Himalayas on the Nepal–Tibet border at 8,848.86 metres', 'Named after Sir George Everest, the British surveyor who first mapped it', 'First summited on 29 May 1953 by Edmund Hillary and Tenzing Norgay', 'Known locally as "Sagarmatha" in Nepal and "Chomolungma" in Tibet', 'Over 300 bodies remain on the mountain — too dangerous and costly to recover'] },
+  ],
+  invention: [
+    { secret: 'The Printing Press', hint: 'A 15th century invention that spread knowledge worldwide', facts: ['Invented by Johannes Gutenberg in Germany around 1440', 'Used movable metal type, enabling books to be mass-produced for the first time', 'The first major work printed was the Gutenberg Bible, around 1455', 'Within 50 years, over 20 million books had been printed across Europe', 'Directly enabled the Renaissance, Reformation, and Scientific Revolution'] },
+    { secret: 'The Telephone', hint: 'A 19th century device for voice communication at distance', facts: ['Alexander Graham Bell patented the first practical telephone on 7 March 1876', 'Famous first words spoken: "Mr. Watson, come here, I want to see you"', 'Elisha Gray filed a similar patent hours after Bell — courts awarded Bell the patent', 'Bell preferred to be remembered as a teacher of the deaf, not an inventor', 'The telephone fundamentally changed how people communicated across distances'] },
+    { secret: 'Penicillin', hint: 'A life-saving medicine discovered almost by accident', facts: ['Discovered accidentally by Alexander Fleming in 1928 — mould contaminated his bacteria dish', 'The Penicillium mould was killing all the surrounding bacteria', 'Fleming published his findings but couldn\'t isolate the active ingredient and moved on', 'Howard Florey and Ernst Chain developed it into a usable medicine in the early 1940s', 'Mass production during WWII saved millions of lives; all three shared the 1945 Nobel Prize'] },
+    { secret: 'The Internet', hint: 'A global network connecting billions of devices', facts: ['Originated from ARPANET, a US military research network first used in 1969', 'The first message sent was "LOGIN" — the system crashed after just "LO"', 'Tim Berners-Lee invented the World Wide Web in 1989, making it accessible to everyone', 'The first public website went live on 6 August 1991', 'Today over 5 billion people use the internet — more than 60% of the world population'] },
+    { secret: 'The Steam Engine', hint: 'The invention that powered the Industrial Revolution', facts: ['James Watt\'s improved steam engine (1769) made it practical for widespread industrial use', 'Earlier versions existed (Newcomen\'s 1712 engine) but were far too inefficient', 'Watt\'s engine was four times more fuel-efficient than Newcomen\'s design', 'Powered factories, trains, and ships — transforming how goods were made and moved', 'The unit of power, the "watt", is named in his honour'] },
+    { secret: 'The Light Bulb', hint: 'An invention that brought artificial light to everyday life', facts: ['Thomas Edison developed the first commercially viable incandescent bulb in 1879', 'He tested thousands of materials before finding carbonised bamboo as the ideal filament', 'Earlier versions existed but lasted only minutes — Edison made one lasting 1,200+ hours', 'He also built New York\'s first power station in 1882 to bring electricity to homes', 'Today\'s LED bulbs use up to 90% less energy than Edison\'s original incandescent design'] },
+  ],
+  character: [
+    { secret: 'Sherlock Holmes', hint: 'A brilliant fictional detective from Victorian London', facts: ['Created by Arthur Conan Doyle; first appeared in A Study in Scarlet (1887)', 'Lives at 221B Baker Street, London, with his friend and chronicler Dr. John Watson', 'Famous for extraordinary deductive reasoning and hyper-keen observation', 'His arch-nemesis is Professor James Moriarty, "the Napoleon of Crime"', 'Doyle killed him off in 1893 but public outcry forced a resurrection in 1903'] },
+    { secret: 'Harry Potter', hint: 'A young wizard from a celebrated modern book series', facts: ['Created by J.K. Rowling; first appeared in Harry Potter and the Philosopher\'s Stone (1997)', 'An orphan who discovers he is a wizard on his 11th birthday', 'Attends Hogwarts School of Witchcraft and Wizardry, sorted into Gryffindor house', 'Has a lightning-bolt scar from surviving Voldemort\'s Killing Curse as a baby', 'The series has sold over 600 million copies — one of the best-selling series ever'] },
+    { secret: 'Darth Vader', hint: 'An iconic villain from a famous space opera franchise', facts: ['Real name Anakin Skywalker — a fallen Jedi who turned to the dark side of the Force', 'Appears in George Lucas\'s Star Wars, first in Episode IV: A New Hope (1977)', 'Recognised by his black armour, helmet, and distinctive mechanical breathing sound', 'Famous line: "No, I am your father" — one of cinema\'s greatest ever plot twists', 'Redeemed himself in Episode VI by saving his son Luke Skywalker, dying peacefully'] },
+    { secret: 'Elizabeth Bennet', hint: 'A witty and independent heroine from a classic novel', facts: ['Protagonist of Jane Austen\'s Pride and Prejudice, published in 1813', 'Second of five Bennet sisters; known for her intelligence, wit, and independence', 'Her famous love interest is the proud and wealthy Mr. Fitzwilliam Darcy', 'Both misjudge each other at first before realising their mutual love', 'Often ranked among literature\'s greatest heroines for her humour and moral clarity'] },
+    { secret: 'Gandalf', hint: 'A wise and powerful wizard from a beloved fantasy world', facts: ['Created by J.R.R. Tolkien; appears in The Hobbit (1937) and The Lord of the Rings (1954–55)', 'One of the Istari — angelic beings sent to Middle-earth to resist the dark lord Sauron', 'Known as Gandalf the Grey; returns as Gandalf the White after defeating the Balrog', 'Famous for his fireworks, his pipe, and "You shall not pass!" on the Bridge of Khazad-dûm', 'His true angelic name is Olórin; Gandalf is the name given by Men of the North'] },
+    { secret: 'James Bond', hint: 'A famous fictional spy working for British intelligence', facts: ['Created by novelist Ian Fleming; first appeared in Casino Royale (1953)', 'A secret agent for MI6 with the code number 007', 'Famous for "Bond, James Bond" and Martinis "shaken, not stirred"', 'Has been played by seven official actors including Sean Connery and Daniel Craig', 'Fleming based Bond partly on wartime intelligence agents he worked with in WWII'] },
+  ],
+};
+
 const DEMO_PLAYERS = [
   { name: 'Ayesha', avatarIdx: 1 },
   { name: 'Marcus', avatarIdx: 2 },
@@ -196,6 +248,8 @@ export default function EnigmaGame() {
   const [partlyMode, setPartlyMode] = useState(false);
   const [partlyNote, setPartlyNote] = useState('');
   const [selectedAvatarIdx, setSelectedAvatarIdx] = useState(0);
+  const [secretSource, setSecretSource] = useState('library');
+  const [libraryBriefing, setLibraryBriefing] = useState(null);
 
   const feedScrollRef = useRef(null);
   const gameRef = useRef(game);
@@ -464,14 +518,17 @@ export default function EnigmaGame() {
     if (!selectedTheme) return;
     const newGame = { ...game, theme: selectedTheme, status: 'secret_entry' };
     setGame(newGame);
+    setSecretSource('library');
     setScreen('secret');
     await syncGame(newGame);
   };
 
-  const lockSecret = async () => {
-    if (!secretInput.trim()) return;
+  const lockSecret = async (secretOverride, hintOverride) => {
+    const secret = (secretOverride ?? secretInput).trim();
+    const hint = (hintOverride ?? hintInput).trim();
+    if (!secret) return;
     const newGame = {
-      ...game, secretAnswer: secretInput.trim(), hostHint: hintInput.trim(),
+      ...game, secretAnswer: secret, hostHint: hint,
       status: 'playing', questions: [], currentQuestionerIndex: 0, pendingSolve: null, hostConsecutiveMisses: 0,
     };
     setGame(newGame);
@@ -642,7 +699,7 @@ export default function EnigmaGame() {
             <Text style={{ fontSize: 11, color: C.muted, letterSpacing: 4, textTransform: 'uppercase', marginTop: 6, fontFamily: 'Outfit_400Regular' }}>
               Reviving the Classic Art of 20 Questions
             </Text>
-            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 10, letterSpacing: 1 }}>v1.7</Text>
+            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 10, letterSpacing: 1 }}>v1.8</Text>
           </View>
 
           <TouchableOpacity style={S.btnGold} onPress={() => setScreen('create')}>
@@ -856,9 +913,50 @@ export default function EnigmaGame() {
 
   // ─── SECRET ENTRY ─────────────────────────────────────────────────────────
   if (screen === 'secret') {
+    const themeLibrary = CONTENT_LIBRARY[game.theme?.id] || [];
+
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
         <SBar />
+
+        {/* Host Briefing Modal — private facts revealed after picking a library secret */}
+        <Modal visible={!!libraryBriefing} transparent animationType="slide" onRequestClose={() => setLibraryBriefing(null)}>
+          <View style={S.overlay}>
+            <View style={[S.modal, { maxHeight: '85%' }]}>
+              <View style={S.modalHandle} />
+              <View style={{ backgroundColor: 'rgba(200,168,74,0.08)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 10, padding: 10, marginBottom: 14, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={{ fontSize: 13 }}>🔒</Text>
+                <Text style={{ fontSize: 11, color: C.goldDim, fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>PRIVATE — HOST EYES ONLY</Text>
+              </View>
+              <Text style={[S.modalTitle, { fontSize: 22, marginBottom: 2 }]}>{libraryBriefing?.secret}</Text>
+              <Text style={[S.modalSub, { marginBottom: 14 }]}>Read these facts so you can answer questions confidently.</Text>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ marginBottom: 14 }}>
+                {(libraryBriefing?.facts || []).map((f, i) => (
+                  <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
+                    <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold', fontSize: 14, marginTop: 1 }}>•</Text>
+                    <Text style={{ flex: 1, fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 20 }}>{f}</Text>
+                  </View>
+                ))}
+                {libraryBriefing?.hint ? (
+                  <View style={{ backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1, borderColor: 'rgba(109,40,217,0.3)', borderRadius: 10, padding: 12, marginTop: 6 }}>
+                    <Text style={{ fontSize: 10, color: C.violet2, letterSpacing: 2, fontFamily: 'Outfit_700Bold', marginBottom: 4 }}>HINT TO GUESSERS</Text>
+                    <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular' }}>{libraryBriefing.hint}</Text>
+                  </View>
+                ) : null}
+              </ScrollView>
+              <TouchableOpacity
+                style={S.btnGold}
+                onPress={() => { const item = libraryBriefing; setLibraryBriefing(null); lockSecret(item.secret, item.hint || ''); }}
+              >
+                <Text style={S.btnGoldText}>I'm Ready — Start Round →</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{ marginTop: 10, alignItems: 'center', padding: 8 }} onPress={() => setLibraryBriefing(null)}>
+                <Text style={{ color: C.dim, fontSize: 13, fontFamily: 'Outfit_400Regular' }}>← Choose a different secret</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 24 }]}>
           <View style={S.screenHeader}>
             <Chip label={`${game.theme?.icon} ${game.theme?.label}`} style="violet" />
@@ -866,33 +964,77 @@ export default function EnigmaGame() {
 
           {viewerIsHost ? (
             <>
-              <Text style={S.h2}>Your Secret</Text>
-              <Text style={[S.muted, { marginBottom: 18 }]}>Think of something within the theme. Guessers must unravel it.</Text>
-              <Text style={S.fieldLabel}>Secret Answer</Text>
-              <TextInput
-                style={S.input}
-                placeholder={`e.g. "Nikola Tesla", "The Magna Carta"...`}
-                placeholderTextColor={C.dim}
-                value={secretInput} onChangeText={setSecretInput} autoFocus
-              />
-              <Text style={[S.fieldLabel, { marginTop: 8 }]}>Optional Hint (visible to guessers)</Text>
-              <TextInput
-                style={S.input}
-                placeholder='e.g. "A scientist from the 19th century"'
-                placeholderTextColor={C.dim}
-                value={hintInput} onChangeText={setHintInput}
-              />
-              <View style={{ backgroundColor: 'rgba(245,158,11,0.07)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.2)', borderRadius: 10, padding: 12, marginVertical: 10 }}>
-                <Text style={{ fontSize: 12, color: C.warn, fontFamily: 'Outfit_400Regular' }}>🔒 Your answer is hidden until the round ends.</Text>
+              <Text style={S.h2}>Choose Your Secret</Text>
+
+              {/* Source tabs */}
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
+                <TouchableOpacity
+                  style={[{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', borderWidth: 1 },
+                    secretSource === 'library'
+                      ? { backgroundColor: 'rgba(200,168,74,0.12)', borderColor: C.goldDim }
+                      : { backgroundColor: C.card, borderColor: C.border2 }]}
+                  onPress={() => setSecretSource('library')}
+                >
+                  <Text style={{ fontSize: 13, fontFamily: 'Outfit_600SemiBold', color: secretSource === 'library' ? C.gold : C.muted }}>📚 From Library</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', borderWidth: 1 },
+                    secretSource === 'manual'
+                      ? { backgroundColor: 'rgba(200,168,74,0.12)', borderColor: C.goldDim }
+                      : { backgroundColor: C.card, borderColor: C.border2 }]}
+                  onPress={() => setSecretSource('manual')}
+                >
+                  <Text style={{ fontSize: 13, fontFamily: 'Outfit_600SemiBold', color: secretSource === 'manual' ? C.gold : C.muted }}>✏️ Write My Own</Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity style={[S.btnGold, !secretInput.trim() && S.btnDisabled]} onPress={lockSecret} disabled={!secretInput.trim()}>
-                <Text style={S.btnGoldText}>Lock it in → Start Round</Text>
-              </TouchableOpacity>
+
+              {secretSource === 'library' ? (
+                <>
+                  <Text style={[S.muted, { marginBottom: 14 }]}>Pick a secret — you'll get private facts to help you answer questions confidently.</Text>
+                  {themeLibrary.map((item, i) => (
+                    <TouchableOpacity
+                      key={i}
+                      style={{ backgroundColor: C.card2, borderWidth: 1, borderColor: C.border2, borderRadius: 14, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 12 }}
+                      onPress={() => setLibraryBriefing(item)}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: C.text, marginBottom: 3 }}>{item.secret}</Text>
+                        <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular' }}>{item.hint}</Text>
+                      </View>
+                      <Text style={{ color: C.gold, fontSize: 22, fontFamily: 'Outfit_400Regular' }}>›</Text>
+                    </TouchableOpacity>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <Text style={[S.muted, { marginBottom: 18 }]}>Think of something within the theme. Guessers must unravel it.</Text>
+                  <Text style={S.fieldLabel}>Secret Answer</Text>
+                  <TextInput
+                    style={S.input}
+                    placeholder={`e.g. "Nikola Tesla", "The Magna Carta"...`}
+                    placeholderTextColor={C.dim}
+                    value={secretInput} onChangeText={setSecretInput} autoFocus
+                  />
+                  <Text style={[S.fieldLabel, { marginTop: 8 }]}>Optional Hint (visible to guessers)</Text>
+                  <TextInput
+                    style={S.input}
+                    placeholder='e.g. "A scientist from the 19th century"'
+                    placeholderTextColor={C.dim}
+                    value={hintInput} onChangeText={setHintInput}
+                  />
+                  <View style={{ backgroundColor: 'rgba(245,158,11,0.07)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.2)', borderRadius: 10, padding: 12, marginVertical: 10 }}>
+                    <Text style={{ fontSize: 12, color: C.warn, fontFamily: 'Outfit_400Regular' }}>🔒 Your answer is hidden until the round ends.</Text>
+                  </View>
+                  <TouchableOpacity style={[S.btnGold, !secretInput.trim() && S.btnDisabled]} onPress={() => lockSecret()} disabled={!secretInput.trim()}>
+                    <Text style={S.btnGoldText}>Lock it in → Start Round</Text>
+                  </TouchableOpacity>
+                </>
+              )}
             </>
           ) : (
             <View style={{ flex: 1, alignItems: 'center', paddingTop: 80 }}>
               <Text style={{ fontSize: 60, marginBottom: 16 }}>🤫</Text>
-              <Text style={[S.h2, { textAlign: 'center', marginBottom: 8 }]}>Host is writing their secret...</Text>
+              <Text style={[S.h2, { textAlign: 'center', marginBottom: 8 }]}>Host is choosing their secret...</Text>
               <Text style={[S.muted, { textAlign: 'center' }]}>Stay sharp. The questioning begins soon.</Text>
             </View>
           )}
