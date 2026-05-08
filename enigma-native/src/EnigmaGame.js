@@ -292,7 +292,7 @@ export default function EnigmaGame() {
     return () => clearInterval(iv);
   }, [screen, game?.currentQuestionerIndex, viewerId]);
 
-  // Host: 15-second answer timer — starts when a pending question appears
+  // Host: 15-second answer timer — two-strike system
   useEffect(() => {
     if (!game || screen !== 'game') { setHostSecsLeft(15); return; }
     const vwr = game.players.find(p => p.id === viewerId);
@@ -307,10 +307,35 @@ export default function EnigmaGame() {
       if (secs <= 0) {
         clearInterval(iv);
         const g = gameRef.current;
-        const questions = g.questions.map(q => q.answer === null ? { ...q, answer: 'NO', note: '' } : q);
-        const ng = { ...g, questions, currentQuestionerIndex: g.currentQuestionerIndex + 1 };
-        setGame(ng);
-        syncGame(ng);
+        const misses = (g.hostConsecutiveMisses || 0) + 1;
+        const questions = g.questions.map(q => q.answer === null ? { ...q, answer: 'SKIP', note: '' } : q);
+
+        if (misses === 1) {
+          // First miss: skip question, warn for 10 seconds
+          const ng = { ...g, questions, currentQuestionerIndex: g.currentQuestionerIndex + 1, hostConsecutiveMisses: 1 };
+          setGame(ng);
+          syncGame(ng);
+          setTimeoutToast('⚠️ Miss 1/2 — Question skipped! Fail to answer again and you lose the host role.');
+          setTimeout(() => setTimeoutToast(null), 10000);
+        } else {
+          // Second consecutive miss: eliminate host
+          const activeGuessers = g.players.filter(p => !p.isHost && !p.isEliminated);
+          if (activeGuessers.length >= 2) {
+            const newHost = activeGuessers[0];
+            const players = g.players.map(p => {
+              if (p.isHost) return { ...p, isHost: false, isEliminated: true };
+              if (p.id === newHost.id) return { ...p, isHost: true };
+              return p;
+            });
+            const ng = { ...g, players, questions, currentQuestionerIndex: 0, hostConsecutiveMisses: 0 };
+            setGame(ng);
+            syncGame(ng);
+            setTimeoutToast(`👑 ${newHost.name} is the new host! They can see the secret.`);
+            setTimeout(() => setTimeoutToast(null), 5000);
+          } else {
+            endRound(null, { ...g, questions });
+          }
+        }
       }
     }, 1000);
     return () => clearInterval(iv);
@@ -327,7 +352,7 @@ export default function EnigmaGame() {
   const viewerIsEliminated = viewer?.isEliminated && !viewer?.isHost;
   const isMyTurn = currentQuestioner?.id === viewerId;
   const pendingQ = game?.questions.find((q) => q.answer === null);
-  const answeredQs = game?.questions.filter((q) => q.answer !== null).length || 0;
+  const answeredQs = game?.questions.filter((q) => q.answer !== null && q.answer !== 'SKIP').length || 0;
 
   // ─── Supabase helpers ─────────────────────────────────────────────────────
   const uniqueCode = async () => {
@@ -356,7 +381,7 @@ export default function EnigmaGame() {
         players: [{ id: playerId, name: nameInput.trim(), score: 0, isHost: true, isEliminated: false, avatarIdx: selectedAvatarIdx }],
         round: 1, theme: null, secretAnswer: '', hostHint: '',
         questions: [], currentQuestionerIndex: 0, status: 'lobby',
-        pendingSolve: null, roundWinnerId: null, createdAt: new Date().toISOString(),
+        pendingSolve: null, roundWinnerId: null, hostConsecutiveMisses: 0, createdAt: new Date().toISOString(),
       };
       await supabase.from('sessions').upsert({ room_code: roomCode, data: session });
       setGame(session);
@@ -427,7 +452,7 @@ export default function EnigmaGame() {
     if (!secretInput.trim()) return;
     const newGame = {
       ...game, secretAnswer: secretInput.trim(), hostHint: hintInput.trim(),
-      status: 'playing', questions: [], currentQuestionerIndex: 0, pendingSolve: null,
+      status: 'playing', questions: [], currentQuestionerIndex: 0, pendingSolve: null, hostConsecutiveMisses: 0,
     };
     setGame(newGame);
     setSecretInput('');
@@ -451,7 +476,7 @@ export default function EnigmaGame() {
 
   const answerQ = async (ans, note = '') => {
     const questions = game.questions.map((q) => q.answer === null ? { ...q, answer: ans, note: note.trim() } : q);
-    const newGame = { ...game, questions, currentQuestionerIndex: game.currentQuestionerIndex + 1 };
+    const newGame = { ...game, questions, currentQuestionerIndex: game.currentQuestionerIndex + 1, hostConsecutiveMisses: 0 };
     setGame(newGame);
     setPartlyMode(false);
     setPartlyNote('');
@@ -508,7 +533,7 @@ export default function EnigmaGame() {
     const newGame = {
       ...game, players, round: game.round + 1, theme: null, secretAnswer: '',
       hostHint: '', questions: [], currentQuestionerIndex: 0,
-      status: 'theme_select', pendingSolve: null, roundWinnerId: undefined,
+      status: 'theme_select', pendingSolve: null, roundWinnerId: undefined, hostConsecutiveMisses: 0,
     };
     setGame(newGame);
     setSelectedTheme(null);
@@ -597,7 +622,7 @@ export default function EnigmaGame() {
             <Text style={{ fontSize: 11, color: C.muted, letterSpacing: 4, textTransform: 'uppercase', marginTop: 6, fontFamily: 'Outfit_400Regular' }}>
               Reviving the Classic Art of 20 Questions
             </Text>
-            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 10, letterSpacing: 1 }}>v1.5</Text>
+            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 10, letterSpacing: 1 }}>v1.6</Text>
           </View>
 
           <TouchableOpacity style={S.btnGold} onPress={() => setScreen('create')}>
@@ -1066,6 +1091,10 @@ export default function EnigmaGame() {
                     {q.answer === null ? (
                       <View style={[S.qBadge, { backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.2)' }]}>
                         <Text style={{ color: C.warn, fontSize: 14, fontFamily: 'Outfit_700Bold' }}>⏳ Awaiting answer</Text>
+                      </View>
+                    ) : q.answer === 'SKIP' ? (
+                      <View style={[S.qBadge, { backgroundColor: 'rgba(90,90,136,0.1)', borderColor: 'rgba(90,90,136,0.3)' }]}>
+                        <Text style={{ color: C.dim, fontSize: 14, fontFamily: 'Outfit_700Bold' }}>⏭ Skipped — host timeout</Text>
                       </View>
                     ) : q.answer === 'PARTLY' ? (
                       <View style={[S.qBadge, { backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.3)' }]}>
