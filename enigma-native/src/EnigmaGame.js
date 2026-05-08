@@ -42,13 +42,19 @@ const THEMES = [
   { id: 'character', label: 'Fictional Character', icon: '🎭', desc: 'A beloved character from books, film or legend' },
 ];
 
-const AVATAR_COLORS = [
-  { bg: '#1c3a5c', fg: '#60aaee' },
-  { bg: '#3c1c1c', fg: '#ee7060' },
-  { bg: '#1c3c1c', fg: '#60cc70' },
-  { bg: '#3c1c3c', fg: '#cc70cc' },
-  { bg: '#3c2c1c', fg: '#ddaa50' },
-  { bg: '#1c3c3c', fg: '#50cccc' },
+const AVATARS = [
+  { emoji: '🧙', bg: '#1a2a4a' },
+  { emoji: '🦊', bg: '#3a1a1a' },
+  { emoji: '🐉', bg: '#1a3a1a' },
+  { emoji: '🦁', bg: '#3a2a1a' },
+  { emoji: '🐺', bg: '#2a1a3a' },
+  { emoji: '🦋', bg: '#1a3a3a' },
+  { emoji: '⚡', bg: '#3a3a1a' },
+  { emoji: '🔥', bg: '#3a1a0a' },
+  { emoji: '🌊', bg: '#0a2a3a' },
+  { emoji: '🌙', bg: '#1a1a3a' },
+  { emoji: '🐯', bg: '#3a2a0a' },
+  { emoji: '🦅', bg: '#2a2a1a' },
 ];
 
 const DEMO_PLAYERS = [
@@ -58,20 +64,18 @@ const DEMO_PLAYERS = [
   { name: 'Jin', avatarIdx: 4 },
 ];
 
-const av = (idx) => AVATAR_COLORS[idx % AVATAR_COLORS.length];
+const av = (idx) => AVATARS[idx % AVATARS.length];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 function PlayerAvatar({ p, size = 36 }) {
-  const c = av(p.avatarIdx);
-  const fs = size <= 26 ? 9 : 12;
+  const a = av(p.avatarIdx);
+  const fs = size <= 26 ? 14 : 20;
   return (
     <View style={{
       width: size, height: size, borderRadius: size / 2,
-      backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center', flexShrink: 0,
     }}>
-      <Text style={{ color: c.fg, fontSize: fs, fontFamily: 'Outfit_700Bold' }}>
-        {getInitials(p.name)}
-      </Text>
+      <Text style={{ fontSize: fs }}>{a.emoji}</Text>
     </View>
   );
 }
@@ -119,26 +123,24 @@ function SimBar({ players, viewerId, onSwitch, onHome, topInset = 0 }) {
 
 function AvatarPicker({ selected, onSelect }) {
   return (
-    <View>
+    <View style={{ marginBottom: 20 }}>
       <Text style={{ fontSize: 11, fontFamily: 'Outfit_700Bold', color: C.muted, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>
-        Choose Avatar
+        Choose Your Avatar
       </Text>
-      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 20 }}>
-        {AVATAR_COLORS.map((c, i) => (
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+        {AVATARS.map((a, i) => (
           <TouchableOpacity
             key={i}
             onPress={() => onSelect(i)}
             style={{
-              width: 46, height: 46, borderRadius: 23,
-              backgroundColor: c.bg,
+              width: 52, height: 52, borderRadius: 26,
+              backgroundColor: a.bg,
               borderWidth: selected === i ? 3 : 1.5,
               borderColor: selected === i ? C.gold : C.border2,
               alignItems: 'center', justifyContent: 'center',
             }}
           >
-            {selected === i && (
-              <Text style={{ color: c.fg, fontSize: 20, fontFamily: 'Outfit_700Bold' }}>✓</Text>
-            )}
+            <Text style={{ fontSize: selected === i ? 22 : 26 }}>{a.emoji}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -260,41 +262,45 @@ export default function EnigmaGame() {
 
   // Guesser: 30-second turn timer — auto-advances to next player
   useEffect(() => {
-    if (screen !== 'game' || !isMyTurn || viewerIsHost || viewerIsEliminated || !!pendingQ) return;
+    if (screen !== 'game' || !isMyTurn || viewerIsHost || viewerIsEliminated || !!pendingQ) {
+      setGuesserSecsLeft(30);
+      return;
+    }
+    let secs = 30;
     setGuesserSecsLeft(30);
     const iv = setInterval(() => {
-      setGuesserSecsLeft((s) => {
-        if (s <= 1) {
-          clearInterval(iv);
-          const g = gameRef.current;
-          const ng = { ...g, currentQuestionerIndex: g.currentQuestionerIndex + 1 };
-          setGame(ng);
-          syncGame(ng);
-          return 30;
-        }
-        return s - 1;
-      });
+      secs -= 1;
+      setGuesserSecsLeft(secs);
+      if (secs <= 0) {
+        clearInterval(iv);
+        const g = gameRef.current;
+        const ng = { ...g, currentQuestionerIndex: g.currentQuestionerIndex + 1 };
+        setGame(ng);
+        syncGame(ng);
+      }
     }, 1000);
     return () => clearInterval(iv);
   }, [screen, isMyTurn, viewerIsHost, viewerIsEliminated, pendingQ?.id]);
 
   // Host: 15-second answer timer — auto-answers NO on expiry
   useEffect(() => {
-    if (screen !== 'game' || !pendingQ || !viewerIsHost) return;
+    if (screen !== 'game' || !pendingQ || !viewerIsHost) {
+      setHostSecsLeft(15);
+      return;
+    }
+    let secs = 15;
     setHostSecsLeft(15);
     const iv = setInterval(() => {
-      setHostSecsLeft((s) => {
-        if (s <= 1) {
-          clearInterval(iv);
-          const g = gameRef.current;
-          const questions = g.questions.map((q) => q.answer === null ? { ...q, answer: 'NO', note: '' } : q);
-          const ng = { ...g, questions, currentQuestionerIndex: g.currentQuestionerIndex + 1 };
-          setGame(ng);
-          syncGame(ng);
-          return 15;
-        }
-        return s - 1;
-      });
+      secs -= 1;
+      setHostSecsLeft(secs);
+      if (secs <= 0) {
+        clearInterval(iv);
+        const g = gameRef.current;
+        const questions = g.questions.map((q) => q.answer === null ? { ...q, answer: 'NO', note: '' } : q);
+        const ng = { ...g, questions, currentQuestionerIndex: g.currentQuestionerIndex + 1 };
+        setGame(ng);
+        syncGame(ng);
+      }
     }, 1000);
     return () => clearInterval(iv);
   }, [screen, pendingQ?.id, viewerIsHost]);
@@ -954,8 +960,8 @@ export default function EnigmaGame() {
           {/* Progress bar */}
           <View style={{ marginBottom: 10 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-              <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_400Regular' }}>Questions Remaining</Text>
-              <Text style={{ fontSize: 11, color: qLeft <= 5 ? C.danger : C.dim, fontFamily: 'Outfit_600SemiBold' }}>{qLeft} / 20</Text>
+              <Text style={{ fontSize: 14, color: C.muted, fontFamily: 'Outfit_600SemiBold' }}>Questions Remaining</Text>
+              <Text style={{ fontSize: 14, color: qLeft <= 5 ? C.danger : C.gold, fontFamily: 'Outfit_700Bold' }}>{qLeft} / 20</Text>
             </View>
             <View style={{ height: 3, backgroundColor: C.border2, borderRadius: 2 }}>
               <View style={{ height: 3, width: `${(answeredQs / 20) * 100}%`, backgroundColor: qLeft <= 5 ? C.danger : C.gold, borderRadius: 2 }} />
@@ -969,12 +975,12 @@ export default function EnigmaGame() {
             contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 2 }}
           >
             {game.players.map((p) => {
-              const c = av(p.avatarIdx);
+              const a = av(p.avatarIdx);
               const isCur = currentQuestioner?.id === p.id && !p.isHost;
               return (
                 <View key={p.id} style={[S.stripItem, isCur && S.stripItemCur, p.isEliminated && { opacity: 0.4 }]}>
-                  <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Text style={{ color: c.fg, fontSize: 10, fontFamily: 'Outfit_700Bold' }}>{getInitials(p.name)}</Text>
+                  <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Text style={{ fontSize: 16 }}>{a.emoji}</Text>
                   </View>
                   <View style={{ flexShrink: 1 }}>
                     <Text style={{ fontSize: 11, color: C.muted, fontFamily: 'Outfit_500Medium', maxWidth: 60 }} numberOfLines={1}>
@@ -1022,12 +1028,12 @@ export default function EnigmaGame() {
               </View>
             ) : (
               game.questions.map((q, i) => {
-                const c = av(q.askerAvatarIdx);
+                const a = av(q.askerAvatarIdx);
                 return (
                   <View key={q.id} style={{ backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: 12, padding: 12, marginBottom: 8 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ color: c.fg, fontSize: 9, fontFamily: 'Outfit_700Bold' }}>{getInitials(q.askerName)}</Text>
+                      <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 14 }}>{a.emoji}</Text>
                       </View>
                       <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: C.muted, textTransform: 'uppercase', letterSpacing: 1, flex: 1 }}>{q.askerName}</Text>
                       <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>Q{i + 1}</Text>
@@ -1194,14 +1200,14 @@ export default function EnigmaGame() {
           <View style={S.card}>
             <Text style={S.cardTitle}>Leaderboard</Text>
             {sorted.map((p, i) => {
-              const c = av(p.avatarIdx);
+              const a = av(p.avatarIdx);
               return (
                 <View key={p.id} style={[S.sbRow, i === 0 && S.sbRowFirst]}>
                   <Text style={[S.sbRank, i === 0 && { color: C.gold }]}>
                     {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
                   </Text>
-                  <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ color: c.fg, fontSize: 10, fontFamily: 'Outfit_700Bold' }}>{getInitials(p.name)}</Text>
+                  <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 20 }}>{a.emoji}</Text>
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 14, fontFamily: i === 0 ? 'Outfit_700Bold' : 'Outfit_500Medium', color: C.text }}>{p.name}</Text>
@@ -1239,14 +1245,14 @@ export default function EnigmaGame() {
           </View>
           <View style={S.card}>
             {sorted.map((p, i) => {
-              const c = av(p.avatarIdx);
+              const a = av(p.avatarIdx);
               return (
                 <View key={p.id} style={[S.sbRow, i === 0 && S.sbRowFirst]}>
                   <Text style={[S.sbRank, { fontSize: i === 0 ? 22 : 18 }, i === 0 && { color: C.gold }]}>
                     {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
                   </Text>
-                  <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ color: c.fg, fontSize: 12, fontFamily: 'Outfit_700Bold' }}>{getInitials(p.name)}</Text>
+                  <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 22 }}>{a.emoji}</Text>
                   </View>
                   <Text style={{ flex: 1, fontSize: 15, fontFamily: i === 0 ? 'Outfit_700Bold' : 'Outfit_500Medium', color: C.text }}>{p.name}</Text>
                   <Text style={[S.sbPts, { fontSize: i === 0 ? 24 : 20 }]}>{p.score}</Text>
