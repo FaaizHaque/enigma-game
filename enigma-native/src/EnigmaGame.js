@@ -260,50 +260,55 @@ export default function EnigmaGame() {
   // Keep gameRef in sync for use inside timer callbacks
   useEffect(() => { gameRef.current = game; }, [game]);
 
-  // Guesser: 30-second turn timer — auto-advances to next player
+  // Guesser: 30-second turn timer — derives all conditions from raw state, not component-level consts
   useEffect(() => {
-    if (screen !== 'game' || !isMyTurn || viewerIsHost || viewerIsEliminated || !!pendingQ) {
-      setGuesserSecsLeft(30);
-      return;
-    }
+    if (!game || screen !== 'game') { setGuesserSecsLeft(30); return; }
+    const vwr = game.players.find(p => p.id === viewerId);
+    if (!vwr || vwr.isHost || vwr.isEliminated) { setGuesserSecsLeft(30); return; }
+    const active = game.players.filter(p => !p.isHost && !p.isEliminated);
+    const cur = active.length ? active[game.currentQuestionerIndex % active.length] : null;
+    if (cur?.id !== viewerId) { setGuesserSecsLeft(30); return; }
+    if (game.questions.some(q => q.answer === null)) { setGuesserSecsLeft(30); return; }
+
     let secs = 30;
     setGuesserSecsLeft(30);
     const iv = setInterval(() => {
-      secs -= 1;
+      secs--;
       setGuesserSecsLeft(secs);
       if (secs <= 0) {
         clearInterval(iv);
         const g = gameRef.current;
         const ng = { ...g, currentQuestionerIndex: g.currentQuestionerIndex + 1 };
         setGame(ng);
-        syncGame(ng);
+        supabase.from('sessions').upsert({ room_code: ng.roomCode, data: ng }).catch(() => {});
       }
     }, 1000);
     return () => clearInterval(iv);
-  }, [screen, isMyTurn, viewerIsHost, viewerIsEliminated, pendingQ?.id]);
+  }, [screen, game?.currentQuestionerIndex, viewerId]);
 
-  // Host: 15-second answer timer — auto-answers NO on expiry
+  // Host: 15-second answer timer — starts when a pending question appears
   useEffect(() => {
-    if (screen !== 'game' || !pendingQ || !viewerIsHost) {
-      setHostSecsLeft(15);
-      return;
-    }
+    if (!game || screen !== 'game') { setHostSecsLeft(15); return; }
+    const vwr = game.players.find(p => p.id === viewerId);
+    if (!vwr?.isHost) { setHostSecsLeft(15); return; }
+    if (!game.questions.some(q => q.answer === null)) { setHostSecsLeft(15); return; }
+
     let secs = 15;
     setHostSecsLeft(15);
     const iv = setInterval(() => {
-      secs -= 1;
+      secs--;
       setHostSecsLeft(secs);
       if (secs <= 0) {
         clearInterval(iv);
         const g = gameRef.current;
-        const questions = g.questions.map((q) => q.answer === null ? { ...q, answer: 'NO', note: '' } : q);
+        const questions = g.questions.map(q => q.answer === null ? { ...q, answer: 'NO', note: '' } : q);
         const ng = { ...g, questions, currentQuestionerIndex: g.currentQuestionerIndex + 1 };
         setGame(ng);
-        syncGame(ng);
+        supabase.from('sessions').upsert({ room_code: ng.roomCode, data: ng }).catch(() => {});
       }
     }, 1000);
     return () => clearInterval(iv);
-  }, [screen, pendingQ?.id, viewerIsHost]);
+  }, [screen, game?.questions?.filter(q => q.answer === null).length, viewerId]);
 
   // ─── Derived ──────────────────────────────────────────────────────────────
   const viewer = game?.players.find((p) => p.id === viewerId);
@@ -896,14 +901,20 @@ export default function EnigmaGame() {
           <View style={S.overlay}>
             <View style={S.modal}>
               <View style={S.modalHandle} />
-              <View style={{ alignItems: 'center', paddingVertical: 10, paddingBottom: 20 }}>
+              <View style={{ alignItems: 'center', paddingVertical: 10, paddingBottom: 4 }}>
                 <Text style={{ fontSize: 52, marginBottom: 12 }}>⚖️</Text>
                 <Text style={S.modalTitle}>Host is deciding...</Text>
                 <Text style={S.modalSub}>{game.pendingSolve?.playerName} submitted an answer — waiting for the verdict.</Text>
-                <View style={{ backgroundColor: C.card, borderRadius: 12, padding: 16, width: '100%', alignItems: 'center' }}>
+                <View style={{ backgroundColor: C.card, borderRadius: 12, padding: 16, width: '100%', alignItems: 'center', marginBottom: 16 }}>
                   <Text style={{ fontSize: 11, color: C.dim, letterSpacing: 1, marginBottom: 6, fontFamily: 'Outfit_400Regular' }}>ANSWER SUBMITTED</Text>
                   <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.gold }}>{game.pendingSolve?.answer}</Text>
                 </View>
+                <TouchableOpacity
+                  style={[S.btnGold, { alignSelf: 'stretch' }]}
+                  onPress={() => setViewerId(game.players.find(p => p.isHost)?.id)}
+                >
+                  <Text style={S.btnGoldText}>👑 Switch to Host to Verify</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -911,7 +922,7 @@ export default function EnigmaGame() {
 
         {/* Solve modal */}
         <Modal visible={solveModalOpen} transparent animationType="slide" onRequestClose={() => setSolveModalOpen(false)}>
-          <View style={S.overlay}>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' }}>
             <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => setSolveModalOpen(false)} />
             <View style={S.modal}>
               <View style={S.modalHandle} />
@@ -932,7 +943,7 @@ export default function EnigmaGame() {
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         </Modal>
 
         {/* Game content */}
@@ -1035,8 +1046,8 @@ export default function EnigmaGame() {
                       <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}>
                         <Text style={{ fontSize: 14 }}>{a.emoji}</Text>
                       </View>
-                      <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: C.muted, textTransform: 'uppercase', letterSpacing: 1, flex: 1 }}>{q.askerName}</Text>
-                      <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>Q{i + 1}</Text>
+                      <Text style={{ fontSize: 15, fontFamily: 'Outfit_700Bold', color: C.text, flex: 1 }}>{q.askerName}</Text>
+                      <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_700Bold' }}>Q{i + 1}</Text>
                     </View>
                     <Text style={{ fontSize: 16, color: C.text, lineHeight: 23, fontFamily: 'Outfit_400Regular' }}>{q.text}</Text>
                     {q.answer === null ? (
