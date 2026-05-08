@@ -580,6 +580,7 @@ export default function EnigmaGame() {
             <Text style={{ fontSize: 11, color: C.muted, letterSpacing: 4, textTransform: 'uppercase', marginTop: 6, fontFamily: 'Outfit_400Regular' }}>
               Reviving the Classic Art of 20 Questions
             </Text>
+            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 10, letterSpacing: 1 }}>v1.2</Text>
           </View>
 
           <TouchableOpacity style={S.btnGold} onPress={() => setScreen('create')}>
