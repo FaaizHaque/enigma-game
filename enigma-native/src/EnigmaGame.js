@@ -201,6 +201,7 @@ export default function EnigmaGame() {
   const gameRef = useRef(game);
   const [guesserSecsLeft, setGuesserSecsLeft] = useState(30);
   const [hostSecsLeft, setHostSecsLeft] = useState(15);
+  const [timeoutToast, setTimeoutToast] = useState(null);
 
   // Deep link handling (QR code scans)
   useEffect(() => {
@@ -278,9 +279,14 @@ export default function EnigmaGame() {
       if (secs <= 0) {
         clearInterval(iv);
         const g = gameRef.current;
+        const active2 = g.players.filter(p => !p.isHost && !p.isEliminated);
+        const nextIdx = (g.currentQuestionerIndex + 1) % (active2.length || 1);
+        const nextName = active2[nextIdx]?.name || 'Next player';
+        setTimeoutToast(`⏱ Time's up! ${nextName}'s turn`);
+        setTimeout(() => setTimeoutToast(null), 3000);
         const ng = { ...g, currentQuestionerIndex: g.currentQuestionerIndex + 1 };
         setGame(ng);
-        supabase.from('sessions').upsert({ room_code: ng.roomCode, data: ng }).catch(() => {});
+        syncGame(ng);
       }
     }, 1000);
     return () => clearInterval(iv);
@@ -304,7 +310,7 @@ export default function EnigmaGame() {
         const questions = g.questions.map(q => q.answer === null ? { ...q, answer: 'NO', note: '' } : q);
         const ng = { ...g, questions, currentQuestionerIndex: g.currentQuestionerIndex + 1 };
         setGame(ng);
-        supabase.from('sessions').upsert({ room_code: ng.roomCode, data: ng }).catch(() => {});
+        syncGame(ng);
       }
     }, 1000);
     return () => clearInterval(iv);
@@ -591,7 +597,7 @@ export default function EnigmaGame() {
             <Text style={{ fontSize: 11, color: C.muted, letterSpacing: 4, textTransform: 'uppercase', marginTop: 6, fontFamily: 'Outfit_400Regular' }}>
               Reviving the Classic Art of 20 Questions
             </Text>
-            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 10, letterSpacing: 1 }}>v1.4</Text>
+            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 10, letterSpacing: 1 }}>v1.5</Text>
           </View>
 
           <TouchableOpacity style={S.btnGold} onPress={() => setScreen('create')}>
@@ -858,6 +864,13 @@ export default function EnigmaGame() {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
         <SBar />
+
+        {/* Timeout toast */}
+        {timeoutToast && (
+          <View style={{ position: 'absolute', top: 100, left: 24, right: 24, zIndex: 999, backgroundColor: 'rgba(10,10,30,0.95)', borderWidth: 1, borderColor: C.gold, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 20, alignItems: 'center' }}>
+            <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 16, color: C.gold, textAlign: 'center' }}>{timeoutToast}</Text>
+          </View>
+        )}
 
         {/* Host verify modal */}
         <Modal visible={!!(game.pendingSolve && viewerIsHost)} transparent animationType="slide" onRequestClose={() => {}}>
