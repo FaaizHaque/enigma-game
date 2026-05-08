@@ -202,6 +202,8 @@ export default function EnigmaGame() {
   const [guesserSecsLeft, setGuesserSecsLeft] = useState(30);
   const [hostSecsLeft, setHostSecsLeft] = useState(15);
   const [timeoutToast, setTimeoutToast] = useState(null);
+  const [hostWarningData, setHostWarningData] = useState(null);
+  const [hostWarningSecsLeft, setHostWarningSecsLeft] = useState(10);
 
   // Deep link handling (QR code scans)
   useEffect(() => {
@@ -292,13 +294,15 @@ export default function EnigmaGame() {
     return () => clearInterval(iv);
   }, [screen, game?.currentQuestionerIndex, viewerId]);
 
-  // Host: 15-second answer timer — two-strike system
+  // Host primary timer: 15s — on expiry opens the 10s warning modal
   useEffect(() => {
-    if (!game || screen !== 'game') { setHostSecsLeft(15); return; }
+    if (!game || screen !== 'game') { setHostSecsLeft(15); setHostWarningData(null); return; }
     const vwr = game.players.find(p => p.id === viewerId);
-    if (!vwr?.isHost) { setHostSecsLeft(15); return; }
-    if (!game.questions.some(q => q.answer === null)) { setHostSecsLeft(15); return; }
+    if (!vwr?.isHost) { setHostSecsLeft(15); setHostWarningData(null); return; }
+    const pq = game.questions.find(q => q.answer === null);
+    if (!pq) { setHostSecsLeft(15); setHostWarningData(null); return; }
 
+    setHostWarningData(null);
     let secs = 15;
     setHostSecsLeft(15);
     const iv = setInterval(() => {
@@ -307,18 +311,34 @@ export default function EnigmaGame() {
       if (secs <= 0) {
         clearInterval(iv);
         const g = gameRef.current;
+        const pending = g.questions.find(q => q.answer === null);
+        if (pending) setHostWarningData({ question: pending.text, questionId: pending.id });
+      }
+    }, 1000);
+    return () => { clearInterval(iv); setHostWarningData(null); };
+  }, [screen, game?.questions?.filter(q => q.answer === null).length, viewerId]);
+
+  // Host warning timer: 10s within the modal — handles miss/eliminate logic
+  useEffect(() => {
+    if (!hostWarningData) return;
+    let secs = 10;
+    setHostWarningSecsLeft(10);
+    const iv = setInterval(() => {
+      secs--;
+      setHostWarningSecsLeft(secs);
+      if (secs <= 0) {
+        clearInterval(iv);
+        setHostWarningData(null);
+        const g = gameRef.current;
         const misses = (g.hostConsecutiveMisses || 0) + 1;
         const questions = g.questions.map(q => q.answer === null ? { ...q, answer: 'SKIP', note: '' } : q);
-
         if (misses === 1) {
-          // First miss: skip question, warn for 10 seconds
           const ng = { ...g, questions, currentQuestionerIndex: g.currentQuestionerIndex + 1, hostConsecutiveMisses: 1 };
           setGame(ng);
           syncGame(ng);
-          setTimeoutToast('⚠️ Miss 1/2 — Question skipped! Fail to answer again and you lose the host role.');
-          setTimeout(() => setTimeoutToast(null), 10000);
+          setTimeoutToast('⚠️ Miss 1 of 2 — question skipped. Miss again and you lose the host role!');
+          setTimeout(() => setTimeoutToast(null), 6000);
         } else {
-          // Second consecutive miss: eliminate host
           const activeGuessers = g.players.filter(p => !p.isHost && !p.isEliminated);
           if (activeGuessers.length >= 2) {
             const newHost = activeGuessers[0];
@@ -330,8 +350,8 @@ export default function EnigmaGame() {
             const ng = { ...g, players, questions, currentQuestionerIndex: 0, hostConsecutiveMisses: 0 };
             setGame(ng);
             syncGame(ng);
-            setTimeoutToast(`👑 ${newHost.name} is the new host! They can see the secret.`);
-            setTimeout(() => setTimeoutToast(null), 5000);
+            setTimeoutToast(`👑 Host eliminated!\n${newHost.name} is now the new host and can see the secret.`);
+            setTimeout(() => setTimeoutToast(null), 6000);
           } else {
             endRound(null, { ...g, questions });
           }
@@ -339,7 +359,7 @@ export default function EnigmaGame() {
       }
     }, 1000);
     return () => clearInterval(iv);
-  }, [screen, game?.questions?.filter(q => q.answer === null).length, viewerId]);
+  }, [hostWarningData]);
 
   // ─── Derived ──────────────────────────────────────────────────────────────
   const viewer = game?.players.find((p) => p.id === viewerId);
@@ -622,7 +642,7 @@ export default function EnigmaGame() {
             <Text style={{ fontSize: 11, color: C.muted, letterSpacing: 4, textTransform: 'uppercase', marginTop: 6, fontFamily: 'Outfit_400Regular' }}>
               Reviving the Classic Art of 20 Questions
             </Text>
-            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 10, letterSpacing: 1 }}>v1.6</Text>
+            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 10, letterSpacing: 1 }}>v1.7</Text>
           </View>
 
           <TouchableOpacity style={S.btnGold} onPress={() => setScreen('create')}>
@@ -890,12 +910,49 @@ export default function EnigmaGame() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
         <SBar />
 
-        {/* Timeout toast */}
+        {/* Timeout toast — centred */}
         {timeoutToast && (
-          <View style={{ position: 'absolute', top: 100, left: 24, right: 24, zIndex: 999, backgroundColor: 'rgba(10,10,30,0.95)', borderWidth: 1, borderColor: C.gold, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 20, alignItems: 'center' }}>
-            <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 16, color: C.gold, textAlign: 'center' }}>{timeoutToast}</Text>
+          <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center', zIndex: 999, pointerEvents: 'none' }}>
+            <View style={{ marginHorizontal: 28, backgroundColor: 'rgba(8,8,24,0.97)', borderWidth: 2, borderColor: C.gold, borderRadius: 18, paddingVertical: 20, paddingHorizontal: 24, alignItems: 'center' }}>
+              <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 17, color: C.gold, textAlign: 'center', lineHeight: 25 }}>{timeoutToast}</Text>
+            </View>
           </View>
         )}
+
+        {/* Host warning modal — appears when 15s expires, gives 10s to answer */}
+        <Modal visible={!!hostWarningData && viewerIsHost} transparent animationType="fade" onRequestClose={() => {}}>
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <View style={{ backgroundColor: C.surface, borderWidth: 2, borderColor: C.danger, borderRadius: 20, padding: 24, width: '100%' }}>
+              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 19, color: C.danger, textAlign: 'center', marginBottom: 4 }}>⏰ Answer Now!</Text>
+              <Text style={{ fontSize: 12, color: C.muted, textAlign: 'center', marginBottom: 16, fontFamily: 'Outfit_400Regular' }}>
+                {(game?.hostConsecutiveMisses || 0) === 0
+                  ? 'Miss 1 of 2 — answer or the question will be skipped'
+                  : '⚠️ Miss 2 of 2 — answer or you will be eliminated as host!'}
+              </Text>
+              <View style={{ alignItems: 'center', marginBottom: 14 }}>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 44, color: hostWarningSecsLeft <= 4 ? C.danger : C.warn }}>{hostWarningSecsLeft}</Text>
+                <View style={{ height: 4, width: '100%', backgroundColor: C.border2, borderRadius: 2, marginTop: 4 }}>
+                  <View style={{ height: 4, width: `${(hostWarningSecsLeft / 10) * 100}%`, backgroundColor: hostWarningSecsLeft <= 4 ? C.danger : C.warn, borderRadius: 2 }} />
+                </View>
+              </View>
+              <View style={{ backgroundColor: C.card, borderRadius: 10, padding: 12, marginBottom: 16 }}>
+                <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 2, marginBottom: 4, fontFamily: 'Outfit_700Bold' }}>QUESTION</Text>
+                <Text style={{ fontSize: 15, color: C.text, fontFamily: 'Outfit_400Regular', lineHeight: 22 }}>{hostWarningData?.question}</Text>
+              </View>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity style={[S.btnYes, { flex: 1 }]} onPress={() => { setHostWarningData(null); answerQ('YES'); }}>
+                  <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>✓ YES</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[S.btnPartly, { flex: 1 }]} onPress={() => { setHostWarningData(null); answerQ('PARTLY'); }}>
+                  <Text style={{ color: C.warn, fontFamily: 'Outfit_700Bold', fontSize: 13 }}>~ PARTLY</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[S.btnNo, { flex: 1 }]} onPress={() => { setHostWarningData(null); answerQ('NO'); }}>
+                  <Text style={{ color: C.danger, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>✗ NO</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
 
         {/* Host verify modal */}
         <Modal visible={!!(game.pendingSolve && viewerIsHost)} transparent animationType="slide" onRequestClose={() => {}}>
