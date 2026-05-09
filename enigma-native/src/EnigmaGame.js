@@ -1138,6 +1138,7 @@ export default function EnigmaGame() {
       <View style={[S.flex, { backgroundColor: C.bg }]}>
         {/* Solve modal */}
         <Modal visible={dailySolveOpen} animationType="slide" transparent onRequestClose={() => setDailySolveOpen(false)}>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
           <View style={S.overlay}>
             <View style={S.modal}>
               <View style={S.modalHandle} />
@@ -1165,6 +1166,7 @@ export default function EnigmaGame() {
               </TouchableOpacity>
             </View>
           </View>
+          </KeyboardAvoidingView>
         </Modal>
 
         {/* Header */}
@@ -1203,9 +1205,6 @@ export default function EnigmaGame() {
           <View>
             <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 2, textTransform: 'uppercase' }}>
               {dailyChallenge.categoryLabel}
-            </Text>
-            <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 2 }}>
-              {dailyChallenge.hint}
             </Text>
           </View>
         </View>
