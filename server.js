@@ -3,12 +3,14 @@ const express = require("express");
 const cors = require("cors");
 const os = require("os");
 const { createClient } = require("@supabase/supabase-js");
+const Anthropic = require("@anthropic-ai/sdk");
 
-// ─── Supabase ─────────────────────────────────────────────────────────────────
+// ─── Clients ──────────────────────────────────────────────────────────────────
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // ─── LAN IP ───────────────────────────────────────────────────────────────────
 const getLocalIP = () => {
@@ -154,6 +156,64 @@ app.put("/api/sessions/:roomCode", async (req, res) => {
 app.delete("/api/sessions/:roomCode", async (req, res) => {
   await deleteSession(req.params.roomCode.toUpperCase());
   res.json({ success: true });
+});
+
+// ─── Daily Challenge — AI question answering ──────────────────────────────────
+app.post("/api/ask", async (req, res) => {
+  const { secret, facts = [], category = "", question } = req.body;
+  if (!secret || !question) {
+    return res.status(400).json({ error: "secret and question are required" });
+  }
+  try {
+    const message = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 60,
+      system: `You are the host of a 20-questions guessing game. The secret answer is "${secret}" (category: ${category}). Key facts: ${facts.join("; ")}. The guesser asks you a yes/no question. Reply with ONLY one word: YES, NO, or PARTLY. Use PARTLY if the answer is partially correct, contextually related, or true for only part of the question.`,
+      messages: [{ role: "user", content: question }],
+    });
+    const raw = message.content[0].text.trim().toUpperCase();
+    const answer = ["YES", "NO", "PARTLY"].includes(raw) ? raw : "NO";
+    res.json({ answer });
+  } catch (e) {
+    console.error("AI ask error:", e.message);
+    res.status(500).json({ error: "AI unavailable", answer: "NO" });
+  }
+});
+
+// ─── Daily Challenge — save result ────────────────────────────────────────────
+app.post("/api/daily-result", async (req, res) => {
+  const { playerName, challengeDate, solved, questionsUsed, timeSeconds, secret } = req.body;
+  if (!playerName || !challengeDate) return res.status(400).json({ error: "Missing fields" });
+  try {
+    await supabase.from("daily_results").insert({
+      player_name: playerName,
+      challenge_date: challengeDate,
+      solved: !!solved,
+      questions_used: questionsUsed || 0,
+      time_seconds: timeSeconds || 0,
+      secret: secret || "",
+    });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ─── Daily Challenge — leaderboard ────────────────────────────────────────────
+app.get("/api/daily-leaderboard/:date", async (req, res) => {
+  try {
+    const { data } = await supabase
+      .from("daily_results")
+      .select("player_name, solved, questions_used, time_seconds")
+      .eq("challenge_date", req.params.date)
+      .order("solved", { ascending: false })
+      .order("questions_used", { ascending: true })
+      .order("time_seconds", { ascending: true })
+      .limit(20);
+    res.json(data || []);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────
