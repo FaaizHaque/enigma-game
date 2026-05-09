@@ -55,7 +55,7 @@ const C = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const THEMES = [
-  { id: 'personality', label: 'Famous Personality', icon: '👤', desc: 'A real or fictional person known worldwide' },
+  { id: 'personality', label: 'Famous Personality', icon: '👤', desc: 'A real person known worldwide' },
   { id: 'event', label: 'Historical Event', icon: '📜', desc: 'A pivotal moment that shaped history' },
   { id: 'object', label: 'Legendary Object', icon: '🏺', desc: 'An iconic object of great significance' },
   { id: 'place', label: 'Famous Place', icon: '🗺️', desc: 'A landmark or renowned location' },
