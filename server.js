@@ -185,6 +185,19 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
+// ─── Debug: test ask with inline prompt ───────────────────────────────────────
+app.get("/api/test-ask", async (req, res) => {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: "The secret is Automobile. Question: Does it relate to transportation? Reply with only YES, NO, or PARTLY.",
+    });
+    res.json({ status: "ok", answer: response.text.trim() });
+  } catch (e) {
+    res.status(500).json({ status: "error", error: e.message });
+  }
+});
+
 // ─── Daily Challenge — AI question answering ──────────────────────────────────
 app.post("/api/ask", async (req, res) => {
   const { secret, facts = [], category = "", question } = req.body;
@@ -206,10 +219,10 @@ Answer rules:
 5. If asked about substrings/letters/words in the name, check the literal spelling of "${secret}" (case-insensitive).
 6. Use PARTLY if the answer is partially true or only true from one angle.
 7. Never reveal the secret word directly.`;
+    const prompt = `${systemInstruction}\n\nQuestion: ${question}`;
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: question,
-      config: { systemInstruction },
+      contents: prompt,
     });
     const raw = response.text.trim().toUpperCase().split(/\s+/)[0];
     const answer = ["YES", "NO", "PARTLY"].includes(raw) ? raw : "NO";
