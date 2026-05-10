@@ -176,7 +176,7 @@ app.get("/api/models", async (req, res) => {
 app.get("/api/health", async (req, res) => {
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: "Reply with the word OK",
     });
     res.json({ status: "ok", ai: response.text.trim() });
@@ -207,7 +207,7 @@ Answer rules:
 6. Use PARTLY if the answer is partially true or only true from one angle.
 7. Never reveal the secret word directly.`;
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: question,
       config: { systemInstruction, maxOutputTokens: 20 },
     });
