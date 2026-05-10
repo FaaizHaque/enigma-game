@@ -161,7 +161,7 @@ app.delete("/api/sessions/:roomCode", async (req, res) => {
 // ─── Health check — test Gemini connectivity ──────────────────────────────────
 app.get("/api/health", async (req, res) => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent("Reply with the word OK");
     res.json({ status: "ok", ai: result.response.text().trim() });
   } catch (e) {
@@ -177,7 +177,7 @@ app.post("/api/ask", async (req, res) => {
   }
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-lite",
+      model: "gemini-1.5-flash",
       systemInstruction: `You are the knowledgeable host of a 20-questions guessing game. The secret answer is "${secret}" (category: ${category}).
 
 You have full knowledge about "${secret}" from your training data. Use BOTH the reference facts below AND your own general knowledge to answer questions accurately and helpfully.
