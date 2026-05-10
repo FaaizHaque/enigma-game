@@ -3,14 +3,14 @@ const express = require("express");
 const cors = require("cors");
 const os = require("os");
 const { createClient } = require("@supabase/supabase-js");
-const Anthropic = require("@anthropic-ai/sdk");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // ─── Clients ──────────────────────────────────────────────────────────────────
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // ─── LAN IP ───────────────────────────────────────────────────────────────────
 const getLocalIP = () => {
@@ -158,15 +158,12 @@ app.delete("/api/sessions/:roomCode", async (req, res) => {
   res.json({ success: true });
 });
 
-// ─── Health check — test Anthropic connectivity ───────────────────────────────
+// ─── Health check — test Gemini connectivity ──────────────────────────────────
 app.get("/api/health", async (req, res) => {
   try {
-    const msg = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 10,
-      messages: [{ role: "user", content: "Reply with the word OK" }],
-    });
-    res.json({ status: "ok", ai: msg.content[0].text.trim() });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+    const result = await model.generateContent("Reply with the word OK");
+    res.json({ status: "ok", ai: result.response.text().trim() });
   } catch (e) {
     res.status(500).json({ status: "error", error: e.message });
   }
@@ -179,10 +176,9 @@ app.post("/api/ask", async (req, res) => {
     return res.status(400).json({ error: "secret and question are required" });
   }
   try {
-    const message = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 60,
-      system: `You are the knowledgeable host of a 20-questions guessing game. The secret answer is "${secret}" (category: ${category}).
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash-lite",
+      systemInstruction: `You are the knowledgeable host of a 20-questions guessing game. The secret answer is "${secret}" (category: ${category}).
 
 You have full knowledge about "${secret}" from your training data. Use BOTH the reference facts below AND your own general knowledge to answer questions accurately and helpfully.
 
@@ -196,9 +192,9 @@ Answer rules:
 5. If asked about substrings/letters/words in the name, check the literal spelling of "${secret}" (case-insensitive).
 6. Use PARTLY if the answer is partially true or only true from one angle.
 7. Never reveal the secret word directly.`,
-      messages: [{ role: "user", content: question }],
     });
-    const raw = message.content[0].text.trim().toUpperCase();
+    const result = await model.generateContent(question);
+    const raw = result.response.text().trim().toUpperCase().split(/\s+/)[0];
     const answer = ["YES", "NO", "PARTLY"].includes(raw) ? raw : "NO";
     res.json({ answer });
   } catch (e) {
