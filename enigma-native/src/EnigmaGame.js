@@ -24,7 +24,7 @@ const getDailyChallenge = () => {
     const theme = THEMES.find(t => t.id === catId);
     secrets.forEach(s => allEntries.push({ ...s, categoryId: catId, categoryIcon: theme?.icon || '❓', categoryLabel: theme?.label || catId }));
   });
-  const DAILY_SEED = 0;
+  const DAILY_SEED = 1;
   return allEntries[(dayNum + DAILY_SEED) % allEntries.length];
 };
 
