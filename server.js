@@ -3,14 +3,14 @@ const express = require("express");
 const cors = require("cors");
 const os = require("os");
 const { createClient } = require("@supabase/supabase-js");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenAI } = require("@google/genai");
 
 // ─── Clients ──────────────────────────────────────────────────────────────────
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // ─── LAN IP ───────────────────────────────────────────────────────────────────
 const getLocalIP = () => {
@@ -161,9 +161,11 @@ app.delete("/api/sessions/:roomCode", async (req, res) => {
 // ─── Health check — test Gemini connectivity ──────────────────────────────────
 app.get("/api/health", async (req, res) => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent("Reply with the word OK");
-    res.json({ status: "ok", ai: result.response.text().trim() });
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: "Reply with the word OK",
+    });
+    res.json({ status: "ok", ai: response.text.trim() });
   } catch (e) {
     res.status(500).json({ status: "error", error: e.message });
   }
@@ -176,9 +178,7 @@ app.post("/api/ask", async (req, res) => {
     return res.status(400).json({ error: "secret and question are required" });
   }
   try {
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      systemInstruction: `You are the knowledgeable host of a 20-questions guessing game. The secret answer is "${secret}" (category: ${category}).
+    const systemInstruction = `You are the knowledgeable host of a 20-questions guessing game. The secret answer is "${secret}" (category: ${category}).
 
 You have full knowledge about "${secret}" from your training data. Use BOTH the reference facts below AND your own general knowledge to answer questions accurately and helpfully.
 
@@ -191,10 +191,13 @@ Answer rules:
 4. For questions about WHO created it, refer to the original inventor/creator.
 5. If asked about substrings/letters/words in the name, check the literal spelling of "${secret}" (case-insensitive).
 6. Use PARTLY if the answer is partially true or only true from one angle.
-7. Never reveal the secret word directly.`,
+7. Never reveal the secret word directly.`;
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: question,
+      config: { systemInstruction, maxOutputTokens: 20 },
     });
-    const result = await model.generateContent(question);
-    const raw = result.response.text().trim().toUpperCase().split(/\s+/)[0];
+    const raw = response.text.trim().toUpperCase().split(/\s+/)[0];
     const answer = ["YES", "NO", "PARTLY"].includes(raw) ? raw : "NO";
     res.json({ answer });
   } catch (e) {
