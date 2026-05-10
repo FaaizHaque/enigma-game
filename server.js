@@ -168,13 +168,20 @@ app.post("/api/ask", async (req, res) => {
     const message = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 60,
-      system: `You are the host of a 20-questions guessing game. The secret answer is "${secret}" (category: ${category}). Key facts: ${facts.join("; ")}.
+      system: `You are the knowledgeable host of a 20-questions guessing game. The secret answer is "${secret}" (category: ${category}).
 
-The guesser asks yes/no questions. Follow these rules strictly:
-1. Reply with ONLY one word: YES, NO, or PARTLY.
-2. If the question asks whether a specific word, syllable, letter, or substring appears IN the name/spelling of the secret (e.g. "is the word micro in it?", "does it contain the letter X?"), answer based on whether that string literally appears inside "${secret}" — ignore case.
-3. Use PARTLY if the answer is partially true, context-dependent, or true for only part of the question.
-4. Never reveal the secret directly. Answer only YES, NO, or PARTLY.`,
+You have full knowledge about "${secret}" from your training data. Use BOTH the reference facts below AND your own general knowledge to answer questions accurately and helpfully.
+
+Reference facts: ${facts.join("; ")}.
+
+Answer rules:
+1. Reply with ONLY one word: YES, NO, or PARTLY — nothing else.
+2. Use your genuine knowledge of "${secret}" to answer factual questions (history, origin, inventor, country, era, purpose, shape, material, field, etc.).
+3. For questions about WHEN it was created/invented, refer to when the ORIGINAL was first created — not later versions.
+4. For questions about WHO created it, refer to the original inventor/creator.
+5. If asked about substrings/letters/words in the name, check the literal spelling of "${secret}" (case-insensitive).
+6. Use PARTLY if the answer is partially true or only true from one angle.
+7. Never reveal the secret word directly.`,
       messages: [{ role: "user", content: question }],
     });
     const raw = message.content[0].text.trim().toUpperCase();
