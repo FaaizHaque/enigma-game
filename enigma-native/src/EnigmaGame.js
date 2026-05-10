@@ -488,6 +488,7 @@ export default function EnigmaGame() {
   const [dailyStartTime, setDailyStartTime] = useState(null);
   const [dailyResult, setDailyResult] = useState(null);
   const [dailyLeaderboard, setDailyLeaderboard] = useState([]);
+  const [dailyInfoOpen, setDailyInfoOpen] = useState(false);
 
   const feedScrollRef = useRef(null);
   const gameRef = useRef(game);
@@ -1324,8 +1325,35 @@ export default function EnigmaGame() {
             </Text>
           </View>
 
-          {/* Secret reveal */}
-          <View style={[S.infoCard, { marginBottom: 16, alignItems: 'center' }]}>
+          {/* Info card modal */}
+          <Modal visible={dailyInfoOpen} animationType="slide" transparent onRequestClose={() => setDailyInfoOpen(false)}>
+            <View style={S.overlay}>
+              <View style={[S.modal, { maxHeight: '80%' }]}>
+                <View style={S.modalHandle} />
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  <Text style={{ fontSize: 36, textAlign: 'center', marginBottom: 8 }}>{dailyChallenge.categoryIcon}</Text>
+                  <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.gold, textAlign: 'center', marginBottom: 4 }}>
+                    {dailyChallenge.secret}
+                  </Text>
+                  <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 2, textTransform: 'uppercase', textAlign: 'center', marginBottom: 20 }}>
+                    {dailyChallenge.categoryLabel}
+                  </Text>
+                  {(dailyChallenge.facts || []).map((fact, i) => (
+                    <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 12, paddingBottom: 12, borderBottomWidth: i < dailyChallenge.facts.length - 1 ? 1 : 0, borderBottomColor: C.border }}>
+                      <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_700Bold', marginTop: 1 }}>•</Text>
+                      <Text style={{ flex: 1, fontSize: 14, color: C.text, fontFamily: 'Outfit_400Regular', lineHeight: 20 }}>{fact}</Text>
+                    </View>
+                  ))}
+                </ScrollView>
+                <TouchableOpacity style={[S.btnGold, { marginTop: 16 }]} onPress={() => setDailyInfoOpen(false)}>
+                  <Text style={S.btnGoldText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
+          {/* Secret reveal — tap for info */}
+          <TouchableOpacity style={[S.infoCard, { marginBottom: 16, alignItems: 'center' }]} onPress={() => setDailyInfoOpen(true)}>
             <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 8 }}>
               Today's Secret
             </Text>
@@ -1335,7 +1363,10 @@ export default function EnigmaGame() {
             <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 6, textAlign: 'center' }}>
               {dailyChallenge.categoryIcon} {dailyChallenge.categoryLabel}
             </Text>
-          </View>
+            <Text style={{ fontSize: 11, color: C.violet2, fontFamily: 'Outfit_600SemiBold', marginTop: 10 }}>
+              Tap to learn more ›
+            </Text>
+          </TouchableOpacity>
 
           {/* Stats */}
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
