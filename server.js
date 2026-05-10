@@ -158,6 +158,20 @@ app.delete("/api/sessions/:roomCode", async (req, res) => {
   res.json({ success: true });
 });
 
+// ─── List available models ────────────────────────────────────────────────────
+app.get("/api/models", async (req, res) => {
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1/models?key=${process.env.GEMINI_API_KEY}`
+    );
+    const data = await response.json();
+    const names = (data.models || []).map(m => m.name);
+    res.json({ models: names });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ─── Health check — test Gemini connectivity ──────────────────────────────────
 app.get("/api/health", async (req, res) => {
   try {
