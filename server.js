@@ -209,7 +209,7 @@ Answer rules:
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: question,
-      config: { systemInstruction, maxOutputTokens: 20 },
+      config: { systemInstruction },
     });
     const raw = response.text.trim().toUpperCase().split(/\s+/)[0];
     const answer = ["YES", "NO", "PARTLY"].includes(raw) ? raw : "NO";
