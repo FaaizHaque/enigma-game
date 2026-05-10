@@ -24,7 +24,8 @@ const getDailyChallenge = () => {
     const theme = THEMES.find(t => t.id === catId);
     secrets.forEach(s => allEntries.push({ ...s, categoryId: catId, categoryIcon: theme?.icon || '❓', categoryLabel: theme?.label || catId }));
   });
-  return allEntries[dayNum % allEntries.length];
+  const DAILY_SEED = 17;
+  return allEntries[(dayNum + DAILY_SEED) % allEntries.length];
 };
 
 const getDailyDateKey = () => {
@@ -893,9 +894,9 @@ export default function EnigmaGame() {
         body: JSON.stringify({ secret: dailyChallenge.secret, facts: dailyChallenge.facts, category: dailyChallenge.categoryLabel, question: q }),
       });
       const data = await res.json();
-      setDailyQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer: data.answer } : qq));
+      setDailyQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer: data.answer || 'ERR' } : qq));
     } catch {
-      setDailyQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer: 'NO' } : qq));
+      setDailyQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer: 'ERR' } : qq));
     } finally {
       setDailyLoading(false);
     }
@@ -1237,15 +1238,15 @@ export default function EnigmaGame() {
                 </View>
               ) : (
                 <View style={[S.qBadge, {
-                  borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : 'rgba(240,160,48,0.4)',
-                  backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.08)' : q.answer === 'NO' ? 'rgba(248,81,73,0.08)' : 'rgba(240,160,48,0.08)',
+                  borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : q.answer === 'ERR' ? 'rgba(150,150,150,0.4)' : 'rgba(240,160,48,0.4)',
+                  backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.08)' : q.answer === 'NO' ? 'rgba(248,81,73,0.08)' : q.answer === 'ERR' ? 'rgba(150,150,150,0.08)' : 'rgba(240,160,48,0.08)',
                   marginTop: 6, marginLeft: 4,
                 }]}>
                   <Text style={{
                     fontSize: 13, fontFamily: 'Outfit_700Bold',
-                    color: q.answer === 'YES' ? C.success : q.answer === 'NO' ? C.danger : C.warn,
+                    color: q.answer === 'YES' ? C.success : q.answer === 'NO' ? C.danger : q.answer === 'ERR' ? C.dim : C.warn,
                   }}>
-                    {q.answer === 'YES' ? '✓ Yes' : q.answer === 'NO' ? '✗ No' : '~ Partly'}
+                    {q.answer === 'YES' ? '✓ Yes' : q.answer === 'NO' ? '✗ No' : q.answer === 'ERR' ? '⚠ Server Error' : '~ Partly'}
                   </Text>
                 </View>
               )}

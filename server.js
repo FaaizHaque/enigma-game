@@ -158,6 +158,20 @@ app.delete("/api/sessions/:roomCode", async (req, res) => {
   res.json({ success: true });
 });
 
+// ─── Health check — test Anthropic connectivity ───────────────────────────────
+app.get("/api/health", async (req, res) => {
+  try {
+    const msg = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 10,
+      messages: [{ role: "user", content: "Reply with the word OK" }],
+    });
+    res.json({ status: "ok", ai: msg.content[0].text.trim() });
+  } catch (e) {
+    res.status(500).json({ status: "error", error: e.message });
+  }
+});
+
 // ─── Daily Challenge — AI question answering ──────────────────────────────────
 app.post("/api/ask", async (req, res) => {
   const { secret, facts = [], category = "", question } = req.body;
@@ -189,7 +203,7 @@ Answer rules:
     res.json({ answer });
   } catch (e) {
     console.error("AI ask error:", e.message);
-    res.status(500).json({ error: "AI unavailable", answer: "NO" });
+    res.status(500).json({ error: e.message, answer: "ERR" });
   }
 });
 
