@@ -19,12 +19,20 @@ const SERVER_URL = Constants.expoConfig?.extra?.serverUrl || 'http://localhost:3
 const getDailyChallenge = () => {
   const now = new Date();
   const dayNum = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
-  const allEntries = [];
-  Object.entries(CONTENT_LIBRARY).forEach(([catId, secrets]) => {
+
+  // Build interleaved array: entry 0 from each category, then entry 1, etc.
+  // This ensures consecutive seeds always span all categories
+  const byCategory = Object.entries(CONTENT_LIBRARY).map(([catId, secrets]) => {
     const theme = THEMES.find(t => t.id === catId);
-    secrets.forEach(s => allEntries.push({ ...s, categoryId: catId, categoryIcon: theme?.icon || '❓', categoryLabel: theme?.label || catId }));
+    return secrets.map(s => ({ ...s, categoryId: catId, categoryIcon: theme?.icon || '❓', categoryLabel: theme?.label || catId }));
   });
-  const DAILY_SEED = 1;
+  const allEntries = [];
+  const maxLen = Math.max(...byCategory.map(c => c.length));
+  for (let i = 0; i < maxLen; i++) {
+    byCategory.forEach(cat => { if (i < cat.length) allEntries.push(cat[i]); });
+  }
+
+  const DAILY_SEED = 2;
   return allEntries[(dayNum + DAILY_SEED) % allEntries.length];
 };
 
