@@ -16,15 +16,16 @@ Enigma is a multiplayer 20-questions party game. Stack:
 - `supabase/schema.sql` — PostgreSQL schema with RLS and Realtime publication
 
 ## Git Workflow — Required Practice
-**After every meaningful change, commit to `main` and push.**
+**Always push directly to `main`. Never use the GitHub API (`mcp__github__push_files`, `create_or_update_file`, etc.) for code commits.**
 
 1. Stage the changed files explicitly (avoid `git add -A`)
 2. Write a concise commit message describing *why*, not just *what*
-3. Push to `main`:
+3. Push to `main` with the standard git CLI:
    ```
    git push -u origin main
    ```
-4. If working on a feature branch, merge it into `main` and push `main` when done.
+4. A push must complete in under 2 seconds. If `git push origin main` fails with HTTP 403 (proxy block) or any other error, STOP immediately and tell the user — do NOT fall back to the GitHub MCP API, do NOT read files into context to push via API, do NOT spawn a sub-agent to push via API. Each of those wastes large amounts of tokens.
+5. Feature-branch development is allowed only as a transient step; merge into `main` and push `main` before ending the task.
 
 This keeps the repo always deployable and prevents work from being lost across sessions.
 

@@ -7,6 +7,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 import * as LinkingExpo from 'expo-linking';
+import Constants from 'expo-constants';
 import { supabase } from './config/supabase';
 import { genCode, getInitials, fuzzyMatch } from './utils/helpers';
 import { sounds } from './utils/sounds';
@@ -115,6 +116,55 @@ const DEMO_PLAYERS = [
   { name: 'Sofia', avatarIdx: 3 },
   { name: 'Jin', avatarIdx: 4 },
 ];
+
+// ─── Daily Challenge helpers ──────────────────────────────────────────────────
+const getTodayUTC = () => new Date().toISOString().slice(0, 10);
+
+const getDailyChallenge = () => {
+  const today = getTodayUTC();
+  let hash = 5381;
+  for (let i = 0; i < today.length; i++) {
+    hash = ((hash << 5) + hash + today.charCodeAt(i)) & 0x7fffffff;
+  }
+  // Interleave across categories so consecutive seeds cycle through all themes:
+  // slot 0 → personality[0], slot 1 → event[0], slot 2 → object[0], ...
+  // slot 6 → personality[1], slot 7 → event[1], etc.
+  const themeIds = Object.keys(CONTENT_LIBRARY);
+  const maxItems = Math.max(...themeIds.map((id) => CONTENT_LIBRARY[id].length));
+  const flat = [];
+  for (let i = 0; i < maxItems; i++) {
+    for (const id of themeIds) {
+      if (i < CONTENT_LIBRARY[id].length) flat.push({ themeId: id, item: CONTENT_LIBRARY[id][i] });
+    }
+  }
+  const picked = flat[Math.abs(hash) % flat.length];
+  const theme = THEMES.find((t) => t.id === picked.themeId) || THEMES[0];
+  return { theme, item: picked.item, date: today };
+};
+
+const SERVER_URL = Constants.expoConfig?.extra?.serverUrl || 'https://enigma-game-production.up.railway.app';
+
+const askGemini = async (secret, facts, question) => {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, facts, question }),
+    });
+    const data = await res.json();
+    return { answer: data.answer || 'NO', note: data.note || '' };
+  } catch {
+    return { answer: 'NO', note: '' };
+  }
+};
+
+const dailyStars = (questions, solved) => {
+  if (!solved) return { stars: 0, label: 'Better luck tomorrow!' };
+  if (questions <= 5)  return { stars: 3, label: 'Legendary! ✦✦✦' };
+  if (questions <= 10) return { stars: 2, label: 'Expert! ✦✦' };
+  if (questions <= 15) return { stars: 1, label: 'Good! ✦' };
+  return { stars: 0, label: 'Squeaked it!' };
+};
 
 const av = (idx) => AVATARS[idx % AVATARS.length];
 
@@ -250,6 +300,21 @@ export default function EnigmaGame() {
   const [selectedAvatarIdx, setSelectedAvatarIdx] = useState(0);
   const [secretSource, setSecretSource] = useState('library');
   const [libraryBriefing, setLibraryBriefing] = useState(null);
+  const [isPublicRoom, setIsPublicRoom] = useState(false);
+  const [publicRooms, setPublicRooms] = useState([]);
+  const [loadingRooms, setLoadingRooms] = useState(false);
+
+  // Daily challenge state
+  const [dailyChallengeData, setDailyChallengeData] = useState(null);
+  const [dailyPhase, setDailyPhase] = useState('intro');  // 'intro' | 'game' | 'result'
+  const [dailyQuestions, setDailyQuestions] = useState([]);
+  const [dailyInput, setDailyInput] = useState('');
+  const [dailyAsking, setDailyAsking] = useState(false);
+  const [dailySolveOpen, setDailySolveOpen] = useState(false);
+  const [dailySolveInput, setDailySolveInput] = useState('');
+  const [dailyResult, setDailyResult] = useState(null);
+  const [dailyLeaderboard, setDailyLeaderboard] = useState([]);
+  const [dailyLoadingBoard, setDailyLoadingBoard] = useState(false);
 
   const feedScrollRef = useRef(null);
   const gameRef = useRef(game);
@@ -289,8 +354,19 @@ export default function EnigmaGame() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'sessions', filter: `room_code=eq.${game.roomCode}` },
         (payload) => {
+          if (payload.eventType === 'DELETE') {
+            setGame(null); setViewerId(null); setScreen('home');
+            setTimeoutToast('The host closed this room.');
+            setTimeout(() => setTimeoutToast(null), 4000);
+            return;
+          }
           const updated = payload.new?.data;
           if (!updated) return;
+          const stillIn = updated.players?.some((p) => p.id === viewerId);
+          if (!stillIn) {
+            setGame(null); setViewerId(null); setScreen('home');
+            return;
+          }
           setGame(updated);
           setScreen((cur) => {
             if (updated.status === 'lobby') return 'lobby';
@@ -304,7 +380,7 @@ export default function EnigmaGame() {
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [game?.roomCode]);
+  }, [game?.roomCode, viewerId]);
 
   // Auto game-over check
   useEffect(() => {
@@ -441,7 +517,157 @@ export default function EnigmaGame() {
 
   const syncGame = async (g) => {
     if (!g?.roomCode) return;
-    try { await supabase.from('sessions').upsert({ room_code: g.roomCode, data: g }); } catch {}
+    try { await supabase.from('sessions').upsert({ room_code: g.roomCode, data: g, is_public: !!g.isPublic }); } catch {}
+  };
+
+  const loadPublicRooms = async () => {
+    setLoadingRooms(true);
+    try {
+      const { data } = await supabase
+        .from('sessions')
+        .select('room_code, data, created_at')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(30);
+      const rows = (data || [])
+        .filter((r) => r.data?.status === 'lobby')
+        .map((r) => {
+          const hostP = r.data.players?.find((p) => p.isHost);
+          return {
+            roomCode: r.room_code,
+            hostName: hostP?.name || 'Unknown host',
+            hostAvatarIdx: hostP?.avatarIdx ?? 0,
+            playerCount: r.data.players?.length || 0,
+            createdAt: r.created_at,
+          };
+        });
+      setPublicRooms(rows);
+    } catch {
+      setPublicRooms([]);
+    } finally {
+      setLoadingRooms(false);
+    }
+  };
+
+  const joinPublicRoom = async (roomCode) => {
+    if (!nameInput.trim()) {
+      Alert.alert('Name required', 'Please enter your name before joining a room.');
+      return;
+    }
+    setCodeInput(roomCode);
+    // Reuse joinGame's logic by setting code and calling it
+    try {
+      const { data: row, error } = await supabase
+        .from('sessions')
+        .select('data')
+        .eq('room_code', roomCode)
+        .single();
+      if (error || !row) throw new Error('Room no longer available');
+      const session = row.data;
+      if (session.status !== 'lobby') throw new Error('Game already started');
+      const existingIds = new Set(session.players.map((p) => p.id));
+      let nextNum = session.players.length + 1;
+      let playerId = `p${nextNum}`;
+      while (existingIds.has(playerId)) { nextNum++; playerId = `p${nextNum}`; }
+      const sessionData = {
+        ...session,
+        players: [...session.players, {
+          id: playerId, name: nameInput.trim(), score: 0,
+          isHost: false, isEliminated: false, avatarIdx: selectedAvatarIdx,
+        }],
+      };
+      await supabase.from('sessions').upsert({ room_code: roomCode, data: sessionData, is_public: !!sessionData.isPublic });
+      setGame(sessionData);
+      setViewerId(playerId);
+      setNameInput('');
+      setCodeInput('');
+      setScreen('lobby');
+    } catch (e) {
+      Alert.alert('Could not join', e.message || 'This room is no longer available.');
+      loadPublicRooms();
+    }
+  };
+
+  // ─── Daily challenge actions ──────────────────────────────────────────────
+  const openDailyChallenge = () => {
+    setDailyChallengeData(getDailyChallenge());
+    setDailyPhase('intro');
+    setDailyQuestions([]);
+    setDailyInput('');
+    setDailyResult(null);
+    setDailyLeaderboard([]);
+    setScreen('daily');
+  };
+
+  const submitDailyQuestion = async () => {
+    if (!dailyInput.trim() || dailyAsking || !dailyChallengeData) return;
+    const text = dailyInput.trim();
+    setDailyInput('');
+    setDailyAsking(true);
+    const { answer, note } = await askGemini(
+      dailyChallengeData.item.secret,
+      dailyChallengeData.item.facts,
+      text,
+    );
+    setDailyAsking(false);
+    const q = { id: Date.now(), text, answer, note };
+    const updated = [...dailyQuestions, q];
+    setDailyQuestions(updated);
+    if (answer === 'YES') sounds.yes();
+    else if (answer === 'NO') sounds.no();
+    else sounds.partly();
+    // Auto-finish when 20 questions used
+    if (updated.length >= 20) finishDaily(false, updated);
+  };
+
+  const submitDailyGuess = async () => {
+    if (!dailySolveInput.trim() || !dailyChallengeData) return;
+    const guess = dailySolveInput.trim();
+    setDailySolveInput('');
+    setDailySolveOpen(false);
+    const correct = fuzzyMatch(guess, dailyChallengeData.item.secret);
+    if (correct) {
+      sounds.win();
+      finishDaily(true, dailyQuestions);
+    } else {
+      sounds.eliminated();
+      Alert.alert('Not quite!', `"${guess}" is not the answer. Keep asking questions!`);
+    }
+  };
+
+  const finishDaily = async (solved, questions = dailyQuestions) => {
+    const questionsUsed = questions.length;
+    setDailyResult({ solved, questionsUsed });
+    setDailyPhase('result');
+    const playerName = nameInput.trim() || 'Anonymous';
+    try {
+      await supabase.from('daily_scores').insert({
+        date: dailyChallengeData.date,
+        player_name: playerName,
+        avatar_idx: selectedAvatarIdx,
+        questions: questionsUsed,
+        solved,
+      });
+    } catch {}
+    loadDailyLeaderboard(dailyChallengeData.date);
+  };
+
+  const loadDailyLeaderboard = async (date) => {
+    setDailyLoadingBoard(true);
+    try {
+      const { data } = await supabase
+        .from('daily_scores')
+        .select('player_name, avatar_idx, questions, solved')
+        .eq('date', date)
+        .eq('solved', true)
+        .order('questions', { ascending: true })
+        .limit(10);
+      setDailyLeaderboard(data || []);
+    } catch {
+      setDailyLeaderboard([]);
+    } finally {
+      setDailyLoadingBoard(false);
+    }
   };
 
   // ─── Actions ──────────────────────────────────────────────────────────────
@@ -455,9 +681,10 @@ export default function EnigmaGame() {
         players: [{ id: playerId, name: nameInput.trim(), score: 0, isHost: true, isEliminated: false, avatarIdx: selectedAvatarIdx }],
         round: 1, theme: null, secretAnswer: '', hostHint: '',
         questions: [], currentQuestionerIndex: 0, status: 'lobby',
-        pendingSolve: null, roundWinnerId: null, hostConsecutiveMisses: 0, createdAt: new Date().toISOString(),
+        pendingSolve: null, roundWinnerId: null, hostConsecutiveMisses: 0,
+        isPublic: isPublicRoom, createdAt: new Date().toISOString(),
       };
-      await supabase.from('sessions').upsert({ room_code: roomCode, data: session });
+      await supabase.from('sessions').upsert({ room_code: roomCode, data: session, is_public: isPublicRoom });
       setGame(session);
       setViewerId(playerId);
       setNameInput('');
@@ -479,7 +706,10 @@ export default function EnigmaGame() {
       if (error || !row) throw new Error('Session not found');
       const session = row.data;
       if (session.status !== 'lobby') throw new Error('Game already in progress');
-      const playerId = `p${session.players.length + 1}`;
+      const existingIds = new Set(session.players.map((p) => p.id));
+      let nextNum = session.players.length + 1;
+      let playerId = `p${nextNum}`;
+      while (existingIds.has(playerId)) { nextNum++; playerId = `p${nextNum}`; }
       const sessionData = {
         ...session,
         players: [...session.players, {
@@ -487,7 +717,7 @@ export default function EnigmaGame() {
           isHost: false, isEliminated: false, avatarIdx: selectedAvatarIdx,
         }],
       };
-      await supabase.from('sessions').upsert({ room_code: roomCode, data: sessionData });
+      await supabase.from('sessions').upsert({ room_code: roomCode, data: sessionData, is_public: !!sessionData.isPublic });
       setGame(sessionData);
       setViewerId(playerId);
       setNameInput('');
@@ -604,13 +834,21 @@ export default function EnigmaGame() {
   };
 
   const nextRound = async () => {
-    const currHostIdx = game.players.findIndex((p) => p.isHost);
-    const newHostIdx = (currHostIdx + 1) % game.players.length;
-    const players = game.players.map((p, i) => ({ ...p, isHost: i === newHostIdx, isEliminated: false }));
+    // If the previous host abandoned, they've already been promoted-away — keep current host.
+    // Otherwise rotate to the next player in order.
+    let players;
+    if (game.hostAbandoned) {
+      players = game.players.map((p) => ({ ...p, isEliminated: false }));
+    } else {
+      const currHostIdx = game.players.findIndex((p) => p.isHost);
+      const newHostIdx = (currHostIdx + 1) % game.players.length;
+      players = game.players.map((p, i) => ({ ...p, isHost: i === newHostIdx, isEliminated: false }));
+    }
     const newGame = {
       ...game, players, round: game.round + 1, theme: null, secretAnswer: '',
       hostHint: '', questions: [], currentQuestionerIndex: 0,
-      status: 'theme_select', pendingSolve: null, roundWinnerId: undefined, hostConsecutiveMisses: 0,
+      status: 'theme_select', pendingSolve: null, roundWinnerId: undefined,
+      hostConsecutiveMisses: 0, hostAbandoned: false, abandonedHostName: undefined,
     };
     setGame(newGame);
     setSelectedTheme(null);
@@ -618,14 +856,77 @@ export default function EnigmaGame() {
     await syncGame(newGame);
   };
 
+  // Remove the current viewer from the live session and update remote state
+  // so the other players see the correct outcome.
+  const leaveSession = async () => {
+    if (!game || !viewerId) { setGame(null); setViewerId(null); setScreen('home'); return; }
+    const me = game.players.find((p) => p.id === viewerId);
+    const remaining = game.players.filter((p) => p.id !== viewerId);
+    const roomCode = game.roomCode;
+    const wasHost = !!me?.isHost;
+    const wasPlaying = game.status === 'playing';
+
+    // Clean local state immediately so the user sees Home right away
+    setGame(null); setViewerId(null); setScreen('home');
+
+    if (!me) return;
+
+    try {
+      // Last player out — close the room
+      if (remaining.length === 0) {
+        await supabase.from('sessions').delete().eq('room_code', roomCode);
+        return;
+      }
+
+      // If host left, promote the next remaining player to host
+      let players = remaining;
+      let updated = { ...game, players };
+      if (wasHost) {
+        const newHostId = remaining[0].id;
+        players = remaining.map((p) => p.id === newHostId ? { ...p, isHost: true, isEliminated: false } : p);
+        if (wasPlaying) {
+          // End this round: reveal secret, no winner, host gets no points
+          updated = {
+            ...game, players,
+            status: 'round_end', roundWinnerId: null,
+            hostAbandoned: true, abandonedHostName: me.name,
+            pendingSolve: null, hostConsecutiveMisses: 0,
+          };
+        } else if (game.status === 'theme_select' || game.status === 'secret_entry') {
+          // Reset back to lobby so the new host can pick fresh
+          updated = {
+            ...game, players,
+            status: 'lobby', theme: null, secretAnswer: '', hostHint: '',
+            questions: [], currentQuestionerIndex: 0, pendingSolve: null, hostConsecutiveMisses: 0,
+          };
+        } else {
+          updated = { ...game, players };
+        }
+      }
+
+      await supabase.from('sessions').upsert({
+        room_code: roomCode, data: updated, is_public: !!updated.isPublic,
+      });
+    } catch {}
+  };
+
   const goHome = () => {
-    if (game && game.status === 'playing') {
-      Alert.alert('Leave Game', 'Leave the game? All progress will be lost.', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Leave', style: 'destructive', onPress: () => { setGame(null); setViewerId(null); setScreen('home'); } },
-      ]);
+    if (!game) { setScreen('home'); return; }
+    const playing = game.status === 'playing';
+    const iAmHost = !!viewer?.isHost;
+    if (playing) {
+      Alert.alert(
+        'Leave Game',
+        iAmHost
+          ? 'As host, leaving will reveal the secret and end this round for everyone. Continue?'
+          : 'Leave the game? The round will continue without you.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Leave', style: 'destructive', onPress: leaveSession },
+        ],
+      );
     } else {
-      setGame(null); setViewerId(null); setScreen('home');
+      leaveSession();
     }
   };
 
@@ -699,16 +1000,30 @@ export default function EnigmaGame() {
             <Text style={{ fontSize: 11, color: C.muted, letterSpacing: 4, textTransform: 'uppercase', marginTop: 6, fontFamily: 'Outfit_400Regular' }}>
               Reviving the Classic Art of 20 Questions
             </Text>
-            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 10, letterSpacing: 1 }}>v1.8</Text>
+            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 10, letterSpacing: 1 }}>v1.9</Text>
           </View>
 
           <TouchableOpacity style={S.btnGold} onPress={() => setScreen('create')}>
             <Text style={S.btnGoldText}>✦  Create New Game</Text>
           </TouchableOpacity>
 
+          <TouchableOpacity
+            style={[S.btnOutline, { marginTop: 10, borderColor: 'rgba(200,168,74,0.4)', backgroundColor: 'rgba(200,168,74,0.05)' }]}
+            onPress={openDailyChallenge}
+          >
+            <Text style={[S.btnOutlineText, { color: C.gold }]}>📅  Daily Challenge</Text>
+          </TouchableOpacity>
+
           <Divider />
 
-          <TouchableOpacity style={S.btnOutline} onPress={() => setScreen('join')}>
+          <TouchableOpacity
+            style={[S.btnOutline, { borderColor: 'rgba(167,139,250,0.45)', backgroundColor: 'rgba(109,40,217,0.08)' }]}
+            onPress={() => { loadPublicRooms(); setScreen('rooms'); }}
+          >
+            <Text style={[S.btnOutlineText, { color: C.violet2 }]}>🌐  Browse Public Rooms</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[S.btnOutline, { marginTop: 12 }]} onPress={() => setScreen('join')}>
             <Text style={S.btnOutlineText}>Join with a Code</Text>
           </TouchableOpacity>
 
@@ -739,6 +1054,27 @@ export default function EnigmaGame() {
             autoFocus onSubmitEditing={createGame} returnKeyType="go"
           />
           <AvatarPicker selected={selectedAvatarIdx} onSelect={setSelectedAvatarIdx} />
+
+          <Text style={S.fieldLabel}>Room Visibility</Text>
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
+            <TouchableOpacity
+              onPress={() => setIsPublicRoom(false)}
+              style={[S.visTile, !isPublicRoom && S.visTileSel]}
+            >
+              <Text style={{ fontSize: 22, marginBottom: 6 }}>🔒</Text>
+              <Text style={[S.visTileTitle, !isPublicRoom && { color: C.gold }]}>Private</Text>
+              <Text style={S.visTileDesc}>Share a code or QR with friends</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setIsPublicRoom(true)}
+              style={[S.visTile, isPublicRoom && S.visTileSel]}
+            >
+              <Text style={{ fontSize: 22, marginBottom: 6 }}>🌐</Text>
+              <Text style={[S.visTileTitle, isPublicRoom && { color: C.gold }]}>Public</Text>
+              <Text style={S.visTileDesc}>Anyone can find and join this room</Text>
+            </TouchableOpacity>
+          </View>
+
           <TouchableOpacity style={[S.btnGold, !nameInput.trim() && S.btnDisabled]} onPress={createGame} disabled={!nameInput.trim()}>
             <Text style={S.btnGoldText}>Create Room →</Text>
           </TouchableOpacity>
@@ -782,6 +1118,332 @@ export default function EnigmaGame() {
     );
   }
 
+  // ─── PUBLIC ROOMS BROWSER ─────────────────────────────────────────────────
+  if (screen === 'rooms') {
+    const readyToJoin = !!nameInput.trim();
+    return (
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
+        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
+          <View style={S.screenHeader}>
+            <TouchableOpacity onPress={() => setScreen('home')}>
+              <Text style={S.backBtn}>← Back</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={loadPublicRooms} disabled={loadingRooms}>
+              <Text style={{ fontSize: 13, color: loadingRooms ? C.dim : C.violet2, fontFamily: 'Outfit_600SemiBold' }}>
+                {loadingRooms ? 'Refreshing…' : '↻ Refresh'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={S.h2}>Public Rooms</Text>
+          <Text style={[S.muted, { marginBottom: 18 }]}>Jump into a room that's waiting for players.</Text>
+
+          <Text style={S.fieldLabel}>Your Name</Text>
+          <TextInput
+            style={S.input} placeholder="Enter your name..." placeholderTextColor={C.dim}
+            value={nameInput} onChangeText={setNameInput} maxLength={20}
+          />
+          <AvatarPicker selected={selectedAvatarIdx} onSelect={setSelectedAvatarIdx} />
+
+          {loadingRooms && publicRooms.length === 0 ? (
+            <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+              <Text style={{ fontSize: 32, marginBottom: 8 }}>⏳</Text>
+              <Text style={S.muted}>Looking for open rooms…</Text>
+            </View>
+          ) : publicRooms.length === 0 ? (
+            <View style={[S.card, { alignItems: 'center', paddingVertical: 28 }]}>
+              <Text style={{ fontSize: 38, marginBottom: 10 }}>🪐</Text>
+              <Text style={[S.h2, { textAlign: 'center', fontSize: 16, marginBottom: 6 }]}>No open rooms right now</Text>
+              <Text style={[S.muted, { textAlign: 'center', marginBottom: 14 }]}>Be the first — create a public room and friends can join from here.</Text>
+              <TouchableOpacity style={S.btnOutlineSm} onPress={() => { setIsPublicRoom(true); setScreen('create'); }}>
+                <Text style={S.btnOutlineSmText}>+ Create Public Room</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              <Text style={[S.fieldLabel, { marginTop: 4 }]}>{publicRooms.length} open room{publicRooms.length !== 1 ? 's' : ''}</Text>
+              {publicRooms.map((r) => {
+                const a = av(r.hostAvatarIdx);
+                const full = r.playerCount >= 8;
+                return (
+                  <TouchableOpacity
+                    key={r.roomCode}
+                    style={[S.roomRow, full && { opacity: 0.5 }]}
+                    onPress={() => !full && readyToJoin && joinPublicRoom(r.roomCode)}
+                    disabled={full || !readyToJoin}
+                  >
+                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 22 }}>{a.emoji}</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: C.text }}>{r.hostName}'s room</Text>
+                      <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 2 }}>
+                        Code {r.roomCode} · {r.playerCount} player{r.playerCount !== 1 ? 's' : ''} waiting
+                      </Text>
+                    </View>
+                    {full ? (
+                      <View style={S.badgeGuesser}>
+                        <Text style={S.badgeGuesserText}>Full</Text>
+                      </View>
+                    ) : (
+                      <Text style={{ color: C.gold, fontSize: 22, fontFamily: 'Outfit_400Regular' }}>›</Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+              {!readyToJoin && (
+                <Text style={[S.muted, { textAlign: 'center', marginTop: 10, fontSize: 12 }]}>Enter your name above to join a room.</Text>
+              )}
+            </>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  // ─── DAILY CHALLENGE ──────────────────────────────────────────────────────
+  if (screen === 'daily' && dailyChallengeData) {
+    const { theme, item } = dailyChallengeData;
+    const qCount = dailyQuestions.length;
+    const hasGeminiKey = !!Constants.expoConfig?.extra?.geminiApiKey;
+
+    // ── Intro ──
+    if (dailyPhase === 'intro') {
+      return (
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
+          <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 32 }]}>
+            <View style={S.screenHeader}>
+              <TouchableOpacity onPress={() => setScreen('home')}>
+                <Text style={S.backBtn}>← Back</Text>
+              </TouchableOpacity>
+              <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_400Regular', letterSpacing: 2 }}>
+                {dailyChallengeData.date}
+              </Text>
+            </View>
+
+            <View style={{ alignItems: 'center', paddingVertical: 24 }}>
+              <Text style={{ fontSize: 64, marginBottom: 10 }}>📅</Text>
+              <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 22, letterSpacing: 4, color: C.gold }}>DAILY CHALLENGE</Text>
+              <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 6, letterSpacing: 2 }}>
+                A new secret every day · Same for everyone
+              </Text>
+            </View>
+
+            <View style={{ backgroundColor: 'rgba(200,168,74,0.07)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 16, padding: 22, alignItems: 'center', marginBottom: 24 }}>
+              <Text style={{ fontSize: 44, marginBottom: 8 }}>{theme.icon}</Text>
+              <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 3, textTransform: 'uppercase', fontFamily: 'Outfit_400Regular', marginBottom: 4 }}>Today's Category</Text>
+              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 20, color: C.text }}>{theme.label}</Text>
+              <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 6, textAlign: 'center' }}>{theme.desc}</Text>
+            </View>
+
+            {!hasGeminiKey && (
+              <View style={{ backgroundColor: 'rgba(240,160,48,0.08)', borderWidth: 1, borderColor: 'rgba(240,160,48,0.3)', borderRadius: 10, padding: 12, marginBottom: 16 }}>
+                <Text style={{ fontSize: 12, color: C.warn, fontFamily: 'Outfit_400Regular', textAlign: 'center' }}>
+                  ⚠️ Gemini API key not set — questions will receive placeholder answers. Add your key to app.json to enable AI responses.
+                </Text>
+              </View>
+            )}
+
+            <Text style={S.fieldLabel}>Your Name</Text>
+            <TextInput
+              style={S.input} placeholder="Enter your name..." placeholderTextColor={C.dim}
+              value={nameInput} onChangeText={setNameInput} maxLength={20}
+            />
+            <AvatarPicker selected={selectedAvatarIdx} onSelect={setSelectedAvatarIdx} />
+
+            <TouchableOpacity
+              style={[S.btnGold, !nameInput.trim() && S.btnDisabled]}
+              disabled={!nameInput.trim()}
+              onPress={() => setDailyPhase('game')}
+            >
+              <Text style={S.btnGoldText}>Start Challenge →</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={{ marginTop: 12, alignItems: 'center', padding: 8 }} onPress={() => { loadDailyLeaderboard(dailyChallengeData.date); setDailyPhase('result'); setDailyResult(null); }}>
+              <Text style={{ fontSize: 13, color: C.dim, fontFamily: 'Outfit_400Regular' }}>View today's leaderboard →</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      );
+    }
+
+    // ── Game ──
+    if (dailyPhase === 'game') {
+      return (
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
+          {/* Solve modal */}
+          <Modal visible={dailySolveOpen} transparent animationType="slide" onRequestClose={() => setDailySolveOpen(false)}>
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+              <View style={S.overlay}>
+                <View style={S.modal}>
+                  <View style={S.modalHandle} />
+                  <Text style={S.modalTitle}>💡 Make Your Guess</Text>
+                  <Text style={[S.modalSub, { marginBottom: 14 }]}>What's the secret {theme.label.toLowerCase()}?</Text>
+                  <TextInput
+                    style={S.input} placeholder={`e.g. "Nikola Tesla"...`} placeholderTextColor={C.dim}
+                    value={dailySolveInput} onChangeText={setDailySolveInput}
+                    autoFocus onSubmitEditing={submitDailyGuess} returnKeyType="done"
+                  />
+                  <TouchableOpacity style={[S.btnGold, !dailySolveInput.trim() && S.btnDisabled]} onPress={submitDailyGuess} disabled={!dailySolveInput.trim()}>
+                    <Text style={S.btnGoldText}>Submit Guess →</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={{ marginTop: 10, alignItems: 'center', padding: 8 }} onPress={() => setDailySolveOpen(false)}>
+                    <Text style={{ color: C.dim, fontSize: 13, fontFamily: 'Outfit_400Regular' }}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </KeyboardAvoidingView>
+          </Modal>
+
+          <View style={{ backgroundColor: C.surface, borderBottomWidth: 1, borderBottomColor: C.border2, paddingHorizontal: 16, paddingTop: insets.top + 10, paddingBottom: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Text style={{ fontSize: 18 }}>📅</Text>
+              <View>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 13, color: C.gold }}>Daily Challenge</Text>
+                <Text style={{ fontSize: 11, color: C.muted, fontFamily: 'Outfit_400Regular' }}>{theme.icon} {theme.label}</Text>
+              </View>
+            </View>
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 18, color: qCount >= 16 ? C.danger : qCount >= 11 ? C.warn : C.gold }}>{qCount}</Text>
+              <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular' }}>of 20</Text>
+            </View>
+          </View>
+
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 8 }}>
+            {qCount === 0 ? (
+              <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+                <Text style={{ fontSize: 40, marginBottom: 10 }}>🤔</Text>
+                <Text style={[S.muted, { textAlign: 'center', lineHeight: 20 }]}>
+                  Ask yes/no questions to uncover{'\n'}today's {theme.label.toLowerCase()}.
+                </Text>
+                <Text style={[S.muted, { marginTop: 8, fontSize: 12, color: C.dim }]}>Hint: {item.hint}</Text>
+              </View>
+            ) : (
+              dailyQuestions.map((q) => (
+                <View key={q.id} style={{ marginBottom: 12 }}>
+                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start' }}>
+                    <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: C.card2, borderWidth: 1, borderColor: C.border2, alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_700Bold' }}>Q</Text>
+                    </View>
+                    <Text style={{ flex: 1, fontSize: 14, color: C.text, fontFamily: 'Outfit_500Medium', paddingTop: 3 }}>{q.text}</Text>
+                  </View>
+                  <View style={{ marginLeft: 34, marginTop: 6 }}>
+                    {q.answer === 'PARTLY' ? (
+                      <View style={[S.qBadge, { backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.3)' }]}>
+                        <Text style={{ color: C.warn, fontSize: 13, fontFamily: 'Outfit_700Bold' }}>~ Partly{q.note ? ` — ${q.note}` : ''}</Text>
+                      </View>
+                    ) : (
+                      <View style={[S.qBadge, { backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)' }]}>
+                        <Text style={{ color: q.answer === 'YES' ? C.success : C.danger, fontSize: 13, fontFamily: 'Outfit_700Bold' }}>
+                          {q.answer === 'YES' ? '✓ Yes' : '✗ No'}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              ))
+            )}
+            {dailyAsking && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, backgroundColor: C.card2, borderRadius: 10, borderWidth: 1, borderColor: C.border2 }}>
+                <Text style={{ fontSize: 16 }}>⏳</Text>
+                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular' }}>Thinking…</Text>
+              </View>
+            )}
+          </ScrollView>
+
+          <View style={{ padding: 12, paddingBottom: insets.bottom + 10, borderTopWidth: 1, borderTopColor: C.border, backgroundColor: C.bg }}>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+              <TextInput
+                style={[S.input, { flex: 1, marginBottom: 0, paddingVertical: 12 }]}
+                placeholder="Ask a yes/no question…" placeholderTextColor={C.dim}
+                value={dailyInput} onChangeText={setDailyInput}
+                onSubmitEditing={submitDailyQuestion} returnKeyType="send"
+                editable={!dailyAsking && qCount < 20}
+              />
+              <TouchableOpacity
+                style={[S.btnGold, { width: 'auto', paddingHorizontal: 18, borderRadius: 10 }, (!dailyInput.trim() || dailyAsking) && S.btnDisabled]}
+                onPress={submitDailyQuestion} disabled={!dailyInput.trim() || dailyAsking}
+              >
+                <Text style={S.btnGoldText}>Ask</Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity style={S.btnSolve} onPress={() => { setDailySolveInput(''); setDailySolveOpen(true); }}>
+              <Text style={{ color: '#fff', fontFamily: 'Outfit_700Bold', fontSize: 14 }}>💡 I Know It — Solve!</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      );
+    }
+
+    // ── Result ──
+    if (dailyPhase === 'result') {
+      const rating = dailyResult ? dailyStars(dailyResult.questionsUsed, dailyResult.solved) : null;
+      return (
+        <ScrollView style={[S.flex, { backgroundColor: C.bg }]} contentContainerStyle={[S.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 32 }]}>
+          <View style={S.screenHeader}>
+            <TouchableOpacity onPress={() => setScreen('home')}><Text style={S.backBtn}>← Home</Text></TouchableOpacity>
+          </View>
+
+          {dailyResult ? (
+            <>
+              <View style={{ alignItems: 'center', padding: 28, backgroundColor: dailyResult.solved ? 'rgba(200,168,74,0.06)' : 'rgba(239,68,68,0.06)', borderWidth: 1, borderColor: dailyResult.solved ? C.goldDim : 'rgba(239,68,68,0.3)', borderRadius: 20, marginBottom: 16 }}>
+                <Text style={{ fontSize: 52, marginBottom: 8 }}>{dailyResult.solved ? '🏆' : '💀'}</Text>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: dailyResult.solved ? C.gold : C.danger, marginBottom: 4 }}>
+                  {dailyResult.solved ? `Solved in ${dailyResult.questionsUsed} question${dailyResult.questionsUsed !== 1 ? 's' : ''}!` : 'Not solved today'}
+                </Text>
+                {rating && <Text style={{ fontSize: 14, color: C.muted, fontFamily: 'Outfit_600SemiBold', marginTop: 4 }}>{rating.label}</Text>}
+              </View>
+
+              <View style={{ backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1, borderColor: 'rgba(109,40,217,0.4)', borderRadius: 12, padding: 14, alignItems: 'center', marginBottom: 16 }}>
+                <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4, fontFamily: 'Outfit_400Regular' }}>The Secret Was</Text>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 20, color: C.violet2 }}>{item.secret}</Text>
+                <Text style={{ fontSize: 12, color: C.dim, marginTop: 4, fontFamily: 'Outfit_400Regular' }}>{theme.icon} {theme.label}</Text>
+              </View>
+            </>
+          ) : (
+            <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+              <Text style={{ fontSize: 52, marginBottom: 8 }}>📅</Text>
+              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 18, color: C.gold, marginBottom: 4 }}>Today's Leaderboard</Text>
+              <Text style={[S.muted, { textAlign: 'center' }]}>{theme.icon} {theme.label}</Text>
+            </View>
+          )}
+
+          <View style={S.card}>
+            <Text style={S.cardTitle}>Today's Top Players</Text>
+            {dailyLoadingBoard ? (
+              <Text style={[S.muted, { textAlign: 'center', padding: 12 }]}>Loading…</Text>
+            ) : dailyLeaderboard.length === 0 ? (
+              <Text style={[S.muted, { textAlign: 'center', padding: 12 }]}>No scores yet today — be the first!</Text>
+            ) : (
+              dailyLeaderboard.map((entry, i) => {
+                const a = av(entry.avatar_idx);
+                const isMe = entry.player_name === (nameInput.trim() || 'Anonymous');
+                return (
+                  <View key={i} style={[S.sbRow, i === 0 && S.sbRowFirst, isMe && { borderColor: C.violet2 }]}>
+                    <Text style={[S.sbRank, i === 0 && { color: C.gold }]}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</Text>
+                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 18 }}>{a.emoji}</Text>
+                    </View>
+                    <Text style={{ flex: 1, fontSize: 13, fontFamily: isMe ? 'Outfit_700Bold' : 'Outfit_500Medium', color: isMe ? C.violet2 : C.text }}>
+                      {entry.player_name}{isMe ? ' (You)' : ''}
+                    </Text>
+                    <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.gold }}>{entry.questions}Q</Text>
+                  </View>
+                );
+              })
+            )}
+          </View>
+
+          <TouchableOpacity style={[S.btnGold, { marginTop: 8 }]} onPress={openDailyChallenge}>
+            <Text style={S.btnGoldText}>Play Again</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[S.btnOutline, { marginTop: 10 }]} onPress={() => setScreen('home')}>
+            <Text style={S.btnOutlineText}>Back to Home</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      );
+    }
+  }
+
   if (!game) return null;
 
   // ─── LOBBY ────────────────────────────────────────────────────────────────
@@ -798,19 +1460,48 @@ export default function EnigmaGame() {
           </View>
 
           {/* Room code + QR */}
-          <View style={S.codeBox}>
-            <Text style={S.codeBoxLabel}>Room Code</Text>
-            <Text style={S.codeBoxValue}>{game.roomCode}</Text>
-            <Text style={S.codeBoxSub}>Share this code or scan QR to join</Text>
-            <View style={{ marginTop: 16, alignItems: 'center' }}>
-              <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 10 }}>
+          {game.isPublic ? (
+            <View style={{
+              backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1,
+              borderColor: 'rgba(109,40,217,0.4)', borderRadius: 16,
+              padding: 20, alignItems: 'center', marginVertical: 14,
+            }}>
+              <Text style={{ fontSize: 32, marginBottom: 8 }}>🌐</Text>
+              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.violet2, marginBottom: 4 }}>
+                Room is Public
+              </Text>
+              <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 18, marginBottom: 14 }}>
+                Your room is listed in the public browser.{'\n'}Anyone can find and join while you wait here.
+              </Text>
+              <View style={{ height: 1, backgroundColor: C.border2, width: '100%', marginBottom: 14 }} />
+              <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6, fontFamily: 'Outfit_400Regular' }}>
+                Or share directly
+              </Text>
+              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 30, color: C.gold, letterSpacing: 8, marginBottom: 4 }}>
+                {game.roomCode}
+              </Text>
+              <View style={{ backgroundColor: '#fff', borderRadius: 10, padding: 8, marginTop: 8 }}>
                 <QRCode
                   value={joinLink || `enigma://join?code=${game.roomCode}`}
-                  size={140} backgroundColor="#ffffff" color="#06060f"
+                  size={110} backgroundColor="#ffffff" color="#06060f"
                 />
               </View>
             </View>
-          </View>
+          ) : (
+            <View style={S.codeBox}>
+              <Text style={S.codeBoxLabel}>Room Code</Text>
+              <Text style={S.codeBoxValue}>{game.roomCode}</Text>
+              <Text style={S.codeBoxSub}>Share this code or scan QR to join</Text>
+              <View style={{ marginTop: 16, alignItems: 'center' }}>
+                <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 10 }}>
+                  <QRCode
+                    value={joinLink || `enigma://join?code=${game.roomCode}`}
+                    size={140} backgroundColor="#ffffff" color="#06060f"
+                  />
+                </View>
+              </View>
+            </View>
+          )}
 
           {/* Players */}
           <View style={S.card}>
@@ -1423,7 +2114,8 @@ export default function EnigmaGame() {
   // ─── RESULT ───────────────────────────────────────────────────────────────
   if (screen === 'result') {
     const winner = game.players.find((p) => p.id === game.roundWinnerId);
-    const hostWon = !winner;
+    const abandoned = !!game.hostAbandoned;
+    const hostWon = !winner && !abandoned;
     const sorted = [...game.players].sort((a, b) => b.score - a.score);
 
     return (
@@ -1432,12 +2124,16 @@ export default function EnigmaGame() {
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 24 }]}>
           {/* Winner block */}
           <View style={{ alignItems: 'center', padding: 28, backgroundColor: 'rgba(200,168,74,0.06)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 20, marginVertical: 16 }}>
-            <Text style={{ fontSize: 52, marginBottom: 8 }}>{hostWon ? '🎩' : '🎉'}</Text>
+            <Text style={{ fontSize: 52, marginBottom: 8 }}>{abandoned ? '👻' : hostWon ? '🎩' : '🎉'}</Text>
             <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 26, color: C.gold }}>
-              {hostWon ? host?.name : winner?.name}
+              {abandoned ? `${game.abandonedHostName || 'The host'} left` : hostWon ? host?.name : winner?.name}
             </Text>
-            <Text style={{ fontSize: 10, color: C.goldDim, letterSpacing: 3, textTransform: 'uppercase', marginTop: 8, fontFamily: 'Outfit_400Regular' }}>
-              {hostWon ? 'defended the secret — nobody cracked it!' : 'cracked the secret!'}
+            <Text style={{ fontSize: 10, color: C.goldDim, letterSpacing: 3, textTransform: 'uppercase', marginTop: 8, fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 16 }}>
+              {abandoned
+                ? `Round ended — no points awarded.\n${host?.name || 'Next player'} is the new host.`
+                : hostWon
+                  ? 'defended the secret — nobody cracked it!'
+                  : 'cracked the secret!'}
             </Text>
           </View>
 
@@ -1464,7 +2160,7 @@ export default function EnigmaGame() {
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 14, fontFamily: i === 0 ? 'Outfit_700Bold' : 'Outfit_500Medium', color: C.text }}>{p.name}</Text>
                     {p.id === game.roundWinnerId && <Text style={{ fontSize: 11, color: C.gold, fontFamily: 'Outfit_400Regular' }}>+10 pts this round</Text>}
-                    {!game.roundWinnerId && p.isHost && <Text style={{ fontSize: 11, color: C.gold, fontFamily: 'Outfit_400Regular' }}>+5 pts (host win)</Text>}
+                    {!game.roundWinnerId && !abandoned && p.isHost && <Text style={{ fontSize: 11, color: C.gold, fontFamily: 'Outfit_400Regular' }}>+5 pts (host win)</Text>}
                   </View>
                   <Text style={S.sbPts}>{p.score}</Text>
                 </View>
@@ -1574,6 +2270,15 @@ const S = StyleSheet.create({
   // Theme tiles
   themeTile: { width: '48%', backgroundColor: C.card2, borderWidth: 1, borderColor: C.border2, borderRadius: 14, padding: 16, alignItems: 'center' },
   themeTileSel: { borderColor: C.gold, backgroundColor: 'rgba(200,168,74,0.08)' },
+
+  // Visibility tiles (Public/Private)
+  visTile: { flex: 1, backgroundColor: C.card2, borderWidth: 1, borderColor: C.border2, borderRadius: 14, padding: 14, alignItems: 'center' },
+  visTileSel: { borderColor: C.gold, backgroundColor: 'rgba(200,168,74,0.08)' },
+  visTileTitle: { fontFamily: 'Outfit_700Bold', fontSize: 14, color: C.text, marginBottom: 2 },
+  visTileDesc: { fontSize: 11, color: C.muted, fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 14, marginTop: 2 },
+
+  // Public room row
+  roomRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, backgroundColor: C.card2, borderWidth: 1, borderColor: C.border2, borderRadius: 12, marginBottom: 8 },
 
   // Turn banner
   turnBanner: { backgroundColor: 'rgba(200,168,74,0.06)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 10, padding: 10, flexDirection: 'row', alignItems: 'center', gap: 8 },

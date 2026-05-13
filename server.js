@@ -156,7 +156,7 @@ app.delete("/api/sessions/:roomCode", async (req, res) => {
   res.json({ success: true });
 });
 
-// ─── Daily Challenge AI ─────────────────────────────────────────────────────────────────────────
+// ─── Daily Challenge AI ───────────────────────────────────────────────────────
 app.post("/api/ask", async (req, res) => {
   const { secret, facts = [], question } = req.body;
   if (!secret || !question) return res.status(400).json({ error: "secret and question required" });
@@ -200,7 +200,7 @@ Do not reveal the secret. No other text.`;
   }
 });
 
-// ─── Start ─────────────────────────────────────────────────────────────────────────────────────
+// ─── Start ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Enigma session server running on port ${PORT}`);
