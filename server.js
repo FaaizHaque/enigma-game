@@ -4,13 +4,13 @@ const cors = require("cors");
 const os = require("os");
 const { createClient } = require("@supabase/supabase-js");
 
-// ─── Supabase ─────────────────────────────────────────────────────────────────
+// ─── Supabase ─────────────────────────────────────────────────────────────────────────────────
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// ─── LAN IP ───────────────────────────────────────────────────────────────────
+// ─── LAN IP ───────────────────────────────────────────────────────────────────────────────────
 const getLocalIP = () => {
   for (const ifaces of Object.values(os.networkInterfaces())) {
     for (const iface of ifaces) {
@@ -20,7 +20,7 @@ const getLocalIP = () => {
   return "localhost";
 };
 
-// ─── Database helpers ─────────────────────────────────────────────────────────
+// ─── Database helpers ─────────────────────────────────────────────────────────────────────────
 const getSession = async (code) => {
   const { data } = await supabase
     .from("sessions")
@@ -51,7 +51,7 @@ const deleteSession = async (code) => {
   await supabase.from("sessions").delete().eq("room_code", code);
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers ────────────────────────────────────────────────────────────────────────────────────
 const genCode = () => {
   const c = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   return Array.from({ length: 6 }, () =>
@@ -67,12 +67,12 @@ const uniqueCode = async () => {
   return code;
 };
 
-// ─── App ──────────────────────────────────────────────────────────────────────
+// ─── App ──────────────────────────────────────────────────────────────────────────────────────
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+// ─── Routes ───────────────────────────────────────────────────────────────────────────────────────
 
 app.get("/api/info", (req, res) => {
   const host = req.headers["x-forwarded-host"] || req.hostname;
