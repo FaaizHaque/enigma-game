@@ -1065,19 +1065,48 @@ export default function EnigmaGame() {
           </View>
 
           {/* Room code + QR */}
-          <View style={S.codeBox}>
-            <Text style={S.codeBoxLabel}>Room Code</Text>
-            <Text style={S.codeBoxValue}>{game.roomCode}</Text>
-            <Text style={S.codeBoxSub}>Share this code or scan QR to join</Text>
-            <View style={{ marginTop: 16, alignItems: 'center' }}>
-              <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 10 }}>
+          {game.isPublic ? (
+            <View style={{
+              backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1,
+              borderColor: 'rgba(109,40,217,0.4)', borderRadius: 16,
+              padding: 20, alignItems: 'center', marginVertical: 14,
+            }}>
+              <Text style={{ fontSize: 32, marginBottom: 8 }}>🌐</Text>
+              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.violet2, marginBottom: 4 }}>
+                Room is Public
+              </Text>
+              <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 18, marginBottom: 14 }}>
+                Your room is listed in the public browser.{'\n'}Anyone can find and join while you wait here.
+              </Text>
+              <View style={{ height: 1, backgroundColor: C.border2, width: '100%', marginBottom: 14 }} />
+              <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6, fontFamily: 'Outfit_400Regular' }}>
+                Or share directly
+              </Text>
+              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 30, color: C.gold, letterSpacing: 8, marginBottom: 4 }}>
+                {game.roomCode}
+              </Text>
+              <View style={{ backgroundColor: '#fff', borderRadius: 10, padding: 8, marginTop: 8 }}>
                 <QRCode
                   value={joinLink || `enigma://join?code=${game.roomCode}`}
-                  size={140} backgroundColor="#ffffff" color="#06060f"
+                  size={110} backgroundColor="#ffffff" color="#06060f"
                 />
               </View>
             </View>
-          </View>
+          ) : (
+            <View style={S.codeBox}>
+              <Text style={S.codeBoxLabel}>Room Code</Text>
+              <Text style={S.codeBoxValue}>{game.roomCode}</Text>
+              <Text style={S.codeBoxSub}>Share this code or scan QR to join</Text>
+              <View style={{ marginTop: 16, alignItems: 'center' }}>
+                <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 10 }}>
+                  <QRCode
+                    value={joinLink || `enigma://join?code=${game.roomCode}`}
+                    size={140} backgroundColor="#ffffff" color="#06060f"
+                  />
+                </View>
+              </View>
+            </View>
+          )}
 
           {/* Players */}
           <View style={S.card}>
