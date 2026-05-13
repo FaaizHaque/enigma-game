@@ -5,11 +5,18 @@
 CREATE TABLE IF NOT EXISTS sessions (
   room_code  TEXT PRIMARY KEY,
   data       JSONB        NOT NULL,
+  is_public  BOOLEAN      NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ  DEFAULT NOW()
 );
 
+-- For existing databases: add is_public if missing
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS is_public BOOLEAN NOT NULL DEFAULT FALSE;
+
 -- Index for cleanup queries
 CREATE INDEX IF NOT EXISTS idx_sessions_created_at ON sessions(created_at);
+
+-- Partial index for the Public Rooms browser (only public lobbies are queried)
+CREATE INDEX IF NOT EXISTS idx_sessions_public ON sessions(created_at DESC) WHERE is_public = TRUE;
 
 -- Row-Level Security (open access — game uses room codes as the access control)
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
@@ -33,6 +40,28 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE sessions;
   END IF;
 END $$;
+
+-- Daily challenge scores
+CREATE TABLE IF NOT EXISTS daily_scores (
+  id          BIGSERIAL    PRIMARY KEY,
+  date        TEXT         NOT NULL,
+  player_name TEXT         NOT NULL,
+  avatar_idx  INTEGER      NOT NULL DEFAULT 0,
+  questions   INTEGER      NOT NULL,
+  solved      BOOLEAN      NOT NULL DEFAULT FALSE,
+  created_at  TIMESTAMPTZ  DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_daily_scores_date ON daily_scores(date, questions ASC);
+
+ALTER TABLE daily_scores ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "Public daily score access"
+  ON daily_scores FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+ALTER PUBLICATION supabase_realtime ADD TABLE daily_scores;
 
 -- Optional: auto-delete sessions older than 24 hours via a cron job
 -- Enable pg_cron extension first in Supabase Dashboard → Database → Extensions
