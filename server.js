@@ -3,12 +3,14 @@ const express = require("express");
 const cors = require("cors");
 const os = require("os");
 const { createClient } = require("@supabase/supabase-js");
+const { GoogleGenAI } = require("@google/genai");
 
-// ─── Supabase ─────────────────────────────────────────────────────────────────────────────────
+// ─── Clients ──────────────────────────────────────────────────────────────────
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, httpOptions: { apiVersion: "v1" } });
 
 // ─── LAN IP ───────────────────────────────────────────────────────────────────────────────────
 const getLocalIP = () => {
@@ -156,47 +158,114 @@ app.delete("/api/sessions/:roomCode", async (req, res) => {
   res.json({ success: true });
 });
 
-// ─── Daily Challenge AI ───────────────────────────────────────────────────────
-app.post("/api/ask", async (req, res) => {
-  const { secret, facts = [], question } = req.body;
-  if (!secret || !question) return res.status(400).json({ error: "secret and question required" });
-
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) return res.json({ answer: "NO", note: "AI unavailable" });
-
-  const prompt = `You are the host in a 20-questions guessing game. The secret answer is "${secret}".
-
-Key facts:
-${facts.map((f) => `- ${f}`).join("\n")}
-
-The player asks: "${question}"
-
-Reply with ONLY one of:
-YES
-NO
-PARTLY: [one short phrase, max 8 words]
-
-Do not reveal the secret. No other text.`;
-
+// ─── List available models ────────────────────────────────────────────────────
+app.get("/api/models", async (req, res) => {
   try {
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-      }
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1/models?key=${process.env.GEMINI_API_KEY}`
     );
-    const geminiData = await geminiRes.json();
-    const raw = (geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "NO").trim().toUpperCase();
-    if (raw.startsWith("PARTLY")) {
-      const colonIdx = raw.indexOf(":");
-      return res.json({ answer: "PARTLY", note: colonIdx >= 0 ? raw.slice(colonIdx + 1).trim() : "" });
-    }
-    return res.json({ answer: raw.startsWith("YES") ? "YES" : "NO", note: "" });
-  } catch (err) {
-    console.error("Gemini error:", err);
-    return res.json({ answer: "NO", note: "" });
+    const data = await response.json();
+    const names = (data.models || []).map(m => m.name);
+    res.json({ models: names });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ─── Health check — test Gemini connectivity ──────────────────────────────────
+app.get("/api/health", async (req, res) => {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: "Reply with the word OK",
+    });
+    res.json({ status: "ok", ai: response.text.trim() });
+  } catch (e) {
+    res.status(500).json({ status: "error", error: e.message });
+  }
+});
+
+// ─── Debug: test ask with inline prompt ───────────────────────────────────────
+app.get("/api/test-ask", async (req, res) => {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: "The secret is Automobile. Question: Does it relate to transportation? Reply with only YES, NO, or PARTLY.",
+    });
+    res.json({ status: "ok", answer: response.text.trim() });
+  } catch (e) {
+    res.status(500).json({ status: "error", error: e.message });
+  }
+});
+
+// ─── Daily Challenge — AI question answering ──────────────────────────────────
+app.post("/api/ask", async (req, res) => {
+  const { secret, facts = [], category = "", question } = req.body;
+  if (!secret || !question) {
+    return res.status(400).json({ error: "secret and question are required" });
+  }
+  try {
+    const systemInstruction = `You are the knowledgeable host of a 20-questions guessing game. The secret answer is "${secret}" (category: ${category}).
+
+You have full knowledge about "${secret}" from your training data. Use BOTH the reference facts below AND your own general knowledge to answer questions accurately and helpfully.
+
+Reference facts: ${facts.join("; ")}.
+
+Answer rules:
+1. Reply with ONLY one word: YES, NO, or PARTLY — nothing else.
+2. Use your genuine knowledge of "${secret}" to answer factual questions (history, origin, inventor, country, era, purpose, shape, material, field, etc.).
+3. For questions about WHEN it was created/invented, refer to when the ORIGINAL was first created — not later versions.
+4. For questions about WHO created it, refer to the original inventor/creator.
+5. If asked about substrings/letters/words in the name, check the literal spelling of "${secret}" (case-insensitive).
+6. Use PARTLY if the answer is partially true or only true from one angle.
+7. Never reveal the secret word directly.`;
+    const prompt = `${systemInstruction}\n\nQuestion: ${question}`;
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+    const raw = response.text.trim().toUpperCase().split(/\s+/)[0];
+    const answer = ["YES", "NO", "PARTLY"].includes(raw) ? raw : "NO";
+    res.json({ answer });
+  } catch (e) {
+    console.error("AI ask error:", e.message);
+    res.status(500).json({ error: e.message, answer: "ERR" });
+  }
+});
+
+// ─── Daily Challenge — save result ────────────────────────────────────────────
+app.post("/api/daily-result", async (req, res) => {
+  const { playerName, challengeDate, solved, questionsUsed, timeSeconds, secret } = req.body;
+  if (!playerName || !challengeDate) return res.status(400).json({ error: "Missing fields" });
+  try {
+    await supabase.from("daily_results").insert({
+      player_name: playerName,
+      challenge_date: challengeDate,
+      solved: !!solved,
+      questions_used: questionsUsed || 0,
+      time_seconds: timeSeconds || 0,
+      secret: secret || "",
+    });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ─── Daily Challenge — leaderboard ────────────────────────────────────────────
+app.get("/api/daily-leaderboard/:date", async (req, res) => {
+  try {
+    const { data } = await supabase
+      .from("daily_results")
+      .select("player_name, solved, questions_used, time_seconds")
+      .eq("challenge_date", req.params.date)
+      .order("solved", { ascending: false })
+      .order("questions_used", { ascending: true })
+      .order("time_seconds", { ascending: true })
+      .limit(20);
+    res.json(data || []);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
