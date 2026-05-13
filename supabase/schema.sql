@@ -41,6 +41,28 @@ BEGIN
   END IF;
 END $$;
 
+-- Daily challenge scores
+CREATE TABLE IF NOT EXISTS daily_scores (
+  id          BIGSERIAL    PRIMARY KEY,
+  date        TEXT         NOT NULL,
+  player_name TEXT         NOT NULL,
+  avatar_idx  INTEGER      NOT NULL DEFAULT 0,
+  questions   INTEGER      NOT NULL,
+  solved      BOOLEAN      NOT NULL DEFAULT FALSE,
+  created_at  TIMESTAMPTZ  DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_daily_scores_date ON daily_scores(date, questions ASC);
+
+ALTER TABLE daily_scores ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "Public daily score access"
+  ON daily_scores FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+ALTER PUBLICATION supabase_realtime ADD TABLE daily_scores;
+
 -- Optional: auto-delete sessions older than 24 hours via a cron job
 -- Enable pg_cron extension first in Supabase Dashboard → Database → Extensions
 -- SELECT cron.schedule('delete-old-sessions', '0 * * * *',
