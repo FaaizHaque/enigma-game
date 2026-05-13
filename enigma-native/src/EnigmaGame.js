@@ -126,12 +126,20 @@ const getDailyChallenge = () => {
   for (let i = 0; i < today.length; i++) {
     hash = ((hash << 5) + hash + today.charCodeAt(i)) & 0x7fffffff;
   }
+  // Interleave across categories so consecutive seeds cycle through all themes:
+  // slot 0 → personality[0], slot 1 → event[0], slot 2 → object[0], ...
+  // slot 6 → personality[1], slot 7 → event[1], etc.
   const themeIds = Object.keys(CONTENT_LIBRARY);
-  const themeId = themeIds[Math.abs(hash) % themeIds.length];
-  const theme = THEMES.find((t) => t.id === themeId) || THEMES[0];
-  const items = CONTENT_LIBRARY[themeId];
-  const item = items[Math.abs(hash * 31 + 17) % items.length];
-  return { theme, item, date: today };
+  const maxItems = Math.max(...themeIds.map((id) => CONTENT_LIBRARY[id].length));
+  const flat = [];
+  for (let i = 0; i < maxItems; i++) {
+    for (const id of themeIds) {
+      if (i < CONTENT_LIBRARY[id].length) flat.push({ themeId: id, item: CONTENT_LIBRARY[id][i] });
+    }
+  }
+  const picked = flat[Math.abs(hash) % flat.length];
+  const theme = THEMES.find((t) => t.id === picked.themeId) || THEMES[0];
+  return { theme, item: picked.item, date: today };
 };
 
 const askGemini = async (secret, facts, question) => {
