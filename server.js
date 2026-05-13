@@ -4,13 +4,13 @@ const cors = require("cors");
 const os = require("os");
 const { createClient } = require("@supabase/supabase-js");
 
-// ─── Supabase ─────────────────────────────────────────────────────────────────
+// ─── Supabase ─────────────────────────────────────────────────────────────────────────────────
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// ─── LAN IP ───────────────────────────────────────────────────────────────────
+// ─── LAN IP ───────────────────────────────────────────────────────────────────────────────────
 const getLocalIP = () => {
   for (const ifaces of Object.values(os.networkInterfaces())) {
     for (const iface of ifaces) {
@@ -20,7 +20,7 @@ const getLocalIP = () => {
   return "localhost";
 };
 
-// ─── Database helpers ─────────────────────────────────────────────────────────
+// ─── Database helpers ─────────────────────────────────────────────────────────────────────────
 const getSession = async (code) => {
   const { data } = await supabase
     .from("sessions")
@@ -51,7 +51,7 @@ const deleteSession = async (code) => {
   await supabase.from("sessions").delete().eq("room_code", code);
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers ────────────────────────────────────────────────────────────────────────────────────
 const genCode = () => {
   const c = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   return Array.from({ length: 6 }, () =>
@@ -67,12 +67,12 @@ const uniqueCode = async () => {
   return code;
 };
 
-// ─── App ──────────────────────────────────────────────────────────────────────
+// ─── App ──────────────────────────────────────────────────────────────────────────────────────
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+// ─── Routes ───────────────────────────────────────────────────────────────────────────────────────
 
 app.get("/api/info", (req, res) => {
   const host = req.headers["x-forwarded-host"] || req.hostname;
@@ -156,7 +156,51 @@ app.delete("/api/sessions/:roomCode", async (req, res) => {
   res.json({ success: true });
 });
 
-// ─── Start ────────────────────────────────────────────────────────────────────
+// ─── Daily Challenge AI ─────────────────────────────────────────────────────────────────────────
+app.post("/api/ask", async (req, res) => {
+  const { secret, facts = [], question } = req.body;
+  if (!secret || !question) return res.status(400).json({ error: "secret and question required" });
+
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return res.json({ answer: "NO", note: "AI unavailable" });
+
+  const prompt = `You are the host in a 20-questions guessing game. The secret answer is "${secret}".
+
+Key facts:
+${facts.map((f) => `- ${f}`).join("\n")}
+
+The player asks: "${question}"
+
+Reply with ONLY one of:
+YES
+NO
+PARTLY: [one short phrase, max 8 words]
+
+Do not reveal the secret. No other text.`;
+
+  try {
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+      }
+    );
+    const geminiData = await geminiRes.json();
+    const raw = (geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "NO").trim().toUpperCase();
+    if (raw.startsWith("PARTLY")) {
+      const colonIdx = raw.indexOf(":");
+      return res.json({ answer: "PARTLY", note: colonIdx >= 0 ? raw.slice(colonIdx + 1).trim() : "" });
+    }
+    return res.json({ answer: raw.startsWith("YES") ? "YES" : "NO", note: "" });
+  } catch (err) {
+    console.error("Gemini error:", err);
+    return res.json({ answer: "NO", note: "" });
+  }
+});
+
+// ─── Start ─────────────────────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Enigma session server running on port ${PORT}`);
