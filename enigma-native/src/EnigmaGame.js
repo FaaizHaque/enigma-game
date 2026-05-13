@@ -142,40 +142,17 @@ const getDailyChallenge = () => {
   return { theme, item: picked.item, date: today };
 };
 
+const SERVER_URL = Constants.expoConfig?.extra?.serverUrl || 'https://enigma-game-production.up.railway.app';
+
 const askGemini = async (secret, facts, question) => {
-  const key = Constants.expoConfig?.extra?.geminiApiKey;
-  if (!key) return { answer: 'NO', note: '' };
   try {
-    const prompt = `You are the host in a 20-questions guessing game. The secret answer is "${secret}".
-
-Key facts:
-${facts.map((f) => `- ${f}`).join('\n')}
-
-The player asks: "${question}"
-
-Reply with ONLY one of:
-YES
-NO
-PARTLY: [one short phrase, max 8 words]
-
-Do not reveal the secret. No other text.`;
-
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 60, temperature: 0.1 },
-        }),
-      }
-    );
+    const res = await fetch(`${SERVER_URL}/api/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, facts, question }),
+    });
     const data = await res.json();
-    const text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
-    if (/^PARTLY/i.test(text)) return { answer: 'PARTLY', note: text.replace(/^PARTLY[:\s]*/i, '').trim() };
-    if (/YES/i.test(text)) return { answer: 'YES', note: '' };
-    return { answer: 'NO', note: '' };
+    return { answer: data.answer || 'NO', note: data.note || '' };
   } catch {
     return { answer: 'NO', note: '' };
   }
@@ -1295,24 +1272,26 @@ export default function EnigmaGame() {
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
           {/* Solve modal */}
           <Modal visible={dailySolveOpen} transparent animationType="slide" onRequestClose={() => setDailySolveOpen(false)}>
-            <View style={S.overlay}>
-              <View style={S.modal}>
-                <View style={S.modalHandle} />
-                <Text style={S.modalTitle}>💡 Make Your Guess</Text>
-                <Text style={[S.modalSub, { marginBottom: 14 }]}>What's the secret {theme.label.toLowerCase()}?</Text>
-                <TextInput
-                  style={S.input} placeholder={`e.g. "Nikola Tesla"...`} placeholderTextColor={C.dim}
-                  value={dailySolveInput} onChangeText={setDailySolveInput}
-                  autoFocus onSubmitEditing={submitDailyGuess} returnKeyType="done"
-                />
-                <TouchableOpacity style={[S.btnGold, !dailySolveInput.trim() && S.btnDisabled]} onPress={submitDailyGuess} disabled={!dailySolveInput.trim()}>
-                  <Text style={S.btnGoldText}>Submit Guess →</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={{ marginTop: 10, alignItems: 'center', padding: 8 }} onPress={() => setDailySolveOpen(false)}>
-                  <Text style={{ color: C.dim, fontSize: 13, fontFamily: 'Outfit_400Regular' }}>Cancel</Text>
-                </TouchableOpacity>
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+              <View style={S.overlay}>
+                <View style={S.modal}>
+                  <View style={S.modalHandle} />
+                  <Text style={S.modalTitle}>💡 Make Your Guess</Text>
+                  <Text style={[S.modalSub, { marginBottom: 14 }]}>What's the secret {theme.label.toLowerCase()}?</Text>
+                  <TextInput
+                    style={S.input} placeholder={`e.g. "Nikola Tesla"...`} placeholderTextColor={C.dim}
+                    value={dailySolveInput} onChangeText={setDailySolveInput}
+                    autoFocus onSubmitEditing={submitDailyGuess} returnKeyType="done"
+                  />
+                  <TouchableOpacity style={[S.btnGold, !dailySolveInput.trim() && S.btnDisabled]} onPress={submitDailyGuess} disabled={!dailySolveInput.trim()}>
+                    <Text style={S.btnGoldText}>Submit Guess →</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={{ marginTop: 10, alignItems: 'center', padding: 8 }} onPress={() => setDailySolveOpen(false)}>
+                    <Text style={{ color: C.dim, fontSize: 13, fontFamily: 'Outfit_400Regular' }}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            </KeyboardAvoidingView>
           </Modal>
 
           <View style={{ backgroundColor: C.surface, borderBottomWidth: 1, borderBottomColor: C.border2, paddingHorizontal: 16, paddingTop: insets.top + 10, paddingBottom: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
