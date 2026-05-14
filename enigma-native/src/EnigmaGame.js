@@ -12,29 +12,6 @@ import { supabase } from './config/supabase';
 import { genCode, getInitials, fuzzyMatch } from './utils/helpers';
 import { sounds } from './utils/sounds';
 
-// Server URL (Railway in production, localhost for dev)
-const SERVER_URL = Constants.expoConfig?.extra?.serverUrl || 'http://localhost:3001';
-
-// Deterministic daily challenge — same secret for everyone on the same calendar day
-const getDailyChallenge = () => {
-  const now = new Date();
-  const dayNum = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
-
-  // Build interleaved array: entry 0 from each category, then entry 1, etc.
-  // This ensures consecutive seeds always span all categories
-  const byCategory = Object.entries(CONTENT_LIBRARY).map(([catId, secrets]) => {
-    const theme = THEMES.find(t => t.id === catId);
-    return secrets.map(s => ({ ...s, categoryId: catId, categoryIcon: theme?.icon || '❓', categoryLabel: theme?.label || catId }));
-  });
-  const allEntries = [];
-  const maxLen = Math.max(...byCategory.map(c => c.length));
-  for (let i = 0; i < maxLen; i++) {
-    byCategory.forEach(cat => { if (i < cat.length) allEntries.push(cat[i]); });
-  }
-
-  const DAILY_SEED = 2;
-  return allEntries[(dayNum + DAILY_SEED) % allEntries.length];
-};
 
 const getDailyDateKey = () => {
   const now = new Date();
