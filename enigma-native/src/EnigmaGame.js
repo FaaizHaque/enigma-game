@@ -1092,7 +1092,7 @@ export default function EnigmaGame() {
 
   const askDailyQuestion = async (question) => {
     const q = question.trim();
-    if (!q || dailyLoading || dailyQuestions.length >= 10) return;
+    if (!q || dailyLoading || dailyQuestions.length >= 20) return;
     const entry = { id: Date.now(), text: q, answer: null };
     setDailyQuestions(prev => [...prev, entry]);
     setDailyInput('');
@@ -1398,7 +1398,7 @@ export default function EnigmaGame() {
             <Text style={[S.bodyText, { lineHeight: 22 }]}>
               {'• A secret is chosen for today — same for everyone worldwide.\n'}
               {'• You have '}
-              <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>10 questions</Text>
+              <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text>
               {' to figure it out.\n'}
               {'• The AI host answers '}
               <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold' }}>Yes</Text>
@@ -1422,7 +1422,7 @@ export default function EnigmaGame() {
   // ─── DAILY GAME ───────────────────────────────────────────────────────────
   if (screen === 'daily_game' && dailyChallenge) {
     const qCount = dailyQuestions.length;
-    const qLimit = 10;
+    const qLimit = 20;
     const limitReached = qCount >= qLimit;
     const lastAnswered = dailyQuestions.length > 0 && dailyQuestions[dailyQuestions.length - 1].answer !== null;
     const canAsk = !limitReached && !dailyLoading && (dailyQuestions.length === 0 || lastAnswered);
@@ -1547,7 +1547,7 @@ export default function EnigmaGame() {
           {limitReached && (
             <View style={{ backgroundColor: 'rgba(248,81,73,0.08)', borderWidth: 1, borderColor: 'rgba(248,81,73,0.3)', borderRadius: 10, padding: 14, marginTop: 4 }}>
               <Text style={{ color: C.danger, fontFamily: 'Outfit_600SemiBold', fontSize: 14, textAlign: 'center' }}>
-                10 questions used — time to make your guess!
+                20 questions used — time to make your guess!
               </Text>
             </View>
           )}

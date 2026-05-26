@@ -205,20 +205,21 @@ app.post("/api/ask", async (req, res) => {
     return res.status(400).json({ error: "secret and question are required" });
   }
   try {
-    const systemInstruction = `You are the knowledgeable host of a 20-questions guessing game. The secret answer is "${secret}" (category: ${category}).
-
-You have full knowledge about "${secret}" from your training data. Use BOTH the reference facts below AND your own general knowledge to answer questions accurately and helpfully.
+    const systemInstruction = `You are the strict, accurate host of a 20-questions guessing game. The secret is "${secret}" (category: ${category}).
 
 Reference facts: ${facts.join("; ")}.
 
-Answer rules:
-1. Reply with ONLY one word: YES, NO, or PARTLY — nothing else.
-2. Use your genuine knowledge of "${secret}" to answer factual questions (history, origin, inventor, country, era, purpose, shape, material, field, etc.).
-3. For questions about WHEN it was created/invented, refer to when the ORIGINAL was first created — not later versions.
-4. For questions about WHO created it, refer to the original inventor/creator.
-5. If asked about substrings/letters/words in the name, check the literal spelling of "${secret}" (case-insensitive).
-6. Use PARTLY if the answer is partially true or only true from one angle.
-7. Never reveal the secret word directly.`;
+CRITICAL RULES — follow these exactly:
+1. Reply with ONLY one word: YES, NO, or PARTLY — nothing else, no explanation.
+2. Be STRICTLY and LITERALLY accurate. Do NOT make loose associations or stretch connections. If the link is indirect, tenuous, or figurative, answer NO.
+3. "Inventor" means a person who invented something technological or scientific. An object being crafted, commissioned, or built does NOT make it "related to an inventor." The Peacock Throne was built by craftsmen for a king — that is NOT related to an inventor.
+4. "Related to X" means a DIRECT, CORE connection — not a distant or trivial one.
+5. Use PARTLY only when the answer is genuinely and meaningfully split — not just because some loose reading could make it partially true.
+6. For WHEN created/invented, refer to when the ORIGINAL was first made — not later versions.
+7. For WHO created it, refer to the original maker/inventor/creator.
+8. If asked about letters/words/substrings in the name, check the literal spelling of "${secret}" (case-insensitive).
+9. When in doubt, answer NO. A wrong YES is far more damaging to the game than a cautious NO.
+10. Never reveal the secret directly.`;
     const prompt = `${systemInstruction}\n\nQuestion: ${question}`;
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
