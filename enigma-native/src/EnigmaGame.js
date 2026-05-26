@@ -1257,61 +1257,91 @@ export default function EnigmaGame() {
           </View>
         </Modal>
 
-        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 32 }]}>
-          <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-            <Text style={{ fontSize: 52, marginBottom: 10 }}>🔍</Text>
-            <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 32, letterSpacing: 6, color: C.gold }}>ENIGMA</Text>
-            <Text style={{ fontSize: 11, color: C.muted, letterSpacing: 4, textTransform: 'uppercase', marginTop: 6, fontFamily: 'Outfit_400Regular' }}>
-              Reviving the Classic Art of 20 Questions
-            </Text>
-            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 10, letterSpacing: 1 }}>v2.0</Text>
+        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 40 }]}>
+          {/* Hero */}
+          <View style={{ alignItems: 'center', paddingTop: 12, paddingBottom: 32 }}>
+            <View style={{
+              width: 90, height: 90, borderRadius: 45,
+              backgroundColor: 'rgba(212,168,74,0.1)', borderWidth: 1.5, borderColor: 'rgba(212,168,74,0.32)',
+              alignItems: 'center', justifyContent: 'center', marginBottom: 20,
+            }}>
+              <Text style={{ fontSize: 46 }}>🔍</Text>
+            </View>
+            <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 34, letterSpacing: 8, color: C.gold }}>ENIGMA</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10, paddingHorizontal: 8, width: '100%' }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.18)' }} />
+              <Text style={{ fontSize: 10, color: C.muted, letterSpacing: 3, textTransform: 'uppercase', fontFamily: 'Outfit_400Regular', paddingHorizontal: 12 }}>The Art of 20 Questions</Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.18)' }} />
+            </View>
           </View>
 
-          {/* Daily Challenge */}
-          <TouchableOpacity onPress={() => setScreen('daily_setup')} style={S.modeCard}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-              <Text style={{ fontSize: 32, marginRight: 12 }}>📅</Text>
+          {/* Daily Challenge — Primary CTA */}
+          <TouchableOpacity
+            onPress={() => setScreen('daily_setup')}
+            activeOpacity={0.85}
+            style={{ backgroundColor: 'rgba(212,168,74,0.07)', borderWidth: 1.5, borderColor: C.gold, borderRadius: 20, padding: 20, marginBottom: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 14 }}>
+              <View style={{ backgroundColor: C.gold, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+                <Text style={{ color: '#1a0f00', fontSize: 10, fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>DAILY</Text>
+              </View>
+              <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_400Regular', letterSpacing: 1 }}>
+                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 16 }}>
+              <Text style={{ fontSize: 40 }}>📅</Text>
               <View style={{ flex: 1 }}>
-                <Text style={[S.modeCardTitle, { color: C.gold }]}>Daily Challenge</Text>
-                <Text style={S.modeCardDesc}>One secret. 10 AI-answered questions. Solve today's Enigma!</Text>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, letterSpacing: 1, color: C.gold, marginBottom: 5 }}>Daily Challenge</Text>
+                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 18 }}>
+                  One secret. 20 AI questions. Crack today's Enigma!
+                </Text>
               </View>
             </View>
-            <View style={{ backgroundColor: 'rgba(212,168,74,0.12)', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 5, alignSelf: 'flex-start' }}>
-              <Text style={{ color: C.gold, fontSize: 11, fontFamily: 'Outfit_700Bold', letterSpacing: 1 }}>TODAY'S CHALLENGE →</Text>
+            <View style={{ backgroundColor: C.gold, borderRadius: 12, paddingVertical: 13, alignItems: 'center' }}>
+              <Text style={{ color: '#1a0f00', fontSize: 14, fontFamily: 'Outfit_700Bold', letterSpacing: 0.5 }}>Play Today's Challenge →</Text>
             </View>
           </TouchableOpacity>
-
-          <View style={{ height: 12 }} />
 
           {/* Multiplayer */}
-          <TouchableOpacity onPress={() => setScreen('multi_home')} style={[S.modeCard, { borderColor: 'rgba(124,58,237,0.5)' }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-              <Text style={{ fontSize: 32, marginRight: 12 }}>👥</Text>
+          <TouchableOpacity
+            onPress={() => setScreen('multi_home')}
+            activeOpacity={0.85}
+            style={{ backgroundColor: 'rgba(124,58,237,0.07)', borderWidth: 1.5, borderColor: 'rgba(124,58,237,0.45)', borderRadius: 20, padding: 20, marginBottom: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <Text style={{ fontSize: 40 }}>👥</Text>
               <View style={{ flex: 1 }}>
-                <Text style={[S.modeCardTitle, { color: C.violet2 }]}>Multiplayer</Text>
-                <Text style={S.modeCardDesc}>Create or join a room. One host, all guessers. Up to 20 questions live.</Text>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, letterSpacing: 1, color: C.violet2, marginBottom: 5 }}>Multiplayer</Text>
+                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 18 }}>
+                  Create or join a room. One host, all guessers. Live questions.
+                </Text>
               </View>
+              <Text style={{ fontSize: 22, color: C.violet2 }}>›</Text>
             </View>
           </TouchableOpacity>
 
-          <View style={{ height: 12 }} />
-
           {/* Solo — coming soon */}
-          <View style={[S.modeCard, { borderColor: C.border, opacity: 0.45 }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-              <Text style={{ fontSize: 32, marginRight: 12 }}>🤖</Text>
+          <View style={{ backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: 20, padding: 20, opacity: 0.38 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <Text style={{ fontSize: 40 }}>🤖</Text>
               <View style={{ flex: 1 }}>
-                <Text style={[S.modeCardTitle, { color: C.muted }]}>Solo Mode</Text>
-                <Text style={S.modeCardDesc}>Play alone against an AI host. Coming soon!</Text>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, letterSpacing: 1, color: C.muted, marginBottom: 5 }}>Solo Mode</Text>
+                <Text style={{ fontSize: 13, color: C.dim, fontFamily: 'Outfit_400Regular', lineHeight: 18 }}>
+                  Play alone against an AI host. Coming soon!
+                </Text>
               </View>
-            </View>
-            <View style={{ backgroundColor: 'rgba(90,90,136,0.15)', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 5, alignSelf: 'flex-start' }}>
-              <Text style={{ color: C.dim, fontSize: 11, fontFamily: 'Outfit_700Bold', letterSpacing: 1 }}>COMING SOON</Text>
+              <View style={{ backgroundColor: 'rgba(90,90,136,0.25)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+                <Text style={{ color: C.dim, fontSize: 10, fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>SOON</Text>
+              </View>
             </View>
           </View>
 
-          <TouchableOpacity style={[S.btnOutline, { marginTop: 28, borderColor: 'rgba(200,168,74,0.25)' }]} onPress={() => setHowToPlayOpen(true)}>
-            <Text style={[S.btnOutlineText, { color: C.gold }]}>📖  How to Play</Text>
+          <View style={{ height: 1, backgroundColor: 'rgba(90,90,136,0.2)', marginTop: 24, marginBottom: 20 }} />
+
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(212,168,74,0.22)', backgroundColor: 'rgba(212,168,74,0.04)' }}
+            onPress={() => setHowToPlayOpen(true)}>
+            <Text style={{ fontSize: 16 }}>📖</Text>
+            <Text style={{ color: C.gold, fontSize: 14, fontFamily: 'Outfit_600SemiBold' }}>How to Play</Text>
           </TouchableOpacity>
         </ScrollView>
       </View>
@@ -1947,47 +1977,72 @@ export default function EnigmaGame() {
             </KeyboardAvoidingView>
           </Modal>
 
-          <View style={{ backgroundColor: C.surface, borderBottomWidth: 1, borderBottomColor: C.border2, paddingHorizontal: 16, paddingTop: insets.top + 10, paddingBottom: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Text style={{ fontSize: 18 }}>📅</Text>
-              <View>
-                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 13, color: C.gold }}>Daily Challenge</Text>
-                <Text style={{ fontSize: 11, color: C.muted, fontFamily: 'Outfit_400Regular' }}>{theme.icon} {theme.label}</Text>
+          <View style={{ backgroundColor: C.surface, borderBottomWidth: 1, borderBottomColor: C.border2, paddingHorizontal: 16, paddingTop: insets.top + 10, paddingBottom: 14 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <TouchableOpacity onPress={() => setScreen('home')}>
+                <Text style={S.backBtn}>← Home</Text>
+              </TouchableOpacity>
+              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 14, color: C.gold, letterSpacing: 1 }}>Daily Challenge</Text>
+              <View style={{
+                backgroundColor: qCount >= 16 ? 'rgba(239,68,68,0.15)' : 'rgba(212,168,74,0.12)',
+                borderWidth: 1, borderColor: qCount >= 16 ? 'rgba(239,68,68,0.4)' : C.goldDim,
+                borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4,
+              }}>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 13, color: qCount >= 16 ? C.danger : qCount >= 11 ? C.warn : C.gold }}>
+                  {qCount} / 20
+                </Text>
               </View>
             </View>
-            <View style={{ alignItems: 'flex-end' }}>
-              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 18, color: qCount >= 16 ? C.danger : qCount >= 11 ? C.warn : C.gold }}>{qCount}</Text>
-              <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular' }}>of 20</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'rgba(212,168,74,0.06)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(212,168,74,0.15)' }}>
+              <Text style={{ fontSize: 26 }}>{theme.icon}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Today's Category</Text>
+                <Text style={{ fontFamily: 'Cinzel_600SemiBold', fontSize: 15, color: C.text }}>{theme.label}</Text>
+              </View>
+              <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_400Regular', maxWidth: 90, textAlign: 'right' }}>{theme.desc}</Text>
             </View>
           </View>
 
           <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 8 }}>
             {qCount === 0 ? (
-              <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-                <Text style={{ fontSize: 40, marginBottom: 10 }}>🤔</Text>
-                <Text style={[S.muted, { textAlign: 'center', lineHeight: 20 }]}>
-                  Ask yes/no questions to uncover{'\n'}today's {theme.label.toLowerCase()}.
+              <View style={{ paddingTop: 24, paddingBottom: 16 }}>
+                <View style={{ backgroundColor: 'rgba(212,168,74,0.05)', borderWidth: 1.5, borderColor: 'rgba(212,168,74,0.18)', borderRadius: 20, padding: 28, alignItems: 'center', marginBottom: 20 }}>
+                  <Text style={{ fontSize: 52, marginBottom: 14 }}>❓</Text>
+                  <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.gold, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>
+                    Mystery {theme.label}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 18, marginBottom: 16 }}>
+                    {theme.desc}
+                  </Text>
+                  <View style={{ height: 1, backgroundColor: 'rgba(212,168,74,0.15)', width: '75%', marginBottom: 16 }} />
+                  <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 2, textTransform: 'uppercase', fontFamily: 'Outfit_400Regular', marginBottom: 6 }}>Hint</Text>
+                  <Text style={{ fontSize: 14, color: C.text, fontFamily: 'Outfit_500Medium', textAlign: 'center', lineHeight: 22, fontStyle: 'italic' }}>
+                    "{item.hint}"
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 20 }}>
+                  Ask yes/no questions to narrow it down.{'\n'}
+                  You have <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> to crack the secret!
                 </Text>
-                <Text style={[S.muted, { marginTop: 8, fontSize: 12, color: C.dim }]}>Hint: {item.hint}</Text>
               </View>
             ) : (
-              dailyQuestions.map((q) => (
-                <View key={q.id} style={{ marginBottom: 12 }}>
-                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start' }}>
-                    <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: C.card2, borderWidth: 1, borderColor: C.border2, alignItems: 'center', justifyContent: 'center' }}>
-                      <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_700Bold' }}>Q</Text>
+              dailyQuestions.map((q, idx) => (
+                <View key={q.id} style={{ marginBottom: 10, backgroundColor: C.card, borderRadius: 14, borderWidth: 1, borderColor: C.border, padding: 12 }}>
+                  <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+                    <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: C.card2, borderWidth: 1, borderColor: C.border2, alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
+                      <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_700Bold' }}>{idx + 1}</Text>
                     </View>
-                    <Text style={{ flex: 1, fontSize: 14, color: C.text, fontFamily: 'Outfit_500Medium', paddingTop: 3 }}>{q.text}</Text>
+                    <Text style={{ flex: 1, fontSize: 14, color: C.text, fontFamily: 'Outfit_500Medium', lineHeight: 20 }}>{q.text}</Text>
                   </View>
-                  <View style={{ marginLeft: 34, marginTop: 6 }}>
+                  <View style={{ marginLeft: 34, marginTop: 8 }}>
                     {q.answer === 'PARTLY' ? (
                       <View style={[S.qBadge, { backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.3)' }]}>
                         <Text style={{ color: C.warn, fontSize: 13, fontFamily: 'Outfit_700Bold' }}>~ Partly{q.note ? ` — ${q.note}` : ''}</Text>
                       </View>
                     ) : (
-                      <View style={[S.qBadge, { backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)' }]}>
+                      <View style={[S.qBadge, { backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)' }]}>
                         <Text style={{ color: q.answer === 'YES' ? C.success : C.danger, fontSize: 13, fontFamily: 'Outfit_700Bold' }}>
-                          {q.answer === 'YES' ? '✓ Yes' : '✗ No'}
+                          {q.answer === 'YES' ? '✓  Yes' : '✗  No'}
                         </Text>
                       </View>
                     )}
@@ -2003,24 +2058,26 @@ export default function EnigmaGame() {
             )}
           </ScrollView>
 
-          <View style={{ padding: 12, paddingBottom: insets.bottom + 10, borderTopWidth: 1, borderTopColor: C.border, backgroundColor: C.bg }}>
+          <View style={{ paddingHorizontal: 12, paddingTop: 10, paddingBottom: insets.bottom + 10, borderTopWidth: 1, borderTopColor: C.border2, backgroundColor: C.surface }}>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
               <TextInput
-                style={[S.input, { flex: 1, marginBottom: 0, paddingVertical: 12 }]}
+                style={[S.input, { flex: 1, marginBottom: 0, paddingVertical: 13 }]}
                 placeholder="Ask a yes/no question…" placeholderTextColor={C.dim}
                 value={dailyInput} onChangeText={setDailyInput}
                 onSubmitEditing={submitDailyQuestion} returnKeyType="send"
                 editable={!dailyAsking && qCount < 20}
               />
               <TouchableOpacity
-                style={[S.btnGold, { width: 'auto', paddingHorizontal: 18, borderRadius: 10 }, (!dailyInput.trim() || dailyAsking) && S.btnDisabled]}
+                style={[{ backgroundColor: C.violet, borderRadius: 12, width: 50, alignItems: 'center', justifyContent: 'center' }, (!dailyInput.trim() || dailyAsking) && S.btnDisabled]}
                 onPress={submitDailyQuestion} disabled={!dailyInput.trim() || dailyAsking}
               >
-                <Text style={S.btnGoldText}>Ask</Text>
+                <Text style={{ fontSize: 20 }}>↑</Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity style={S.btnSolve} onPress={() => { setDailySolveInput(''); setDailySolveOpen(true); }}>
-              <Text style={{ color: '#fff', fontFamily: 'Outfit_700Bold', fontSize: 14 }}>💡 I Know It — Solve!</Text>
+            <TouchableOpacity
+              style={{ backgroundColor: 'rgba(212,168,74,0.1)', borderWidth: 1.5, borderColor: C.goldDim, borderRadius: 12, paddingVertical: 13, alignItems: 'center' }}
+              onPress={() => { setDailySolveInput(''); setDailySolveOpen(true); }}>
+              <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold', fontSize: 14 }}>💡 I Know the Answer — Solve!</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
