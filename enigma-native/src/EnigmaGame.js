@@ -1791,7 +1791,7 @@ export default function EnigmaGame() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <View style={S.screenHeader}>
-            <TouchableOpacity onPress={() => setScreen('home')}>
+            <TouchableOpacity onPress={() => setScreen('modes')}>
               <Text style={S.backBtn}>← Back</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={loadPublicRooms} disabled={loadingRooms}>
