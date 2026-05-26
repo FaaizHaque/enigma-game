@@ -526,17 +526,10 @@ export default function EnigmaGame() {
   const [dailyLeaderboard, setDailyLeaderboard] = useState([]);
   const [dailyLoadingBoard, setDailyLoadingBoard] = useState(false);
 
-  // Daily Challenge
   const [dailyChallenge, setDailyChallenge] = useState(null);
   const [dailyPlayerName, setDailyPlayerName] = useState('');
-  const [dailyQuestions, setDailyQuestions] = useState([]);
-  const [dailyInput, setDailyInput] = useState('');
-  const [dailySolveInput, setDailySolveInput] = useState('');
-  const [dailySolveOpen, setDailySolveOpen] = useState(false);
   const [dailyLoading, setDailyLoading] = useState(false);
   const [dailyStartTime, setDailyStartTime] = useState(null);
-  const [dailyResult, setDailyResult] = useState(null);
-  const [dailyLeaderboard, setDailyLeaderboard] = useState([]);
   const [dailyInfoOpen, setDailyInfoOpen] = useState(false);
 
   const feedScrollRef = useRef(null);
