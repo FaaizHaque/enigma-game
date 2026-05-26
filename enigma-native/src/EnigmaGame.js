@@ -538,6 +538,16 @@ export default function EnigmaGame() {
   const [dailyStartTime, setDailyStartTime] = useState(null);
   const [dailyInfoOpen, setDailyInfoOpen] = useState(false);
 
+  // Solo mode state
+  const [soloChallenge, setSoloChallenge] = useState(null);
+  const [soloQuestions, setSoloQuestions] = useState([]);
+  const [soloInput, setSoloInput] = useState('');
+  const [soloSolveInput, setSoloSolveInput] = useState('');
+  const [soloSolveOpen, setSoloSolveOpen] = useState(false);
+  const [soloLoading, setSoloLoading] = useState(false);
+  const [soloResult, setSoloResult] = useState(null);
+  const [soloCategory, setSoloCategory] = useState('random');
+
   const feedScrollRef = useRef(null);
   const gameRef = useRef(game);
   const [guesserSecsLeft, setGuesserSecsLeft] = useState(30);
@@ -1070,6 +1080,54 @@ export default function EnigmaGame() {
     }
   };
 
+  // ─── Solo Mode helpers ────────────────────────────────────────────────────
+  const getRandomChallenge = (categoryId = 'random') => {
+    const themeIds = categoryId === 'random' ? Object.keys(CONTENT_LIBRARY) : [categoryId];
+    const pool = themeIds.flatMap((id) => CONTENT_LIBRARY[id].map((item) => ({ themeId: id, item })));
+    const picked = pool[Math.floor(Math.random() * pool.length)];
+    const theme = THEMES.find((t) => t.id === picked.themeId) || THEMES[0];
+    return { secret: picked.item.secret, hint: picked.item.hint, facts: picked.item.facts, categoryLabel: theme.label, categoryIcon: theme.icon };
+  };
+
+  const startSoloChallenge = () => {
+    setSoloChallenge(getRandomChallenge(soloCategory));
+    setSoloQuestions([]);
+    setSoloInput('');
+    setSoloSolveInput('');
+    setSoloSolveOpen(false);
+    setSoloResult(null);
+    setScreen('solo_game');
+  };
+
+  const askSoloQuestion = async (question) => {
+    const q = question.trim();
+    if (!q || soloLoading || soloQuestions.length >= 20 || !soloChallenge) return;
+    const entry = { id: Date.now(), text: q, answer: null };
+    setSoloQuestions((prev) => [...prev, entry]);
+    setSoloInput('');
+    setSoloLoading(true);
+    try {
+      const res = await fetch(`${SERVER_URL}/api/ask`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: soloChallenge.secret, facts: soloChallenge.facts, category: soloChallenge.categoryLabel, question: q }),
+      });
+      const data = await res.json();
+      setSoloQuestions((prev) => prev.map((qq) => qq.id === entry.id ? { ...qq, answer: data.answer || 'ERR' } : qq));
+    } catch {
+      setSoloQuestions((prev) => prev.map((qq) => qq.id === entry.id ? { ...qq, answer: 'ERR' } : qq));
+    } finally {
+      setSoloLoading(false);
+    }
+  };
+
+  const finishSoloChallenge = (guess) => {
+    if (!guess.trim() || !soloChallenge) return;
+    const isCorrect = fuzzyMatch(guess.trim(), soloChallenge.secret);
+    setSoloResult({ solved: isCorrect, questionsUsed: soloQuestions.length });
+    setSoloSolveOpen(false);
+    setScreen('solo_result');
+  };
+
   // ─── Daily Challenge helpers ──────────────────────────────────────────────
   const startDailyChallenge = () => {
     const { theme, item, date } = getDailyChallenge();
@@ -1328,21 +1386,22 @@ export default function EnigmaGame() {
             </View>
           </TouchableOpacity>
 
-          {/* Solo — coming soon */}
-          <View style={{ backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: 20, padding: 20, opacity: 0.38 }}>
+          {/* Solo */}
+          <TouchableOpacity
+            onPress={() => setScreen('solo_setup')}
+            activeOpacity={0.85}
+            style={{ backgroundColor: 'rgba(34,197,94,0.06)', borderWidth: 1.5, borderColor: 'rgba(34,197,94,0.35)', borderRadius: 20, padding: 20 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <Text style={{ fontSize: 40 }}>🤖</Text>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, letterSpacing: 1, color: C.muted, marginBottom: 5 }}>Solo Mode</Text>
-                <Text style={{ fontSize: 13, color: C.dim, fontFamily: 'Outfit_400Regular', lineHeight: 18 }}>
-                  Play alone against an AI host. Coming soon!
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, letterSpacing: 1, color: C.success, marginBottom: 5 }}>Solo Mode</Text>
+                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 18 }}>
+                  AI hides a secret. You have 20 questions to crack it.
                 </Text>
               </View>
-              <View style={{ backgroundColor: 'rgba(90,90,136,0.25)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
-                <Text style={{ color: C.dim, fontSize: 10, fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>SOON</Text>
-              </View>
+              <Text style={{ fontSize: 22, color: C.success }}>›</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         </ScrollView>
       </View>
     );
@@ -1698,6 +1757,244 @@ export default function EnigmaGame() {
           </TouchableOpacity>
         </ScrollView>
       </View>
+    );
+  }
+
+  // ─── SOLO SETUP ──────────────────────────────────────────────────────────
+  if (screen === 'solo_setup') {
+    return (
+      <ScrollView style={[S.flex, { backgroundColor: C.bg }]} contentContainerStyle={[S.screen, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 32 }]}>
+        <View style={S.screenHeader}>
+          <TouchableOpacity onPress={() => setScreen('modes')}><Text style={S.backBtn}>← Back</Text></TouchableOpacity>
+        </View>
+        <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+          <Text style={{ fontSize: 48, marginBottom: 10 }}>🤖</Text>
+          <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.text, letterSpacing: 2 }}>Solo Mode</Text>
+          <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 6, textAlign: 'center' }}>
+            The AI hides a secret. You have 20 questions to crack it.
+          </Text>
+        </View>
+
+        <Text style={[S.sectionLabel, { marginTop: 8, marginBottom: 12 }]}>Choose a Category</Text>
+
+        {/* Random tile */}
+        <TouchableOpacity
+          onPress={() => setSoloCategory('random')}
+          style={{ backgroundColor: soloCategory === 'random' ? 'rgba(212,168,74,0.1)' : C.card, borderWidth: 1.5, borderColor: soloCategory === 'random' ? C.gold : C.border2, borderRadius: 14, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          <Text style={{ fontSize: 28 }}>🎲</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === 'random' ? C.gold : C.text }}>Any Category</Text>
+            <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 2 }}>Surprise me — pick from all categories</Text>
+          </View>
+          {soloCategory === 'random' && <Text style={{ color: C.gold, fontSize: 18 }}>✓</Text>}
+        </TouchableOpacity>
+
+        {/* Theme tiles */}
+        {THEMES.map((t) => (
+          <TouchableOpacity
+            key={t.id}
+            onPress={() => setSoloCategory(t.id)}
+            style={{ backgroundColor: soloCategory === t.id ? 'rgba(212,168,74,0.1)' : C.card, borderWidth: 1.5, borderColor: soloCategory === t.id ? C.gold : C.border2, borderRadius: 14, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+            <Text style={{ fontSize: 28 }}>{t.icon}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === t.id ? C.gold : C.text }}>{t.label}</Text>
+              <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 2 }}>{t.desc}</Text>
+            </View>
+            {soloCategory === t.id && <Text style={{ color: C.gold, fontSize: 18 }}>✓</Text>}
+          </TouchableOpacity>
+        ))}
+
+        <View style={{ height: 12 }} />
+        <TouchableOpacity style={S.btnGold} onPress={startSoloChallenge}>
+          <Text style={S.btnGoldText}>Start Game →</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    );
+  }
+
+  // ─── SOLO GAME ────────────────────────────────────────────────────────────
+  if (screen === 'solo_game' && soloChallenge) {
+    const qCount = soloQuestions.length;
+    const qLimit = 20;
+    const limitReached = qCount >= qLimit;
+    const lastAnswered = soloQuestions.length === 0 || soloQuestions[soloQuestions.length - 1].answer !== null;
+    const canAsk = !limitReached && !soloLoading && lastAnswered;
+
+    return (
+      <View style={[S.flex, { backgroundColor: C.bg }]}>
+        {/* Solve modal */}
+        <Modal visible={soloSolveOpen} animationType="slide" transparent onRequestClose={() => setSoloSolveOpen(false)}>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+            <View style={S.overlay}>
+              <View style={S.modal}>
+                <View style={S.modalHandle} />
+                <Text style={S.modalTitle}>💡 Make Your Guess</Text>
+                <Text style={[S.modalSub, { marginBottom: 16 }]}>What is the secret? Type your answer below.</Text>
+                <TextInput
+                  style={[S.input, { marginBottom: 16 }]}
+                  placeholder="Your answer…"
+                  placeholderTextColor={C.dim}
+                  value={soloSolveInput}
+                  onChangeText={setSoloSolveInput}
+                  autoFocus returnKeyType="go"
+                  onSubmitEditing={() => finishSoloChallenge(soloSolveInput)}
+                />
+                <TouchableOpacity style={[S.btnGold, !soloSolveInput.trim() && S.btnDisabled]} onPress={() => finishSoloChallenge(soloSolveInput)} disabled={!soloSolveInput.trim()}>
+                  <Text style={S.btnGoldText}>Submit Answer</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[S.btnOutline, { marginTop: 10 }]} onPress={() => setSoloSolveOpen(false)}>
+                  <Text style={S.btnOutlineText}>Ask More Questions First</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </Modal>
+
+        {/* Header */}
+        <View style={{ backgroundColor: C.surface, borderBottomWidth: 1, borderBottomColor: C.border2, paddingHorizontal: 16, paddingTop: insets.top + 10, paddingBottom: 14 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <TouchableOpacity onPress={() => Alert.alert('Abandon Game?', 'Your progress will be lost.', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Leave', style: 'destructive', onPress: () => setScreen('modes') },
+            ])}>
+              <Text style={S.backBtn}>← Modes</Text>
+            </TouchableOpacity>
+            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 14, color: C.text, letterSpacing: 1 }}>Solo Mode</Text>
+            <View style={{ backgroundColor: qCount >= 16 ? 'rgba(239,68,68,0.15)' : 'rgba(212,168,74,0.12)', borderWidth: 1, borderColor: qCount >= 16 ? 'rgba(239,68,68,0.4)' : C.goldDim, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 }}>
+              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 13, color: qCount >= 16 ? C.danger : qCount >= 11 ? C.warn : C.gold }}>{qCount} / {qLimit}</Text>
+            </View>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'rgba(167,139,250,0.07)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(167,139,250,0.18)' }}>
+            <Text style={{ fontSize: 26 }}>{soloChallenge.categoryIcon}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Category</Text>
+              <Text style={{ fontFamily: 'Cinzel_600SemiBold', fontSize: 15, color: C.text }}>{soloChallenge.categoryLabel}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Q&A feed */}
+        <ScrollView ref={feedScrollRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 24 }} onContentSizeChange={() => feedScrollRef.current?.scrollToEnd({ animated: true })}>
+          {qCount === 0 ? (
+            <View style={{ paddingTop: 24, paddingBottom: 16 }}>
+              <View style={{ backgroundColor: 'rgba(167,139,250,0.05)', borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.18)', borderRadius: 20, padding: 28, alignItems: 'center' }}>
+                <Text style={{ fontSize: 52, marginBottom: 14 }}>🤖</Text>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.violet2, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>
+                  I'm thinking of a {soloChallenge.categoryLabel}…
+                </Text>
+                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 20 }}>
+                  Ask yes/no questions to narrow it down.{'\n'}You have <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> to crack the secret!
+                </Text>
+              </View>
+            </View>
+          ) : (
+            soloQuestions.map((q, idx) => (
+              <View key={q.id} style={{ marginBottom: 10, backgroundColor: C.card, borderRadius: 14, borderWidth: 1, borderColor: C.border, padding: 12 }}>
+                <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+                  <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: C.card2, borderWidth: 1, borderColor: C.border2, alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
+                    <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_700Bold' }}>{idx + 1}</Text>
+                  </View>
+                  <Text style={{ flex: 1, fontSize: 14, color: C.text, fontFamily: 'Outfit_500Medium', lineHeight: 20 }}>{q.text}</Text>
+                </View>
+                <View style={{ marginLeft: 34, marginTop: 8 }}>
+                  {q.answer === null ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <ActivityIndicator size="small" color={C.gold} />
+                      <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>AI is thinking…</Text>
+                    </View>
+                  ) : (
+                    <View style={[S.qBadge, {
+                      borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : q.answer === 'ERR' ? 'rgba(150,150,150,0.4)' : 'rgba(240,160,48,0.4)',
+                      backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.08)' : q.answer === 'NO' ? 'rgba(248,81,73,0.08)' : q.answer === 'ERR' ? 'rgba(150,150,150,0.08)' : 'rgba(240,160,48,0.08)',
+                    }]}>
+                      <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: q.answer === 'YES' ? C.success : q.answer === 'NO' ? C.danger : q.answer === 'ERR' ? C.dim : C.warn }}>
+                        {q.answer === 'YES' ? '✓ Yes' : q.answer === 'NO' ? '✗ No' : q.answer === 'ERR' ? '⚠ Error' : '~ Partly'}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            ))
+          )}
+          {limitReached && (
+            <View style={{ backgroundColor: 'rgba(248,81,73,0.08)', borderWidth: 1, borderColor: 'rgba(248,81,73,0.3)', borderRadius: 10, padding: 14, marginTop: 4 }}>
+              <Text style={{ color: C.danger, fontFamily: 'Outfit_600SemiBold', fontSize: 14, textAlign: 'center' }}>20 questions used — time to make your guess!</Text>
+            </View>
+          )}
+        </ScrollView>
+
+        {/* Bottom input + solve */}
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={{ backgroundColor: C.surface, borderTopWidth: 1, borderTopColor: C.border2, padding: 12, paddingBottom: insets.bottom + 12 }}>
+            <TouchableOpacity style={[S.btnGold, { marginBottom: 10 }]} onPress={() => { setSoloSolveInput(''); setSoloSolveOpen(true); }}>
+              <Text style={S.btnGoldText}>💡 I Know the Answer — Solve!</Text>
+            </TouchableOpacity>
+            {!limitReached && (
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TextInput
+                  style={[S.input, { flex: 1, marginBottom: 0 }]}
+                  placeholder={canAsk ? 'Ask a yes/no question…' : soloLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
+                  placeholderTextColor={C.dim}
+                  value={soloInput} onChangeText={setSoloInput}
+                  editable={canAsk} returnKeyType="send"
+                  onSubmitEditing={() => askSoloQuestion(soloInput)}
+                />
+                <TouchableOpacity
+                  style={[{ backgroundColor: C.violet, borderRadius: 12, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' }, (!canAsk || !soloInput.trim()) && { opacity: 0.4 }]}
+                  onPress={() => askSoloQuestion(soloInput)} disabled={!canAsk || !soloInput.trim()}>
+                  <Text style={{ color: '#fff', fontSize: 18 }}>↑</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </KeyboardAvoidingView>
+      </View>
+    );
+  }
+
+  // ─── SOLO RESULT ──────────────────────────────────────────────────────────
+  if (screen === 'solo_result' && soloResult && soloChallenge) {
+    const { solved, questionsUsed } = soloResult;
+    return (
+      <ScrollView style={[S.flex, { backgroundColor: C.bg }]} contentContainerStyle={[S.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 32 }]}>
+        <View style={S.screenHeader}>
+          <TouchableOpacity onPress={() => setScreen('modes')}><Text style={S.backBtn}>← Modes</Text></TouchableOpacity>
+        </View>
+
+        {/* Result hero */}
+        <View style={{ alignItems: 'center', paddingVertical: 28 }}>
+          <Text style={{ fontSize: 56, marginBottom: 10 }}>{solved ? '🎉' : '😔'}</Text>
+          <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 24, color: solved ? C.gold : C.muted, letterSpacing: 2 }}>
+            {solved ? 'You Cracked It!' : 'Not This Time'}
+          </Text>
+          <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 8 }}>
+            {solved ? `Solved in ${questionsUsed} question${questionsUsed !== 1 ? 's' : ''}` : `Used all ${questionsUsed} questions`}
+          </Text>
+        </View>
+
+        {/* Secret reveal */}
+        <View style={{ backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1, borderColor: 'rgba(109,40,217,0.4)', borderRadius: 14, padding: 20, alignItems: 'center', marginBottom: 16 }}>
+          <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 8 }}>The Secret Was</Text>
+          <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.violet2, textAlign: 'center' }}>{soloChallenge.secret}</Text>
+          <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 6 }}>{soloChallenge.categoryIcon} {soloChallenge.categoryLabel}</Text>
+        </View>
+
+        {/* Hint */}
+        <View style={[S.infoCard, { marginBottom: 24 }]}>
+          <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>Did You Know</Text>
+          <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 20, fontStyle: 'italic' }}>"{soloChallenge.hint}"</Text>
+        </View>
+
+        <TouchableOpacity style={S.btnGold} onPress={startSoloChallenge}>
+          <Text style={S.btnGoldText}>Play Again →</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[S.btnOutline, { marginTop: 10 }]} onPress={() => setScreen('solo_setup')}>
+          <Text style={S.btnOutlineText}>Change Category</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{ marginTop: 10, alignItems: 'center', padding: 10 }} onPress={() => setScreen('modes')}>
+          <Text style={{ color: C.dim, fontSize: 13, fontFamily: 'Outfit_400Regular' }}>← Back to Modes</Text>
+        </TouchableOpacity>
+      </ScrollView>
     );
   }
 
