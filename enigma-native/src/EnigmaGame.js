@@ -1482,7 +1482,7 @@ export default function EnigmaGame() {
     return (
       <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
         <Animated.Image
-          source={require('../assets/logo-main-transparent.png')}
+          source={require('../assets/logo-haque-games.png')}
           style={{ width: 280, height: 280, opacity: splashOpacity, transform: [{ scale: splashScale }] }}
           resizeMode="contain"
         />
