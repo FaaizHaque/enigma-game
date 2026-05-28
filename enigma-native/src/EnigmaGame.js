@@ -606,18 +606,27 @@ const getDailyChallenge = () => {
 
 const SERVER_URL = Constants.expoConfig?.extra?.serverUrl || 'https://enigma-game-production.up.railway.app';
 
-const askGemini = async (secret, facts, question) => {
-  try {
-    const res = await fetch(`${SERVER_URL}/api/ask`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, facts, question }),
-    });
-    const data = await res.json();
-    return { answer: data.answer || 'NO', note: data.note || '' };
-  } catch {
-    return { answer: 'NO', note: '' };
+// Robust ask: client-side retries + per-attempt timeout to survive Railway cold starts
+const askWithRetry = async (payload, retries = 3, timeoutMs = 12000) => {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    if (attempt > 0) await new Promise(r => setTimeout(r, 2000 * attempt));
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      const res = await fetch(`${SERVER_URL}/api/ask`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      const data = await res.json();
+      return data.answer && ['YES', 'NO', 'PARTLY'].includes(data.answer) ? data.answer : 'ERR';
+    } catch {
+      // retry
+    }
   }
+  return 'ERR';
 };
 
 const dailyStars = (questions, solved) => {
@@ -1361,21 +1370,21 @@ export default function EnigmaGame() {
     const q = question.trim();
     if (!q || soloLoading || soloQuestions.length >= 20 || !soloChallenge) return;
     const entry = { id: Date.now(), text: q, answer: null };
-    setSoloQuestions((prev) => [...prev, entry]);
+    setSoloQuestions(prev => [...prev, entry]);
     setSoloInput('');
     setSoloLoading(true);
-    try {
-      const res = await fetch(`${SERVER_URL}/api/ask`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret: soloChallenge.secret, facts: soloChallenge.facts, category: soloChallenge.categoryLabel, question: q }),
-      });
-      const data = await res.json();
-      setSoloQuestions((prev) => prev.map((qq) => qq.id === entry.id ? { ...qq, answer: data.answer || 'ERR' } : qq));
-    } catch {
-      setSoloQuestions((prev) => prev.map((qq) => qq.id === entry.id ? { ...qq, answer: 'ERR' } : qq));
-    } finally {
-      setSoloLoading(false);
-    }
+    const answer = await askWithRetry({ secret: soloChallenge.secret, facts: soloChallenge.facts, category: soloChallenge.categoryLabel, question: q });
+    setSoloQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer } : qq));
+    setSoloLoading(false);
+  };
+
+  const retrySoloQuestion = async (id, text) => {
+    if (soloLoading || !soloChallenge) return;
+    setSoloQuestions(prev => prev.map(qq => qq.id === id ? { ...qq, answer: null } : qq));
+    setSoloLoading(true);
+    const answer = await askWithRetry({ secret: soloChallenge.secret, facts: soloChallenge.facts, category: soloChallenge.categoryLabel, question: text });
+    setSoloQuestions(prev => prev.map(qq => qq.id === id ? { ...qq, answer } : qq));
+    setSoloLoading(false);
   };
 
   const finishSoloChallenge = (guess) => {
@@ -1413,19 +1422,18 @@ export default function EnigmaGame() {
     setDailyQuestions(prev => [...prev, entry]);
     setDailyInput('');
     setDailyLoading(true);
-    try {
-      const res = await fetch(`${SERVER_URL}/api/ask`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret: dailyChallenge.secret, facts: dailyChallenge.facts, category: dailyChallenge.categoryLabel, question: q }),
-      });
-      const data = await res.json();
-      setDailyQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer: data.answer || 'ERR' } : qq));
-    } catch {
-      setDailyQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer: 'ERR' } : qq));
-    } finally {
-      setDailyLoading(false);
-    }
+    const answer = await askWithRetry({ secret: dailyChallenge.secret, facts: dailyChallenge.facts, category: dailyChallenge.categoryLabel, question: q });
+    setDailyQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer } : qq));
+    setDailyLoading(false);
+  };
+
+  const retryDailyQuestion = async (id, text) => {
+    if (dailyLoading || !dailyChallenge) return;
+    setDailyQuestions(prev => prev.map(qq => qq.id === id ? { ...qq, answer: null } : qq));
+    setDailyLoading(true);
+    const answer = await askWithRetry({ secret: dailyChallenge.secret, facts: dailyChallenge.facts, category: dailyChallenge.categoryLabel, question: text });
+    setDailyQuestions(prev => prev.map(qq => qq.id === id ? { ...qq, answer } : qq));
+    setDailyLoading(false);
   };
 
   const finishDailyChallenge = async (guess) => {
@@ -1839,18 +1847,21 @@ export default function EnigmaGame() {
                   <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>AI is thinking…</Text>
                 </View>
               ) : (
-                <View style={[S.qBadge, {
-                  borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : q.answer === 'ERR' ? 'rgba(150,150,150,0.4)' : 'rgba(240,160,48,0.4)',
-                  backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.08)' : q.answer === 'NO' ? 'rgba(248,81,73,0.08)' : q.answer === 'ERR' ? 'rgba(150,150,150,0.08)' : 'rgba(240,160,48,0.08)',
-                  marginTop: 6, marginLeft: 4,
-                }]}>
-                  <Text style={{
-                    fontSize: 13, fontFamily: 'Outfit_700Bold',
-                    color: q.answer === 'YES' ? C.success : q.answer === 'NO' ? C.danger : q.answer === 'ERR' ? C.dim : C.warn,
-                  }}>
-                    {q.answer === 'YES' ? '✓ Yes' : q.answer === 'NO' ? '✗ No' : q.answer === 'ERR' ? '⚠ Server Error' : '~ Partly'}
-                  </Text>
-                </View>
+                {q.answer === 'ERR' ? (
+                  <TouchableOpacity onPress={() => retryDailyQuestion(q.id, q.text)} style={[S.qBadge, { borderColor: 'rgba(240,160,48,0.5)', backgroundColor: 'rgba(240,160,48,0.08)', marginTop: 6, marginLeft: 4 }]}>
+                    <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: C.warn }}>↺ Tap to Retry</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View style={[S.qBadge, {
+                    borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : 'rgba(240,160,48,0.4)',
+                    backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.08)' : q.answer === 'NO' ? 'rgba(248,81,73,0.08)' : 'rgba(240,160,48,0.08)',
+                    marginTop: 6, marginLeft: 4,
+                  }]}>
+                    <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: q.answer === 'YES' ? C.success : q.answer === 'NO' ? C.danger : C.warn }}>
+                      {q.answer === 'YES' ? '✓ Yes' : q.answer === 'NO' ? '✗ No' : '~ Partly'}
+                    </Text>
+                  </View>
+                )}
               )}
             </View>
           ))}
@@ -2133,14 +2144,20 @@ export default function EnigmaGame() {
                       <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>AI is thinking…</Text>
                     </View>
                   ) : (
-                    <View style={[S.qBadge, {
-                      borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : q.answer === 'ERR' ? 'rgba(150,150,150,0.4)' : 'rgba(240,160,48,0.4)',
-                      backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.08)' : q.answer === 'NO' ? 'rgba(248,81,73,0.08)' : q.answer === 'ERR' ? 'rgba(150,150,150,0.08)' : 'rgba(240,160,48,0.08)',
-                    }]}>
-                      <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: q.answer === 'YES' ? C.success : q.answer === 'NO' ? C.danger : q.answer === 'ERR' ? C.dim : C.warn }}>
-                        {q.answer === 'YES' ? '✓ Yes' : q.answer === 'NO' ? '✗ No' : q.answer === 'ERR' ? '⚠ Error' : '~ Partly'}
-                      </Text>
-                    </View>
+                    {q.answer === 'ERR' ? (
+                      <TouchableOpacity onPress={() => retrySoloQuestion(q.id, q.text)} style={[S.qBadge, { borderColor: 'rgba(240,160,48,0.5)', backgroundColor: 'rgba(240,160,48,0.08)' }]}>
+                        <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: C.warn }}>↺ Tap to Retry</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <View style={[S.qBadge, {
+                        borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : 'rgba(240,160,48,0.4)',
+                        backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.08)' : q.answer === 'NO' ? 'rgba(248,81,73,0.08)' : 'rgba(240,160,48,0.08)',
+                      }]}>
+                        <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: q.answer === 'YES' ? C.success : q.answer === 'NO' ? C.danger : C.warn }}>
+                          {q.answer === 'YES' ? '✓ Yes' : q.answer === 'NO' ? '✗ No' : '~ Partly'}
+                        </Text>
+                      </View>
+                    )}
                   )}
                 </View>
               </View>
