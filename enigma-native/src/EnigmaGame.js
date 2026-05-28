@@ -781,6 +781,7 @@ export default function EnigmaGame() {
 
   const splashScale = useRef(new Animated.Value(0.4)).current;
   const splashOpacity = useRef(new Animated.Value(0)).current;
+  const sweepX = useRef(new Animated.Value(-100)).current;
 
   // Keep Railway server warm — prevents cold-start errors
   useEffect(() => {
@@ -795,8 +796,18 @@ export default function EnigmaGame() {
       Animated.timing(splashScale, { toValue: 1, duration: 900, useNativeDriver: true }),
       Animated.timing(splashOpacity, { toValue: 1, duration: 700, useNativeDriver: true }),
     ]).start();
-    const t = setTimeout(() => setScreen('home'), 4500);
-    return () => clearTimeout(t);
+    // Looping light sweep across the logo
+    const sweep = Animated.loop(
+      Animated.sequence([
+        Animated.delay(600),
+        Animated.timing(sweepX, { toValue: 420, duration: 1400, useNativeDriver: true }),
+        Animated.delay(1000),
+        Animated.timing(sweepX, { toValue: -100, duration: 0, useNativeDriver: true }),
+      ])
+    );
+    sweep.start();
+    const t = setTimeout(() => setScreen('home'), 6500);
+    return () => { clearTimeout(t); sweep.stop(); };
   }, [screen]);
 
   const [nameInput, setNameInput] = useState('');
@@ -1481,11 +1492,30 @@ export default function EnigmaGame() {
   if (screen === 'splash') {
     return (
       <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
-        <Animated.Image
-          source={require('../assets/logo-haque-games.png')}
-          style={{ width: 320, height: 126, opacity: splashOpacity, transform: [{ scale: splashScale }] }}
-          resizeMode="contain"
-        />
+        <Animated.View style={{ opacity: splashOpacity, transform: [{ scale: splashScale }] }}>
+          <View style={{ width: 320, height: 126, overflow: 'hidden' }}>
+            <Image
+              source={require('../assets/logo-haque-games.png')}
+              style={{ width: 320, height: 126 }}
+              resizeMode="contain"
+            />
+            {/* Moving light sweep overlay */}
+            <Animated.View
+              pointerEvents="none"
+              style={{
+                position: 'absolute', top: 0, bottom: 0, width: 70,
+                transform: [{ translateX: sweepX }, { skewX: '-18deg' }],
+              }}>
+              <View style={{ flex: 1, flexDirection: 'row' }}>
+                <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0)' }} />
+                <View style={{ width: 10, backgroundColor: 'rgba(255,255,255,0.15)' }} />
+                <View style={{ width: 22, backgroundColor: 'rgba(255,255,255,0.45)' }} />
+                <View style={{ width: 10, backgroundColor: 'rgba(255,255,255,0.15)' }} />
+                <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0)' }} />
+              </View>
+            </Animated.View>
+          </View>
+        </Animated.View>
       </View>
     );
   }
