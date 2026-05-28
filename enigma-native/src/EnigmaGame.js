@@ -1523,7 +1523,7 @@ export default function EnigmaGame() {
           {/* Logo */}
           <View style={{ alignItems: 'center', marginBottom: 40 }}>
             <Image
-              source={require('../../assets/logo-main-transparent.png')}
+              source={require('../assets/logo-main-transparent.png')}
               style={{ width: 180, height: 180, marginBottom: 12 }}
               resizeMode="contain"
             />
@@ -1642,7 +1642,7 @@ export default function EnigmaGame() {
           <TouchableOpacity
             onPress={() => setScreen('solo_setup')}
             activeOpacity={0.85}
-            style={{ backgroundColor: 'rgba(34,197,94,0.06)', borderWidth: 1.5, borderColor: 'rgba(34,197,94,0.35)', borderRadius: 20, padding: 20 }}>
+            style={{ backgroundColor: 'rgba(34,197,94,0.10)', borderWidth: 1.5, borderColor: 'rgba(34,197,94,0.70)', borderRadius: 20, padding: 20 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <Text style={{ fontSize: 40 }}>🤖</Text>
               <View style={{ flex: 1 }}>
