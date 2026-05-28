@@ -784,7 +784,7 @@ export default function EnigmaGame() {
 
   const splashScale = useRef(new Animated.Value(0.4)).current;
   const splashOpacity = useRef(new Animated.Value(0)).current;
-  const sweepX = useRef(new Animated.Value(0)).current;
+  const sweepX = useRef(new Animated.Value(-60)).current;
 
   // Keep Railway server warm — prevents cold-start errors
   useEffect(() => {
@@ -799,13 +799,13 @@ export default function EnigmaGame() {
       Animated.timing(splashScale, { toValue: 1, duration: 900, useNativeDriver: true }),
       Animated.timing(splashOpacity, { toValue: 1, duration: 700, useNativeDriver: true }),
     ]).start();
-    // Looping light sweep — animates gradient stop positions (0→1)
+    // Looping bright sweep bar across letters (pixel translateX, native driver)
     const sweep = Animated.loop(
       Animated.sequence([
+        Animated.delay(700),
+        Animated.timing(sweepX, { toValue: 380, duration: 1100, useNativeDriver: true }),
         Animated.delay(800),
-        Animated.timing(sweepX, { toValue: 1, duration: 1200, useNativeDriver: false }),
-        Animated.delay(900),
-        Animated.timing(sweepX, { toValue: 0, duration: 0, useNativeDriver: false }),
+        Animated.timing(sweepX, { toValue: -60, duration: 0, useNativeDriver: true }),
       ])
     );
     sweep.start();
@@ -1493,11 +1493,6 @@ export default function EnigmaGame() {
 
   // ─── SPLASH ───────────────────────────────────────────────────────────────
   if (screen === 'splash') {
-    // sweepX animates 0→1; interpolate to gradient stop positions so the
-    // bright band travels left-to-right through the metallic gradient
-    const stop1 = sweepX.interpolate({ inputRange: [0, 1], outputRange: [-0.4, 0.8] });
-    const stop2 = sweepX.interpolate({ inputRange: [0, 1], outputRange: [-0.2, 1.0] });
-    const stop3 = sweepX.interpolate({ inputRange: [0, 1], outputRange: [ 0.0, 1.2] });
     return (
       <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
         <Animated.View style={{ opacity: splashOpacity, transform: [{ scale: splashScale }] }}>
@@ -1511,24 +1506,23 @@ export default function EnigmaGame() {
               />
             }
           >
-            {/* Metallic gradient fill — only shows through logo pixels */}
-            <AnimatedLinearGradient
-              colors={['#2a2a2a', '#a8a8a8', '#ffffff', '#e0e0e0', '#c0c8d8', '#ffffff', '#b0b0b0', '#1a1a1a']}
-              locations={[0, 0.2, 0.38, 0.5, 0.62, 0.75, 0.88, 1]}
+            {/* High-contrast chrome gradient — dark→silver→white→silver→dark vertically */}
+            <LinearGradient
+              colors={['#050508', '#1c1c28', '#6a6a84', '#e8e8f8', '#ffffff', '#d0d0e8', '#505060', '#050508']}
+              locations={[0, 0.12, 0.32, 0.48, 0.55, 0.68, 0.84, 1]}
               start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
               style={{ width: 320, height: 126 }}
             />
-            {/* Animated sweep — bright band travelling across, masked to letter shapes */}
+            {/* Bright sweep bar — translateX only, clipped to letter shapes by MaskedView */}
             <Animated.View
               pointerEvents="none"
-              style={{ position: 'absolute', top: 0, left: 0, width: 320, height: 126, overflow: 'hidden' }}>
-              <AnimatedLinearGradient
-                colors={['transparent', 'transparent', 'rgba(255,255,255,0)', 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0)', 'transparent', 'transparent']}
-                locations={[0, 0.1, 0.35, 0.5, 0.65, 0.9, 1]}
-                start={{ x: stop1, y: 0 }} end={{ x: stop3, y: 0 }}
-                style={{ width: 320, height: 126, transform: [{ skewX: '-15deg' }] }}
-              />
-            </Animated.View>
+              style={{
+                position: 'absolute', top: -10, bottom: -10, width: 55,
+                backgroundColor: 'rgba(255,255,255,0.75)',
+                borderRadius: 8,
+                transform: [{ translateX: sweepX }, { skewX: '-14deg' }],
+              }}
+            />
           </MaskedView>
         </Animated.View>
       </View>
