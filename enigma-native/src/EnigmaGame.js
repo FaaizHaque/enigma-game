@@ -781,7 +781,6 @@ export default function EnigmaGame() {
   const [dailyPlayerName, setDailyPlayerName] = useState('');
   const [dailyLoading, setDailyLoading] = useState(false);
   const [dailyStartTime, setDailyStartTime] = useState(null);
-  const [dailyInfoOpen, setDailyInfoOpen] = useState(false);
 
   // Solo mode state
   const [soloChallenge, setSoloChallenge] = useState(null);
@@ -1920,48 +1919,27 @@ export default function EnigmaGame() {
             </Text>
           </View>
 
-          {/* Info card modal */}
-          <Modal visible={dailyInfoOpen} animationType="slide" transparent onRequestClose={() => setDailyInfoOpen(false)}>
-            <View style={S.overlay}>
-              <View style={[S.modal, { maxHeight: '80%' }]}>
-                <View style={S.modalHandle} />
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  <Text style={{ fontSize: 36, textAlign: 'center', marginBottom: 8 }}>{dailyChallenge.categoryIcon}</Text>
-                  <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.gold, textAlign: 'center', marginBottom: 4 }}>
-                    {dailyChallenge.secret}
-                  </Text>
-                  <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 2, textTransform: 'uppercase', textAlign: 'center', marginBottom: 20 }}>
-                    {dailyChallenge.categoryLabel}
-                  </Text>
-                  {(dailyChallenge.facts || []).map((fact, i) => (
-                    <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 12, paddingBottom: 12, borderBottomWidth: i < dailyChallenge.facts.length - 1 ? 1 : 0, borderBottomColor: C.border }}>
-                      <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_700Bold', marginTop: 1 }}>•</Text>
-                      <Text style={{ flex: 1, fontSize: 14, color: C.text, fontFamily: 'Outfit_400Regular', lineHeight: 20 }}>{fact}</Text>
-                    </View>
-                  ))}
-                </ScrollView>
-                <TouchableOpacity style={[S.btnGold, { marginTop: 16 }]} onPress={() => setDailyInfoOpen(false)}>
-                  <Text style={S.btnGoldText}>Close</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
+          {/* Secret reveal */}
+          <View style={{ backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1, borderColor: 'rgba(109,40,217,0.4)', borderRadius: 14, padding: 20, alignItems: 'center', marginBottom: 16 }}>
+            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 8 }}>Today's Secret</Text>
+            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.gold, textAlign: 'center' }}>{dailyChallenge.secret}</Text>
+            <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 6 }}>{dailyChallenge.categoryIcon} {dailyChallenge.categoryLabel}</Text>
+          </View>
 
-          {/* Secret reveal — tap for info */}
-          <TouchableOpacity style={[S.infoCard, { marginBottom: 16, alignItems: 'center' }]} onPress={() => setDailyInfoOpen(true)}>
-            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 8 }}>
-              Today's Secret
-            </Text>
-            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 20, color: C.gold, textAlign: 'center' }}>
-              {dailyChallenge.secret}
-            </Text>
-            <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 6, textAlign: 'center' }}>
-              {dailyChallenge.categoryIcon} {dailyChallenge.categoryLabel}
-            </Text>
-            <Text style={{ fontSize: 11, color: C.violet2, fontFamily: 'Outfit_600SemiBold', marginTop: 10 }}>
-              Tap to learn more ›
-            </Text>
-          </TouchableOpacity>
+          {/* Educational data card */}
+          {(dailyChallenge.facts || []).length > 0 && (
+            <View style={[S.infoCard, { marginBottom: 16 }]}>
+              <Text style={{ fontSize: 10, color: C.gold, fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 14 }}>📖 About This Secret</Text>
+              {(dailyChallenge.facts || []).map((fact, i) => (
+                <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 12, paddingBottom: 12, borderBottomWidth: i < dailyChallenge.facts.length - 1 ? 1 : 0, borderBottomColor: C.border }}>
+                  <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(109,40,217,0.18)', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                    <Text style={{ fontSize: 11, color: C.violet2, fontFamily: 'Outfit_700Bold' }}>{i + 1}</Text>
+                  </View>
+                  <Text style={{ flex: 1, fontSize: 13, color: C.text, fontFamily: 'Outfit_400Regular', lineHeight: 20 }}>{fact}</Text>
+                </View>
+              ))}
+            </View>
+          )}
 
           {/* Stats */}
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
@@ -2224,11 +2202,20 @@ export default function EnigmaGame() {
           <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 6 }}>{soloChallenge.categoryIcon} {soloChallenge.categoryLabel}</Text>
         </View>
 
-        {/* Hint */}
-        <View style={[S.infoCard, { marginBottom: 24 }]}>
-          <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>Did You Know</Text>
-          <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 20, fontStyle: 'italic' }}>"{soloChallenge.hint}"</Text>
-        </View>
+        {/* Educational data card */}
+        {(soloChallenge.facts || []).length > 0 && (
+          <View style={[S.infoCard, { marginBottom: 24 }]}>
+            <Text style={{ fontSize: 10, color: C.gold, fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 14 }}>📖 About This Secret</Text>
+            {(soloChallenge.facts || []).map((fact, i) => (
+              <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 12, paddingBottom: 12, borderBottomWidth: i < soloChallenge.facts.length - 1 ? 1 : 0, borderBottomColor: C.border }}>
+                <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(109,40,217,0.18)', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                  <Text style={{ fontSize: 11, color: C.violet2, fontFamily: 'Outfit_700Bold' }}>{i + 1}</Text>
+                </View>
+                <Text style={{ flex: 1, fontSize: 13, color: C.text, fontFamily: 'Outfit_400Regular', lineHeight: 20 }}>{fact}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         <TouchableOpacity style={S.btnGold} onPress={startSoloChallenge}>
           <Text style={S.btnGoldText}>Play Again →</Text>
