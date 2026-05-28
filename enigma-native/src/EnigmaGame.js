@@ -1452,21 +1452,12 @@ export default function EnigmaGame() {
   // ─── SPLASH ───────────────────────────────────────────────────────────────
   if (screen === 'splash') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#f2ede3', alignItems: 'center', justifyContent: 'center' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
-          {/* Stylised controller icon */}
-          <View style={{ position: 'relative', width: 72, height: 52 }}>
-            <View style={{ position: 'absolute', top: 0, left: 8, width: 20, height: 14, borderRadius: 7, backgroundColor: '#1c1c1c' }} />
-            <View style={{ position: 'absolute', top: 0, right: 8, width: 20, height: 14, borderRadius: 7, backgroundColor: '#1c1c1c' }} />
-            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 42, borderRadius: 21, backgroundColor: '#1c1c1c', alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ color: '#f2ede3', fontSize: 17, fontFamily: 'Cinzel_700Bold', letterSpacing: 1 }}>HG</Text>
-            </View>
-          </View>
-          <View>
-            <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 26, color: '#1c1c1c', letterSpacing: 4 }}>HAQUE</Text>
-            <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 12, color: '#1c1c1c', letterSpacing: 5, marginTop: 1 }}>GAMES</Text>
-          </View>
-        </View>
+      <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
+        <Image
+          source={require('../assets/logo-main-transparent.png')}
+          style={{ width: 260, height: 260 }}
+          resizeMode="contain"
+        />
       </View>
     );
   }
@@ -1522,12 +1513,11 @@ export default function EnigmaGame() {
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 32, paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
           {/* Logo */}
           <View style={{ alignItems: 'center', marginBottom: 40 }}>
-            <Image
-              source={require('../assets/logo-main-transparent.png')}
-              style={{ width: 180, height: 180, marginBottom: 12 }}
-              resizeMode="contain"
-            />
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, width: '100%' }}>
+            <View style={{ width: 90, height: 90, borderRadius: 45, backgroundColor: 'rgba(212,168,74,0.1)', borderWidth: 1.5, borderColor: 'rgba(212,168,74,0.32)', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+              <Text style={{ fontSize: 46 }}>🔍</Text>
+            </View>
+            <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 34, letterSpacing: 8, color: C.gold }}>ENIGMA</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10, width: '100%' }}>
               <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.18)' }} />
               <Text style={{ fontSize: 10, color: C.muted, letterSpacing: 3, textTransform: 'uppercase', fontFamily: 'Outfit_400Regular', paddingHorizontal: 12 }}>The Art of 20 Questions</Text>
               <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.18)' }} />
