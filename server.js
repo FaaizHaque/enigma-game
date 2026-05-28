@@ -214,7 +214,7 @@ CRITICAL RULES — follow these exactly:
 2. Be STRICTLY and LITERALLY accurate. Do NOT make loose associations or stretch connections. If the link is indirect, tenuous, or figurative, answer NO.
 3. "Inventor" means a person who invented something technological or scientific. An object being crafted, commissioned, or built does NOT make it "related to an inventor." The Peacock Throne was built by craftsmen for a king — that is NOT related to an inventor.
 4. "Related to X" means a DIRECT, CORE connection — not a distant or trivial one.
-5. Use PARTLY only when the answer is genuinely and meaningfully split — not just because some loose reading could make it partially true.
+5. PARTLY is ONLY for questions that are genuinely compound — where the question explicitly asks about two things and only one is true (e.g. "Is it from Asia or Europe?" when neither applies, or "Does it involve both war and politics?" when only one does). For every simple yes/no question — "Is it a person?", "Did it happen in the 20th century?", "Is it related to science?" — you MUST answer YES or NO. Never answer PARTLY on a simple question. If you are tempted to say PARTLY on a simple question, commit to whichever of YES or NO is more accurate.
 6. For WHEN created/invented, refer to when the ORIGINAL was first made — not later versions.
 7. For WHO created it, refer to the original maker/inventor/creator.
 8. If asked about letters/words/substrings in the name, check the literal spelling of "${secret}" (case-insensitive).
