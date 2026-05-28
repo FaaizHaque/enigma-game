@@ -158,6 +158,9 @@ app.delete("/api/sessions/:roomCode", async (req, res) => {
   res.json({ success: true });
 });
 
+// ─── Keep-alive ping ─────────────────────────────────────────────────────────
+app.get("/api/ping", (req, res) => res.json({ ok: true, ts: Date.now() }));
+
 // ─── List available models ────────────────────────────────────────────────────
 app.get("/api/models", async (req, res) => {
   try {
