@@ -4,6 +4,9 @@ import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Animated,
 } from 'react-native';
+import MaskedView from '@react-native-masked-view/masked-view';
+import { LinearGradient } from 'expo-linear-gradient';
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 import * as LinkingExpo from 'expo-linking';
@@ -781,7 +784,7 @@ export default function EnigmaGame() {
 
   const splashScale = useRef(new Animated.Value(0.4)).current;
   const splashOpacity = useRef(new Animated.Value(0)).current;
-  const sweepX = useRef(new Animated.Value(-100)).current;
+  const sweepX = useRef(new Animated.Value(0)).current;
 
   // Keep Railway server warm — prevents cold-start errors
   useEffect(() => {
@@ -796,13 +799,13 @@ export default function EnigmaGame() {
       Animated.timing(splashScale, { toValue: 1, duration: 900, useNativeDriver: true }),
       Animated.timing(splashOpacity, { toValue: 1, duration: 700, useNativeDriver: true }),
     ]).start();
-    // Looping light sweep across the logo
+    // Looping light sweep — animates gradient stop positions (0→1)
     const sweep = Animated.loop(
       Animated.sequence([
-        Animated.delay(600),
-        Animated.timing(sweepX, { toValue: 420, duration: 1400, useNativeDriver: true }),
-        Animated.delay(1000),
-        Animated.timing(sweepX, { toValue: -100, duration: 0, useNativeDriver: true }),
+        Animated.delay(800),
+        Animated.timing(sweepX, { toValue: 1, duration: 1200, useNativeDriver: false }),
+        Animated.delay(900),
+        Animated.timing(sweepX, { toValue: 0, duration: 0, useNativeDriver: false }),
       ])
     );
     sweep.start();
@@ -1490,31 +1493,43 @@ export default function EnigmaGame() {
 
   // ─── SPLASH ───────────────────────────────────────────────────────────────
   if (screen === 'splash') {
+    // sweepX animates 0→1; interpolate to gradient stop positions so the
+    // bright band travels left-to-right through the metallic gradient
+    const stop1 = sweepX.interpolate({ inputRange: [0, 1], outputRange: [-0.4, 0.8] });
+    const stop2 = sweepX.interpolate({ inputRange: [0, 1], outputRange: [-0.2, 1.0] });
+    const stop3 = sweepX.interpolate({ inputRange: [0, 1], outputRange: [ 0.0, 1.2] });
     return (
       <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
         <Animated.View style={{ opacity: splashOpacity, transform: [{ scale: splashScale }] }}>
-          <View style={{ width: 320, height: 126, overflow: 'hidden' }}>
-            <Image
-              source={require('../assets/logo-haque-games.png')}
+          <MaskedView
+            style={{ width: 320, height: 126 }}
+            maskElement={
+              <Image
+                source={require('../assets/logo-haque-games.png')}
+                style={{ width: 320, height: 126 }}
+                resizeMode="contain"
+              />
+            }
+          >
+            {/* Metallic gradient fill — only shows through logo pixels */}
+            <AnimatedLinearGradient
+              colors={['#2a2a2a', '#a8a8a8', '#ffffff', '#e0e0e0', '#c0c8d8', '#ffffff', '#b0b0b0', '#1a1a1a']}
+              locations={[0, 0.2, 0.38, 0.5, 0.62, 0.75, 0.88, 1]}
+              start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
               style={{ width: 320, height: 126 }}
-              resizeMode="contain"
             />
-            {/* Moving light sweep overlay */}
+            {/* Animated sweep — bright band travelling across, masked to letter shapes */}
             <Animated.View
               pointerEvents="none"
-              style={{
-                position: 'absolute', top: 0, bottom: 0, width: 70,
-                transform: [{ translateX: sweepX }, { skewX: '-18deg' }],
-              }}>
-              <View style={{ flex: 1, flexDirection: 'row' }}>
-                <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0)' }} />
-                <View style={{ width: 10, backgroundColor: 'rgba(255,255,255,0.15)' }} />
-                <View style={{ width: 22, backgroundColor: 'rgba(255,255,255,0.45)' }} />
-                <View style={{ width: 10, backgroundColor: 'rgba(255,255,255,0.15)' }} />
-                <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0)' }} />
-              </View>
+              style={{ position: 'absolute', top: 0, left: 0, width: 320, height: 126, overflow: 'hidden' }}>
+              <AnimatedLinearGradient
+                colors={['transparent', 'transparent', 'rgba(255,255,255,0)', 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0)', 'transparent', 'transparent']}
+                locations={[0, 0.1, 0.35, 0.5, 0.65, 0.9, 1]}
+                start={{ x: stop1, y: 0 }} end={{ x: stop3, y: 0 }}
+                style={{ width: 320, height: 126, transform: [{ skewX: '-15deg' }] }}
+              />
             </Animated.View>
-          </View>
+          </MaskedView>
         </Animated.View>
       </View>
     );
