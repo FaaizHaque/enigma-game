@@ -1480,10 +1480,10 @@ export default function EnigmaGame() {
   // ─── SPLASH ───────────────────────────────────────────────────────────────
   if (screen === 'splash') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#1a0030', alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
         <Animated.Image
           source={require('../assets/logo-haque-games.png')}
-          style={{ width: 280, height: 280, opacity: splashOpacity, transform: [{ scale: splashScale }] }}
+          style={{ width: 320, height: 126, opacity: splashOpacity, transform: [{ scale: splashScale }] }}
           resizeMode="contain"
         />
       </View>
