@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator,
+  StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator, Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
@@ -1522,11 +1522,12 @@ export default function EnigmaGame() {
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 32, paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
           {/* Logo */}
           <View style={{ alignItems: 'center', marginBottom: 40 }}>
-            <View style={{ width: 90, height: 90, borderRadius: 45, backgroundColor: 'rgba(212,168,74,0.1)', borderWidth: 1.5, borderColor: 'rgba(212,168,74,0.32)', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-              <Text style={{ fontSize: 46 }}>🔍</Text>
-            </View>
-            <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 34, letterSpacing: 8, color: C.gold }}>ENIGMA</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10, width: '100%' }}>
+            <Image
+              source={require('../../assets/logo-main-transparent.png')}
+              style={{ width: 180, height: 180, marginBottom: 12 }}
+              resizeMode="contain"
+            />
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, width: '100%' }}>
               <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.18)' }} />
               <Text style={{ fontSize: 10, color: C.muted, letterSpacing: 3, textTransform: 'uppercase', fontFamily: 'Outfit_400Regular', paddingHorizontal: 12 }}>The Art of 20 Questions</Text>
               <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.18)' }} />
