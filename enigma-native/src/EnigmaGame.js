@@ -609,11 +609,12 @@ const SERVER_URL = Constants.expoConfig?.extra?.serverUrl || 'https://enigma-gam
 // Keeps Railway server warm — pings every 4 minutes so it never sleeps
 const pingServer = () => fetch(`${SERVER_URL}/api/ping`).catch(() => {});
 
-// Silent unlimited retry — keeps trying every 3s until a valid answer comes back.
-// The player only ever sees the spinner; errors are never surfaced.
-const askWithRetry = async (payload) => {
+// Silent retry with 5-minute deadline. Returns YES/NO/PARTLY on success,
+// or 'TIMEOUT' if the device has no connection after 5 minutes of trying.
+const askWithRetry = async (payload, maxWaitMs = 5 * 60 * 1000) => {
+  const deadline = Date.now() + maxWaitMs;
   let delay = 2000;
-  while (true) {
+  while (Date.now() < deadline) {
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 12000);
@@ -630,8 +631,9 @@ const askWithRetry = async (payload) => {
       // swallow and retry
     }
     await new Promise(r => setTimeout(r, delay));
-    delay = Math.min(delay * 1.5, 8000); // cap at 8s between attempts
+    delay = Math.min(delay * 1.5, 8000);
   }
+  return 'TIMEOUT';
 };
 
 const dailyStars = (questions, solved) => {
@@ -1842,6 +1844,10 @@ export default function EnigmaGame() {
                   <ActivityIndicator size="small" color={C.gold} />
                   <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>AI is thinking…</Text>
                 </View>
+              ) : q.answer === 'TIMEOUT' ? (
+                <View style={[S.qBadge, { borderColor: 'rgba(248,81,73,0.4)', backgroundColor: 'rgba(248,81,73,0.08)', marginTop: 6, marginLeft: 4 }]}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Outfit_600SemiBold', color: C.danger }}>No connection — check internet</Text>
+                </View>
               ) : (
                 <View style={[S.qBadge, {
                   borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : 'rgba(240,160,48,0.4)',
@@ -2132,6 +2138,10 @@ export default function EnigmaGame() {
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                       <ActivityIndicator size="small" color={C.gold} />
                       <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>AI is thinking…</Text>
+                    </View>
+                  ) : q.answer === 'TIMEOUT' ? (
+                    <View style={[S.qBadge, { borderColor: 'rgba(248,81,73,0.4)', backgroundColor: 'rgba(248,81,73,0.08)' }]}>
+                      <Text style={{ fontSize: 12, fontFamily: 'Outfit_600SemiBold', color: C.danger }}>No connection — check internet</Text>
                     </View>
                   ) : (
                     <View style={[S.qBadge, {

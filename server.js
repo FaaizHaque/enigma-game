@@ -201,12 +201,26 @@ app.get("/api/test-ask", async (req, res) => {
   }
 });
 
+// ─── Answer cache ─────────────────────────────────────────────────────────────
+// In-memory cache keyed by normalised "secret|question". Resets on server restart
+// but warms up quickly during active play and eliminates repeat Gemini calls.
+const answerCache = new Map();
+const cacheKey = (secret, question) =>
+  `${secret.toLowerCase().trim()}|${question.toLowerCase().trim()}`;
+
 // ─── Daily Challenge — AI question answering ──────────────────────────────────
 app.post("/api/ask", async (req, res) => {
   const { secret, facts = [], category = "", question } = req.body;
   if (!secret || !question) {
     return res.status(400).json({ error: "secret and question are required" });
   }
+
+  // Serve from cache if available — instant response, zero API cost
+  const key = cacheKey(secret, question);
+  if (answerCache.has(key)) {
+    return res.json({ answer: answerCache.get(key), cached: true });
+  }
+
   const systemInstruction = `You are the strict, accurate host of a 20-questions guessing game. The secret is "${secret}" (category: ${category}).
 
 Reference facts: ${facts.join("; ")}.
@@ -233,6 +247,7 @@ CRITICAL RULES — follow these exactly:
       });
       const raw = response.text.trim().toUpperCase().split(/\s+/)[0];
       const answer = ["YES", "NO", "PARTLY"].includes(raw) ? raw : "NO";
+      answerCache.set(key, answer); // cache for future identical questions
       return res.json({ answer });
     } catch (e) {
       lastError = e;
