@@ -2,7 +2,7 @@
   "expo": {
     "name": "Enigma",
     "slug": "enigma-game",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#06060f",
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.enigmagame.app",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "requireFullScreen": true,
       "infoPlist": {
         "UIStatusBarStyle": "UIStatusBarStyleLightContent",
@@ -30,7 +30,7 @@
         "backgroundColor": "#06060f"
       },
       "package": "com.enigmagame.app",
-      "versionCode": 3
+      "versionCode": 4
     },
     "plugins": [
       [
