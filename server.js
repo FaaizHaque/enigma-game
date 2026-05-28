@@ -204,8 +204,7 @@ app.post("/api/ask", async (req, res) => {
   if (!secret || !question) {
     return res.status(400).json({ error: "secret and question are required" });
   }
-  try {
-    const systemInstruction = `You are the strict, accurate host of a 20-questions guessing game. The secret is "${secret}" (category: ${category}).
+  const systemInstruction = `You are the strict, accurate host of a 20-questions guessing game. The secret is "${secret}" (category: ${category}).
 
 Reference facts: ${facts.join("; ")}.
 
@@ -220,18 +219,24 @@ CRITICAL RULES — follow these exactly:
 8. If asked about letters/words/substrings in the name, check the literal spelling of "${secret}" (case-insensitive).
 9. When in doubt, answer NO. A wrong YES is far more damaging to the game than a cautious NO.
 10. Never reveal the secret directly.`;
-    const prompt = `${systemInstruction}\n\nQuestion: ${question}`;
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
-    const raw = response.text.trim().toUpperCase().split(/\s+/)[0];
-    const answer = ["YES", "NO", "PARTLY"].includes(raw) ? raw : "NO";
-    res.json({ answer });
-  } catch (e) {
-    console.error("AI ask error:", e.message);
-    res.status(500).json({ error: e.message, answer: "ERR" });
+  const prompt = `${systemInstruction}\n\nQuestion: ${question}`;
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      if (attempt > 0) await new Promise(r => setTimeout(r, 1000 * attempt));
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+      const raw = response.text.trim().toUpperCase().split(/\s+/)[0];
+      const answer = ["YES", "NO", "PARTLY"].includes(raw) ? raw : "NO";
+      return res.json({ answer });
+    } catch (e) {
+      lastError = e;
+      console.error(`AI ask error (attempt ${attempt + 1}):`, e.message);
+    }
   }
+  res.status(500).json({ error: lastError.message, answer: "ERR" });
 });
 
 // ─── Daily Challenge — save result ────────────────────────────────────────────

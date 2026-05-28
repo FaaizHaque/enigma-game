@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator, Image,
+  StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
@@ -748,9 +748,16 @@ export default function EnigmaGame() {
   const [game, setGame] = useState(null);
   const [viewerId, setViewerId] = useState(null);
 
+  const splashScale = useRef(new Animated.Value(0.4)).current;
+  const splashOpacity = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
     if (screen !== 'splash') return;
-    const t = setTimeout(() => setScreen('home'), 4000);
+    Animated.parallel([
+      Animated.timing(splashScale, { toValue: 1, duration: 900, useNativeDriver: true }),
+      Animated.timing(splashOpacity, { toValue: 1, duration: 700, useNativeDriver: true }),
+    ]).start();
+    const t = setTimeout(() => setScreen('home'), 4500);
     return () => clearTimeout(t);
   }, [screen]);
 
@@ -1453,9 +1460,9 @@ export default function EnigmaGame() {
   if (screen === 'splash') {
     return (
       <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
-        <Image
+        <Animated.Image
           source={require('../assets/logo-main-transparent.png')}
-          style={{ width: 260, height: 260 }}
+          style={{ width: 280, height: 280, opacity: splashOpacity, transform: [{ scale: splashScale }] }}
           resizeMode="contain"
         />
       </View>
@@ -1472,36 +1479,35 @@ export default function EnigmaGame() {
               <View style={S.modalHandle} />
               <ScrollView showsVerticalScrollIndicator={false}>
                 <Text style={[S.modalTitle, { marginBottom: 16 }]}>📖 How to Play</Text>
-                <Text style={S.sectionLabel}>🎯 Objective</Text>
-                <Text style={S.bodyText}>
-                  One player is the <Text style={{ color: C.text, fontFamily: 'Outfit_700Bold' }}>Host</Text> who picks a secret.
-                  All other players are <Text style={{ color: C.text, fontFamily: 'Outfit_700Bold' }}>Guessers</Text> who must
-                  figure out the secret by asking up to <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text>.
-                  The Host answers with <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold' }}>Yes</Text>,{' '}
-                  <Text style={{ color: C.danger, fontFamily: 'Outfit_700Bold' }}>No</Text>, or{' '}
-                  <Text style={{ color: C.warn, fontFamily: 'Outfit_700Bold' }}>Partly</Text>.
-                </Text>
-                <Text style={[S.sectionLabel, { marginTop: 16 }]}>👥 The Roles</Text>
-                <View style={S.infoCard}>
-                  <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold', fontSize: 14, marginBottom: 4 }}>👑 The Host</Text>
-                  <Text style={S.bodyText}>Selects a theme, thinks of a secret, and answers every question. A Partly answer can include a short note. The Host wins if nobody guesses correctly.</Text>
+
+                {/* Daily Challenge */}
+                <View style={{ backgroundColor: 'rgba(212,168,74,0.07)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.3)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
+                  <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold', fontSize: 15, marginBottom: 8 }}>📅 Daily Challenge</Text>
+                  <Text style={S.bodyText}>One new secret every day, the same for all players worldwide. You get <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> answered by AI to crack it.</Text>
+                  <Text style={[S.bodyText, { marginTop: 6 }]}>{'⭐⭐⭐ '}<Text style={{ color: C.gold }}>Legendary</Text>{' — solved in 5 or fewer questions\n'}{'⭐⭐   '}<Text style={{ color: C.gold }}>Expert</Text>{' — solved in 10 or fewer\n'}{'⭐     '}<Text style={{ color: C.gold }}>Good</Text>{' — solved in 15 or fewer'}</Text>
+                  <Text style={[S.bodyText, { marginTop: 6 }]}>Your result goes on the <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>Daily Leaderboard</Text>. After the game, an educational card reveals key facts about the secret.</Text>
                 </View>
-                <View style={[S.infoCard, { marginTop: 8 }]}>
-                  <Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold', fontSize: 14, marginBottom: 4 }}>🕵️ The Guessers</Text>
-                  <Text style={S.bodyText}>Take turns asking one question at a time. All players can see every question and answer.</Text>
+
+                {/* Solo Mode */}
+                <View style={{ backgroundColor: 'rgba(34,197,94,0.07)', borderWidth: 1, borderColor: 'rgba(34,197,94,0.3)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
+                  <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold', fontSize: 15, marginBottom: 8 }}>🤖 Solo Mode</Text>
+                  <Text style={S.bodyText}>Play alone against the AI. Choose a category or go fully random. You get <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> to identify the secret.</Text>
+                  <Text style={[S.bodyText, { marginTop: 6 }]}>Ask yes/no questions, then tap <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold' }}>💡 I Know the Answer</Text> when you're ready to guess. Play as many rounds as you like — a new secret is picked every time.</Text>
+                  <Text style={[S.bodyText, { marginTop: 6 }]}>After each round, the <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>About This Secret</Text> card teaches you fascinating facts about what you were guessing.</Text>
                 </View>
-                <Text style={[S.sectionLabel, { marginTop: 16 }]}>🔢 Question Limit</Text>
-                <Text style={S.bodyText}>There are <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions total</Text>, shared equally among all guessers.</Text>
-                <Text style={[S.sectionLabel, { marginTop: 16 }]}>💡 Solving the Secret</Text>
-                <Text style={S.bodyText}>Any guesser can tap <Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold' }}>💡 Solve</Text> at any time. The Host decides if it's Correct or Wrong.</Text>
-                <Text style={[S.sectionLabel, { marginTop: 16 }]}>🏆 Winning & Elimination</Text>
-                <Text style={S.bodyText}>
-                  {'• '}<Text style={{ color: C.success }}>Correct guess</Text>{' → Guesser wins, earns '}<Text style={{ color: C.gold }}>10 pts</Text>{'\n'}
-                  {'• '}<Text style={{ color: C.danger }}>Wrong guess</Text>{' → Guesser eliminated\n'}
-                  {'• All 20 questions used or all eliminated → '}<Text style={{ color: C.gold }}>Host wins, earns 5 pts</Text>
-                </Text>
-                <Text style={[S.sectionLabel, { marginTop: 16 }]}>🔄 Rounds</Text>
-                <Text style={S.bodyText}>After each round the Host role rotates. Play as many rounds as you like!</Text>
+
+                {/* Multiplayer */}
+                <View style={{ backgroundColor: 'rgba(124,58,237,0.07)', borderWidth: 1, borderColor: 'rgba(124,58,237,0.3)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
+                  <Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold', fontSize: 15, marginBottom: 8 }}>👥 Multiplayer</Text>
+                  <Text style={S.bodyText}>Create or join a room with friends. One player is the <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>Host</Text> who picks a secret; everyone else is a <Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold' }}>Guesser</Text>.</Text>
+                  <Text style={[S.bodyText, { marginTop: 6 }]}>The Host answers every question with <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold' }}>Yes</Text>, <Text style={{ color: C.danger, fontFamily: 'Outfit_700Bold' }}>No</Text>, or <Text style={{ color: C.warn, fontFamily: 'Outfit_700Bold' }}>Partly</Text>. There are <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> shared among all guessers.</Text>
+                  <Text style={[S.bodyText, { marginTop: 6 }]}>
+                    {'• '}<Text style={{ color: C.success }}>Correct guess</Text>{' → Guesser wins, earns '}<Text style={{ color: C.gold }}>10 pts\n</Text>
+                    {'• '}<Text style={{ color: C.danger }}>Wrong guess</Text>{' → Guesser is eliminated\n'}
+                    {'• All questions used → '}<Text style={{ color: C.gold }}>Host wins, earns 5 pts</Text>
+                  </Text>
+                  <Text style={[S.bodyText, { marginTop: 6 }]}>After each round the Host role rotates automatically. Play as many rounds as you like!</Text>
+                </View>
                 <TouchableOpacity style={[S.btnGold, { marginTop: 24, marginBottom: 8 }]} onPress={() => setHowToPlayOpen(false)}>
                   <Text style={S.btnGoldText}>Got it — Let's Play! ✦</Text>
                 </TouchableOpacity>
@@ -1522,6 +1528,9 @@ export default function EnigmaGame() {
               <Text style={{ fontSize: 10, color: C.muted, letterSpacing: 3, textTransform: 'uppercase', fontFamily: 'Outfit_400Regular', paddingHorizontal: 12 }}>The Art of 20 Questions</Text>
               <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.18)' }} />
             </View>
+            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 8, letterSpacing: 1 }}>
+              v{Constants.expoConfig?.version || '1.1.0'}
+            </Text>
           </View>
 
           {/* Name */}
