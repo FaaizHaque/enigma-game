@@ -799,12 +799,12 @@ export default function EnigmaGame() {
       Animated.timing(splashScale, { toValue: 1, duration: 900, useNativeDriver: true }),
       Animated.timing(splashOpacity, { toValue: 1, duration: 700, useNativeDriver: true }),
     ]).start();
-    // Looping bright sweep bar across letters (pixel translateX, native driver)
+    // Looping bright sweep bar across letters — slower, more visible
     const sweep = Animated.loop(
       Animated.sequence([
-        Animated.delay(700),
-        Animated.timing(sweepX, { toValue: 380, duration: 1100, useNativeDriver: true }),
-        Animated.delay(800),
+        Animated.delay(1000),
+        Animated.timing(sweepX, { toValue: 380, duration: 2000, useNativeDriver: true }),
+        Animated.delay(1200),
         Animated.timing(sweepX, { toValue: -60, duration: 0, useNativeDriver: true }),
       ])
     );
@@ -1493,37 +1493,73 @@ export default function EnigmaGame() {
 
   // ─── SPLASH ───────────────────────────────────────────────────────────────
   if (screen === 'splash') {
+    const LogoMask = () => (
+      <Image
+        source={require('../assets/logo-haque-games.png')}
+        style={{ width: 320, height: 126 }}
+        resizeMode="contain"
+      />
+    );
     return (
       <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
         <Animated.View style={{ opacity: splashOpacity, transform: [{ scale: splashScale }] }}>
-          <MaskedView
-            style={{ width: 320, height: 126 }}
-            maskElement={
-              <Image
-                source={require('../assets/logo-haque-games.png')}
+          <View style={{ width: 320, height: 126 }}>
+            {/* 1. Drop shadow — dark silhouette offset down-right for 3D depth */}
+            <View style={{ position: 'absolute', top: 4, left: 3, opacity: 0.55 }}>
+              <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
+                <View style={{ flex: 1, backgroundColor: '#000000' }} />
+              </MaskedView>
+            </View>
+            {/* 2. Top highlight bevel — bright silhouette offset up-left for raised edge */}
+            <View style={{ position: 'absolute', top: -1, left: -1, opacity: 0.55 }}>
+              <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
+                <View style={{ flex: 1, backgroundColor: '#ffffff' }} />
+              </MaskedView>
+            </View>
+            {/* 3. Main chrome — classic horizon gradient (sky reflects above, ground below) */}
+            <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
+              <LinearGradient
+                colors={[
+                  '#08090f', // deep top — sky shadow
+                  '#1f2434', // dark blue-grey sky
+                  '#3a4258', // mid sky
+                  '#7d8aa3', // light sky
+                  '#e8eef8', // bright horizon highlight
+                  '#ffffff', // sharp horizon peak
+                  '#ffffff', // (double stop = hard horizon line)
+                  '#bcc4d2', // top of ground
+                  '#5a606e', // mid ground
+                  '#2a2d36', // ground shadow
+                  '#08090f', // bottom — black
+                ]}
+                locations={[0, 0.10, 0.25, 0.40, 0.48, 0.50, 0.50, 0.58, 0.75, 0.90, 1]}
+                start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
                 style={{ width: 320, height: 126 }}
-                resizeMode="contain"
               />
-            }
-          >
-            {/* High-contrast chrome gradient — dark→silver→white→silver→dark vertically */}
-            <LinearGradient
-              colors={['#050508', '#1c1c28', '#6a6a84', '#e8e8f8', '#ffffff', '#d0d0e8', '#505060', '#050508']}
-              locations={[0, 0.12, 0.32, 0.48, 0.55, 0.68, 0.84, 1]}
-              start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
-              style={{ width: 320, height: 126 }}
-            />
-            {/* Bright sweep bar — translateX only, clipped to letter shapes by MaskedView */}
-            <Animated.View
-              pointerEvents="none"
-              style={{
-                position: 'absolute', top: -10, bottom: -10, width: 55,
-                backgroundColor: 'rgba(255,255,255,0.75)',
-                borderRadius: 8,
-                transform: [{ translateX: sweepX }, { skewX: '-14deg' }],
-              }}
-            />
-          </MaskedView>
+              {/* Slow, bright sweep bar with soft edges */}
+              <Animated.View
+                pointerEvents="none"
+                style={{
+                  position: 'absolute', top: -12, bottom: -12, width: 28,
+                  backgroundColor: 'rgba(255,255,255,0.95)',
+                  shadowColor: '#ffffff',
+                  shadowOpacity: 1,
+                  shadowRadius: 18,
+                  shadowOffset: { width: 0, height: 0 },
+                  transform: [{ translateX: sweepX }, { skewX: '-16deg' }],
+                }}
+              />
+              {/* Wider soft glow around the sweep for a halo */}
+              <Animated.View
+                pointerEvents="none"
+                style={{
+                  position: 'absolute', top: -12, bottom: -12, width: 90,
+                  backgroundColor: 'rgba(255,255,255,0.20)',
+                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(30)) }, { skewX: '-16deg' }],
+                }}
+              />
+            </MaskedView>
+          </View>
         </Animated.View>
       </View>
     );
