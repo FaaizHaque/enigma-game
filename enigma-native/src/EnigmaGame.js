@@ -1503,54 +1503,45 @@ export default function EnigmaGame() {
     return (
       <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
         <Animated.View style={{ opacity: splashOpacity, transform: [{ scale: splashScale }] }}>
-          {/* Outer container slightly larger to accommodate shadow bleed */}
-          <View style={{ width: 330, height: 136, alignItems: 'center', justifyContent: 'center' }}>
+          <View style={{ width: 326, height: 130, alignItems: 'center', justifyContent: 'center' }}>
 
-            {/* Layer 1: Far shadow — deepest offset, softest, largest */}
-            <View style={{ position: 'absolute', top: 10, left: 8, opacity: 0.70 }}>
+            {/* Shadow — subtle, 2px offset only so it reads as depth not ghost */}
+            <View style={{ position: 'absolute', top: 3, left: 2, opacity: 0.60 }}>
               <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
                 <View style={{ flex: 1, backgroundColor: '#000000' }} />
               </MaskedView>
             </View>
 
-            {/* Layer 2: Near shadow — tighter, stronger */}
-            <View style={{ position: 'absolute', top: 5, left: 4, opacity: 0.90 }}>
+            {/* Highlight bevel — 1px offset up-left, bright edge */}
+            <View style={{ position: 'absolute', top: -1, left: -1, opacity: 0.50 }}>
               <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
-                <View style={{ flex: 1, backgroundColor: '#000510' }} />
+                <View style={{ flex: 1, backgroundColor: '#c8d8ff' }} />
               </MaskedView>
             </View>
 
-            {/* Layer 3: Top-left highlight bevel — the "raised" edge catches the light */}
-            <View style={{ position: 'absolute', top: -3, left: -3, opacity: 0.85 }}>
-              <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
-                <View style={{ flex: 1, backgroundColor: '#e8f0ff' }} />
-              </MaskedView>
-            </View>
-
-            {/* Layer 4: Main chrome fill — sharp horizon gradient */}
+            {/* Main chrome fill */}
             <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
               <LinearGradient
                 colors={[
-                  '#000000', // 0%   — pure black top
-                  '#050810', // 8%   — near black
-                  '#0f1420', // 18%  — very dark blue-steel
-                  '#1e2840', // 28%  — dark steel
-                  '#3c4e70', // 38%  — steel blue rising
-                  '#8090b8', // 44%  — light steel
-                  '#c8d4f0', // 48%  — near white
-                  '#ffffff', // 50%  — pure white horizon (peak)
-                  '#ffffff', // 50%  — hard stop — no blend
-                  '#d0d8e8', // 54%  — just below horizon
-                  '#707888', // 62%  — mid grey ground
-                  '#282c38', // 78%  — dark ground
-                  '#080a10', // 90%  — near black
-                  '#000000', // 100% — pure black bottom
+                  '#000000',
+                  '#050810',
+                  '#0f1420',
+                  '#1e2840',
+                  '#3c4e70',
+                  '#8090b8',
+                  '#c8d4f0',
+                  '#ffffff',
+                  '#ffffff',
+                  '#d0d8e8',
+                  '#707888',
+                  '#282c38',
+                  '#080a10',
+                  '#000000',
                 ]}
                 locations={[0, 0.08, 0.18, 0.28, 0.38, 0.44, 0.48, 0.499, 0.50, 0.54, 0.62, 0.78, 0.90, 1]}
                 start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
                 style={{ width: 320, height: 126 }}
               />
-
               {/* Bright sweep core */}
               <Animated.View
                 pointerEvents="none"
@@ -1560,13 +1551,30 @@ export default function EnigmaGame() {
                   transform: [{ translateX: sweepX }, { skewX: '-16deg' }],
                 }}
               />
-              {/* Inner glow around core */}
+              {/* Inner glow */}
               <Animated.View
                 pointerEvents="none"
                 style={{
                   position: 'absolute', top: -10, bottom: -10, width: 60,
                   backgroundColor: 'rgba(255,255,255,0.30)',
                   transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(18)) }, { skewX: '-16deg' }],
+                }}
+              />
+              {/* Outer halo */}
+              <Animated.View
+                pointerEvents="none"
+                style={{
+                  position: 'absolute', top: -10, bottom: -10, width: 120,
+                  backgroundColor: 'rgba(255,255,255,0.10)',
+                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(48)) }, { skewX: '-16deg' }],
+                }}
+              />
+            </MaskedView>
+          </View>
+        </Animated.View>
+      </View>
+    );
+  }
                 }}
               />
               {/* Outer halo */}
@@ -1633,19 +1641,43 @@ export default function EnigmaGame() {
         </Modal>
 
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 32, paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
-          {/* Logo */}
+          {/* Game Logo — 20 Questions */}
           <View style={{ alignItems: 'center', marginBottom: 40 }}>
-            <View style={{ width: 90, height: 90, borderRadius: 45, backgroundColor: 'rgba(212,168,74,0.1)', borderWidth: 1.5, borderColor: 'rgba(212,168,74,0.32)', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-              <Text style={{ fontSize: 46 }}>🔍</Text>
+            {/* Icon mark: magnifying glass with "?" inside */}
+            <View style={{ marginBottom: 18, alignItems: 'center', justifyContent: 'center' }}>
+              {/* Outer ring glow */}
+              <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: 'rgba(212,168,74,0.06)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.20)', alignItems: 'center', justifyContent: 'center', position: 'absolute' }} />
+              {/* Magnifying glass circle */}
+              <View style={{ width: 72, height: 72, borderRadius: 36, borderWidth: 3, borderColor: C.gold, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(212,168,74,0.08)' }}>
+                {/* Big question mark */}
+                <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 34, color: C.gold, lineHeight: 38 }}>?</Text>
+              </View>
+              {/* Magnifying glass handle */}
+              <View style={{
+                position: 'absolute', bottom: 6, right: 6,
+                width: 26, height: 5, borderRadius: 3,
+                backgroundColor: C.gold,
+                transform: [{ rotate: '45deg' }],
+              }} />
             </View>
-            <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 34, letterSpacing: 8, color: C.gold }}>ENIGMA</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10, width: '100%' }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.18)' }} />
-              <Text style={{ fontSize: 10, color: C.muted, letterSpacing: 3, textTransform: 'uppercase', fontFamily: 'Outfit_400Regular', paddingHorizontal: 12 }}>The Art of 20 Questions</Text>
-              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.18)' }} />
+
+            {/* "20" large number */}
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: 2 }}>
+              <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 52, color: C.gold, letterSpacing: 2, lineHeight: 56 }}>20</Text>
             </View>
-            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 8, letterSpacing: 1 }}>
-              v{Constants.expoConfig?.version || '1.1.0'}
+
+            {/* "QUESTIONS" subtitle */}
+            <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 15, letterSpacing: 7, color: C.gold, marginBottom: 10 }}>QUESTIONS</Text>
+
+            {/* Decorative divider with tagline */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', width: '90%', marginBottom: 8 }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.25)' }} />
+              <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: 'rgba(212,168,74,0.50)', marginHorizontal: 10 }} />
+              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.25)' }} />
+            </View>
+            <Text style={{ fontSize: 10, color: C.muted, letterSpacing: 3, textTransform: 'uppercase', fontFamily: 'Outfit_400Regular' }}>The Art of Deduction</Text>
+            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 6, letterSpacing: 1 }}>
+              v{Constants.expoConfig?.version || '1.2.0'}
             </Text>
           </View>
 
@@ -1706,7 +1738,7 @@ export default function EnigmaGame() {
             </View>
           </View>
 
-          <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 28, letterSpacing: 6, color: C.gold, marginBottom: 6 }}>ENIGMA</Text>
+          <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 22, letterSpacing: 5, color: C.gold, marginBottom: 6 }}>20 QUESTIONS</Text>
           <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginBottom: 28 }}>Choose a game mode to play.</Text>
 
           {/* Daily Challenge */}
