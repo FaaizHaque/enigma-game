@@ -2,8 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator,
+  StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Animated, Easing,
 } from 'react-native';
+import MaskedView from '@react-native-masked-view/masked-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 import * as LinkingExpo from 'expo-linking';
@@ -492,10 +493,42 @@ function Chip({ label, style = 'gold' }) {
 export default function EnigmaGame() {
   const insets = useSafeAreaInsets();
 
-  const [screen, setScreen] = useState('home');
+  const [screen, setScreen] = useState('splash');
   const [game, setGame] = useState(null);
   const [viewerId, setViewerId] = useState(null);
 
+  const splashScale = useRef(new Animated.Value(0.55)).current;
+  const splashOpacity = useRef(new Animated.Value(1)).current;
+  const sweepX = useRef(new Animated.Value(-80)).current;
+
+  // Keep Railway server warm — prevents cold-start errors
+  useEffect(() => {
+    pingServer();
+    const interval = setInterval(pingServer, 4 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (screen !== 'splash') return;
+    // Zoom from 55% to 100% — logo is visible immediately and grows visibly
+    Animated.timing(splashScale, {
+      toValue: 1, duration: 2500, useNativeDriver: true,
+      easing: Easing.out(Easing.cubic),
+    }).start();
+    // Looping bright sweep bar across letters — slower, more visible
+    const sweep = Animated.loop(
+      Animated.sequence([
+        Animated.delay(1000),
+        Animated.timing(sweepX, { toValue: 420, duration: 2200, useNativeDriver: true }),
+        Animated.delay(1200),
+        Animated.timing(sweepX, { toValue: -80, duration: 0, useNativeDriver: true }),
+      ])
+    );
+    sweep.start();
+    // 6000ms total: 2500ms zoom + 3500ms at full size
+    const t = setTimeout(() => setScreen('home'), 6000);
+    return () => { clearTimeout(t); sweep.stop(); };
+  }, [screen]);
   const [nameInput, setNameInput] = useState('');
   const [codeInput, setCodeInput] = useState('');
   const [questionInput, setQuestionInput] = useState('');
@@ -1209,7 +1242,55 @@ export default function EnigmaGame() {
     ? <SimBar players={game.players} viewerId={viewerId} onSwitch={setViewerId} onHome={goHome} topInset={insets.top} />
     : null;
 
-  // ─── HOME — mode selection ────────────────────────────────────────────────
+  // ─── SPLASH ───────────────────────────────────────────────────────────────
+  if (screen === 'splash') {
+    const LW = 440, LH = 242;
+    const logoSrc = require('../assets/Haque Games Metallic Logo.png');
+    return (
+      <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
+        <Animated.View style={{
+          transform: [{ scale: splashScale }],
+          shadowColor: '#000',
+          shadowOpacity: 0.7,
+          shadowRadius: 16,
+          shadowOffset: { width: 0, height: 8 },
+        }}>
+          {/* Logo + sweep both clipped to letter shapes by a single MaskedView */}
+          <MaskedView
+            style={{ width: LW, height: LH, overflow: 'hidden' }}
+            maskElement={
+              <Image source={logoSrc} style={{ width: LW, height: LH }} resizeMode="contain" />
+            }
+          >
+            <View style={{ width: LW, height: LH, overflow: 'hidden' }}>
+              {/* The visible logo */}
+              <Image source={logoSrc} style={{ width: LW, height: LH }} resizeMode="contain" />
+              {/* Soft halo behind core */}
+              <Animated.View
+                pointerEvents="none"
+                style={{
+                  position: 'absolute', top: 0, height: LH, width: 90,
+                  backgroundColor: 'rgba(255,255,255,0.22)',
+                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(32)) }, { skewX: '-16deg' }],
+                }}
+              />
+              {/* Bright sweep core */}
+              <Animated.View
+                pointerEvents="none"
+                style={{
+                  position: 'absolute', top: 0, height: LH, width: 28,
+                  backgroundColor: 'rgba(255,255,255,0.90)',
+                  transform: [{ translateX: sweepX }, { skewX: '-16deg' }],
+                }}
+              />
+            </View>
+          </MaskedView>
+        </Animated.View>
+      </View>
+    );
+  }
+
+  // ─── HOME — personal landing ──────────────────────────────────────────────
   if (screen === 'home') {
     return (
       <View style={[S.flex, { backgroundColor: C.bg }]}>
