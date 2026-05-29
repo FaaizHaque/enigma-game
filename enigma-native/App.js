@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -19,10 +18,15 @@ import {
 import EnigmaGame from './src/EnigmaGame';
 import { initAudio } from './src/utils/sounds';
 
-SplashScreen.preventAutoHideAsync();
+// Keep the native splash visible until EnigmaGame paints its first frame —
+// this eliminates the black gap. EnigmaGame calls SplashScreen.hideAsync()
+// from its splash <View onLayout>.
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function App() {
-  const [fontsLoaded, fontError] = useFonts({
+  // Load fonts in the background, but don't gate rendering on them.
+  // The splash screen uses only an <Image>, so it doesn't need fonts.
+  useFonts({
     Cinzel_400Regular,
     Cinzel_600SemiBold,
     Cinzel_700Bold,
@@ -33,20 +37,7 @@ export default function App() {
     Outfit_700Bold,
   });
 
-  useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-      initAudio();
-    }
-  }, [fontsLoaded, fontError]);
-
-  if (!fontsLoaded && !fontError) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#c8a84a" />
-      </View>
-    );
-  }
+  useEffect(() => { initAudio(); }, []);
 
   return (
     <SafeAreaProvider>
@@ -55,12 +46,3 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    backgroundColor: '#06060f',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

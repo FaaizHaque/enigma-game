@@ -5,6 +5,7 @@ import {
   StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Animated, Easing,
 } from 'react-native';
 import MaskedView from '@react-native-masked-view/masked-view';
+import * as SplashScreen from 'expo-splash-screen';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 import * as LinkingExpo from 'expo-linking';
@@ -497,9 +498,9 @@ export default function EnigmaGame() {
   const [game, setGame] = useState(null);
   const [viewerId, setViewerId] = useState(null);
 
-  const splashScale = useRef(new Animated.Value(0.55)).current;
-  const splashOpacity = useRef(new Animated.Value(1)).current;
+  const splashScale = useRef(new Animated.Value(0.30)).current;
   const sweepX = useRef(new Animated.Value(-80)).current;
+  const splashHidden = useRef(false);
 
   // Keep Railway server warm — prevents cold-start errors
   useEffect(() => {
@@ -510,12 +511,12 @@ export default function EnigmaGame() {
 
   useEffect(() => {
     if (screen !== 'splash') return;
-    // Zoom from 55% to 100% — logo is visible immediately and grows visibly
+    // Dramatic slow zoom: 30% -> 100% over 3500ms with cubic easing
     Animated.timing(splashScale, {
-      toValue: 1, duration: 2500, useNativeDriver: true,
+      toValue: 1, duration: 3500, useNativeDriver: true,
       easing: Easing.out(Easing.cubic),
     }).start();
-    // Looping bright sweep bar across letters — slower, more visible
+    // Looping bright sweep bar across letters
     const sweep = Animated.loop(
       Animated.sequence([
         Animated.delay(1000),
@@ -525,10 +526,18 @@ export default function EnigmaGame() {
       ])
     );
     sweep.start();
-    // 6000ms total: 2500ms zoom + 3500ms at full size
-    const t = setTimeout(() => setScreen('home'), 6000);
+    // 7000ms total: 3500ms zoom + 3500ms at full size
+    const t = setTimeout(() => setScreen('home'), 7000);
     return () => { clearTimeout(t); sweep.stop(); };
   }, [screen]);
+
+  // Hide the native splash only AFTER the JS splash has painted —
+  // this is what eliminates the black gap.
+  const onSplashLayout = () => {
+    if (splashHidden.current) return;
+    splashHidden.current = true;
+    SplashScreen.hideAsync().catch(() => {});
+  };
   const [nameInput, setNameInput] = useState('');
   const [codeInput, setCodeInput] = useState('');
   const [questionInput, setQuestionInput] = useState('');
@@ -1247,7 +1256,10 @@ export default function EnigmaGame() {
     const LW = 440, LH = 242;
     const logoSrc = require('../assets/Haque Games Metallic Logo.png');
     return (
-      <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        onLayout={onSplashLayout}
+        style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}
+      >
         <Animated.View style={{
           transform: [{ scale: splashScale }],
           shadowColor: '#000',
