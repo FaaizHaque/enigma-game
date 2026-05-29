@@ -1575,23 +1575,6 @@ export default function EnigmaGame() {
       </View>
     );
   }
-                }}
-              />
-              {/* Outer halo */}
-              <Animated.View
-                pointerEvents="none"
-                style={{
-                  position: 'absolute', top: -10, bottom: -10, width: 120,
-                  backgroundColor: 'rgba(255,255,255,0.10)',
-                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(48)) }, { skewX: '-16deg' }],
-                }}
-              />
-            </MaskedView>
-          </View>
-        </Animated.View>
-      </View>
-    );
-  }
 
   // ─── HOME — personal landing ──────────────────────────────────────────────
   if (screen === 'home') {
