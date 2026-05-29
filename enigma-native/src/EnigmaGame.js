@@ -794,9 +794,10 @@ export default function EnigmaGame() {
 
   useEffect(() => {
     if (screen !== 'splash') return;
-    // Dramatic slow zoom: 30% -> 100% over 3500ms with cubic easing
+    // useNativeDriver:false here because MaskedView's CALayer mask
+    // does not follow native-thread scale transforms on iOS.
     Animated.timing(splashScale, {
-      toValue: 1, duration: 3500, useNativeDriver: true,
+      toValue: 1, duration: 3500, useNativeDriver: false,
       easing: Easing.out(Easing.cubic),
     }).start();
     // Looping bright sweep bar across letters
