@@ -803,7 +803,7 @@ export default function EnigmaGame() {
     const sweep = Animated.loop(
       Animated.sequence([
         Animated.delay(1000),
-        Animated.timing(sweepX, { toValue: 480, duration: 2200, useNativeDriver: true }),
+        Animated.timing(sweepX, { toValue: 420, duration: 2200, useNativeDriver: true }),
         Animated.delay(1200),
         Animated.timing(sweepX, { toValue: -80, duration: 0, useNativeDriver: true }),
       ])
@@ -1493,69 +1493,48 @@ export default function EnigmaGame() {
 
   // ─── SPLASH ───────────────────────────────────────────────────────────────
   if (screen === 'splash') {
-    const LW = 420, LH = 165;
-    const LogoMask = () => (
-      <Image
-        source={require('../assets/logo-haque-games.png')}
-        style={{ width: LW, height: LH }}
-        resizeMode="contain"
-      />
-    );
+    const LW = 360, LH = 198;
     return (
       <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
         <Animated.View style={{
           opacity: splashOpacity,
           transform: [{ scale: splashScale }],
-          // Native shadow gives soft 3D depth without a duplicated silhouette
           shadowColor: '#000',
-          shadowOpacity: 0.85,
-          shadowRadius: 14,
-          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.7,
+          shadowRadius: 16,
+          shadowOffset: { width: 0, height: 8 },
         }}>
-          <View style={{ width: LW, height: LH }}>
-            {/* Single MaskedView with smooth chrome gradient — no hard horizon stop */}
-            <MaskedView style={{ width: LW, height: LH }} maskElement={<LogoMask />}>
-              <LinearGradient
-                colors={[
-                  '#2a3142', // top — soft steel grey (no pure black, avoids stripe illusion)
-                  '#6b7894', // upper steel
-                  '#aab6cc', // light steel
-                  '#e8eef8', // bright silver
-                  '#ffffff', // peak highlight
-                  '#dde4f0', // softer downside
-                  '#9aa3b8', // mid silver
-                  '#5c6478', // dark steel
-                  '#2a3142', // bottom — soft steel grey
-                ]}
-                locations={[0, 0.18, 0.34, 0.46, 0.54, 0.62, 0.74, 0.88, 1]}
-                start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
-                style={{ width: LW, height: LH }}
-              />
-              {/* Bright sweep core */}
+          <View style={{ width: LW, height: LH, overflow: 'hidden' }}>
+            <Image
+              source={require('../assets/Haque Games Metallic Logo.png')}
+              style={{ width: LW, height: LH }}
+              resizeMode="contain"
+            />
+            {/* Animated light sweep — masked to logo shape so it only shines through letters/icon */}
+            <MaskedView
+              style={{ position: 'absolute', top: 0, left: 0, width: LW, height: LH }}
+              maskElement={
+                <Image
+                  source={require('../assets/Haque Games Metallic Logo.png')}
+                  style={{ width: LW, height: LH }}
+                  resizeMode="contain"
+                />
+              }
+            >
               <Animated.View
                 pointerEvents="none"
                 style={{
-                  position: 'absolute', top: -14, bottom: -14, width: 26,
-                  backgroundColor: 'rgba(255,255,255,0.95)',
+                  position: 'absolute', top: -20, bottom: -20, width: 26,
+                  backgroundColor: 'rgba(255,255,255,0.85)',
                   transform: [{ translateX: sweepX }, { skewX: '-16deg' }],
                 }}
               />
-              {/* Inner glow */}
               <Animated.View
                 pointerEvents="none"
                 style={{
-                  position: 'absolute', top: -14, bottom: -14, width: 70,
-                  backgroundColor: 'rgba(255,255,255,0.28)',
-                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(22)) }, { skewX: '-16deg' }],
-                }}
-              />
-              {/* Outer halo */}
-              <Animated.View
-                pointerEvents="none"
-                style={{
-                  position: 'absolute', top: -14, bottom: -14, width: 140,
-                  backgroundColor: 'rgba(255,255,255,0.10)',
-                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(57)) }, { skewX: '-16deg' }],
+                  position: 'absolute', top: -20, bottom: -20, width: 80,
+                  backgroundColor: 'rgba(255,255,255,0.25)',
+                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(28)) }, { skewX: '-16deg' }],
                 }}
               />
             </MaskedView>
