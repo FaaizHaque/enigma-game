@@ -782,7 +782,7 @@ export default function EnigmaGame() {
   const [game, setGame] = useState(null);
   const [viewerId, setViewerId] = useState(null);
 
-  const splashScale = useRef(new Animated.Value(0.25)).current;
+  const splashScale = useRef(new Animated.Value(0.15)).current;
   const splashOpacity = useRef(new Animated.Value(0)).current;
   const sweepX = useRef(new Animated.Value(-80)).current;
 
@@ -1497,7 +1497,7 @@ export default function EnigmaGame() {
 
   // ─── SPLASH ───────────────────────────────────────────────────────────────
   if (screen === 'splash') {
-    const LW = 360, LH = 198;
+    const LW = 440, LH = 242;
     const logoSrc = require('../assets/Haque Games Metallic Logo.png');
     return (
       <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
