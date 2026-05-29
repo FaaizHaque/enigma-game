@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Animated,
+  StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Animated, Easing,
 } from 'react-native';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -782,7 +782,7 @@ export default function EnigmaGame() {
   const [game, setGame] = useState(null);
   const [viewerId, setViewerId] = useState(null);
 
-  const splashScale = useRef(new Animated.Value(0.55)).current;
+  const splashScale = useRef(new Animated.Value(0.25)).current;
   const splashOpacity = useRef(new Animated.Value(0)).current;
   const sweepX = useRef(new Animated.Value(-80)).current;
 
@@ -796,9 +796,12 @@ export default function EnigmaGame() {
   useEffect(() => {
     if (screen !== 'splash') return;
     Animated.parallel([
-      // Slow zoom-in from 0.55 to 1.0 over 3s
-      Animated.timing(splashScale, { toValue: 1, duration: 3000, useNativeDriver: true }),
-      Animated.timing(splashOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+      // Dramatic slow zoom: 25% -> 100% over 3.5s with cubic easing
+      Animated.timing(splashScale, {
+        toValue: 1, duration: 3500, useNativeDriver: true,
+        easing: Easing.out(Easing.cubic),
+      }),
+      Animated.timing(splashOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
     ]).start();
     // Looping bright sweep bar across letters — slower, more visible
     const sweep = Animated.loop(
@@ -1508,31 +1511,33 @@ export default function EnigmaGame() {
         }}>
           {/* Logo + sweep both clipped to letter shapes by a single MaskedView */}
           <MaskedView
-            style={{ width: LW, height: LH }}
+            style={{ width: LW, height: LH, overflow: 'hidden' }}
             maskElement={
               <Image source={logoSrc} style={{ width: LW, height: LH }} resizeMode="contain" />
             }
           >
-            {/* The visible logo */}
-            <Image source={logoSrc} style={{ width: LW, height: LH }} resizeMode="contain" />
-            {/* Bright sweep core — only shows through the letter pixels */}
-            <Animated.View
-              pointerEvents="none"
-              style={{
-                position: 'absolute', top: -20, bottom: -20, width: 26,
-                backgroundColor: 'rgba(255,255,255,0.85)',
-                transform: [{ translateX: sweepX }, { skewX: '-16deg' }],
-              }}
-            />
-            {/* Wider soft halo */}
-            <Animated.View
-              pointerEvents="none"
-              style={{
-                position: 'absolute', top: -20, bottom: -20, width: 80,
-                backgroundColor: 'rgba(255,255,255,0.20)',
-                transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(28)) }, { skewX: '-16deg' }],
-              }}
-            />
+            <View style={{ width: LW, height: LH, overflow: 'hidden' }}>
+              {/* The visible logo */}
+              <Image source={logoSrc} style={{ width: LW, height: LH }} resizeMode="contain" />
+              {/* Soft halo behind core */}
+              <Animated.View
+                pointerEvents="none"
+                style={{
+                  position: 'absolute', top: 0, height: LH, width: 90,
+                  backgroundColor: 'rgba(255,255,255,0.22)',
+                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(32)) }, { skewX: '-16deg' }],
+                }}
+              />
+              {/* Bright sweep core */}
+              <Animated.View
+                pointerEvents="none"
+                style={{
+                  position: 'absolute', top: 0, height: LH, width: 28,
+                  backgroundColor: 'rgba(255,255,255,0.90)',
+                  transform: [{ translateX: sweepX }, { skewX: '-16deg' }],
+                }}
+              />
+            </View>
           </MaskedView>
         </Animated.View>
       </View>
