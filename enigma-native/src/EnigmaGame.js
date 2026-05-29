@@ -781,7 +781,7 @@ export default function EnigmaGame() {
   const [game, setGame] = useState(null);
   const [viewerId, setViewerId] = useState(null);
 
-  const splashScale = useRef(new Animated.Value(0.30)).current;
+  const [splashScale, setSplashScale] = useState(0.30);
   const sweepX = useRef(new Animated.Value(-80)).current;
   const splashHidden = useRef(false);
 
@@ -794,12 +794,22 @@ export default function EnigmaGame() {
 
   useEffect(() => {
     if (screen !== 'splash') return;
-    // useNativeDriver:false here because MaskedView's CALayer mask
-    // does not follow native-thread scale transforms on iOS.
-    Animated.timing(splashScale, {
-      toValue: 1, duration: 3500, useNativeDriver: false,
-      easing: Easing.out(Easing.cubic),
-    }).start();
+    // Manual rAF-driven zoom. Animated.Value + transform:scale doesn't
+    // work reliably with MaskedView on iOS, so we drive React state
+    // directly and pass real width/height to MaskedView.
+    const ZOOM_MS = 3500;
+    const startScale = 0.30;
+    const endScale = 1.0;
+    const t0 = Date.now();
+    let raf;
+    const tick = () => {
+      const t = Math.min(1, (Date.now() - t0) / ZOOM_MS);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - t, 3);
+      setSplashScale(startScale + (endScale - startScale) * eased);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
     // Looping bright sweep bar across letters
     const sweep = Animated.loop(
       Animated.sequence([
@@ -811,8 +821,8 @@ export default function EnigmaGame() {
     );
     sweep.start();
     // 7000ms total: 3500ms zoom + 3500ms at full size
-    const t = setTimeout(() => setScreen('home'), 7000);
-    return () => { clearTimeout(t); sweep.stop(); };
+    const timerId = setTimeout(() => setScreen('home'), 7000);
+    return () => { clearTimeout(timerId); sweep.stop(); if (raf) cancelAnimationFrame(raf); };
   }, [screen]);
 
   // Hide the native splash only AFTER the JS splash has painted —
@@ -1503,15 +1513,18 @@ export default function EnigmaGame() {
 
   // ─── SPLASH ───────────────────────────────────────────────────────────────
   if (screen === 'splash') {
-    const LW = 440, LH = 242;
+    const BASE_W = 440, BASE_H = 242;
+    const LW = Math.round(BASE_W * splashScale);
+    const LH = Math.round(BASE_H * splashScale);
     const logoSrc = require('../assets/Haque Games Metallic Logo.png');
     return (
       <View
         onLayout={onSplashLayout}
         style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}
       >
-        <Animated.View style={{
-          transform: [{ scale: splashScale }],
+        <View style={{
+          width: LW,
+          height: LH,
           shadowColor: '#000',
           shadowOpacity: 0.7,
           shadowRadius: 16,
@@ -1547,7 +1560,7 @@ export default function EnigmaGame() {
               />
             </View>
           </MaskedView>
-        </Animated.View>
+        </View>
       </View>
     );
   }
