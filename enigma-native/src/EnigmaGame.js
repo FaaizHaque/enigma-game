@@ -782,7 +782,7 @@ export default function EnigmaGame() {
   const [game, setGame] = useState(null);
   const [viewerId, setViewerId] = useState(null);
 
-  const splashScale = useRef(new Animated.Value(0.4)).current;
+  const splashScale = useRef(new Animated.Value(0.55)).current;
   const splashOpacity = useRef(new Animated.Value(0)).current;
   const sweepX = useRef(new Animated.Value(-80)).current;
 
@@ -796,8 +796,9 @@ export default function EnigmaGame() {
   useEffect(() => {
     if (screen !== 'splash') return;
     Animated.parallel([
-      Animated.timing(splashScale, { toValue: 1, duration: 900, useNativeDriver: true }),
-      Animated.timing(splashOpacity, { toValue: 1, duration: 700, useNativeDriver: true }),
+      // Slow zoom-in from 0.55 to 1.0 over 3s
+      Animated.timing(splashScale, { toValue: 1, duration: 3000, useNativeDriver: true }),
+      Animated.timing(splashOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
     ]).start();
     // Looping bright sweep bar across letters — slower, more visible
     const sweep = Animated.loop(
@@ -1494,6 +1495,7 @@ export default function EnigmaGame() {
   // ─── SPLASH ───────────────────────────────────────────────────────────────
   if (screen === 'splash') {
     const LW = 360, LH = 198;
+    const logoSrc = require('../assets/Haque Games Metallic Logo.png');
     return (
       <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
         <Animated.View style={{
@@ -1504,41 +1506,34 @@ export default function EnigmaGame() {
           shadowRadius: 16,
           shadowOffset: { width: 0, height: 8 },
         }}>
-          <View style={{ width: LW, height: LH, overflow: 'hidden' }}>
-            <Image
-              source={require('../assets/Haque Games Metallic Logo.png')}
-              style={{ width: LW, height: LH }}
-              resizeMode="contain"
+          {/* Logo + sweep both clipped to letter shapes by a single MaskedView */}
+          <MaskedView
+            style={{ width: LW, height: LH }}
+            maskElement={
+              <Image source={logoSrc} style={{ width: LW, height: LH }} resizeMode="contain" />
+            }
+          >
+            {/* The visible logo */}
+            <Image source={logoSrc} style={{ width: LW, height: LH }} resizeMode="contain" />
+            {/* Bright sweep core — only shows through the letter pixels */}
+            <Animated.View
+              pointerEvents="none"
+              style={{
+                position: 'absolute', top: -20, bottom: -20, width: 26,
+                backgroundColor: 'rgba(255,255,255,0.85)',
+                transform: [{ translateX: sweepX }, { skewX: '-16deg' }],
+              }}
             />
-            {/* Animated light sweep — masked to logo shape so it only shines through letters/icon */}
-            <MaskedView
-              style={{ position: 'absolute', top: 0, left: 0, width: LW, height: LH }}
-              maskElement={
-                <Image
-                  source={require('../assets/Haque Games Metallic Logo.png')}
-                  style={{ width: LW, height: LH }}
-                  resizeMode="contain"
-                />
-              }
-            >
-              <Animated.View
-                pointerEvents="none"
-                style={{
-                  position: 'absolute', top: -20, bottom: -20, width: 26,
-                  backgroundColor: 'rgba(255,255,255,0.85)',
-                  transform: [{ translateX: sweepX }, { skewX: '-16deg' }],
-                }}
-              />
-              <Animated.View
-                pointerEvents="none"
-                style={{
-                  position: 'absolute', top: -20, bottom: -20, width: 80,
-                  backgroundColor: 'rgba(255,255,255,0.25)',
-                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(28)) }, { skewX: '-16deg' }],
-                }}
-              />
-            </MaskedView>
-          </View>
+            {/* Wider soft halo */}
+            <Animated.View
+              pointerEvents="none"
+              style={{
+                position: 'absolute', top: -20, bottom: -20, width: 80,
+                backgroundColor: 'rgba(255,255,255,0.20)',
+                transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(28)) }, { skewX: '-16deg' }],
+              }}
+            />
+          </MaskedView>
         </Animated.View>
       </View>
     );
