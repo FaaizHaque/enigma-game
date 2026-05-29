@@ -782,6 +782,7 @@ export default function EnigmaGame() {
   const [viewerId, setViewerId] = useState(null);
 
   const [splashScale, setSplashScale] = useState(0.30);
+  const [splashImgReady, setSplashImgReady] = useState(false);
   const sweepX = useRef(new Animated.Value(-80)).current;
   const splashHidden = useRef(false);
 
@@ -794,9 +795,13 @@ export default function EnigmaGame() {
 
   useEffect(() => {
     if (screen !== 'splash') return;
-    // Manual rAF-driven zoom. Animated.Value + transform:scale doesn't
-    // work reliably with MaskedView on iOS, so we drive React state
-    // directly and pass real width/height to MaskedView.
+    // Wait for the logo bitmap to be decoded and ready to render —
+    // otherwise the rAF ticks happen during decode and the screen
+    // jumps straight to the final frame.
+    if (!splashImgReady) return;
+    // Manual rAF-driven zoom. MaskedView on iOS ignores transforms
+    // on its parent, so we drive React state and pass real width/
+    // height to MaskedView itself — forces a layout pass per frame.
     const ZOOM_MS = 3500;
     const startScale = 0.30;
     const endScale = 1.0;
@@ -804,8 +809,7 @@ export default function EnigmaGame() {
     let raf;
     const tick = () => {
       const t = Math.min(1, (Date.now() - t0) / ZOOM_MS);
-      // ease-out cubic
-      const eased = 1 - Math.pow(1 - t, 3);
+      const eased = 1 - Math.pow(1 - t, 3);   // ease-out cubic
       setSplashScale(startScale + (endScale - startScale) * eased);
       if (t < 1) raf = requestAnimationFrame(tick);
     };
@@ -823,7 +827,7 @@ export default function EnigmaGame() {
     // 7000ms total: 3500ms zoom + 3500ms at full size
     const timerId = setTimeout(() => setScreen('home'), 7000);
     return () => { clearTimeout(timerId); sweep.stop(); if (raf) cancelAnimationFrame(raf); };
-  }, [screen]);
+  }, [screen, splashImgReady]);
 
   // Hide the native splash only AFTER the JS splash has painted —
   // this is what eliminates the black gap.
@@ -1538,8 +1542,13 @@ export default function EnigmaGame() {
             }
           >
             <View style={{ width: LW, height: LH, overflow: 'hidden' }}>
-              {/* The visible logo */}
-              <Image source={logoSrc} style={{ width: LW, height: LH }} resizeMode="contain" />
+              {/* The visible logo — onLoad flips splashImgReady to start zoom */}
+              <Image
+                source={logoSrc}
+                style={{ width: LW, height: LH }}
+                resizeMode="contain"
+                onLoad={() => setSplashImgReady(true)}
+              />
               {/* Soft halo behind core */}
               <Animated.View
                 pointerEvents="none"
