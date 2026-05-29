@@ -1591,10 +1591,10 @@ export default function EnigmaGame() {
           <View style={{ alignItems: 'center', marginBottom: 40 }}>
             {/* Icon mark: magnifying glass with "?" inside */}
             <View style={{ marginBottom: 18, alignItems: 'center', justifyContent: 'center' }}>
-              {/* Outer ring glow */}
-              <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: 'rgba(212,168,74,0.06)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.20)', alignItems: 'center', justifyContent: 'center', position: 'absolute' }} />
-              {/* Magnifying glass circle */}
-              <View style={{ width: 72, height: 72, borderRadius: 36, borderWidth: 3, borderColor: C.gold, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(212,168,74,0.08)' }}>
+              {/* Outer ring glow — brighter, thicker */}
+              <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: 'rgba(212,168,74,0.10)', borderWidth: 2.5, borderColor: 'rgba(212,168,74,0.65)', alignItems: 'center', justifyContent: 'center', position: 'absolute' }} />
+              {/* Magnifying glass circle — thicker ring */}
+              <View style={{ width: 72, height: 72, borderRadius: 36, borderWidth: 5, borderColor: C.gold, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(212,168,74,0.08)' }}>
                 {/* Big question mark */}
                 <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 34, color: C.gold, lineHeight: 38 }}>?</Text>
               </View>
