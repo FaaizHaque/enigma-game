@@ -1503,59 +1503,79 @@ export default function EnigmaGame() {
     return (
       <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
         <Animated.View style={{ opacity: splashOpacity, transform: [{ scale: splashScale }] }}>
-          <View style={{ width: 320, height: 126 }}>
-            {/* 1. Drop shadow — dark silhouette offset down-right for 3D depth */}
-            <View style={{ position: 'absolute', top: 4, left: 3, opacity: 0.55 }}>
+          {/* Outer container slightly larger to accommodate shadow bleed */}
+          <View style={{ width: 330, height: 136, alignItems: 'center', justifyContent: 'center' }}>
+
+            {/* Layer 1: Far shadow — deepest offset, softest, largest */}
+            <View style={{ position: 'absolute', top: 10, left: 8, opacity: 0.70 }}>
               <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
                 <View style={{ flex: 1, backgroundColor: '#000000' }} />
               </MaskedView>
             </View>
-            {/* 2. Top highlight bevel — bright silhouette offset up-left for raised edge */}
-            <View style={{ position: 'absolute', top: -1, left: -1, opacity: 0.55 }}>
+
+            {/* Layer 2: Near shadow — tighter, stronger */}
+            <View style={{ position: 'absolute', top: 5, left: 4, opacity: 0.90 }}>
               <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
-                <View style={{ flex: 1, backgroundColor: '#ffffff' }} />
+                <View style={{ flex: 1, backgroundColor: '#000510' }} />
               </MaskedView>
             </View>
-            {/* 3. Main chrome — classic horizon gradient (sky reflects above, ground below) */}
+
+            {/* Layer 3: Top-left highlight bevel — the "raised" edge catches the light */}
+            <View style={{ position: 'absolute', top: -3, left: -3, opacity: 0.85 }}>
+              <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
+                <View style={{ flex: 1, backgroundColor: '#e8f0ff' }} />
+              </MaskedView>
+            </View>
+
+            {/* Layer 4: Main chrome fill — sharp horizon gradient */}
             <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
               <LinearGradient
                 colors={[
-                  '#08090f', // deep top — sky shadow
-                  '#1f2434', // dark blue-grey sky
-                  '#3a4258', // mid sky
-                  '#7d8aa3', // light sky
-                  '#e8eef8', // bright horizon highlight
-                  '#ffffff', // sharp horizon peak
-                  '#ffffff', // (double stop = hard horizon line)
-                  '#bcc4d2', // top of ground
-                  '#5a606e', // mid ground
-                  '#2a2d36', // ground shadow
-                  '#08090f', // bottom — black
+                  '#000000', // 0%   — pure black top
+                  '#050810', // 8%   — near black
+                  '#0f1420', // 18%  — very dark blue-steel
+                  '#1e2840', // 28%  — dark steel
+                  '#3c4e70', // 38%  — steel blue rising
+                  '#8090b8', // 44%  — light steel
+                  '#c8d4f0', // 48%  — near white
+                  '#ffffff', // 50%  — pure white horizon (peak)
+                  '#ffffff', // 50%  — hard stop — no blend
+                  '#d0d8e8', // 54%  — just below horizon
+                  '#707888', // 62%  — mid grey ground
+                  '#282c38', // 78%  — dark ground
+                  '#080a10', // 90%  — near black
+                  '#000000', // 100% — pure black bottom
                 ]}
-                locations={[0, 0.10, 0.25, 0.40, 0.48, 0.50, 0.50, 0.58, 0.75, 0.90, 1]}
+                locations={[0, 0.08, 0.18, 0.28, 0.38, 0.44, 0.48, 0.499, 0.50, 0.54, 0.62, 0.78, 0.90, 1]}
                 start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
                 style={{ width: 320, height: 126 }}
               />
-              {/* Slow, bright sweep bar with soft edges */}
+
+              {/* Bright sweep core */}
               <Animated.View
                 pointerEvents="none"
                 style={{
-                  position: 'absolute', top: -12, bottom: -12, width: 28,
-                  backgroundColor: 'rgba(255,255,255,0.95)',
-                  shadowColor: '#ffffff',
-                  shadowOpacity: 1,
-                  shadowRadius: 18,
-                  shadowOffset: { width: 0, height: 0 },
+                  position: 'absolute', top: -10, bottom: -10, width: 22,
+                  backgroundColor: 'rgba(255,255,255,0.98)',
                   transform: [{ translateX: sweepX }, { skewX: '-16deg' }],
                 }}
               />
-              {/* Wider soft glow around the sweep for a halo */}
+              {/* Inner glow around core */}
               <Animated.View
                 pointerEvents="none"
                 style={{
-                  position: 'absolute', top: -12, bottom: -12, width: 90,
-                  backgroundColor: 'rgba(255,255,255,0.20)',
-                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(30)) }, { skewX: '-16deg' }],
+                  position: 'absolute', top: -10, bottom: -10, width: 60,
+                  backgroundColor: 'rgba(255,255,255,0.30)',
+                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(18)) }, { skewX: '-16deg' }],
+                }}
+              />
+              {/* Outer halo */}
+              <Animated.View
+                pointerEvents="none"
+                style={{
+                  position: 'absolute', top: -10, bottom: -10, width: 120,
+                  backgroundColor: 'rgba(255,255,255,0.10)',
+                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(48)) }, { skewX: '-16deg' }],
                 }}
               />
             </MaskedView>
