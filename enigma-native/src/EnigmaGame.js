@@ -784,7 +784,7 @@ export default function EnigmaGame() {
 
   const splashScale = useRef(new Animated.Value(0.4)).current;
   const splashOpacity = useRef(new Animated.Value(0)).current;
-  const sweepX = useRef(new Animated.Value(-60)).current;
+  const sweepX = useRef(new Animated.Value(-80)).current;
 
   // Keep Railway server warm — prevents cold-start errors
   useEffect(() => {
@@ -803,9 +803,9 @@ export default function EnigmaGame() {
     const sweep = Animated.loop(
       Animated.sequence([
         Animated.delay(1000),
-        Animated.timing(sweepX, { toValue: 380, duration: 2000, useNativeDriver: true }),
+        Animated.timing(sweepX, { toValue: 480, duration: 2200, useNativeDriver: true }),
         Animated.delay(1200),
-        Animated.timing(sweepX, { toValue: -60, duration: 0, useNativeDriver: true }),
+        Animated.timing(sweepX, { toValue: -80, duration: 0, useNativeDriver: true }),
       ])
     );
     sweep.start();
@@ -1493,61 +1493,50 @@ export default function EnigmaGame() {
 
   // ─── SPLASH ───────────────────────────────────────────────────────────────
   if (screen === 'splash') {
+    const LW = 420, LH = 165;
     const LogoMask = () => (
       <Image
         source={require('../assets/logo-haque-games.png')}
-        style={{ width: 320, height: 126 }}
+        style={{ width: LW, height: LH }}
         resizeMode="contain"
       />
     );
     return (
       <View style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}>
-        <Animated.View style={{ opacity: splashOpacity, transform: [{ scale: splashScale }] }}>
-          <View style={{ width: 326, height: 130, alignItems: 'center', justifyContent: 'center' }}>
-
-            {/* Shadow — subtle, 2px offset only so it reads as depth not ghost */}
-            <View style={{ position: 'absolute', top: 3, left: 2, opacity: 0.60 }}>
-              <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
-                <View style={{ flex: 1, backgroundColor: '#000000' }} />
-              </MaskedView>
-            </View>
-
-            {/* Highlight bevel — 1px offset up-left, bright edge */}
-            <View style={{ position: 'absolute', top: -1, left: -1, opacity: 0.50 }}>
-              <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
-                <View style={{ flex: 1, backgroundColor: '#c8d8ff' }} />
-              </MaskedView>
-            </View>
-
-            {/* Main chrome fill */}
-            <MaskedView style={{ width: 320, height: 126 }} maskElement={<LogoMask />}>
+        <Animated.View style={{
+          opacity: splashOpacity,
+          transform: [{ scale: splashScale }],
+          // Native shadow gives soft 3D depth without a duplicated silhouette
+          shadowColor: '#000',
+          shadowOpacity: 0.85,
+          shadowRadius: 14,
+          shadowOffset: { width: 0, height: 6 },
+        }}>
+          <View style={{ width: LW, height: LH }}>
+            {/* Single MaskedView with smooth chrome gradient — no hard horizon stop */}
+            <MaskedView style={{ width: LW, height: LH }} maskElement={<LogoMask />}>
               <LinearGradient
                 colors={[
-                  '#000000',
-                  '#050810',
-                  '#0f1420',
-                  '#1e2840',
-                  '#3c4e70',
-                  '#8090b8',
-                  '#c8d4f0',
-                  '#ffffff',
-                  '#ffffff',
-                  '#d0d8e8',
-                  '#707888',
-                  '#282c38',
-                  '#080a10',
-                  '#000000',
+                  '#2a3142', // top — soft steel grey (no pure black, avoids stripe illusion)
+                  '#6b7894', // upper steel
+                  '#aab6cc', // light steel
+                  '#e8eef8', // bright silver
+                  '#ffffff', // peak highlight
+                  '#dde4f0', // softer downside
+                  '#9aa3b8', // mid silver
+                  '#5c6478', // dark steel
+                  '#2a3142', // bottom — soft steel grey
                 ]}
-                locations={[0, 0.08, 0.18, 0.28, 0.38, 0.44, 0.48, 0.499, 0.50, 0.54, 0.62, 0.78, 0.90, 1]}
+                locations={[0, 0.18, 0.34, 0.46, 0.54, 0.62, 0.74, 0.88, 1]}
                 start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
-                style={{ width: 320, height: 126 }}
+                style={{ width: LW, height: LH }}
               />
               {/* Bright sweep core */}
               <Animated.View
                 pointerEvents="none"
                 style={{
-                  position: 'absolute', top: -10, bottom: -10, width: 22,
-                  backgroundColor: 'rgba(255,255,255,0.98)',
+                  position: 'absolute', top: -14, bottom: -14, width: 26,
+                  backgroundColor: 'rgba(255,255,255,0.95)',
                   transform: [{ translateX: sweepX }, { skewX: '-16deg' }],
                 }}
               />
@@ -1555,18 +1544,18 @@ export default function EnigmaGame() {
               <Animated.View
                 pointerEvents="none"
                 style={{
-                  position: 'absolute', top: -10, bottom: -10, width: 60,
-                  backgroundColor: 'rgba(255,255,255,0.30)',
-                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(18)) }, { skewX: '-16deg' }],
+                  position: 'absolute', top: -14, bottom: -14, width: 70,
+                  backgroundColor: 'rgba(255,255,255,0.28)',
+                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(22)) }, { skewX: '-16deg' }],
                 }}
               />
               {/* Outer halo */}
               <Animated.View
                 pointerEvents="none"
                 style={{
-                  position: 'absolute', top: -10, bottom: -10, width: 120,
+                  position: 'absolute', top: -14, bottom: -14, width: 140,
                   backgroundColor: 'rgba(255,255,255,0.10)',
-                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(48)) }, { skewX: '-16deg' }],
+                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(57)) }, { skewX: '-16deg' }],
                 }}
               />
             </MaskedView>
