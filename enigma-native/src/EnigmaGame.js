@@ -1131,6 +1131,7 @@ export default function EnigmaGame() {
       if (error || !row) throw new Error('Room no longer available');
       const session = row.data;
       if (session.status !== 'lobby') throw new Error('Game already started');
+      if (session.players.length >= 5) throw new Error('Room is full (max 5 players)');
       const existingIds = new Set(session.players.map((p) => p.id));
       let nextNum = session.players.length + 1;
       let playerId = `p${nextNum}`;
@@ -1190,6 +1191,7 @@ export default function EnigmaGame() {
       if (error || !row) throw new Error('Session not found');
       const session = row.data;
       if (session.status !== 'lobby') throw new Error('Game already in progress');
+      if (session.players.length >= 5) throw new Error('Room is full (max 5 players)');
       const existingIds = new Set(session.players.map((p) => p.id));
       let nextNum = session.players.length + 1;
       let playerId = `p${nextNum}`;
@@ -2455,6 +2457,14 @@ export default function EnigmaGame() {
   }
 
   // ─── PUBLIC ROOMS BROWSER ─────────────────────────────────────────────────
+  // Auto-load and poll public rooms every 10s while on the rooms screen
+  useEffect(() => {
+    if (screen !== 'rooms') return;
+    loadPublicRooms();
+    const interval = setInterval(loadPublicRooms, 10000);
+    return () => clearInterval(interval);
+  }, [screen]);
+
   if (screen === 'rooms') {
     const readyToJoin = !!nameInput.trim();
     return (
@@ -2499,7 +2509,7 @@ export default function EnigmaGame() {
               <Text style={[S.fieldLabel, { marginTop: 4 }]}>{publicRooms.length} open room{publicRooms.length !== 1 ? 's' : ''}</Text>
               {publicRooms.map((r) => {
                 const a = av(r.hostAvatarIdx);
-                const full = r.playerCount >= 8;
+                const full = r.playerCount >= 5;
                 return (
                   <TouchableOpacity
                     key={r.roomCode}
