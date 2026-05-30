@@ -26,6 +26,14 @@ CREATE POLICY "Public session access"
   USING (true)
   WITH CHECK (true);
 
+-- Explicit Data API grants. As of 2026, Supabase no longer auto-grants
+-- public-schema tables to the anon/authenticated roles (default for new
+-- projects 30 May 2026; enforced on existing projects 30 Oct 2026).
+-- Without these GRANTs, supabase-js requests using the publishable
+-- (anon) key are rejected even though RLS allows them.
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON sessions TO anon, authenticated;
+
 -- Enable Realtime so clients can subscribe to row changes
 ALTER TABLE sessions REPLICA IDENTITY FULL;
 
@@ -60,6 +68,12 @@ CREATE POLICY IF NOT EXISTS "Public daily score access"
   ON daily_scores FOR ALL
   USING (true)
   WITH CHECK (true);
+
+-- Data API grants (see note on sessions above). daily_scores uses a
+-- BIGSERIAL id, so the underlying sequence must be granted too or
+-- INSERTs fail with "permission denied for sequence".
+GRANT SELECT, INSERT, UPDATE, DELETE ON daily_scores TO anon, authenticated;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
 
 ALTER PUBLICATION supabase_realtime ADD TABLE daily_scores;
 
