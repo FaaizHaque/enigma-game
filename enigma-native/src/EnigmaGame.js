@@ -890,6 +890,23 @@ export default function EnigmaGame() {
   const [hostWarningData, setHostWarningData] = useState(null);
   const [hostWarningSecsLeft, setHostWarningSecsLeft] = useState(10);
 
+  // Animated values for smooth timer bars (avoid 1s jump steps)
+  const guesserBarAnim = useRef(new Animated.Value(1)).current;
+  const hostBarAnim = useRef(new Animated.Value(1)).current;
+  const hostWarnBarAnim = useRef(new Animated.Value(1)).current;
+
+  // Smooth bar animations — each runs a 950ms tween on every 1s tick
+  // so the bar glides continuously instead of jumping in 1s steps.
+  useEffect(() => {
+    Animated.timing(guesserBarAnim, { toValue: guesserSecsLeft / 30, duration: 950, useNativeDriver: false }).start();
+  }, [guesserSecsLeft]);
+  useEffect(() => {
+    Animated.timing(hostBarAnim, { toValue: hostSecsLeft / 15, duration: 950, useNativeDriver: false }).start();
+  }, [hostSecsLeft]);
+  useEffect(() => {
+    Animated.timing(hostWarnBarAnim, { toValue: hostWarningSecsLeft / 10, duration: 950, useNativeDriver: false }).start();
+  }, [hostWarningSecsLeft]);
+
   // Deep link handling (QR code scans)
   useEffect(() => {
     const handleURL = ({ url }) => {
@@ -2869,7 +2886,7 @@ export default function EnigmaGame() {
               <View style={{ alignItems: 'center', marginBottom: 14 }}>
                 <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 44, color: hostWarningSecsLeft <= 4 ? C.danger : C.warn }}>{hostWarningSecsLeft}</Text>
                 <View style={{ height: 4, width: '100%', backgroundColor: C.border2, borderRadius: 2, marginTop: 4 }}>
-                  <View style={{ height: 4, width: `${(hostWarningSecsLeft / 10) * 100}%`, backgroundColor: hostWarningSecsLeft <= 4 ? C.danger : C.warn, borderRadius: 2 }} />
+                  <Animated.View style={{ height: 4, width: hostWarnBarAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }), backgroundColor: hostWarningSecsLeft <= 4 ? C.danger : C.warn, borderRadius: 2 }} />
                 </View>
               </View>
               <View style={{ backgroundColor: C.card, borderRadius: 10, padding: 12, marginBottom: 16 }}>
@@ -3125,7 +3142,7 @@ export default function EnigmaGame() {
                     <Text style={{ fontSize: 11, fontFamily: 'Outfit_700Bold', color: hostSecsLeft <= 5 ? C.danger : C.warn }}>{hostSecsLeft}s</Text>
                   </View>
                   <View style={{ height: 3, backgroundColor: C.border2, borderRadius: 2 }}>
-                    <View style={{ height: 3, width: `${(hostSecsLeft / 15) * 100}%`, backgroundColor: hostSecsLeft <= 5 ? C.danger : C.warn, borderRadius: 2 }} />
+                    <Animated.View style={{ height: 3, width: hostBarAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }), backgroundColor: hostSecsLeft <= 5 ? C.danger : C.warn, borderRadius: 2 }} />
                   </View>
                 </View>
                 <View style={{ flexDirection: 'row', gap: 6, marginBottom: partlyMode ? 8 : 0 }}>
@@ -3169,7 +3186,7 @@ export default function EnigmaGame() {
                       <Text style={{ fontSize: 11, fontFamily: 'Outfit_700Bold', color: guesserSecsLeft <= 10 ? C.danger : C.gold }}>{guesserSecsLeft}s</Text>
                     </View>
                     <View style={{ height: 3, backgroundColor: C.border2, borderRadius: 2 }}>
-                      <View style={{ height: 3, width: `${(guesserSecsLeft / 30) * 100}%`, backgroundColor: guesserSecsLeft <= 10 ? C.danger : C.gold, borderRadius: 2 }} />
+                      <Animated.View style={{ height: 3, width: guesserBarAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }), backgroundColor: guesserSecsLeft <= 10 ? C.danger : C.gold, borderRadius: 2 }} />
                     </View>
                   </View>
                   <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
