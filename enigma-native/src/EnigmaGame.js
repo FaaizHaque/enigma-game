@@ -1677,7 +1677,6 @@ export default function EnigmaGame() {
           />
 
           {/* Avatar */}
-          <Text style={[S.fieldLabel, { marginTop: 8 }]}>Choose Avatar</Text>
           <AvatarPicker selected={selectedAvatarIdx} onSelect={setSelectedAvatarIdx} />
 
           <View style={{ height: 16 }} />
@@ -1708,27 +1707,29 @@ export default function EnigmaGame() {
   // ─── MODES ────────────────────────────────────────────────────────────────
   if (screen === 'modes') {
     return (
-      <View style={[S.flex, { backgroundColor: C.bg }]}>
-        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 40 }]}>
-          {/* Back + greeting */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 28 }}>
-            <TouchableOpacity onPress={() => setScreen('home')} style={{ marginRight: 12 }}>
-              <Text style={S.backBtn}>← Back</Text>
-            </TouchableOpacity>
-            <View style={{ flex: 1, alignItems: 'flex-end', flexDirection: 'row', justifyContent: 'flex-end', gap: 8 }}>
-              <PlayerAvatar p={{ avatarIdx: selectedAvatarIdx }} size={28} />
-              <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_500Medium' }}>{nameInput.trim()}</Text>
-            </View>
+      <View style={[S.flex, { backgroundColor: C.bg, paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+        {/* Back + greeting */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, paddingHorizontal: 24 }}>
+          <TouchableOpacity onPress={() => setScreen('home')} style={{ marginRight: 12 }}>
+            <Text style={S.backBtn}>← Back</Text>
+          </TouchableOpacity>
+          <View style={{ flex: 1, alignItems: 'flex-end', flexDirection: 'row', justifyContent: 'flex-end', gap: 8 }}>
+            <PlayerAvatar p={{ avatarIdx: selectedAvatarIdx }} size={28} />
+            <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_500Medium' }}>{nameInput.trim()}</Text>
           </View>
+        </View>
 
-          <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 22, letterSpacing: 5, color: C.gold, marginBottom: 6 }}>20 QUESTIONS</Text>
-          <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginBottom: 28 }}>Choose a game mode to play.</Text>
+        <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 22, letterSpacing: 5, color: C.gold, marginBottom: 4, paddingHorizontal: 24 }}>20 QUESTIONS</Text>
+        <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginBottom: 20, paddingHorizontal: 24 }}>Choose a game mode to play.</Text>
+
+        {/* Three cards equally spaced */}
+        <View style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-evenly' }}>
 
           {/* Daily Challenge */}
           <TouchableOpacity
             onPress={() => setScreen('daily_setup')}
             activeOpacity={0.85}
-            style={{ backgroundColor: 'rgba(212,168,74,0.07)', borderWidth: 1.5, borderColor: C.gold, borderRadius: 20, padding: 20, marginBottom: 12 }}>
+            style={{ backgroundColor: 'rgba(212,168,74,0.07)', borderWidth: 1.5, borderColor: C.gold, borderRadius: 20, padding: 20 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 14 }}>
               <View style={{ backgroundColor: C.gold, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
                 <Text style={{ color: '#1a0f00', fontSize: 10, fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>DAILY</Text>
@@ -1742,7 +1743,7 @@ export default function EnigmaGame() {
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, letterSpacing: 1, color: C.gold, marginBottom: 5 }}>Daily Challenge</Text>
                 <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 18 }}>
-                  One secret. 10 AI questions. Crack today's Enigma!
+                  One secret. 20 questions. Crack today's mystery!
                 </Text>
               </View>
             </View>
@@ -1755,13 +1756,13 @@ export default function EnigmaGame() {
           <TouchableOpacity
             onPress={() => setScreen('multi_home')}
             activeOpacity={0.85}
-            style={{ backgroundColor: 'rgba(124,58,237,0.07)', borderWidth: 1.5, borderColor: 'rgba(124,58,237,0.45)', borderRadius: 20, padding: 20, marginBottom: 12 }}>
+            style={{ backgroundColor: 'rgba(124,58,237,0.07)', borderWidth: 1.5, borderColor: 'rgba(124,58,237,0.45)', borderRadius: 20, padding: 20 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <Text style={{ fontSize: 40 }}>👥</Text>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, letterSpacing: 1, color: C.violet2, marginBottom: 5 }}>Multiplayer</Text>
                 <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 18 }}>
-                  Create or join a room. One host, all guessers. Live questions.
+                  Public or private room. One host sets the secret, everyone guesses.
                 </Text>
               </View>
               <Text style={{ fontSize: 22, color: C.violet2 }}>›</Text>
@@ -1778,13 +1779,14 @@ export default function EnigmaGame() {
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, letterSpacing: 1, color: C.success, marginBottom: 5 }}>Solo Mode</Text>
                 <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 18 }}>
-                  AI hides a secret. You have 20 questions to crack it.
+                  A secret is chosen for you. 20 questions to figure it out.
                 </Text>
               </View>
               <Text style={{ fontSize: 22, color: C.success }}>›</Text>
             </View>
           </TouchableOpacity>
-        </ScrollView>
+
+        </View>
       </View>
     );
   }
