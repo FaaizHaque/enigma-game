@@ -2,8 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Animated, Easing,
+  StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Animated, Easing, Dimensions,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import * as SplashScreen from 'expo-splash-screen';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -847,6 +848,109 @@ function Chip({ label, style = 'gold' }) {
       <Text style={{ fontSize: 13, fontFamily: 'Outfit_600SemiBold', color: isGold ? C.gold : C.violet2 }}>
         {label}
       </Text>
+    </View>
+  );
+}
+
+// ─── Premium Background ───────────────────────────────────────────────────────
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+
+// Deterministic particle layout (no Math.random so it's consistent across renders)
+const PARTICLE_DATA = [
+  { x: 0.08, y: 0.72, size: 2, rise: 220, duration: 9000, delay: 0,    maxOp: 0.25, color: 'rgba(167,139,250,1)' },
+  { x: 0.22, y: 0.45, size: 1, rise: 180, duration: 11000, delay: 2200, maxOp: 0.18, color: 'rgba(96,165,250,1)' },
+  { x: 0.38, y: 0.83, size: 2, rise: 260, duration: 8500,  delay: 1000, maxOp: 0.22, color: 'rgba(216,180,254,1)' },
+  { x: 0.55, y: 0.60, size: 1, rise: 200, duration: 13000, delay: 3500, maxOp: 0.15, color: 'rgba(167,139,250,1)' },
+  { x: 0.70, y: 0.30, size: 3, rise: 300, duration: 10000, delay: 500,  maxOp: 0.20, color: 'rgba(96,165,250,1)' },
+  { x: 0.82, y: 0.75, size: 1, rise: 150, duration: 12000, delay: 4000, maxOp: 0.18, color: 'rgba(216,180,254,1)' },
+  { x: 0.14, y: 0.20, size: 2, rise: 240, duration: 9500,  delay: 6000, maxOp: 0.20, color: 'rgba(167,139,250,1)' },
+  { x: 0.64, y: 0.55, size: 1, rise: 190, duration: 14000, delay: 2800, maxOp: 0.15, color: 'rgba(96,165,250,1)' },
+  { x: 0.45, y: 0.10, size: 2, rise: 170, duration: 11500, delay: 7500, maxOp: 0.22, color: 'rgba(216,180,254,1)' },
+  { x: 0.90, y: 0.40, size: 1, rise: 210, duration: 10500, delay: 1800, maxOp: 0.16, color: 'rgba(167,139,250,1)' },
+].map(p => ({ ...p, anim: new Animated.Value(0) }));
+
+function startParticleLoop(p) {
+  p.anim.setValue(0);
+  Animated.sequence([
+    Animated.delay(p.delay),
+    Animated.timing(p.anim, { toValue: 1, duration: p.duration, easing: Easing.linear, useNativeDriver: true }),
+  ]).start(() => startParticleLoop({ ...p, delay: 800 + (p.delay % 2000) }));
+}
+PARTICLE_DATA.forEach(startParticleLoop);
+
+function PremiumBackground() {
+  return (
+    <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+      {/* Deep midnight navy base gradient */}
+      <LinearGradient
+        colors={['#04040e', '#070718', '#0b0b22', '#090920', '#05050f']}
+        locations={[0, 0.2, 0.5, 0.78, 1]}
+        style={StyleSheet.absoluteFillObject}
+      />
+
+      {/* Ambient violet glow — upper third */}
+      <View style={{
+        position: 'absolute', top: SCREEN_H * 0.06, left: SCREEN_W * 0.5 - 160,
+        width: 320, height: 320, borderRadius: 160,
+        backgroundColor: 'rgba(55,20,110,0.16)',
+      }} />
+      <View style={{
+        position: 'absolute', top: SCREEN_H * 0.10, left: SCREEN_W * 0.5 - 100,
+        width: 200, height: 200, borderRadius: 100,
+        backgroundColor: 'rgba(75,30,140,0.10)',
+      }} />
+
+      {/* Secondary deep-blue glow — lower area */}
+      <View style={{
+        position: 'absolute', bottom: SCREEN_H * 0.08, left: SCREEN_W * 0.5 - 130,
+        width: 260, height: 220, borderRadius: 130,
+        backgroundColor: 'rgba(15,35,90,0.18)',
+      }} />
+
+      {/* Vignette — top edge */}
+      <LinearGradient
+        colors={['rgba(3,3,12,0.85)', 'transparent']}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 140 }}
+      />
+      {/* Vignette — bottom edge */}
+      <LinearGradient
+        colors={['transparent', 'rgba(3,3,12,0.85)']}
+        style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 140 }}
+      />
+      {/* Vignette — left edge */}
+      <LinearGradient
+        colors={['rgba(3,3,12,0.55)', 'transparent']}
+        start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }}
+        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: 70 }}
+      />
+      {/* Vignette — right edge */}
+      <LinearGradient
+        colors={['transparent', 'rgba(3,3,12,0.55)']}
+        start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }}
+        style={{ position: 'absolute', top: 0, bottom: 0, right: 0, width: 70 }}
+      />
+
+      {/* Floating particles */}
+      {PARTICLE_DATA.map((p, i) => (
+        <Animated.View
+          key={i}
+          style={{
+            position: 'absolute',
+            left: p.x * SCREEN_W,
+            width: p.size,
+            height: p.size,
+            borderRadius: p.size / 2,
+            backgroundColor: p.color,
+            opacity: p.anim.interpolate({ inputRange: [0, 0.1, 0.5, 0.9, 1], outputRange: [0, p.maxOp, p.maxOp, p.maxOp * 0.4, 0] }),
+            transform: [{
+              translateY: p.anim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [p.y * SCREEN_H, p.y * SCREEN_H - p.rise],
+              }),
+            }],
+          }}
+        />
+      ))}
     </View>
   );
 }
@@ -1743,7 +1847,8 @@ export default function EnigmaGame() {
   // ─── HOME — personal landing ──────────────────────────────────────────────
   if (screen === 'home') {
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
+        <PremiumBackground />
         <Modal visible={howToPlayOpen} animationType="slide" transparent onRequestClose={() => setHowToPlayOpen(false)}>
           <View style={S.overlay}>
             <View style={[S.modal, { maxHeight: '90%' }]}>
@@ -1871,7 +1976,8 @@ export default function EnigmaGame() {
   // ─── MODES ────────────────────────────────────────────────────────────────
   if (screen === 'modes') {
     return (
-      <View style={[S.flex, { backgroundColor: C.bg, paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={[S.flex, { backgroundColor: '#05050f', paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <PremiumBackground />
         {/* Back + greeting */}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, paddingHorizontal: 24 }}>
           <TouchableOpacity onPress={() => setScreen('home')} style={{ marginRight: 12 }}>
@@ -1958,7 +2064,8 @@ export default function EnigmaGame() {
   // ─── MULTIPLAYER HOME ─────────────────────────────────────────────────────
   if (screen === 'multi_home') {
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
+        <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <View style={S.screenHeader}>
             <TouchableOpacity onPress={() => setScreen('modes')}>
@@ -1984,7 +2091,8 @@ export default function EnigmaGame() {
     const today = new Date();
     const dateStr = today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
+        <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 32 }]}>
           <View style={S.screenHeader}>
             <TouchableOpacity onPress={() => setScreen('modes')}>
@@ -2036,7 +2144,8 @@ export default function EnigmaGame() {
     const canAsk = !limitReached && !dailyLoading && lastAnswered;
 
     return (
-      <View style={[S.flex, { backgroundColor: C.bg }]}>
+      <View style={[S.flex, { backgroundColor: '#05050f' }]}>
+      <PremiumBackground />
         {/* Ad simulation modal */}
         <Modal visible={adModalVisible} animationType="fade" transparent onRequestClose={() => {}}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
@@ -2314,7 +2423,8 @@ export default function EnigmaGame() {
     const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
 
     return (
-      <View style={[S.flex, { backgroundColor: C.bg }]}>
+      <View style={[S.flex, { backgroundColor: '#05050f' }]}>
+      <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 32 }]}>
           {/* Result hero */}
           <View style={{ alignItems: 'center', paddingVertical: 28 }}>
@@ -2394,7 +2504,9 @@ export default function EnigmaGame() {
   // ─── SOLO SETUP ──────────────────────────────────────────────────────────
   if (screen === 'solo_setup') {
     return (
-      <ScrollView style={[S.flex, { backgroundColor: C.bg }]} contentContainerStyle={[S.screen, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 32 }]}>
+      <View style={[S.flex, { backgroundColor: '#05050f' }]}>
+      <PremiumBackground />
+      <ScrollView style={S.flex} contentContainerStyle={[S.screen, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 32 }]}>
         <View style={S.screenHeader}>
           <TouchableOpacity onPress={() => setScreen('modes')}><Text style={S.backBtn}>← Back</Text></TouchableOpacity>
         </View>
@@ -2440,6 +2552,7 @@ export default function EnigmaGame() {
           <Text style={S.btnGoldText}>Start Game →</Text>
         </TouchableOpacity>
       </ScrollView>
+      </View>
     );
   }
 
@@ -2453,7 +2566,8 @@ export default function EnigmaGame() {
     const canAsk = !limitReached && !soloLoading && lastAnswered;
 
     return (
-      <View style={[S.flex, { backgroundColor: C.bg }]}>
+      <View style={[S.flex, { backgroundColor: '#05050f' }]}>
+      <PremiumBackground />
         {/* Ad simulation modal */}
         <Modal visible={adModalVisible} animationType="fade" transparent onRequestClose={() => {}}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
@@ -2693,7 +2807,9 @@ export default function EnigmaGame() {
   if (screen === 'solo_result' && soloResult && soloChallenge) {
     const { solved, questionsUsed } = soloResult;
     return (
-      <ScrollView style={[S.flex, { backgroundColor: C.bg }]} contentContainerStyle={[S.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 32 }]}>
+      <View style={[S.flex, { backgroundColor: '#05050f' }]}>
+      <PremiumBackground />
+      <ScrollView style={S.flex} contentContainerStyle={[S.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 32 }]}>
         <View style={S.screenHeader}>
           <TouchableOpacity onPress={() => setScreen('modes')}><Text style={S.backBtn}>← Modes</Text></TouchableOpacity>
         </View>
@@ -2741,13 +2857,15 @@ export default function EnigmaGame() {
           <Text style={{ color: C.dim, fontSize: 13, fontFamily: 'Outfit_400Regular' }}>← Back to Modes</Text>
         </TouchableOpacity>
       </ScrollView>
+      </View>
     );
   }
 
   // ─── CREATE ───────────────────────────────────────────────────────────────
   if (screen === 'create') {
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
+        <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <View style={S.screenHeader}>
             <TouchableOpacity onPress={() => setScreen('multi_home')}>
@@ -2796,7 +2914,8 @@ export default function EnigmaGame() {
   if (screen === 'join') {
     const joinReady = codeInput.length === 6 && nameInput.trim();
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
+        <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <View style={S.screenHeader}>
             <TouchableOpacity onPress={() => setScreen('multi_home')}>
@@ -2839,7 +2958,8 @@ export default function EnigmaGame() {
   if (screen === 'rooms') {
     const readyToJoin = !!nameInput.trim();
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
+        <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <View style={S.screenHeader}>
             <TouchableOpacity onPress={() => setScreen('modes')}>
@@ -2922,7 +3042,8 @@ export default function EnigmaGame() {
   // ─── LOBBY ────────────────────────────────────────────────────────────────
   if (screen === 'lobby') {
     return (
-      <View style={[S.flex, { backgroundColor: C.bg }]}>
+      <View style={[S.flex, { backgroundColor: '#05050f' }]}>
+      <PremiumBackground />
         <SBar />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 90 }]}>
           <View style={S.screenHeader}>
@@ -3027,7 +3148,8 @@ export default function EnigmaGame() {
   // ─── THEME SELECT ─────────────────────────────────────────────────────────
   if (screen === 'theme') {
     return (
-      <View style={[S.flex, { backgroundColor: C.bg }]}>
+      <View style={[S.flex, { backgroundColor: '#05050f' }]}>
+      <PremiumBackground />
         <SBar />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 24 }]}>
           <View style={S.screenHeader}>
@@ -3080,7 +3202,8 @@ export default function EnigmaGame() {
     const themeLibrary = CONTENT_LIBRARY[game.theme?.id] || [];
 
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
+        <PremiumBackground />
         <SBar />
 
         {/* Host Briefing Modal — private facts revealed after picking a library secret */}
@@ -3213,7 +3336,8 @@ export default function EnigmaGame() {
     const canAsk = !viewerIsHost && !viewerIsEliminated && isMyTurn && !pendingQ;
 
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: C.bg }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
+        <PremiumBackground />
         <SBar />
 
         {/* Timeout toast — centred */}
@@ -3592,7 +3716,8 @@ export default function EnigmaGame() {
     const sorted = [...game.players].sort((a, b) => b.score - a.score);
 
     return (
-      <View style={[S.flex, { backgroundColor: C.bg }]}>
+      <View style={[S.flex, { backgroundColor: '#05050f' }]}>
+      <PremiumBackground />
         <SBar />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 24 }]}>
           {/* Winner block */}
@@ -3658,7 +3783,8 @@ export default function EnigmaGame() {
   if (screen === 'scoreboard') {
     const sorted = [...game.players].sort((a, b) => b.score - a.score);
     return (
-      <View style={[S.flex, { backgroundColor: C.bg }]}>
+      <View style={[S.flex, { backgroundColor: '#05050f' }]}>
+      <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}>
           <View style={{ alignItems: 'center', paddingVertical: 20 }}>
             <Text style={{ fontSize: 60, marginBottom: 10 }}>🏆</Text>
