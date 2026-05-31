@@ -1182,6 +1182,117 @@ function PremiumButton({ onPress, disabled, label, icon, square = false, width, 
   );
 }
 
+// ─── Hint Card & Button ───────────────────────────────────────────────────────
+// Glowing gold lightbulb medallion shared by the revealed-hint card and the
+// reveal-hint CTA.
+function HintMedallion({ size = 40 }) {
+  return (
+    <View style={{
+      width: size, height: size, borderRadius: size / 2,
+      alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+      borderWidth: 1.2, borderColor: 'rgba(255,224,140,0.55)',
+      shadowColor: C.gold, shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.55, shadowRadius: 7, elevation: 5,
+    }}>
+      <LinearGradient
+        colors={['rgba(255,226,150,0.42)', 'rgba(150,100,20,0.32)']}
+        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFillObject}
+      />
+      <Text style={{ fontSize: size * 0.5 }}>💡</Text>
+    </View>
+  );
+}
+
+// Revealed hint — a dark-luxury gold glass card with accent rim, soft glow,
+// left accent bar and refined typography.
+function HintCard({ hintNum, text, total = 2 }) {
+  return (
+    <View style={{
+      marginBottom: 10, borderRadius: 16,
+      shadowColor: C.gold, shadowOffset: { width: 0, height: 5 },
+      shadowOpacity: 0.30, shadowRadius: 12, elevation: 7,
+    }}>
+      <LinearGradient
+        colors={['rgba(255,224,140,0.55)', 'rgba(212,168,74,0.18)', 'rgba(150,100,20,0.42)']}
+        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+        style={{ borderRadius: 16, padding: 1.2 }}
+      >
+        <LinearGradient
+          colors={['rgba(48,38,14,0.94)', 'rgba(30,24,8,0.92)', 'rgba(16,12,4,0.96)']}
+          start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
+          style={{ borderRadius: 14.8, overflow: 'hidden' }}
+        >
+          {/* Top sheen */}
+          <LinearGradient
+            colors={['rgba(255,224,140,0.16)', 'transparent']}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 32 }}
+          />
+          {/* Left accent bar */}
+          <LinearGradient
+            colors={['rgba(255,224,140,0.85)', 'rgba(212,168,74,0.30)']}
+            start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
+            style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 3 }}
+          />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 13 }}>
+            <HintMedallion size={40} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 10, color: 'rgba(255,215,130,0.85)', fontFamily: 'Outfit_700Bold', letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 3 }}>Hint {hintNum} of {total}</Text>
+              <Text style={{ fontSize: 15, color: '#fbe9c0', fontFamily: 'Outfit_600SemiBold', lineHeight: 21 }}>{text}</Text>
+            </View>
+          </View>
+        </LinearGradient>
+      </LinearGradient>
+    </View>
+  );
+}
+
+// Reveal-hint CTA — inviting gold glass button that encourages a tap; an "AD"
+// badge sets the watch-an-ad expectation, with a chevron affordance.
+function HintButton({ nextHint, total = 2, onPress }) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.85} onPress={onPress}
+      style={{
+        marginTop: 10, borderRadius: 16,
+        shadowColor: C.gold, shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.40, shadowRadius: 13, elevation: 8,
+      }}
+    >
+      <LinearGradient
+        colors={['rgba(255,224,140,0.75)', 'rgba(212,168,74,0.30)', 'rgba(150,100,20,0.52)']}
+        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+        style={{ borderRadius: 16, padding: 1.4 }}
+      >
+        <LinearGradient
+          colors={['rgba(62,48,18,0.96)', 'rgba(40,30,10,0.96)']}
+          start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
+          style={{ borderRadius: 14.6, overflow: 'hidden' }}
+        >
+          {/* Top sheen */}
+          <LinearGradient
+            colors={['rgba(255,224,140,0.22)', 'transparent']}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '58%' }}
+          />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 12 }}>
+            <HintMedallion size={42} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 15, color: C.gold2, fontFamily: 'Outfit_700Bold', letterSpacing: 0.3 }}>Reveal Hint {nextHint} of {total}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                <View style={{ backgroundColor: 'rgba(255,224,140,0.15)', borderWidth: 1, borderColor: 'rgba(255,224,140,0.3)', borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1.5 }}>
+                  <Text style={{ fontSize: 9, color: 'rgba(255,215,130,0.95)', fontFamily: 'Outfit_700Bold', letterSpacing: 1 }}>▶ AD</Text>
+                </View>
+                <Text style={{ fontSize: 12, color: 'rgba(220,195,140,0.78)', fontFamily: 'Outfit_400Regular' }}>Watch a short ad to unlock</Text>
+              </View>
+            </View>
+            <Text style={{ fontSize: 24, color: 'rgba(255,215,130,0.55)', fontFamily: 'Outfit_400Regular', marginTop: -2 }}>›</Text>
+          </View>
+        </LinearGradient>
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function EnigmaGame() {
   const insets = useSafeAreaInsets();
@@ -2661,15 +2772,7 @@ export default function EnigmaGame() {
           )}
           {dailyQuestions.map((q, i) => {
             if (q.type === 'hint') {
-              return (
-                <View key={q.id} style={{ marginBottom: 12, backgroundColor: 'rgba(212,168,74,0.07)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(212,168,74,0.3)', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                  <Text style={{ fontSize: 20 }}>💡</Text>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 10, color: C.goldDim, fontFamily: 'Outfit_700Bold', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Hint {q.hintNum} of 2</Text>
-                    <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_600SemiBold', lineHeight: 20 }}>{q.text}</Text>
-                  </View>
-                </View>
-              );
+              return <HintCard key={q.id} hintNum={q.hintNum} text={q.text} />;
             }
             const qNum = dailyQuestions.slice(0, i + 1).filter(x => !x.type).length;
             return (
@@ -2735,12 +2838,7 @@ export default function EnigmaGame() {
 
           {/* Hint button — below input */}
           {dailyHintsUsed < 2 && (
-            <TouchableOpacity
-              style={{ backgroundColor: 'rgba(212,168,74,0.10)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.30)', borderRadius: 12, paddingVertical: 11, alignItems: 'center', marginTop: 10 }}
-              onPress={() => openAdForHint('daily')}
-            >
-              <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_600SemiBold' }}>💡 Get Hint {dailyHintsUsed + 1} of 2 · watch a short ad</Text>
-            </TouchableOpacity>
+            <HintButton nextHint={dailyHintsUsed + 1} onPress={() => openAdForHint('daily')} />
           )}
         </ScrollView>
 
@@ -3196,15 +3294,7 @@ export default function EnigmaGame() {
             {/* Q&A entries */}
             {soloQuestions.map((q, idx) => {
               if (q.type === 'hint') {
-                return (
-                  <View key={q.id} style={{ marginBottom: 10, backgroundColor: 'rgba(212,168,74,0.07)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(212,168,74,0.3)', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <Text style={{ fontSize: 20 }}>💡</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 10, color: C.goldDim, fontFamily: 'Outfit_700Bold', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Hint {q.hintNum} of 2</Text>
-                      <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_600SemiBold', lineHeight: 20 }}>{q.text}</Text>
-                    </View>
-                  </View>
-                );
+                return <HintCard key={q.id} hintNum={q.hintNum} text={q.text} />;
               }
               const qNum = soloQuestions.slice(0, idx + 1).filter(x => !x.type).length;
               return (
@@ -3270,12 +3360,7 @@ export default function EnigmaGame() {
 
             {/* Hint button — below input */}
             {soloHintsUsed < 2 && (
-              <TouchableOpacity
-                style={{ backgroundColor: 'rgba(212,168,74,0.10)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.30)', borderRadius: 12, paddingVertical: 11, alignItems: 'center', marginTop: 10 }}
-                onPress={() => openAdForHint('solo')}
-              >
-                <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_600SemiBold' }}>💡 Get Hint {soloHintsUsed + 1} of 2 · watch a short ad</Text>
-              </TouchableOpacity>
+              <HintButton nextHint={soloHintsUsed + 1} onPress={() => openAdForHint('solo')} />
             )}
           </ScrollView>
 
