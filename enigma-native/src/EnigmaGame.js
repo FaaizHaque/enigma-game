@@ -2134,31 +2134,60 @@ export default function EnigmaGame() {
           </View>
         </View>
 
-        {/* Category banner */}
-        <View style={{
-          backgroundColor: C.card, borderBottomWidth: 1, borderBottomColor: C.border,
-          paddingVertical: 10, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10,
-        }}>
-          <Text style={{ fontSize: 22 }}>{dailyChallenge.categoryIcon}</Text>
-          <View>
-            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 2, textTransform: 'uppercase' }}>
-              {dailyChallenge.categoryLabel}
-            </Text>
+        {/* Category banner — premium 3D gold panel */}
+        <View style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 }}>
+          <View style={{
+            flexDirection: 'row', alignItems: 'center', gap: 14,
+            backgroundColor: 'rgba(212,168,74,0.13)',
+            borderRadius: 18, paddingHorizontal: 16, paddingVertical: 16,
+            borderWidth: 2,
+            borderTopColor: 'rgba(255,225,140,0.85)',
+            borderLeftColor: 'rgba(255,225,140,0.85)',
+            borderBottomColor: 'rgba(150,100,20,0.65)',
+            borderRightColor: 'rgba(150,100,20,0.65)',
+            shadowColor: C.gold,
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.45,
+            shadowRadius: 14,
+            elevation: 10,
+          }}>
+            {/* Icon badge */}
+            <View style={{
+              width: 56, height: 56, borderRadius: 28,
+              backgroundColor: 'rgba(212,168,74,0.18)',
+              borderWidth: 1.5, borderColor: 'rgba(255,225,140,0.5)',
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Text style={{ fontSize: 30 }}>{dailyChallenge.categoryIcon}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 10, color: 'rgba(255,215,130,0.85)', fontFamily: 'Outfit_700Bold', letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 4 }}>
+                Today · {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+              </Text>
+              <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 20, color: '#fff', letterSpacing: 0.5 }}>
+                {dailyChallenge.categoryLabel}
+              </Text>
+            </View>
           </View>
         </View>
 
-        {/* Q&A feed */}
+        {/* Q&A feed + input */}
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView
           ref={feedScrollRef}
           style={{ flex: 1 }}
-          contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 16 }}
           onContentSizeChange={() => feedScrollRef.current?.scrollToEnd({ animated: true })}
+          keyboardShouldPersistTaps="handled"
         >
           {dailyQuestions.length === 0 && (
-            <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-              <Text style={{ fontSize: 36, marginBottom: 12 }}>🤔</Text>
-              <Text style={{ color: C.muted, fontFamily: 'Outfit_400Regular', fontSize: 14, textAlign: 'center' }}>
-                Ask your first yes/no question to start narrowing it down!
+            <View style={{ marginBottom: 16, backgroundColor: 'rgba(212,168,74,0.05)', borderWidth: 1.5, borderColor: 'rgba(212,168,74,0.2)', borderRadius: 20, padding: 26, alignItems: 'center' }}>
+              <Text style={{ fontSize: 50, marginBottom: 12 }}>🌍</Text>
+              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.gold, letterSpacing: 1.5, textTransform: 'uppercase', textAlign: 'center', marginBottom: 8 }}>
+                One Secret. Everyone. Today.
+              </Text>
+              <Text style={{ color: C.muted, fontFamily: 'Outfit_400Regular', fontSize: 14, textAlign: 'center', lineHeight: 22 }}>
+                The same mystery is challenging players worldwide right now. Ask your first yes/no question and start closing in — you have <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text>.
               </Text>
             </View>
           )}
@@ -2205,61 +2234,73 @@ export default function EnigmaGame() {
             );
           })}
           {limitReached && (
-            <View style={{ backgroundColor: 'rgba(248,81,73,0.08)', borderWidth: 1, borderColor: 'rgba(248,81,73,0.3)', borderRadius: 10, padding: 14, marginTop: 4 }}>
+            <View style={{ backgroundColor: 'rgba(248,81,73,0.08)', borderWidth: 1, borderColor: 'rgba(248,81,73,0.3)', borderRadius: 10, padding: 14, marginBottom: 12 }}>
               <Text style={{ color: C.danger, fontFamily: 'Outfit_600SemiBold', fontSize: 14, textAlign: 'center' }}>
                 20 questions used — time to make your guess!
               </Text>
             </View>
           )}
+
+          {/* Question input — sits right below the feed */}
+          {!limitReached && (
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+              <TextInput
+                style={[S.input, { flex: 1, marginBottom: 0, fontSize: 15 }]}
+                placeholder={canAsk ? 'Ask a yes/no question…' : dailyLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
+                placeholderTextColor={C.dim}
+                value={dailyInput}
+                onChangeText={setDailyInput}
+                editable={canAsk}
+                returnKeyType="send"
+                onSubmitEditing={() => askDailyQuestion(dailyInput)}
+              />
+              <TouchableOpacity
+                style={[{
+                  backgroundColor: C.violet, borderRadius: 12, paddingHorizontal: 16,
+                  alignItems: 'center', justifyContent: 'center',
+                }, (!canAsk || !dailyInput.trim()) && { opacity: 0.4 }]}
+                onPress={() => askDailyQuestion(dailyInput)}
+                disabled={!canAsk || !dailyInput.trim()}
+              >
+                <Text style={{ color: '#fff', fontSize: 18 }}>↑</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Hint button — below input */}
+          {dailyHintsUsed < 2 && (
+            <TouchableOpacity
+              style={{ backgroundColor: 'rgba(212,168,74,0.10)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.30)', borderRadius: 12, paddingVertical: 11, alignItems: 'center', marginTop: 10 }}
+              onPress={() => openAdForHint('daily')}
+            >
+              <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_600SemiBold' }}>💡 Get Hint {dailyHintsUsed + 1} of 2 · watch a short ad</Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
 
-        {/* Bottom input + solve */}
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={{
-            backgroundColor: C.surface, borderTopWidth: 1, borderTopColor: C.border2,
-            padding: 12, paddingBottom: insets.bottom + 12,
-          }}>
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
-              <TouchableOpacity
-                style={[S.btnGold, { flex: 1 }]}
-                onPress={() => { setDailySolveInput(''); setDailySolveOpen(true); }}
-              >
-                <Text style={S.btnGoldText}>✓ Solve!</Text>
-              </TouchableOpacity>
-              {dailyHintsUsed < 2 && (
-                <TouchableOpacity
-                  style={{ backgroundColor: 'rgba(212,168,74,0.12)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.35)', borderRadius: 12, paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center' }}
-                  onPress={() => openAdForHint('daily')}
-                >
-                  <Text style={{ fontSize: 13, color: C.gold, fontFamily: 'Outfit_600SemiBold' }}>💡 Hint {dailyHintsUsed + 1}/2</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-            {!limitReached && (
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <TextInput
-                  style={[S.input, { flex: 1, marginBottom: 0 }]}
-                  placeholder={canAsk ? 'Ask a yes/no question…' : dailyLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
-                  placeholderTextColor={C.dim}
-                  value={dailyInput}
-                  onChangeText={setDailyInput}
-                  editable={canAsk}
-                  returnKeyType="send"
-                  onSubmitEditing={() => askDailyQuestion(dailyInput)}
-                />
-                <TouchableOpacity
-                  style={[{
-                    backgroundColor: C.violet, borderRadius: 12, paddingHorizontal: 16,
-                    alignItems: 'center', justifyContent: 'center',
-                  }, (!canAsk || !dailyInput.trim()) && { opacity: 0.4 }]}
-                  onPress={() => askDailyQuestion(dailyInput)}
-                  disabled={!canAsk || !dailyInput.trim()}
-                >
-                  <Text style={{ color: '#fff', fontSize: 18 }}>↑</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
+        {/* Solve button — fixed at very bottom, bold gold */}
+        <View style={{ backgroundColor: C.surface, borderTopWidth: 1, borderTopColor: C.border2, padding: 14, paddingBottom: insets.bottom + 14 }}>
+          <TouchableOpacity
+            style={{
+              backgroundColor: C.gold,
+              borderRadius: 16, paddingVertical: 18,
+              alignItems: 'center', justifyContent: 'center',
+              borderTopColor: 'rgba(255,230,120,0.7)',
+              borderLeftColor: 'rgba(255,230,120,0.7)',
+              borderBottomColor: 'rgba(160,110,20,0.8)',
+              borderRightColor: 'rgba(160,110,20,0.8)',
+              borderWidth: 1.5,
+              shadowColor: C.gold,
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.55,
+              shadowRadius: 14,
+              elevation: 10,
+            }}
+            onPress={() => { setDailySolveInput(''); setDailySolveOpen(true); }}
+          >
+            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, color: '#06060f', letterSpacing: 1 }}>✓ I Know the Answer — Solve!</Text>
+          </TouchableOpacity>
+        </View>
         </KeyboardAvoidingView>
       </View>
     );
