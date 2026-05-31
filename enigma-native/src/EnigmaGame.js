@@ -1293,6 +1293,56 @@ function HintButton({ nextHint, total = 2, onPress }) {
   );
 }
 
+// ─── Progress Counter ─────────────────────────────────────────────────────────
+// Compact metallic-gold progress pill: the body fills with a soft gold wash as
+// questions are used, a crisp metallic bar tracks the exact fraction along the
+// bottom, and the colour escalates gold → amber → red as you near the limit.
+function ProgressCounter({ count, limit = 20 }) {
+  const pct = Math.max(0, Math.min(1, count / limit));
+  const danger = pct >= 0.8;
+  const warn = !danger && pct >= 0.55;
+  const accent = danger ? C.danger : warn ? C.warn : C.gold;
+
+  const rim = danger
+    ? ['rgba(248,120,110,0.90)', 'rgba(180,50,45,0.50)', 'rgba(120,30,28,0.70)']
+    : warn
+    ? ['rgba(255,205,120,0.90)', 'rgba(190,120,30,0.50)', 'rgba(120,80,20,0.70)']
+    : ['rgba(255,233,168,0.92)', 'rgba(212,168,74,0.45)', 'rgba(138,106,36,0.72)'];
+  const fill = danger
+    ? ['rgba(248,81,73,0.34)', 'rgba(180,40,35,0.16)']
+    : warn
+    ? ['rgba(240,160,48,0.32)', 'rgba(170,110,20,0.15)']
+    : ['rgba(246,226,122,0.30)', 'rgba(212,168,74,0.14)'];
+  const bar = danger ? ['#ff8a7e', '#c4302a'] : warn ? ['#ffd27a', '#d4a020'] : ['#f6e27a', '#d4a84a'];
+
+  return (
+    <View style={{
+      borderRadius: 13,
+      shadowColor: accent, shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.45, shadowRadius: 8, elevation: 6,
+    }}>
+      {/* Metallic rim */}
+      <LinearGradient colors={rim} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 13, padding: 1.2 }}>
+        <View style={{ borderRadius: 11.8, overflow: 'hidden', backgroundColor: 'rgba(18,14,5,0.96)', minWidth: 66 }}>
+          {/* Progress wash (grows with count) */}
+          <LinearGradient colors={fill} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: `${pct * 100}%` }} />
+          {/* Top sheen */}
+          <LinearGradient colors={['rgba(255,255,255,0.13)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '52%' }} />
+          {/* Count */}
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center', paddingHorizontal: 12, paddingTop: 5, paddingBottom: 6 }}>
+            <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 15, color: accent, textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>{count}</Text>
+            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 11, color: 'rgba(225,200,145,0.55)' }}> / {limit}</Text>
+          </View>
+          {/* Crisp metallic progress bar */}
+          <View style={{ height: 2.5, backgroundColor: 'rgba(255,255,255,0.06)' }}>
+            <LinearGradient colors={bar} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ height: 2.5, width: `${pct * 100}%` }} />
+          </View>
+        </View>
+      </LinearGradient>
+    </View>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function EnigmaGame() {
   const insets = useSafeAreaInsets();
@@ -2570,16 +2620,7 @@ export default function EnigmaGame() {
             <Text style={S.backBtn}>← Home</Text>
           </TouchableOpacity>
           <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.gold }}>Daily Challenge</Text>
-          <View style={{
-            backgroundColor: qCount >= 8 ? 'rgba(248,81,73,0.12)' : 'rgba(200,168,74,0.12)',
-            borderWidth: 1,
-            borderColor: qCount >= 8 ? 'rgba(248,81,73,0.4)' : C.goldDim,
-            borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3,
-          }}>
-            <Text style={{ fontSize: 12, fontFamily: 'Outfit_700Bold', color: qCount >= 8 ? C.danger : C.gold }}>
-              {qCount}/{qLimit}
-            </Text>
-          </View>
+          <ProgressCounter count={qCount} limit={qLimit} />
         </View>
 
         {/* Category banner — premium gold glass morphism panel */}
@@ -3102,9 +3143,7 @@ export default function EnigmaGame() {
               <Text style={S.backBtn}>← Modes</Text>
             </TouchableOpacity>
             <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 14, color: C.text, letterSpacing: 1 }}>Solo Mode</Text>
-            <View style={{ backgroundColor: qCount >= 16 ? 'rgba(239,68,68,0.15)' : 'rgba(212,168,74,0.12)', borderWidth: 1, borderColor: qCount >= 16 ? 'rgba(239,68,68,0.4)' : C.goldDim, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 }}>
-              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 13, color: qCount >= 16 ? C.danger : qCount >= 11 ? C.warn : C.gold }}>{qCount} / {qLimit}</Text>
-            </View>
+            <ProgressCounter count={qCount} limit={qLimit} />
           </View>
           {/* Category panel — royal purple glass morphism */}
           <View style={{
