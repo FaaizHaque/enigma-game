@@ -2640,8 +2640,8 @@ export default function EnigmaGame() {
               </View>
               <View style={{ height: 200, backgroundColor: '#0d0d1f', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
                 <Text style={{ fontSize: 48 }}>🎮</Text>
-                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.gold, letterSpacing: 1 }}>Enigma</Text>
-                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular' }}>Challenge your friends today</Text>
+                <Text style={[S.tH3, { color: C.gold, letterSpacing: 1 }]}>Enigma</Text>
+                <Text style={[S.tBodySm, { color: C.muted }]}>Challenge your friends today</Text>
               </View>
               <View style={{ padding: 20 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16, backgroundColor: 'rgba(212,168,74,0.07)', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: 'rgba(212,168,74,0.2)' }}>
@@ -2711,7 +2711,7 @@ export default function EnigmaGame() {
           }}>
             <Text style={S.backBtn}>← Home</Text>
           </TouchableOpacity>
-          <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.gold }}>Daily Challenge</Text>
+          <Text style={[S.tH3, { color: C.gold }]}>Daily Challenge</Text>
           <ProgressCounter count={qCount} limit={qLimit} />
         </View>
 
@@ -2917,7 +2917,7 @@ export default function EnigmaGame() {
                 {q.answer === null ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6, paddingLeft: 4 }}>
                     <ActivityIndicator size="small" color={C.gold} />
-                    <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>AI is thinking…</Text>
+                    <Text style={S.tCaption}>AI is thinking…</Text>
                   </View>
                 ) : q.answer === 'TIMEOUT' ? (
                   <View style={[S.qBadge, { borderColor: 'rgba(248,81,73,0.4)', backgroundColor: 'rgba(248,81,73,0.08)', marginTop: 6, marginLeft: 4 }]}>
@@ -3051,7 +3051,7 @@ export default function EnigmaGame() {
                   <Text style={{ fontSize: 12, color: row.solved ? C.success : C.danger, fontFamily: 'Outfit_600SemiBold', marginRight: 8 }}>
                     {row.solved ? '✓' : '✗'} {row.questions_used}Q
                   </Text>
-                  <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>
+                  <Text style={[S.tCaption, { color: C.dim }]}>
                     {Math.floor(row.time_seconds / 60) > 0 ? `${Math.floor(row.time_seconds / 60)}m ` : ''}{row.time_seconds % 60}s
                   </Text>
                 </View>
@@ -3096,7 +3096,7 @@ export default function EnigmaGame() {
           <Text style={{ fontSize: 28 }}>🎲</Text>
           <View style={{ flex: 1 }}>
             <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === 'random' ? C.gold : C.text }}>Any Category</Text>
-            <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 2 }}>Surprise me — pick from all categories</Text>
+            <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>Surprise me — pick from all categories</Text>
           </View>
           {soloCategory === 'random' && <Text style={{ color: C.gold, fontSize: 18 }}>✓</Text>}
         </TouchableOpacity>
@@ -3110,7 +3110,7 @@ export default function EnigmaGame() {
             <Text style={{ fontSize: 28 }}>{t.icon}</Text>
             <View style={{ flex: 1 }}>
               <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === t.id ? C.gold : C.text }}>{t.label}</Text>
-              <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 2 }}>{t.desc}</Text>
+              <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>{t.desc}</Text>
             </View>
             {soloCategory === t.id && <Text style={{ color: C.gold, fontSize: 18 }}>✓</Text>}
           </TouchableOpacity>
@@ -3153,8 +3153,8 @@ export default function EnigmaGame() {
               {/* Fake ad content */}
               <View style={{ height: 200, backgroundColor: '#0d0d1f', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
                 <Text style={{ fontSize: 48 }}>🎮</Text>
-                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.gold, letterSpacing: 1 }}>Enigma</Text>
-                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular' }}>Challenge your friends today</Text>
+                <Text style={[S.tH3, { color: C.gold, letterSpacing: 1 }]}>Enigma</Text>
+                <Text style={[S.tBodySm, { color: C.muted }]}>Challenge your friends today</Text>
               </View>
               {/* Reward notice + button */}
               <View style={{ padding: 20 }}>
@@ -3215,7 +3215,7 @@ export default function EnigmaGame() {
             ])}>
               <Text style={S.backBtn}>← Modes</Text>
             </TouchableOpacity>
-            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 14, color: C.text, letterSpacing: 1 }}>Solo Mode</Text>
+            <Text style={[S.tH3, { color: C.text, letterSpacing: 1 }]}>Solo Mode</Text>
             <ProgressCounter count={qCount} limit={qLimit} />
           </View>
           {/* Category panel — royal purple glass morphism */}
@@ -3421,7 +3421,7 @@ export default function EnigmaGame() {
                     {q.answer === null ? (
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                         <ActivityIndicator size="small" color={C.gold} />
-                        <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>AI is thinking…</Text>
+                        <Text style={S.tCaption}>AI is thinking…</Text>
                       </View>
                     ) : q.answer === 'TIMEOUT' ? (
                       <View style={[S.qBadge, { borderColor: 'rgba(248,81,73,0.4)', backgroundColor: 'rgba(248,81,73,0.08)' }]}>
@@ -3499,31 +3499,31 @@ export default function EnigmaGame() {
         {/* Result hero */}
         <View style={{ alignItems: 'center', paddingVertical: 28 }}>
           <Text style={{ fontSize: 56, marginBottom: 10 }}>{solved ? '🎉' : '😔'}</Text>
-          <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 24, color: solved ? C.gold : C.muted, letterSpacing: 2 }}>
+          <Text style={[S.tH1, { color: solved ? C.gold : C.muted, letterSpacing: 2 }]}>
             {solved ? 'You Cracked It!' : 'Not This Time'}
           </Text>
-          <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 8 }}>
+          <Text style={[S.tBodySm, { color: C.muted, marginTop: 8 }]}>
             {solved ? `Solved in ${questionsUsed} question${questionsUsed !== 1 ? 's' : ''}` : `Used all ${questionsUsed} questions`}
           </Text>
         </View>
 
         {/* Secret reveal */}
         <View style={{ backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1, borderColor: 'rgba(109,40,217,0.4)', borderRadius: 14, padding: 20, alignItems: 'center', marginBottom: 16 }}>
-          <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 8 }}>The Secret Was</Text>
-          <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.violet2, textAlign: 'center' }}>{soloChallenge.secret}</Text>
-          <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 6 }}>{soloChallenge.categoryIcon} {soloChallenge.categoryLabel}</Text>
+          <Text style={[S.tLabel, { color: C.dim, letterSpacing: 3, marginBottom: 8 }]}>The Secret Was</Text>
+          <Text style={[S.tH1, { color: C.violet2, textAlign: 'center' }]}>{soloChallenge.secret}</Text>
+          <Text style={[S.tCaption, { color: C.muted, marginTop: 6 }]}>{soloChallenge.categoryIcon} {soloChallenge.categoryLabel}</Text>
         </View>
 
         {/* Educational data card */}
         {(soloChallenge.facts || []).length > 0 && (
           <View style={[S.infoCard, { marginBottom: 24 }]}>
-            <Text style={{ fontSize: 10, color: C.gold, fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 14 }}>📖 About This Secret</Text>
+            <Text style={[S.tOverline, { letterSpacing: 3, marginBottom: 14 }]}>📖 About This Secret</Text>
             {(soloChallenge.facts || []).map((fact, i) => (
               <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 12, paddingBottom: 12, borderBottomWidth: i < soloChallenge.facts.length - 1 ? 1 : 0, borderBottomColor: C.border }}>
                 <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(109,40,217,0.18)', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
                   <Text style={{ fontSize: 11, color: C.violet2, fontFamily: 'Outfit_700Bold' }}>{i + 1}</Text>
                 </View>
-                <Text style={{ flex: 1, fontSize: 13, color: C.text, fontFamily: 'Outfit_400Regular', lineHeight: 20 }}>{fact}</Text>
+                <Text style={[S.tBodySm, { flex: 1, color: C.text, lineHeight: 20 }]}>{fact}</Text>
               </View>
             ))}
           </View>
@@ -3536,7 +3536,7 @@ export default function EnigmaGame() {
           <Text style={S.btnOutlineText}>Change Category</Text>
         </TouchableOpacity>
         <TouchableOpacity style={{ marginTop: 10, alignItems: 'center', padding: 10 }} onPress={() => setScreen('modes')}>
-          <Text style={{ color: C.dim, fontSize: 13, fontFamily: 'Outfit_400Regular' }}>← Back to Modes</Text>
+          <Text style={[S.tBodySm, { color: C.dim }]}>← Back to Modes</Text>
         </TouchableOpacity>
       </ScrollView>
       </View>
@@ -3734,7 +3734,7 @@ export default function EnigmaGame() {
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 90 }]}>
           <View style={S.screenHeader}>
             <Chip label="Lobby" />
-            <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>
+            <Text style={[S.tCaption, { color: C.dim }]}>
               {game.players.length} player{game.players.length !== 1 ? 's' : ''}
             </Text>
           </View>
@@ -3747,10 +3747,10 @@ export default function EnigmaGame() {
               padding: 20, alignItems: 'center', marginVertical: 14,
             }}>
               <Text style={{ fontSize: 32, marginBottom: 8 }}>🌐</Text>
-              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.violet2, marginBottom: 4 }}>
+              <Text style={[S.tH3, { color: C.violet2, marginBottom: 4 }]}>
                 Room is Public
               </Text>
-              <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 18, marginBottom: 14 }}>
+              <Text style={[S.tCaption, { color: C.muted, textAlign: 'center', lineHeight: 18, marginBottom: 14 }]}>
                 Your room is listed in the public browser.{'\n'}Anyone can find and join while you wait here.
               </Text>
               <View style={{ height: 1, backgroundColor: C.border2, width: '100%', marginBottom: 14 }} />
@@ -3840,7 +3840,7 @@ export default function EnigmaGame() {
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 24 }]}>
           <View style={S.screenHeader}>
             <Chip label={`Round ${game.round}`} />
-            <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular' }}>Host: {host?.name}</Text>
+            <Text style={[S.tCaption, { color: C.muted }]}>Host: {host?.name}</Text>
           </View>
 
           {viewerIsHost ? (
@@ -3871,7 +3871,7 @@ export default function EnigmaGame() {
               <Text style={[S.muted, { textAlign: 'center', marginBottom: 28 }]}>The host is selecting a theme. Prepare your mind.</Text>
               <View style={{ backgroundColor: C.card, borderWidth: 1, borderColor: C.border2, borderRadius: 14, paddingVertical: 16, paddingHorizontal: 28, alignItems: 'center' }}>
                 <Text style={{ fontSize: 11, color: C.dim, letterSpacing: 2, marginBottom: 4, fontFamily: 'Outfit_400Regular' }}>HOST THIS ROUND</Text>
-                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 20, color: C.gold }}>{host?.name}</Text>
+                <Text style={[S.tH2, { color: C.gold }]}>{host?.name}</Text>
               </View>
               <Text style={{ fontSize: 11, color: C.dim, marginTop: 20, fontFamily: 'Outfit_400Regular' }}>
                 Switch to host in the bar above to proceed
@@ -3907,13 +3907,13 @@ export default function EnigmaGame() {
                 {(libraryBriefing?.facts || []).map((f, i) => (
                   <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
                     <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold', fontSize: 14, marginTop: 1 }}>•</Text>
-                    <Text style={{ flex: 1, fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 20 }}>{f}</Text>
+                    <Text style={[S.tBodySm, { flex: 1, color: C.muted, lineHeight: 20 }]}>{f}</Text>
                   </View>
                 ))}
                 {libraryBriefing?.hint ? (
                   <View style={{ backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1, borderColor: 'rgba(109,40,217,0.3)', borderRadius: 10, padding: 12, marginTop: 6 }}>
                     <Text style={{ fontSize: 10, color: C.violet2, letterSpacing: 2, fontFamily: 'Outfit_700Bold', marginBottom: 4 }}>HINT TO GUESSERS</Text>
-                    <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular' }}>{libraryBriefing.hint}</Text>
+                    <Text style={[S.tBodySm, { color: C.muted }]}>{libraryBriefing.hint}</Text>
                   </View>
                 ) : null}
               </ScrollView>
@@ -3924,7 +3924,7 @@ export default function EnigmaGame() {
                 <Text style={S.btnGoldText}>I'm Ready — Start Round →</Text>
               </TouchableOpacity>
               <TouchableOpacity style={{ marginTop: 10, alignItems: 'center', padding: 8 }} onPress={() => setLibraryBriefing(null)}>
-                <Text style={{ color: C.dim, fontSize: 13, fontFamily: 'Outfit_400Regular' }}>← Choose a different secret</Text>
+                <Text style={[S.tBodySm, { color: C.dim }]}>← Choose a different secret</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -3972,7 +3972,7 @@ export default function EnigmaGame() {
                     >
                       <View style={{ flex: 1 }}>
                         <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: C.text, marginBottom: 3 }}>{item.secret}</Text>
-                        <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular' }}>{item.hint}</Text>
+                        <Text style={[S.tCaption, { color: C.muted }]}>{item.hint}</Text>
                       </View>
                       <Text style={{ color: C.gold, fontSize: 22, fontFamily: 'Outfit_400Regular' }}>›</Text>
                     </TouchableOpacity>
@@ -3996,7 +3996,7 @@ export default function EnigmaGame() {
                     value={hintInput} onChangeText={setHintInput}
                   />
                   <View style={{ backgroundColor: 'rgba(245,158,11,0.07)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.2)', borderRadius: 10, padding: 12, marginVertical: 10 }}>
-                    <Text style={{ fontSize: 12, color: C.warn, fontFamily: 'Outfit_400Regular' }}>🔒 Your answer is hidden until the round ends.</Text>
+                    <Text style={[S.tCaption, { color: C.warn }]}>🔒 Your answer is hidden until the round ends.</Text>
                   </View>
                   <TouchableOpacity style={[S.btnGold, !secretInput.trim() && S.btnDisabled]} onPress={() => lockSecret()} disabled={!secretInput.trim()}>
                     <Text style={S.btnGoldText}>Lock it in → Start Round</Text>
@@ -4039,8 +4039,8 @@ export default function EnigmaGame() {
         <Modal visible={!!hostWarningData && viewerIsHost} transparent animationType="fade" onRequestClose={() => {}}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <View style={{ backgroundColor: C.surface, borderWidth: 2, borderColor: C.danger, borderRadius: 20, padding: 24, width: '100%' }}>
-              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 19, color: C.danger, textAlign: 'center', marginBottom: 4 }}>⏰ Answer Now!</Text>
-              <Text style={{ fontSize: 12, color: C.muted, textAlign: 'center', marginBottom: 16, fontFamily: 'Outfit_400Regular' }}>
+              <Text style={[S.tH2, { color: C.danger, textAlign: 'center', marginBottom: 4 }]}>⏰ Answer Now!</Text>
+              <Text style={[S.tCaption, { color: C.muted, textAlign: 'center', marginBottom: 16 }]}>
                 {(game?.hostConsecutiveMisses || 0) === 0
                   ? 'Miss 1 of 2 — answer or the question will be skipped'
                   : '⚠️ Miss 2 of 2 — answer or you will be eliminated as host!'}
@@ -4245,7 +4245,7 @@ export default function EnigmaGame() {
           <ScrollView ref={feedScrollRef} style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 8 }}>
             {game.questions.length === 0 ? (
               <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-                <Text style={{ color: C.dim, fontSize: 13, textAlign: 'center', lineHeight: 22, fontFamily: 'Outfit_400Regular' }}>
+                <Text style={[S.tBodySm, { color: C.dim, textAlign: 'center', lineHeight: 22 }]}>
                   No questions yet.{'\n'}The first guesser will set the tone...
                 </Text>
               </View>
@@ -4261,7 +4261,7 @@ export default function EnigmaGame() {
                       <Text style={{ fontSize: 15, fontFamily: 'Outfit_700Bold', color: C.text, flex: 1 }}>{q.askerName}</Text>
                       <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_700Bold' }}>Q{i + 1}</Text>
                     </View>
-                    <Text style={{ fontSize: 16, color: C.text, lineHeight: 23, fontFamily: 'Outfit_400Regular' }}>{q.text}</Text>
+                    <Text style={[S.tBodyLg, { color: C.text, lineHeight: 23 }]}>{q.text}</Text>
                     {q.answer === null ? (
                       <View style={[S.qBadge, { backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.2)' }]}>
                         <Text style={{ color: C.warn, fontSize: 14, fontFamily: 'Outfit_700Bold' }}>⏳ Awaiting answer</Text>
@@ -4296,7 +4296,7 @@ export default function EnigmaGame() {
           <View style={{ paddingVertical: 10, paddingBottom: insets.bottom + 8 }}>
             {viewerIsHost && pendingQ ? (
               <View>
-                <Text style={{ fontSize: 12, color: C.muted, marginBottom: 8, fontFamily: 'Outfit_400Regular' }}>
+                <Text style={[S.tCaption, { color: C.muted, marginBottom: 8 }]}>
                   {'Answering: '}<Text style={{ color: C.text, fontFamily: 'Outfit_600SemiBold' }}>"{pendingQ.text}"</Text>
                 </Text>
                 <View style={{ marginBottom: 8 }}>
@@ -4338,7 +4338,7 @@ export default function EnigmaGame() {
               </View>
             ) : viewerIsEliminated ? (
               <View style={{ padding: 14, backgroundColor: 'rgba(239,68,68,0.07)', borderRadius: 10, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)', alignItems: 'center' }}>
-                <Text style={{ fontSize: 13, color: C.danger, fontFamily: 'Outfit_400Regular' }}>
+                <Text style={[S.tBodySm, { color: C.danger }]}>
                   ❌ You've been eliminated — watch the others play on...
                 </Text>
               </View>
@@ -4379,7 +4379,7 @@ export default function EnigmaGame() {
               ) : (
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   <View style={{ flex: 1, padding: 12, backgroundColor: C.card, borderRadius: 10, borderWidth: 1, borderColor: C.border, justifyContent: 'center' }}>
-                    <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular' }}>
+                    <Text style={[S.tCaption, { color: C.muted }]}>
                       {pendingQ ? 'Waiting for host to answer...' : `Waiting for ${currentQuestioner?.name || 'next player'}...`}
                     </Text>
                   </View>
@@ -4390,7 +4390,7 @@ export default function EnigmaGame() {
               )
             ) : (
               <View style={{ padding: 12, alignItems: 'center' }}>
-                <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>
+                <Text style={[S.tCaption, { color: C.dim }]}>
                   Host — watch and answer questions as they come in.
                 </Text>
               </View>
@@ -4416,7 +4416,7 @@ export default function EnigmaGame() {
           {/* Winner block */}
           <View style={{ alignItems: 'center', padding: 28, backgroundColor: 'rgba(200,168,74,0.06)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 20, marginVertical: 16 }}>
             <Text style={{ fontSize: 52, marginBottom: 8 }}>{abandoned ? '👻' : hostWon ? '🎩' : '🎉'}</Text>
-            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 26, color: C.gold }}>
+            <Text style={[S.tH1, { color: C.gold }]}>
               {abandoned ? `${game.abandonedHostName || 'The host'} left` : hostWon ? host?.name : winner?.name}
             </Text>
             <Text style={{ fontSize: 10, color: C.goldDim, letterSpacing: 3, textTransform: 'uppercase', marginTop: 8, fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 16 }}>
@@ -4431,8 +4431,8 @@ export default function EnigmaGame() {
           {/* Secret reveal */}
           <View style={{ backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1, borderColor: 'rgba(109,40,217,0.4)', borderRadius: 12, padding: 14, alignItems: 'center', marginBottom: 16 }}>
             <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4, fontFamily: 'Outfit_400Regular' }}>The Secret Was</Text>
-            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 20, color: C.violet2 }}>{game.secretAnswer}</Text>
-            <Text style={{ fontSize: 12, color: C.dim, marginTop: 4, fontFamily: 'Outfit_400Regular' }}>{game.theme?.icon} {game.theme?.label}</Text>
+            <Text style={[S.tH2, { color: C.violet2 }]}>{game.secretAnswer}</Text>
+            <Text style={[S.tCaption, { color: C.dim, marginTop: 4 }]}>{game.theme?.icon} {game.theme?.label}</Text>
           </View>
 
           {/* Leaderboard */}
