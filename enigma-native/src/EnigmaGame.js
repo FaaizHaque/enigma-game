@@ -43,6 +43,44 @@ const C = {
   warn: '#f0a030',
 };
 
+// ─── Typography system ──────────────────────────────────────────────────────────
+// Two families, one editorial voice:
+//   • Cinzel  — an inscriptional serif used only for display/headings; lends the
+//     luxury, "engraved" character. Weights: 400/600/700/900.
+//   • Outfit  — a clean geometric sans for everything readable: body, labels,
+//     buttons, captions. Weights: 400/500/600/700.
+// The scale below is the single source of truth for size / line-height / tracking.
+// Headings tighten tracking as they grow; overlines & labels open it up wide;
+// body copy runs at a generous ~1.5 line-height for editorial readability.
+const F = {
+  serif: 'Cinzel_400Regular',
+  serifSemi: 'Cinzel_600SemiBold',
+  serifBold: 'Cinzel_700Bold',
+  serifBlack: 'Cinzel_900Black',
+  sans: 'Outfit_400Regular',
+  sansMed: 'Outfit_500Medium',
+  sansSemi: 'Outfit_600SemiBold',
+  sansBold: 'Outfit_700Bold',
+};
+
+const T = {
+  // ── Display & headings (serif) ──
+  display:  { fontFamily: F.serifBlack, fontSize: 32, lineHeight: 38, letterSpacing: 0.5, color: C.text },
+  h1:       { fontFamily: F.serifBold,  fontSize: 24, lineHeight: 30, letterSpacing: 0.5, color: C.text },
+  h2:       { fontFamily: F.serifSemi,  fontSize: 20, lineHeight: 26, letterSpacing: 0.3, color: C.text },
+  h3:       { fontFamily: F.serifBold,  fontSize: 16, lineHeight: 22, letterSpacing: 1,   color: C.text },
+  // ── Eyebrow / overline (sans, wide tracking, uppercase) ──
+  overline: { fontFamily: F.sansBold,   fontSize: 11, lineHeight: 14, letterSpacing: 2.5, textTransform: 'uppercase', color: C.gold },
+  // ── Body copy (sans) ──
+  bodyLg:   { fontFamily: F.sans,       fontSize: 16, lineHeight: 24, color: C.text },
+  body:     { fontFamily: F.sans,       fontSize: 14, lineHeight: 21, color: C.muted },
+  bodySm:   { fontFamily: F.sans,       fontSize: 13, lineHeight: 20, color: C.muted },
+  caption:  { fontFamily: F.sansMed,    fontSize: 12, lineHeight: 16, letterSpacing: 0.2, color: C.dim },
+  // ── UI labels & actions (sans) ──
+  label:    { fontFamily: F.sansBold,   fontSize: 11, lineHeight: 14, letterSpacing: 2, textTransform: 'uppercase', color: C.muted },
+  button:   { fontFamily: F.sansSemi,   fontSize: 15, lineHeight: 20, letterSpacing: 0.4, color: C.text },
+};
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 const THEMES = [
   { id: 'personality', label: 'Famous Personality', icon: '👤', desc: 'A real person known worldwide' },
@@ -3043,8 +3081,8 @@ export default function EnigmaGame() {
         </View>
         <View style={{ alignItems: 'center', paddingVertical: 20 }}>
           <View style={{ marginBottom: 10 }}><MascotIcon size={88} uid="setup" /></View>
-          <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.text, letterSpacing: 2 }}>Solo Mode</Text>
-          <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 6, textAlign: 'center' }}>
+          <Text style={[S.tH1, { letterSpacing: 1.5 }]}>Solo Mode</Text>
+          <Text style={[S.tBodySm, { marginTop: 6, textAlign: 'center' }]}>
             The AI hides a secret. You have 20 questions to crack it.
           </Text>
         </View>
@@ -4443,7 +4481,7 @@ export default function EnigmaGame() {
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}>
           <View style={{ alignItems: 'center', paddingVertical: 20 }}>
             <Text style={{ fontSize: 60, marginBottom: 10 }}>🏆</Text>
-            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 30, color: C.gold }}>Final Standings</Text>
+            <Text style={[S.tDisplay, { color: C.gold }]}>Final Standings</Text>
           </View>
           <View style={S.card}>
             {sorted.map((p, i) => {
@@ -4478,25 +4516,39 @@ const S = StyleSheet.create({
   flex: { flex: 1 },
   screen: { paddingHorizontal: 16 },
   screenHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 14, paddingBottom: 16 },
-  backBtn: { fontSize: 13, color: C.muted, fontFamily: 'Outfit_500Medium' },
-  h2: { fontFamily: 'Cinzel_600SemiBold', fontSize: 20, color: C.text, marginBottom: 6 },
-  muted: { fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular' },
-  bodyText: { fontSize: 13, color: C.muted, lineHeight: 20, fontFamily: 'Outfit_400Regular' },
-  sectionLabel: { fontSize: 11, fontFamily: 'Outfit_700Bold', color: C.gold, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
+  backBtn: { ...T.bodySm, color: C.muted, fontFamily: F.sansMed },
+
+  // ── Typographic scale (single source of truth: the `T` system) ──
+  tDisplay:  T.display,
+  tH1:       T.h1,
+  tH2:       T.h2,
+  tH3:       T.h3,
+  tOverline: T.overline,
+  tBodyLg:   T.bodyLg,
+  tBody:     T.body,
+  tBodySm:   T.bodySm,
+  tCaption:  T.caption,
+  tLabel:    T.label,
+
+  // ── Shared text roles (derived from the system) ──
+  h2: { ...T.h2, marginBottom: 6 },
+  muted: { ...T.bodySm },
+  bodyText: { ...T.bodySm },
+  sectionLabel: { ...T.overline, color: C.gold, marginBottom: 8 },
   infoCard: { backgroundColor: C.card2, borderRadius: 10, padding: 14, borderWidth: 1, borderColor: C.border },
 
   // Mode cards
   modeCard: { backgroundColor: C.card, borderWidth: 1.5, borderColor: C.goldDim, borderRadius: 16, padding: 18, marginBottom: 2 },
-  modeCardTitle: { fontFamily: 'Cinzel_700Bold', fontSize: 16, letterSpacing: 1, marginBottom: 4 },
-  modeCardDesc: { fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 18 },
+  modeCardTitle: { ...T.h3, marginBottom: 4 },
+  modeCardDesc: { ...T.bodySm, fontSize: 12, lineHeight: 18 },
 
   // Buttons
   btnGold: { backgroundColor: C.gold, borderRadius: 12, paddingVertical: 16, paddingHorizontal: 24, alignItems: 'center', justifyContent: 'center' },
-  btnGoldText: { color: '#1a0f00', fontSize: 15, fontFamily: 'Outfit_600SemiBold' },
+  btnGoldText: { ...T.button, color: '#1a0f00' },
   btnOutline: { backgroundColor: 'transparent', borderWidth: 1, borderColor: C.border2, borderRadius: 12, paddingVertical: 16, paddingHorizontal: 24, alignItems: 'center', justifyContent: 'center' },
-  btnOutlineText: { color: C.text, fontSize: 15, fontFamily: 'Outfit_600SemiBold' },
+  btnOutlineText: { ...T.button, color: C.text },
   btnOutlineSm: { backgroundColor: 'transparent', borderWidth: 1, borderColor: C.border2, borderRadius: 9, paddingVertical: 9, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
-  btnOutlineSmText: { color: C.text, fontSize: 13, fontFamily: 'Outfit_600SemiBold' },
+  btnOutlineSmText: { ...T.button, fontSize: 13, color: C.text },
   btnDisabled: { opacity: 0.4 },
   btnYes: { backgroundColor: 'rgba(34,197,94,0.12)', borderWidth: 1, borderColor: 'rgba(34,197,94,0.3)', borderRadius: 10, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
   btnNo: { backgroundColor: 'rgba(239,68,68,0.12)', borderWidth: 1, borderColor: 'rgba(239,68,68,0.3)', borderRadius: 10, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
@@ -4506,11 +4558,11 @@ const S = StyleSheet.create({
 
   // Input
   input: { backgroundColor: C.card, borderWidth: 1, borderColor: C.border2, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, color: C.text, fontSize: 16, fontFamily: 'Outfit_400Regular', marginBottom: 8 },
-  fieldLabel: { fontSize: 11, fontFamily: 'Outfit_700Bold', color: C.muted, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
+  fieldLabel: { ...T.label, marginBottom: 8 },
 
   // Card
   card: { backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: 16, padding: 18, marginBottom: 12 },
-  cardTitle: { fontFamily: 'Cinzel_600SemiBold', fontSize: 12, color: C.gold, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 },
+  cardTitle: { ...T.overline, fontFamily: F.serifSemi, fontSize: 12, color: C.gold, marginBottom: 14 },
 
   // Code box
   codeBox: { backgroundColor: C.card2, borderWidth: 1, borderColor: C.goldDim, borderRadius: 16, padding: 22, alignItems: 'center', marginVertical: 14 },
@@ -4561,6 +4613,6 @@ const S = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end', alignItems: 'center' },
   modal: { backgroundColor: C.surface, borderWidth: 1, borderColor: C.border2, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 32, width: '100%' },
   modalHandle: { width: 36, height: 4, backgroundColor: C.border2, borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
-  modalTitle: { fontFamily: 'Cinzel_700Bold', fontSize: 18, color: C.text, marginBottom: 4 },
-  modalSub: { fontSize: 13, color: C.muted, marginBottom: 18, lineHeight: 20, fontFamily: 'Outfit_400Regular' },
+  modalTitle: { ...T.h3, fontSize: 18, lineHeight: 24, letterSpacing: 0.3, marginBottom: 4 },
+  modalSub: { ...T.bodySm, marginBottom: 18 },
 });
