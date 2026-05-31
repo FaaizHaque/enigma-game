@@ -1111,6 +1111,77 @@ function GlassInput({ accent = C.gold, containerStyle, style, onFocus, onBlur, e
   );
 }
 
+// ─── Premium Action Button ──────────────────────────────────────────────────
+// Modern telegram-style send glyph (crisp vector)
+function SendGlyph({ size = 20, color = '#ffffff' }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path d="M3 20.5l18.5-8.5L3 3.5V10l12 2-12 2v6.5z" fill={color} />
+    </Svg>
+  );
+}
+
+// Deep-purple glass action button. Layered gradients give a glass-like finish
+// with 3D depth (bright accent ring → rich purple body → top sheen), a soft
+// violet glow shadow, and tactile press feedback. `square` makes a fixed-width
+// icon button that stretches to its row's height; otherwise it's a full button.
+function PremiumButton({ onPress, disabled, label, icon, square = false, width, style, textStyle }) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.82}
+      onPress={onPress}
+      disabled={disabled}
+      style={[
+        {
+          borderRadius: 15,
+          shadowColor: '#7c3aed',
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: disabled ? 0 : 0.55,
+          shadowRadius: 14,
+          elevation: disabled ? 0 : 9,
+        },
+        square ? { width: width || 54 } : null,
+        disabled ? { opacity: 0.4 } : null,
+        style,
+      ]}
+    >
+      {/* Bright accent ring (3D rim) */}
+      <LinearGradient
+        colors={['rgba(199,170,255,0.95)', 'rgba(124,58,237,0.45)', 'rgba(48,18,108,0.85)']}
+        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+        style={[{ borderRadius: 15, padding: 1.4 }, square ? { flex: 1 } : null]}
+      >
+        {/* Rich purple glass body */}
+        <LinearGradient
+          colors={['#9355f2', '#7c3aed', '#5520ac']}
+          locations={[0, 0.5, 1]}
+          start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
+          style={[
+            { borderRadius: 13.6, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+            square ? { flex: 1 } : { paddingVertical: 16, paddingHorizontal: 24 },
+          ]}
+        >
+          {/* Top glass sheen */}
+          <LinearGradient
+            colors={['rgba(255,255,255,0.30)', 'rgba(255,255,255,0.04)', 'transparent']}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '52%' }}
+          />
+          {/* Inner hairline highlight */}
+          <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 12.6, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)' }} />
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            {icon}
+            {label ? (
+              <Text style={[{ color: '#fff', fontFamily: 'Outfit_700Bold', fontSize: 15, letterSpacing: 0.4, textShadowColor: 'rgba(30,10,70,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 }, textStyle]}>
+                {label}
+              </Text>
+            ) : null}
+          </View>
+        </LinearGradient>
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function EnigmaGame() {
   const insets = useSafeAreaInsets();
@@ -2653,16 +2724,12 @@ export default function EnigmaGame() {
                 returnKeyType="send"
                 onSubmitEditing={() => askDailyQuestion(dailyInput)}
               />
-              <TouchableOpacity
-                style={[{
-                  backgroundColor: C.violet, borderRadius: 12, paddingHorizontal: 16,
-                  alignItems: 'center', justifyContent: 'center',
-                }, (!canAsk || !dailyInput.trim()) && { opacity: 0.4 }]}
+              <PremiumButton
+                square
+                icon={<SendGlyph size={20} />}
                 onPress={() => askDailyQuestion(dailyInput)}
                 disabled={!canAsk || !dailyInput.trim()}
-              >
-                <Text style={{ color: '#fff', fontSize: 18 }}>↑</Text>
-              </TouchableOpacity>
+              />
             </View>
           )}
 
@@ -3192,11 +3259,12 @@ export default function EnigmaGame() {
                   editable={canAsk} returnKeyType="send"
                   onSubmitEditing={() => askSoloQuestion(soloInput)}
                 />
-                <TouchableOpacity
-                  style={[{ backgroundColor: C.violet, borderRadius: 12, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' }, (!canAsk || !soloInput.trim()) && { opacity: 0.4 }]}
-                  onPress={() => askSoloQuestion(soloInput)} disabled={!canAsk || !soloInput.trim()}>
-                  <Text style={{ color: '#fff', fontSize: 18 }}>↑</Text>
-                </TouchableOpacity>
+                <PremiumButton
+                  square
+                  icon={<SendGlyph size={20} />}
+                  onPress={() => askSoloQuestion(soloInput)}
+                  disabled={!canAsk || !soloInput.trim()}
+                />
               </View>
             )}
 
@@ -4117,16 +4185,18 @@ export default function EnigmaGame() {
                       value={questionInput} onChangeText={setQuestionInput}
                       onSubmitEditing={submitQuestion} returnKeyType="send"
                     />
-                    <TouchableOpacity
-                      style={[S.btnGold, { width: 'auto', paddingHorizontal: 18, borderRadius: 10 }, !questionInput.trim() && S.btnDisabled]}
-                      onPress={submitQuestion} disabled={!questionInput.trim()}
-                    >
-                      <Text style={S.btnGoldText}>Ask</Text>
-                    </TouchableOpacity>
+                    <PremiumButton
+                      square
+                      icon={<SendGlyph size={19} />}
+                      onPress={submitQuestion}
+                      disabled={!questionInput.trim()}
+                    />
                   </View>
-                  <TouchableOpacity style={S.btnSolve} onPress={() => { setSolveInput(''); setSolveModalOpen(true); }}>
-                    <Text style={{ color: '#fff', fontFamily: 'Outfit_700Bold', fontSize: 14 }}>💡 I Know It — Solve!</Text>
-                  </TouchableOpacity>
+                  <PremiumButton
+                    label="💡 I Know It — Solve!"
+                    textStyle={{ fontSize: 14 }}
+                    onPress={() => { setSolveInput(''); setSolveModalOpen(true); }}
+                  />
                 </View>
               ) : (
                 <View style={{ flexDirection: 'row', gap: 8 }}>
