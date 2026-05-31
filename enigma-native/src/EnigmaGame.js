@@ -2206,6 +2206,16 @@ export default function EnigmaGame() {
     return () => clearInterval(interval);
   }, [adModalVisible]);
 
+  // Auto-load and poll public rooms every 10s while on the rooms screen.
+  // Must live with the other hooks (before any screen early-return) so the
+  // hook order stays stable across renders — it self-guards on `screen`.
+  useEffect(() => {
+    if (screen !== 'rooms') return;
+    loadPublicRooms();
+    const interval = setInterval(loadPublicRooms, 10000);
+    return () => clearInterval(interval);
+  }, [screen]);
+
   const openAdForHint = (mode) => {
     setPendingHintMode(mode);
     setAdModalVisible(true);
@@ -3632,15 +3642,6 @@ export default function EnigmaGame() {
       </KeyboardAvoidingView>
     );
   }
-
-  // ─── PUBLIC ROOMS BROWSER ─────────────────────────────────────────────────
-  // Auto-load and poll public rooms every 10s while on the rooms screen
-  useEffect(() => {
-    if (screen !== 'rooms') return;
-    loadPublicRooms();
-    const interval = setInterval(loadPublicRooms, 10000);
-    return () => clearInterval(interval);
-  }, [screen]);
 
   if (screen === 'rooms') {
     const readyToJoin = !!nameInput.trim();
