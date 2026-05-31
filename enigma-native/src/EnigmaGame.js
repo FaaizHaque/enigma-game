@@ -959,6 +959,8 @@ export default function EnigmaGame() {
   const [soloLoading, setSoloLoading] = useState(false);
   const [soloResult, setSoloResult] = useState(null);
   const [soloCategory, setSoloCategory] = useState('random');
+  const [soloHintsUsed, setSoloHintsUsed] = useState(0);
+  const [dailyHintsUsed, setDailyHintsUsed] = useState(0);
 
   const feedScrollRef = useRef(null);
   const gameRef = useRef(game);
@@ -1520,6 +1522,19 @@ export default function EnigmaGame() {
     return { secret: picked.item.secret, hint: picked.item.hint, facts: picked.item.facts, categoryLabel: theme.label, categoryIcon: theme.icon };
   };
 
+  const computeHint = (secret, hintNum) => {
+    const words = secret.trim().split(/\s+/);
+    if (hintNum === 1) {
+      const n = words.length;
+      return `The secret is ${n} word${n !== 1 ? 's' : ''} long`;
+    }
+    if (hintNum === 2) {
+      const firstMeaningful = words[0].toLowerCase() === 'the' && words.length > 1 ? words[1] : words[0];
+      return `It starts with the letter "${firstMeaningful[0].toUpperCase()}"`;
+    }
+    return null;
+  };
+
   const startSoloChallenge = () => {
     setSoloChallenge(getRandomChallenge(soloCategory));
     setSoloQuestions([]);
@@ -1527,12 +1542,21 @@ export default function EnigmaGame() {
     setSoloSolveInput('');
     setSoloSolveOpen(false);
     setSoloResult(null);
+    setSoloHintsUsed(0);
     setScreen('solo_game');
+  };
+
+  const useSoloHint = () => {
+    if (soloHintsUsed >= 2 || !soloChallenge) return;
+    const nextHint = soloHintsUsed + 1;
+    setSoloQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(soloChallenge.secret, nextHint) }]);
+    setSoloHintsUsed(nextHint);
   };
 
   const askSoloQuestion = async (question) => {
     const q = question.trim();
-    if (!q || soloLoading || soloQuestions.length >= 20 || !soloChallenge) return;
+    const realQCount = soloQuestions.filter(qq => !qq.type).length;
+    if (!q || soloLoading || realQCount >= 20 || !soloChallenge) return;
     const entry = { id: Date.now(), text: q, answer: null };
     setSoloQuestions(prev => [...prev, entry]);
     setSoloInput('');
@@ -1546,7 +1570,7 @@ export default function EnigmaGame() {
   const finishSoloChallenge = (guess) => {
     if (!guess.trim() || !soloChallenge) return;
     const isCorrect = fuzzyMatch(guess.trim(), soloChallenge.secret);
-    setSoloResult({ solved: isCorrect, questionsUsed: soloQuestions.length });
+    setSoloResult({ solved: isCorrect, questionsUsed: soloQuestions.filter(qq => !qq.type).length });
     setSoloSolveOpen(false);
     setScreen('solo_result');
   };
@@ -1567,13 +1591,22 @@ export default function EnigmaGame() {
     setDailySolveInput('');
     setDailySolveOpen(false);
     setDailyResult(null);
+    setDailyHintsUsed(0);
     setDailyStartTime(Date.now());
     setScreen('daily_game');
   };
 
+  const useDailyHint = () => {
+    if (dailyHintsUsed >= 2 || !dailyChallenge) return;
+    const nextHint = dailyHintsUsed + 1;
+    setDailyQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(dailyChallenge.secret, nextHint) }]);
+    setDailyHintsUsed(nextHint);
+  };
+
   const askDailyQuestion = async (question) => {
     const q = question.trim();
-    if (!q || dailyLoading || dailyQuestions.length >= 20) return;
+    const realQCount = dailyQuestions.filter(qq => !qq.type).length;
+    if (!q || dailyLoading || realQCount >= 20) return;
     const entry = { id: Date.now(), text: q, answer: null };
     setDailyQuestions(prev => [...prev, entry]);
     setDailyInput('');
@@ -1588,7 +1621,7 @@ export default function EnigmaGame() {
     if (!guess.trim() || !dailyChallenge) return;
     const isCorrect = fuzzyMatch(guess.trim(), dailyChallenge.secret);
     const timeSeconds = Math.round((Date.now() - dailyStartTime) / 1000);
-    const questionsUsed = dailyQuestions.length;
+    const questionsUsed = dailyQuestions.filter(qq => !qq.type).length;
     setDailyResult({ solved: isCorrect, questionsUsed, timeSeconds });
     setDailySolveOpen(false);
     setScreen('daily_result');
@@ -1959,11 +1992,12 @@ export default function EnigmaGame() {
 
   // ─── DAILY GAME ───────────────────────────────────────────────────────────
   if (screen === 'daily_game' && dailyChallenge) {
-    const qCount = dailyQuestions.length;
+    const qCount = dailyQuestions.filter(q => !q.type).length;
     const qLimit = 20;
     const limitReached = qCount >= qLimit;
-    const lastAnswered = dailyQuestions.length > 0 && dailyQuestions[dailyQuestions.length - 1].answer !== null;
-    const canAsk = !limitReached && !dailyLoading && (dailyQuestions.length === 0 || lastAnswered);
+    const lastEntry = dailyQuestions[dailyQuestions.length - 1];
+    const lastAnswered = !lastEntry || lastEntry.type === 'hint' || lastEntry.answer !== null;
+    const canAsk = !limitReached && !dailyLoading && lastAnswered;
 
     return (
       <View style={[S.flex, { backgroundColor: C.bg }]}>
@@ -2055,34 +2089,48 @@ export default function EnigmaGame() {
               </Text>
             </View>
           )}
-          {dailyQuestions.map((q, i) => (
-            <View key={q.id} style={{ marginBottom: 12 }}>
-              <View style={{ backgroundColor: C.card2, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: C.border }}>
-                <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 2, marginBottom: 4 }}>Q{i + 1}</Text>
-                <Text style={{ fontSize: 14, color: C.text, fontFamily: 'Outfit_500Medium' }}>{q.text}</Text>
+          {dailyQuestions.map((q, i) => {
+            if (q.type === 'hint') {
+              return (
+                <View key={q.id} style={{ marginBottom: 12, backgroundColor: 'rgba(212,168,74,0.07)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(212,168,74,0.3)', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Text style={{ fontSize: 20 }}>💡</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 10, color: C.goldDim, fontFamily: 'Outfit_700Bold', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Hint {q.hintNum} of 2</Text>
+                    <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_600SemiBold', lineHeight: 20 }}>{q.text}</Text>
+                  </View>
+                </View>
+              );
+            }
+            const qNum = dailyQuestions.slice(0, i + 1).filter(x => !x.type).length;
+            return (
+              <View key={q.id} style={{ marginBottom: 12 }}>
+                <View style={{ backgroundColor: C.card2, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: C.border }}>
+                  <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 2, marginBottom: 4 }}>Q{qNum}</Text>
+                  <Text style={{ fontSize: 14, color: C.text, fontFamily: 'Outfit_500Medium' }}>{q.text}</Text>
+                </View>
+                {q.answer === null ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6, paddingLeft: 4 }}>
+                    <ActivityIndicator size="small" color={C.gold} />
+                    <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>AI is thinking…</Text>
+                  </View>
+                ) : q.answer === 'TIMEOUT' ? (
+                  <View style={[S.qBadge, { borderColor: 'rgba(248,81,73,0.4)', backgroundColor: 'rgba(248,81,73,0.08)', marginTop: 6, marginLeft: 4 }]}>
+                    <Text style={{ fontSize: 12, fontFamily: 'Outfit_600SemiBold', color: C.danger }}>No connection — check internet</Text>
+                  </View>
+                ) : (
+                  <View style={[S.qBadge, {
+                    borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : 'rgba(240,160,48,0.4)',
+                    backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.08)' : q.answer === 'NO' ? 'rgba(248,81,73,0.08)' : 'rgba(240,160,48,0.08)',
+                    marginTop: 6, marginLeft: 4,
+                  }]}>
+                    <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: q.answer === 'YES' ? C.success : q.answer === 'NO' ? C.danger : C.warn }}>
+                      {q.answer === 'YES' ? '✓ Yes' : q.answer === 'NO' ? '✗ No' : '~ Partly'}
+                    </Text>
+                  </View>
+                )}
               </View>
-              {q.answer === null ? (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6, paddingLeft: 4 }}>
-                  <ActivityIndicator size="small" color={C.gold} />
-                  <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>AI is thinking…</Text>
-                </View>
-              ) : q.answer === 'TIMEOUT' ? (
-                <View style={[S.qBadge, { borderColor: 'rgba(248,81,73,0.4)', backgroundColor: 'rgba(248,81,73,0.08)', marginTop: 6, marginLeft: 4 }]}>
-                  <Text style={{ fontSize: 12, fontFamily: 'Outfit_600SemiBold', color: C.danger }}>No connection — check internet</Text>
-                </View>
-              ) : (
-                <View style={[S.qBadge, {
-                  borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : 'rgba(240,160,48,0.4)',
-                  backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.08)' : q.answer === 'NO' ? 'rgba(248,81,73,0.08)' : 'rgba(240,160,48,0.08)',
-                  marginTop: 6, marginLeft: 4,
-                }]}>
-                  <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: q.answer === 'YES' ? C.success : q.answer === 'NO' ? C.danger : C.warn }}>
-                    {q.answer === 'YES' ? '✓ Yes' : q.answer === 'NO' ? '✗ No' : '~ Partly'}
-                  </Text>
-                </View>
-              )}
-            </View>
-          ))}
+            );
+          })}
           {limitReached && (
             <View style={{ backgroundColor: 'rgba(248,81,73,0.08)', borderWidth: 1, borderColor: 'rgba(248,81,73,0.3)', borderRadius: 10, padding: 14, marginTop: 4 }}>
               <Text style={{ color: C.danger, fontFamily: 'Outfit_600SemiBold', fontSize: 14, textAlign: 'center' }}>
@@ -2098,12 +2146,22 @@ export default function EnigmaGame() {
             backgroundColor: C.surface, borderTopWidth: 1, borderTopColor: C.border2,
             padding: 12, paddingBottom: insets.bottom + 12,
           }}>
-            <TouchableOpacity
-              style={[S.btnGold, { marginBottom: 10 }]}
-              onPress={() => { setDailySolveInput(''); setDailySolveOpen(true); }}
-            >
-              <Text style={S.btnGoldText}>💡 I Know the Answer — Solve!</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
+              <TouchableOpacity
+                style={[S.btnGold, { flex: 1 }]}
+                onPress={() => { setDailySolveInput(''); setDailySolveOpen(true); }}
+              >
+                <Text style={S.btnGoldText}>✓ Solve!</Text>
+              </TouchableOpacity>
+              {dailyHintsUsed < 2 && (
+                <TouchableOpacity
+                  style={{ backgroundColor: 'rgba(212,168,74,0.12)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.35)', borderRadius: 12, paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center' }}
+                  onPress={useDailyHint}
+                >
+                  <Text style={{ fontSize: 13, color: C.gold, fontFamily: 'Outfit_600SemiBold' }}>💡 Hint {dailyHintsUsed + 1}/2</Text>
+                </TouchableOpacity>
+              )}
+            </View>
             {!limitReached && (
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TextInput
@@ -2273,10 +2331,11 @@ export default function EnigmaGame() {
 
   // ─── SOLO GAME ────────────────────────────────────────────────────────────
   if (screen === 'solo_game' && soloChallenge) {
-    const qCount = soloQuestions.length;
+    const qCount = soloQuestions.filter(q => !q.type).length;
     const qLimit = 20;
     const limitReached = qCount >= qLimit;
-    const lastAnswered = soloQuestions.length === 0 || soloQuestions[soloQuestions.length - 1].answer !== null;
+    const lastEntry = soloQuestions[soloQuestions.length - 1];
+    const lastAnswered = !lastEntry || lastEntry.type === 'hint' || lastEntry.answer !== null;
     const canAsk = !limitReached && !soloLoading && lastAnswered;
 
     return (
@@ -2347,37 +2406,51 @@ export default function EnigmaGame() {
               </View>
             </View>
           ) : (
-            soloQuestions.map((q, idx) => (
-              <View key={q.id} style={{ marginBottom: 10, backgroundColor: C.card, borderRadius: 14, borderWidth: 1, borderColor: C.border, padding: 12 }}>
-                <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
-                  <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: C.card2, borderWidth: 1, borderColor: C.border2, alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
-                    <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_700Bold' }}>{idx + 1}</Text>
+            soloQuestions.map((q, idx) => {
+              if (q.type === 'hint') {
+                return (
+                  <View key={q.id} style={{ marginBottom: 10, backgroundColor: 'rgba(212,168,74,0.07)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(212,168,74,0.3)', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <Text style={{ fontSize: 20 }}>💡</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 10, color: C.goldDim, fontFamily: 'Outfit_700Bold', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Hint {q.hintNum} of 2</Text>
+                      <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_600SemiBold', lineHeight: 20 }}>{q.text}</Text>
+                    </View>
                   </View>
-                  <Text style={{ flex: 1, fontSize: 14, color: C.text, fontFamily: 'Outfit_500Medium', lineHeight: 20 }}>{q.text}</Text>
+                );
+              }
+              const qNum = soloQuestions.slice(0, idx + 1).filter(x => !x.type).length;
+              return (
+                <View key={q.id} style={{ marginBottom: 10, backgroundColor: C.card, borderRadius: 14, borderWidth: 1, borderColor: C.border, padding: 12 }}>
+                  <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+                    <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: C.card2, borderWidth: 1, borderColor: C.border2, alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
+                      <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_700Bold' }}>{qNum}</Text>
+                    </View>
+                    <Text style={{ flex: 1, fontSize: 14, color: C.text, fontFamily: 'Outfit_500Medium', lineHeight: 20 }}>{q.text}</Text>
+                  </View>
+                  <View style={{ marginLeft: 34, marginTop: 8 }}>
+                    {q.answer === null ? (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <ActivityIndicator size="small" color={C.gold} />
+                        <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>AI is thinking…</Text>
+                      </View>
+                    ) : q.answer === 'TIMEOUT' ? (
+                      <View style={[S.qBadge, { borderColor: 'rgba(248,81,73,0.4)', backgroundColor: 'rgba(248,81,73,0.08)' }]}>
+                        <Text style={{ fontSize: 12, fontFamily: 'Outfit_600SemiBold', color: C.danger }}>No connection — check internet</Text>
+                      </View>
+                    ) : (
+                      <View style={[S.qBadge, {
+                        borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : 'rgba(240,160,48,0.4)',
+                        backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.08)' : q.answer === 'NO' ? 'rgba(248,81,73,0.08)' : 'rgba(240,160,48,0.08)',
+                      }]}>
+                        <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: q.answer === 'YES' ? C.success : q.answer === 'NO' ? C.danger : C.warn }}>
+                          {q.answer === 'YES' ? '✓ Yes' : q.answer === 'NO' ? '✗ No' : '~ Partly'}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
-                <View style={{ marginLeft: 34, marginTop: 8 }}>
-                  {q.answer === null ? (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                      <ActivityIndicator size="small" color={C.gold} />
-                      <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'Outfit_400Regular' }}>AI is thinking…</Text>
-                    </View>
-                  ) : q.answer === 'TIMEOUT' ? (
-                    <View style={[S.qBadge, { borderColor: 'rgba(248,81,73,0.4)', backgroundColor: 'rgba(248,81,73,0.08)' }]}>
-                      <Text style={{ fontSize: 12, fontFamily: 'Outfit_600SemiBold', color: C.danger }}>No connection — check internet</Text>
-                    </View>
-                  ) : (
-                    <View style={[S.qBadge, {
-                      borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : 'rgba(240,160,48,0.4)',
-                      backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.08)' : q.answer === 'NO' ? 'rgba(248,81,73,0.08)' : 'rgba(240,160,48,0.08)',
-                    }]}>
-                      <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: q.answer === 'YES' ? C.success : q.answer === 'NO' ? C.danger : C.warn }}>
-                        {q.answer === 'YES' ? '✓ Yes' : q.answer === 'NO' ? '✗ No' : '~ Partly'}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-            ))
+              );
+            })
           )}
           {limitReached && (
             <View style={{ backgroundColor: 'rgba(248,81,73,0.08)', borderWidth: 1, borderColor: 'rgba(248,81,73,0.3)', borderRadius: 10, padding: 14, marginTop: 4 }}>
@@ -2389,9 +2462,19 @@ export default function EnigmaGame() {
         {/* Bottom input + solve */}
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={{ backgroundColor: C.surface, borderTopWidth: 1, borderTopColor: C.border2, padding: 12, paddingBottom: insets.bottom + 12 }}>
-            <TouchableOpacity style={[S.btnGold, { marginBottom: 10 }]} onPress={() => { setSoloSolveInput(''); setSoloSolveOpen(true); }}>
-              <Text style={S.btnGoldText}>💡 I Know the Answer — Solve!</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
+              <TouchableOpacity style={[S.btnGold, { flex: 1 }]} onPress={() => { setSoloSolveInput(''); setSoloSolveOpen(true); }}>
+                <Text style={S.btnGoldText}>✓ Solve!</Text>
+              </TouchableOpacity>
+              {soloHintsUsed < 2 && (
+                <TouchableOpacity
+                  style={{ backgroundColor: 'rgba(212,168,74,0.12)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.35)', borderRadius: 12, paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center' }}
+                  onPress={useSoloHint}
+                >
+                  <Text style={{ fontSize: 13, color: C.gold, fontFamily: 'Outfit_600SemiBold' }}>💡 Hint {soloHintsUsed + 1}/2</Text>
+                </TouchableOpacity>
+              )}
+            </View>
             {!limitReached && (
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TextInput
