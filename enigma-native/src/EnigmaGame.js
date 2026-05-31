@@ -5,6 +5,7 @@ import {
   StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Animated, Easing, Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Defs, RadialGradient, LinearGradient as SvgLinearGradient, Stop, Circle, Ellipse, Rect, Path, G, Line } from 'react-native-svg';
 import MaskedView from '@react-native-masked-view/masked-view';
 import * as SplashScreen from 'expo-splash-screen';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -848,6 +849,101 @@ function Chip({ label, style = 'gold' }) {
       <Text style={{ fontSize: 13, fontFamily: 'Outfit_600SemiBold', color: isGold ? C.gold : C.violet2 }}>
         {label}
       </Text>
+    </View>
+  );
+}
+
+// ─── AI Game Mascot ───────────────────────────────────────────────────────────
+// Friendly, intelligent, slightly mysterious AI orb-host. Pure vector (SVG) so
+// it stays crisp at any size and animates a soft glowing "thinking" pulse.
+const AEllipse = Animated.createAnimatedComponent(Ellipse);
+const ACircle = Animated.createAnimatedComponent(Circle);
+
+function MascotIcon({ size = 72, uid = 'm', pulse = true }) {
+  const blink = useRef(new Animated.Value(1)).current;   // eye-glow pulse
+  useEffect(() => {
+    if (!pulse) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(blink, { toValue: 0.55, duration: 1400, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(blink, { toValue: 1, duration: 1400, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulse]);
+
+  return (
+    <View style={{ width: size, height: size }}>
+      <Svg width={size} height={size} viewBox="0 0 100 100">
+        <Defs>
+          {/* Polished 3D body shading — light from upper-left */}
+          <RadialGradient id={`${uid}-body`} cx="38%" cy="32%" r="78%">
+            <Stop offset="0%" stopColor="#b7a0ff" />
+            <Stop offset="42%" stopColor="#7c4ddb" />
+            <Stop offset="78%" stopColor="#4a1f9e" />
+            <Stop offset="100%" stopColor="#2a0f5e" />
+          </RadialGradient>
+          {/* Outer ambient glow */}
+          <RadialGradient id={`${uid}-glow`} cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor="#a78bfa" stopOpacity="0.55" />
+            <Stop offset="60%" stopColor="#7c3aed" stopOpacity="0.22" />
+            <Stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
+          </RadialGradient>
+          {/* Dark face visor */}
+          <SvgLinearGradient id={`${uid}-visor`} x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0%" stopColor="#1a0b3e" />
+            <Stop offset="100%" stopColor="#0a0420" />
+          </SvgLinearGradient>
+          {/* Glowing cyan eyes */}
+          <RadialGradient id={`${uid}-eye`} cx="50%" cy="42%" r="65%">
+            <Stop offset="0%" stopColor="#eafffe" />
+            <Stop offset="35%" stopColor="#7df0ff" />
+            <Stop offset="75%" stopColor="#2bb9e6" />
+            <Stop offset="100%" stopColor="#0e7fb8" />
+          </RadialGradient>
+          {/* Antenna tip glow */}
+          <RadialGradient id={`${uid}-tip`} cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor="#eafffe" />
+            <Stop offset="55%" stopColor="#7df0ff" />
+            <Stop offset="100%" stopColor="#2bb9e6" />
+          </RadialGradient>
+        </Defs>
+
+        {/* Soft outer glow */}
+        <Circle cx="50" cy="53" r="48" fill={`url(#${uid}-glow)`} />
+
+        {/* Antenna */}
+        <Line x1="50" y1="20" x2="50" y2="9" stroke="#8b6bdf" strokeWidth="2.4" strokeLinecap="round" />
+        <ACircle cx="50" cy="8" r="4.6" fill={`url(#${uid}-tip)`} opacity={pulse ? blink : 1} />
+
+        {/* Head body */}
+        <Circle cx="50" cy="53" r="34" fill={`url(#${uid}-body)`} stroke="#c9b6ff" strokeWidth="1" strokeOpacity="0.35" />
+
+        {/* Top specular highlight */}
+        <Ellipse cx="41" cy="33" rx="17" ry="9" fill="#ffffff" opacity="0.20" />
+
+        {/* Side "ear" pods */}
+        <Circle cx="17.5" cy="53" r="4.6" fill="#5a2eaf" stroke="#b7a0ff" strokeWidth="0.8" strokeOpacity="0.4" />
+        <Circle cx="82.5" cy="53" r="4.6" fill="#5a2eaf" stroke="#b7a0ff" strokeWidth="0.8" strokeOpacity="0.4" />
+
+        {/* Face visor panel */}
+        <Rect x="27" y="40" width="46" height="30" rx="15" ry="15" fill={`url(#${uid}-visor)`} stroke="#3a1f7a" strokeWidth="1" />
+        {/* Visor sheen */}
+        <Ellipse cx="42" cy="46" rx="14" ry="5" fill="#ffffff" opacity="0.06" />
+
+        {/* Eyes — glowing, expressive */}
+        <G>
+          <AEllipse cx="41" cy="53" rx="5.4" ry="7" fill={`url(#${uid}-eye)`} opacity={pulse ? blink : 1} />
+          <AEllipse cx="59" cy="53" rx="5.4" ry="7" fill={`url(#${uid}-eye)`} opacity={pulse ? blink : 1} />
+          {/* catch-lights */}
+          <Circle cx="39.3" cy="50.2" r="1.7" fill="#ffffff" opacity="0.95" />
+          <Circle cx="57.3" cy="50.2" r="1.7" fill="#ffffff" opacity="0.95" />
+        </G>
+
+        {/* Friendly subtle smile */}
+        <Path d="M43 63 Q50 67.5 57 63" stroke="#7df0ff" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.8" />
+      </Svg>
     </View>
   );
 }
@@ -2045,7 +2141,7 @@ export default function EnigmaGame() {
             activeOpacity={0.85}
             style={{ backgroundColor: 'rgba(34,197,94,0.10)', borderWidth: 1.5, borderColor: 'rgba(34,197,94,0.70)', borderRadius: 20, padding: 20 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-              <Text style={{ fontSize: 40 }}>🤖</Text>
+              <MascotIcon size={52} uid="mode" pulse={false} />
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, letterSpacing: 1, color: C.success, marginBottom: 5 }}>Solo Mode</Text>
                 <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 18 }}>
@@ -2642,7 +2738,7 @@ export default function EnigmaGame() {
           <TouchableOpacity onPress={() => setScreen('modes')}><Text style={S.backBtn}>← Back</Text></TouchableOpacity>
         </View>
         <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-          <Text style={{ fontSize: 48, marginBottom: 10 }}>🤖</Text>
+          <View style={{ marginBottom: 10 }}><MascotIcon size={88} uid="setup" /></View>
           <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.text, letterSpacing: 2 }}>Solo Mode</Text>
           <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 6, textAlign: 'center' }}>
             The AI hides a secret. You have 20 questions to crack it.
@@ -2912,7 +3008,7 @@ export default function EnigmaGame() {
                               style={StyleSheet.absoluteFillObject}
                             />
                             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                              <Text style={{ fontSize: 44 }}>🤖</Text>
+                              <MascotIcon size={74} uid="host" />
                             </View>
                           </View>
                         </View>
