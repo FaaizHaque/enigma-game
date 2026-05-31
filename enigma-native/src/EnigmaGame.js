@@ -961,6 +961,10 @@ export default function EnigmaGame() {
   const [soloCategory, setSoloCategory] = useState('random');
   const [soloHintsUsed, setSoloHintsUsed] = useState(0);
   const [dailyHintsUsed, setDailyHintsUsed] = useState(0);
+  const [adModalVisible, setAdModalVisible] = useState(false);
+  const [adCountdown, setAdCountdown] = useState(5);
+  const [adReady, setAdReady] = useState(false);
+  const [pendingHintMode, setPendingHintMode] = useState(null);
 
   const feedScrollRef = useRef(null);
   const gameRef = useRef(game);
@@ -1546,6 +1550,38 @@ export default function EnigmaGame() {
     setScreen('solo_game');
   };
 
+  useEffect(() => {
+    if (!adModalVisible) return;
+    setAdCountdown(5);
+    setAdReady(false);
+    const interval = setInterval(() => {
+      setAdCountdown(prev => {
+        if (prev <= 1) { clearInterval(interval); setAdReady(true); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [adModalVisible]);
+
+  const openAdForHint = (mode) => {
+    setPendingHintMode(mode);
+    setAdModalVisible(true);
+  };
+
+  const collectHint = () => {
+    setAdModalVisible(false);
+    if (pendingHintMode === 'solo') {
+      const nextHint = soloHintsUsed + 1;
+      setSoloQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(soloChallenge.secret, nextHint) }]);
+      setSoloHintsUsed(nextHint);
+    } else if (pendingHintMode === 'daily') {
+      const nextHint = dailyHintsUsed + 1;
+      setDailyQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(dailyChallenge.secret, nextHint) }]);
+      setDailyHintsUsed(nextHint);
+    }
+    setPendingHintMode(null);
+  };
+
   const useSoloHint = () => {
     if (soloHintsUsed >= 2 || !soloChallenge) return;
     const nextHint = soloHintsUsed + 1;
@@ -2001,6 +2037,43 @@ export default function EnigmaGame() {
 
     return (
       <View style={[S.flex, { backgroundColor: C.bg }]}>
+        {/* Ad simulation modal */}
+        <Modal visible={adModalVisible} animationType="fade" transparent onRequestClose={() => {}}>
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+            <View style={{ width: '100%', backgroundColor: C.surface, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: C.border }}>
+              <View style={{ backgroundColor: '#1a1a2e', paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 2 }}>ADVERTISEMENT</Text>
+                {!adReady && (
+                  <View style={{ backgroundColor: 'rgba(212,168,74,0.15)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3, borderWidth: 1, borderColor: C.goldDim }}>
+                    <Text style={{ fontSize: 12, color: C.gold, fontFamily: 'Outfit_700Bold' }}>{adCountdown}s</Text>
+                  </View>
+                )}
+              </View>
+              <View style={{ height: 200, backgroundColor: '#0d0d1f', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+                <Text style={{ fontSize: 48 }}>🎮</Text>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.gold, letterSpacing: 1 }}>Enigma</Text>
+                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular' }}>Challenge your friends today</Text>
+              </View>
+              <View style={{ padding: 20 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16, backgroundColor: 'rgba(212,168,74,0.07)', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: 'rgba(212,168,74,0.2)' }}>
+                  <Text style={{ fontSize: 20 }}>💡</Text>
+                  <View>
+                    <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_400Regular' }}>You will receive</Text>
+                    <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_700Bold' }}>Hint {(pendingHintMode === 'solo' ? soloHintsUsed : dailyHintsUsed) + 1} of 2</Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={[S.btnGold, !adReady && { opacity: 0.4 }]}
+                  onPress={collectHint}
+                  disabled={!adReady}
+                >
+                  <Text style={S.btnGoldText}>{adReady ? '✓ Collect Hint' : `Please wait… ${adCountdown}s`}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
         {/* Solve modal */}
         <Modal visible={dailySolveOpen} animationType="slide" transparent onRequestClose={() => setDailySolveOpen(false)}>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
@@ -2156,7 +2229,7 @@ export default function EnigmaGame() {
               {dailyHintsUsed < 2 && (
                 <TouchableOpacity
                   style={{ backgroundColor: 'rgba(212,168,74,0.12)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.35)', borderRadius: 12, paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center' }}
-                  onPress={useDailyHint}
+                  onPress={() => openAdForHint('daily')}
                 >
                   <Text style={{ fontSize: 13, color: C.gold, fontFamily: 'Outfit_600SemiBold' }}>💡 Hint {dailyHintsUsed + 1}/2</Text>
                 </TouchableOpacity>
@@ -2340,6 +2413,46 @@ export default function EnigmaGame() {
 
     return (
       <View style={[S.flex, { backgroundColor: C.bg }]}>
+        {/* Ad simulation modal */}
+        <Modal visible={adModalVisible} animationType="fade" transparent onRequestClose={() => {}}>
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+            <View style={{ width: '100%', backgroundColor: C.surface, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: C.border }}>
+              {/* Ad label */}
+              <View style={{ backgroundColor: '#1a1a2e', paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 2 }}>ADVERTISEMENT</Text>
+                {!adReady && (
+                  <View style={{ backgroundColor: 'rgba(212,168,74,0.15)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3, borderWidth: 1, borderColor: C.goldDim }}>
+                    <Text style={{ fontSize: 12, color: C.gold, fontFamily: 'Outfit_700Bold' }}>{adCountdown}s</Text>
+                  </View>
+                )}
+              </View>
+              {/* Fake ad content */}
+              <View style={{ height: 200, backgroundColor: '#0d0d1f', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+                <Text style={{ fontSize: 48 }}>🎮</Text>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.gold, letterSpacing: 1 }}>Enigma</Text>
+                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular' }}>Challenge your friends today</Text>
+              </View>
+              {/* Reward notice + button */}
+              <View style={{ padding: 20 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16, backgroundColor: 'rgba(212,168,74,0.07)', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: 'rgba(212,168,74,0.2)' }}>
+                  <Text style={{ fontSize: 20 }}>💡</Text>
+                  <View>
+                    <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_400Regular' }}>You will receive</Text>
+                    <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_700Bold' }}>Hint {(pendingHintMode === 'solo' ? soloHintsUsed : dailyHintsUsed) + 1} of 2</Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={[S.btnGold, !adReady && { opacity: 0.4 }]}
+                  onPress={collectHint}
+                  disabled={!adReady}
+                >
+                  <Text style={S.btnGoldText}>{adReady ? '✓ Collect Hint' : `Please wait… ${adCountdown}s`}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
         {/* Solve modal */}
         <Modal visible={soloSolveOpen} animationType="slide" transparent onRequestClose={() => setSoloSolveOpen(false)}>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
@@ -2469,7 +2582,7 @@ export default function EnigmaGame() {
               {soloHintsUsed < 2 && (
                 <TouchableOpacity
                   style={{ backgroundColor: 'rgba(212,168,74,0.12)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.35)', borderRadius: 12, paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center' }}
-                  onPress={useSoloHint}
+                  onPress={() => openAdForHint('solo')}
                 >
                   <Text style={{ fontSize: 13, color: C.gold, fontFamily: 'Outfit_600SemiBold' }}>💡 Hint {soloHintsUsed + 1}/2</Text>
                 </TouchableOpacity>
