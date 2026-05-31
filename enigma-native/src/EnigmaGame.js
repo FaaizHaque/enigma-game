@@ -2243,40 +2243,68 @@ export default function EnigmaGame() {
           </View>
         </View>
 
-        {/* Category banner — premium 3D gold panel */}
+        {/* Category banner — premium gold glass morphism panel */}
         <View style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 }}>
           <View style={{
-            flexDirection: 'row', alignItems: 'center', gap: 14,
-            backgroundColor: 'rgba(212,168,74,0.13)',
-            borderRadius: 18, paddingHorizontal: 16, paddingVertical: 16,
-            borderWidth: 2,
-            borderTopColor: 'rgba(255,225,140,0.85)',
-            borderLeftColor: 'rgba(255,225,140,0.85)',
-            borderBottomColor: 'rgba(150,100,20,0.65)',
-            borderRightColor: 'rgba(150,100,20,0.65)',
+            borderRadius: 22,
             shadowColor: C.gold,
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.45,
-            shadowRadius: 14,
-            elevation: 10,
+            shadowOffset: { width: 0, height: 10 },
+            shadowOpacity: 0.5,
+            shadowRadius: 22,
+            elevation: 14,
           }}>
-            {/* Icon badge */}
-            <View style={{
-              width: 56, height: 56, borderRadius: 28,
-              backgroundColor: 'rgba(212,168,74,0.18)',
-              borderWidth: 1.5, borderColor: 'rgba(255,225,140,0.5)',
-              alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Text style={{ fontSize: 30 }}>{dailyChallenge.categoryIcon}</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 10, color: 'rgba(255,215,130,0.85)', fontFamily: 'Outfit_700Bold', letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 4 }}>
-                Today · {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-              </Text>
-              <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 20, color: '#fff', letterSpacing: 0.5 }}>
-                {dailyChallenge.categoryLabel}
-              </Text>
-            </View>
+            {/* Outer gold accent frame */}
+            <LinearGradient
+              colors={['rgba(255,232,160,0.75)', 'rgba(212,168,74,0.30)', 'rgba(140,90,18,0.50)']}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+              style={{ borderRadius: 22, padding: 1.5 }}
+            >
+              {/* Glass body */}
+              <LinearGradient
+                colors={['rgba(212,168,74,0.30)', 'rgba(150,100,20,0.18)', 'rgba(60,40,10,0.30)']}
+                locations={[0, 0.55, 1]}
+                start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }}
+                style={{ borderRadius: 20.5, overflow: 'hidden' }}
+              >
+                {/* Soft inner top-edge glow */}
+                <LinearGradient
+                  colors={['rgba(255,232,160,0.32)', 'transparent']}
+                  style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 44 }}
+                />
+                {/* Inner hairline highlight */}
+                <View style={{
+                  position: 'absolute', top: 1, left: 1, right: 1, bottom: 1,
+                  borderRadius: 19.5, borderWidth: 1,
+                  borderColor: 'rgba(255,232,160,0.18)',
+                }} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 18, paddingVertical: 18 }}>
+                  {/* Icon in glass medallion with gold ring */}
+                  <View style={{
+                    width: 58, height: 58, borderRadius: 29,
+                    alignItems: 'center', justifyContent: 'center',
+                    borderWidth: 1.5, borderColor: 'rgba(255,232,160,0.6)',
+                    shadowColor: '#d4a84a', shadowOffset: { width: 0, height: 3 },
+                    shadowOpacity: 0.55, shadowRadius: 8, elevation: 6,
+                    overflow: 'hidden',
+                  }}>
+                    <LinearGradient
+                      colors={['rgba(255,225,140,0.28)', 'rgba(150,100,20,0.32)']}
+                      start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                      style={StyleSheet.absoluteFillObject}
+                    />
+                    <Text style={{ fontSize: 30 }}>{dailyChallenge.categoryIcon}</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 10, color: 'rgba(255,224,150,0.9)', fontFamily: 'Outfit_700Bold', letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 5 }}>
+                      Today · {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                    </Text>
+                    <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 21, color: '#fff', letterSpacing: 0.5, textShadowColor: 'rgba(212,168,74,0.6)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8 }}>
+                      {dailyChallenge.categoryLabel}
+                    </Text>
+                  </View>
+                </View>
+              </LinearGradient>
+            </LinearGradient>
           </View>
         </View>
 
@@ -2650,27 +2678,63 @@ export default function EnigmaGame() {
               <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 13, color: qCount >= 16 ? C.danger : qCount >= 11 ? C.warn : C.gold }}>{qCount} / {qLimit}</Text>
             </View>
           </View>
-          {/* Category box — 3D effect */}
+          {/* Category panel — royal purple glass morphism */}
           <View style={{
-            flexDirection: 'row', alignItems: 'center', gap: 14,
-            backgroundColor: 'rgba(124,58,237,0.15)',
-            borderRadius: 16, paddingHorizontal: 18, paddingVertical: 16,
-            borderWidth: 2,
-            borderTopColor: 'rgba(167,139,250,0.80)',
-            borderLeftColor: 'rgba(167,139,250,0.80)',
-            borderBottomColor: 'rgba(80,40,160,0.60)',
-            borderRightColor: 'rgba(80,40,160,0.60)',
+            borderRadius: 22,
             shadowColor: '#7c3aed',
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.45,
-            shadowRadius: 14,
-            elevation: 10,
+            shadowOffset: { width: 0, height: 10 },
+            shadowOpacity: 0.55,
+            shadowRadius: 22,
+            elevation: 14,
           }}>
-            <Text style={{ fontSize: 36 }}>{soloChallenge.categoryIcon}</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 11, color: 'rgba(200,180,255,0.75)', fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 5 }}>Category</Text>
-              <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 20, color: '#fff', letterSpacing: 0.5 }}>{soloChallenge.categoryLabel}</Text>
-            </View>
+            {/* Outer gold accent frame */}
+            <LinearGradient
+              colors={['rgba(255,224,140,0.55)', 'rgba(212,168,74,0.18)', 'rgba(150,100,20,0.40)']}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+              style={{ borderRadius: 22, padding: 1.5 }}
+            >
+              {/* Glass body */}
+              <LinearGradient
+                colors={['rgba(124,58,237,0.34)', 'rgba(76,29,149,0.22)', 'rgba(30,12,70,0.30)']}
+                locations={[0, 0.55, 1]}
+                start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }}
+                style={{ borderRadius: 20.5, overflow: 'hidden' }}
+              >
+                {/* Soft inner top-edge glow */}
+                <LinearGradient
+                  colors={['rgba(216,180,254,0.30)', 'transparent']}
+                  style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 44 }}
+                />
+                {/* Inner hairline highlight */}
+                <View style={{
+                  position: 'absolute', top: 1, left: 1, right: 1, bottom: 1,
+                  borderRadius: 19.5, borderWidth: 1,
+                  borderColor: 'rgba(216,180,254,0.16)',
+                }} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 18, paddingVertical: 18 }}>
+                  {/* Icon in glass medallion with gold ring */}
+                  <View style={{
+                    width: 58, height: 58, borderRadius: 29,
+                    alignItems: 'center', justifyContent: 'center',
+                    borderWidth: 1.5, borderColor: 'rgba(255,224,140,0.55)',
+                    shadowColor: '#d4a84a', shadowOffset: { width: 0, height: 3 },
+                    shadowOpacity: 0.5, shadowRadius: 8, elevation: 6,
+                    overflow: 'hidden',
+                  }}>
+                    <LinearGradient
+                      colors={['rgba(167,139,250,0.28)', 'rgba(76,29,149,0.30)']}
+                      start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                      style={StyleSheet.absoluteFillObject}
+                    />
+                    <Text style={{ fontSize: 32 }}>{soloChallenge.categoryIcon}</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 11, color: 'rgba(216,196,255,0.85)', fontFamily: 'Outfit_700Bold', letterSpacing: 3.5, textTransform: 'uppercase', marginBottom: 6 }}>Category</Text>
+                    <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 21, color: '#fff', letterSpacing: 0.5, textShadowColor: 'rgba(124,58,237,0.6)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8 }}>{soloChallenge.categoryLabel}</Text>
+                  </View>
+                </View>
+              </LinearGradient>
+            </LinearGradient>
           </View>
         </View>
 
