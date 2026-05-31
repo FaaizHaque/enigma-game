@@ -1435,6 +1435,65 @@ function SolveButton({ label = '✓ I Know the Answer — Solve!', onPress }) {
   );
 }
 
+// ─── Q&A Card ─────────────────────────────────────────────────────────────────
+// One refined card for every asked question, shared by Solo & Daily so the feed
+// reads consistently. Subtle vertical gradient + hairline border + soft shadow
+// give gentle depth; an accent-tinted number badge anchors the row; the answer
+// resolves into an elegant colour-coded chip (or a "thinking" spinner).
+const ANSWER_STYLES = {
+  YES:     { color: C.success, border: 'rgba(34,197,94,0.42)',  bg: 'rgba(34,197,94,0.10)',  label: '✓  Yes' },
+  NO:      { color: C.danger,  border: 'rgba(248,81,73,0.42)',  bg: 'rgba(248,81,73,0.10)',  label: '✗  No' },
+  PARTLY:  { color: C.warn,    border: 'rgba(240,160,48,0.42)', bg: 'rgba(240,160,48,0.10)', label: '~  Partly' },
+  TIMEOUT: { color: C.danger,  border: 'rgba(248,81,73,0.42)',  bg: 'rgba(248,81,73,0.08)',  label: 'No connection — check internet' },
+};
+
+function QACard({ num, text, answer, accent = 'violet' }) {
+  const isGold = accent === 'gold';
+  const badgeBg = isGold ? 'rgba(212,168,74,0.16)' : 'rgba(124,58,237,0.20)';
+  const badgeRing = isGold ? 'rgba(255,224,140,0.45)' : 'rgba(167,139,250,0.45)';
+  const badgeText = isGold ? C.gold2 : C.violet2;
+  const a = answer && answer !== null ? ANSWER_STYLES[answer] : null;
+
+  return (
+    <View style={{
+      marginBottom: 10, borderRadius: 16,
+      shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.26, shadowRadius: 8, elevation: 4,
+    }}>
+      <LinearGradient
+        colors={['rgba(40,40,74,0.90)', 'rgba(24,24,52,0.92)', 'rgba(15,15,38,0.95)']}
+        start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
+        style={{ borderRadius: 16, borderWidth: 1, borderColor: 'rgba(120,120,185,0.14)', overflow: 'hidden' }}
+      >
+        {/* Top sheen */}
+        <LinearGradient colors={['rgba(255,255,255,0.05)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 22 }} />
+        <View style={{ padding: 13 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 11 }}>
+            {/* Number badge */}
+            <View style={{ width: 27, height: 27, borderRadius: 9, backgroundColor: badgeBg, borderWidth: 1, borderColor: badgeRing, alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
+              <Text style={{ fontSize: 11, color: badgeText, fontFamily: F.sansBold }}>{num}</Text>
+            </View>
+            <Text style={[S.tBody, { flex: 1, color: C.text, fontFamily: F.sansMed }]}>{text}</Text>
+          </View>
+          {/* Answer */}
+          <View style={{ marginLeft: 38, marginTop: 9 }}>
+            {answer === null ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <ActivityIndicator size="small" color={isGold ? C.gold : C.violet2} />
+                <Text style={S.tCaption}>AI is thinking…</Text>
+              </View>
+            ) : (
+              <View style={{ alignSelf: 'flex-start', borderRadius: 9, paddingHorizontal: 11, paddingVertical: 6, borderWidth: 1, borderColor: a.border, backgroundColor: a.bg }}>
+                <Text style={{ fontSize: 13, fontFamily: F.sansBold, color: a.color }}>{a.label}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </LinearGradient>
+    </View>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function EnigmaGame() {
   const insets = useSafeAreaInsets();
@@ -2908,34 +2967,7 @@ export default function EnigmaGame() {
               return <HintCard key={q.id} hintNum={q.hintNum} text={q.text} />;
             }
             const qNum = dailyQuestions.slice(0, i + 1).filter(x => !x.type).length;
-            return (
-              <View key={q.id} style={{ marginBottom: 12 }}>
-                <View style={{ backgroundColor: C.card2, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: C.border }}>
-                  <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 2, marginBottom: 4 }}>Q{qNum}</Text>
-                  <Text style={{ fontSize: 14, color: C.text, fontFamily: 'Outfit_500Medium' }}>{q.text}</Text>
-                </View>
-                {q.answer === null ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6, paddingLeft: 4 }}>
-                    <ActivityIndicator size="small" color={C.gold} />
-                    <Text style={S.tCaption}>AI is thinking…</Text>
-                  </View>
-                ) : q.answer === 'TIMEOUT' ? (
-                  <View style={[S.qBadge, { borderColor: 'rgba(248,81,73,0.4)', backgroundColor: 'rgba(248,81,73,0.08)', marginTop: 6, marginLeft: 4 }]}>
-                    <Text style={{ fontSize: 12, fontFamily: 'Outfit_600SemiBold', color: C.danger }}>No connection — check internet</Text>
-                  </View>
-                ) : (
-                  <View style={[S.qBadge, {
-                    borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : 'rgba(240,160,48,0.4)',
-                    backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.08)' : q.answer === 'NO' ? 'rgba(248,81,73,0.08)' : 'rgba(240,160,48,0.08)',
-                    marginTop: 6, marginLeft: 4,
-                  }]}>
-                    <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: q.answer === 'YES' ? C.success : q.answer === 'NO' ? C.danger : C.warn }}>
-                      {q.answer === 'YES' ? '✓ Yes' : q.answer === 'NO' ? '✗ No' : '~ Partly'}
-                    </Text>
-                  </View>
-                )}
-              </View>
-            );
+            return <QACard key={q.id} num={qNum} text={q.text} answer={q.answer} accent="gold" />;
           })}
           {limitReached && (
             <View style={{ backgroundColor: 'rgba(248,81,73,0.08)', borderWidth: 1, borderColor: 'rgba(248,81,73,0.3)', borderRadius: 10, padding: 14, marginBottom: 12 }}>
@@ -3409,37 +3441,7 @@ export default function EnigmaGame() {
                 return <HintCard key={q.id} hintNum={q.hintNum} text={q.text} />;
               }
               const qNum = soloQuestions.slice(0, idx + 1).filter(x => !x.type).length;
-              return (
-                <View key={q.id} style={{ marginBottom: 10, backgroundColor: C.card, borderRadius: 14, borderWidth: 1, borderColor: C.border, padding: 12 }}>
-                  <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
-                    <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: C.card2, borderWidth: 1, borderColor: C.border2, alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
-                      <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_700Bold' }}>{qNum}</Text>
-                    </View>
-                    <Text style={{ flex: 1, fontSize: 14, color: C.text, fontFamily: 'Outfit_500Medium', lineHeight: 20 }}>{q.text}</Text>
-                  </View>
-                  <View style={{ marginLeft: 34, marginTop: 8 }}>
-                    {q.answer === null ? (
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                        <ActivityIndicator size="small" color={C.gold} />
-                        <Text style={S.tCaption}>AI is thinking…</Text>
-                      </View>
-                    ) : q.answer === 'TIMEOUT' ? (
-                      <View style={[S.qBadge, { borderColor: 'rgba(248,81,73,0.4)', backgroundColor: 'rgba(248,81,73,0.08)' }]}>
-                        <Text style={{ fontSize: 12, fontFamily: 'Outfit_600SemiBold', color: C.danger }}>No connection — check internet</Text>
-                      </View>
-                    ) : (
-                      <View style={[S.qBadge, {
-                        borderColor: q.answer === 'YES' ? 'rgba(34,197,94,0.4)' : q.answer === 'NO' ? 'rgba(248,81,73,0.4)' : 'rgba(240,160,48,0.4)',
-                        backgroundColor: q.answer === 'YES' ? 'rgba(34,197,94,0.08)' : q.answer === 'NO' ? 'rgba(248,81,73,0.08)' : 'rgba(240,160,48,0.08)',
-                      }]}>
-                        <Text style={{ fontSize: 13, fontFamily: 'Outfit_700Bold', color: q.answer === 'YES' ? C.success : q.answer === 'NO' ? C.danger : C.warn }}>
-                          {q.answer === 'YES' ? '✓ Yes' : q.answer === 'NO' ? '✗ No' : '~ Partly'}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
-              );
+              return <QACard key={q.id} num={qNum} text={q.text} answer={q.answer} accent="violet" />;
             })}
 
             {limitReached && (
