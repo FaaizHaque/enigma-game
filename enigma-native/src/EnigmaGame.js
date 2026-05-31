@@ -2495,11 +2495,11 @@ export default function EnigmaGame() {
               <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 13, color: qCount >= 16 ? C.danger : qCount >= 11 ? C.warn : C.gold }}>{qCount} / {qLimit}</Text>
             </View>
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'rgba(167,139,250,0.07)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(167,139,250,0.18)' }}>
-            <Text style={{ fontSize: 26 }}>{soloChallenge.categoryIcon}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(167,139,250,0.10)', borderRadius: 16, paddingHorizontal: 16, paddingVertical: 14, borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.30)' }}>
+            <Text style={{ fontSize: 32 }}>{soloChallenge.categoryIcon}</Text>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Category</Text>
-              <Text style={{ fontFamily: 'Cinzel_600SemiBold', fontSize: 15, color: C.text }}>{soloChallenge.categoryLabel}</Text>
+              <Text style={{ fontSize: 11, color: 'rgba(167,139,250,0.7)', fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 4 }}>Category</Text>
+              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 19, color: C.text, letterSpacing: 0.5 }}>{soloChallenge.categoryLabel}</Text>
             </View>
           </View>
         </View>
@@ -2510,10 +2510,10 @@ export default function EnigmaGame() {
             <View style={{ paddingTop: 24, paddingBottom: 16 }}>
               <View style={{ backgroundColor: 'rgba(167,139,250,0.05)', borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.18)', borderRadius: 20, padding: 28, alignItems: 'center' }}>
                 <Text style={{ fontSize: 52, marginBottom: 14 }}>🤖</Text>
-                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.violet2, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 18, color: C.violet2, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 }}>
                   I'm thinking of a {soloChallenge.categoryLabel}…
                 </Text>
-                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 20 }}>
+                <Text style={{ fontSize: 15, color: C.muted, fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 23 }}>
                   Ask yes/no questions to narrow it down.{'\n'}You have <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> to crack the secret!
                 </Text>
               </View>
@@ -2575,23 +2575,11 @@ export default function EnigmaGame() {
         {/* Bottom input + solve */}
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={{ backgroundColor: C.surface, borderTopWidth: 1, borderTopColor: C.border2, padding: 12, paddingBottom: insets.bottom + 12 }}>
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
-              <TouchableOpacity style={[S.btnGold, { flex: 1 }]} onPress={() => { setSoloSolveInput(''); setSoloSolveOpen(true); }}>
-                <Text style={S.btnGoldText}>✓ Solve!</Text>
-              </TouchableOpacity>
-              {soloHintsUsed < 2 && (
-                <TouchableOpacity
-                  style={{ backgroundColor: 'rgba(212,168,74,0.12)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.35)', borderRadius: 12, paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center' }}
-                  onPress={() => openAdForHint('solo')}
-                >
-                  <Text style={{ fontSize: 13, color: C.gold, fontFamily: 'Outfit_600SemiBold' }}>💡 Hint {soloHintsUsed + 1}/2</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+            {/* 1. Question input — primary action, top of bar */}
             {!limitReached && (
-              <View style={{ flexDirection: 'row', gap: 8 }}>
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
                 <TextInput
-                  style={[S.input, { flex: 1, marginBottom: 0 }]}
+                  style={[S.input, { flex: 1, marginBottom: 0, fontSize: 15 }]}
                   placeholder={canAsk ? 'Ask a yes/no question…' : soloLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
                   placeholderTextColor={C.dim}
                   value={soloInput} onChangeText={setSoloInput}
@@ -2605,6 +2593,19 @@ export default function EnigmaGame() {
                 </TouchableOpacity>
               </View>
             )}
+            {/* 2. Hint button — secondary action, middle */}
+            {soloHintsUsed < 2 && (
+              <TouchableOpacity
+                style={{ backgroundColor: 'rgba(212,168,74,0.10)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.30)', borderRadius: 12, paddingVertical: 10, alignItems: 'center', marginBottom: 10 }}
+                onPress={() => openAdForHint('solo')}
+              >
+                <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_600SemiBold' }}>💡 Get Hint {soloHintsUsed + 1} of 2  (watch a short ad)</Text>
+              </TouchableOpacity>
+            )}
+            {/* 3. Solve button — at bottom */}
+            <TouchableOpacity style={S.btnGold} onPress={() => { setSoloSolveInput(''); setSoloSolveOpen(true); }}>
+              <Text style={S.btnGoldText}>✓ I Know the Answer — Solve!</Text>
+            </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       </View>
