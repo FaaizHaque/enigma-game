@@ -1051,6 +1051,66 @@ function PremiumBackground() {
   );
 }
 
+// ─── Glass Input ──────────────────────────────────────────────────────────────
+// Premium glassmorphism text field: layered gradient body inside an accent
+// border ring that lights up on focus, soft shadow that lifts on focus, and a
+// faint top sheen for the "glass" read. Drop-in for <TextInput> — forwards all
+// props; put layout (flex, width) on `containerStyle`, text styling on `style`.
+function GlassInput({ accent = C.gold, containerStyle, style, onFocus, onBlur, editable = true, ...props }) {
+  const [focused, setFocused] = useState(false);
+  const lit = focused && editable;
+
+  // Accent → rgba helpers for the focus ring (gold #d4a84a / violet #7c3aed)
+  const ringFocused = accent === C.violet
+    ? ['rgba(167,139,250,0.85)', 'rgba(124,58,237,0.35)', 'rgba(70,30,140,0.55)']
+    : ['rgba(255,224,140,0.85)', 'rgba(212,168,74,0.35)', 'rgba(150,100,20,0.55)'];
+  const ringIdle = ['rgba(120,120,180,0.32)', 'rgba(60,60,110,0.20)', 'rgba(40,40,85,0.30)'];
+
+  return (
+    <View style={[{
+      borderRadius: 14,
+      shadowColor: lit ? accent : '#000',
+      shadowOffset: { width: 0, height: lit ? 5 : 2 },
+      shadowOpacity: lit ? 0.45 : 0.30,
+      shadowRadius: lit ? 13 : 6,
+      elevation: lit ? 9 : 3,
+    }, containerStyle]}>
+      {/* Accent border ring */}
+      <LinearGradient
+        colors={lit ? ringFocused : ringIdle}
+        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+        style={{ borderRadius: 14, padding: lit ? 1.6 : 1.2 }}
+      >
+        {/* Glass body */}
+        <LinearGradient
+          colors={lit
+            ? ['rgba(48,44,86,0.72)', 'rgba(26,24,58,0.82)', 'rgba(16,14,40,0.88)']
+            : ['rgba(38,38,72,0.62)', 'rgba(22,22,52,0.76)', 'rgba(14,14,36,0.84)']}
+          start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
+          style={{ borderRadius: 12.6, overflow: 'hidden' }}
+        >
+          {/* Top sheen */}
+          <LinearGradient
+            colors={['rgba(255,255,255,0.08)', 'transparent']}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 20 }}
+          />
+          <TextInput
+            {...props}
+            editable={editable}
+            onFocus={(e) => { setFocused(true); onFocus?.(e); }}
+            onBlur={(e) => { setFocused(false); onBlur?.(e); }}
+            style={[{
+              paddingHorizontal: 16, paddingVertical: 14,
+              color: C.text, fontSize: 16, fontFamily: 'Outfit_400Regular',
+              backgroundColor: 'transparent',
+            }, style]}
+          />
+        </LinearGradient>
+      </LinearGradient>
+    </View>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function EnigmaGame() {
   const insets = useSafeAreaInsets();
@@ -2031,8 +2091,8 @@ export default function EnigmaGame() {
 
           {/* Name */}
           <Text style={S.fieldLabel}>Your Name</Text>
-          <TextInput
-            style={S.input}
+          <GlassInput
+            containerStyle={{ marginBottom: 8 }}
             placeholder="Enter your name…"
             placeholderTextColor={C.dim}
             value={nameInput}
@@ -2287,8 +2347,9 @@ export default function EnigmaGame() {
               <View style={S.modalHandle} />
               <Text style={S.modalTitle}>💡 Make Your Guess</Text>
               <Text style={[S.modalSub, { marginBottom: 16 }]}>What is the secret? Type your answer below.</Text>
-              <TextInput
-                style={[S.input, { marginBottom: 16 }]}
+              <GlassInput
+                accent={C.gold}
+                containerStyle={{ marginBottom: 16 }}
                 placeholder="Your answer..."
                 placeholderTextColor={C.dim}
                 value={dailySolveInput}
@@ -2580,8 +2641,10 @@ export default function EnigmaGame() {
           {/* Question input — sits right below the feed */}
           {!limitReached && (
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
-              <TextInput
-                style={[S.input, { flex: 1, marginBottom: 0, fontSize: 15 }]}
+              <GlassInput
+                accent={C.gold}
+                containerStyle={{ flex: 1 }}
+                style={{ fontSize: 15 }}
                 placeholder={canAsk ? 'Ask a yes/no question…' : dailyLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
                 placeholderTextColor={C.dim}
                 value={dailyInput}
@@ -2843,8 +2906,9 @@ export default function EnigmaGame() {
                 <View style={S.modalHandle} />
                 <Text style={S.modalTitle}>💡 Make Your Guess</Text>
                 <Text style={[S.modalSub, { marginBottom: 16 }]}>What is the secret? Type your answer below.</Text>
-                <TextInput
-                  style={[S.input, { marginBottom: 16 }]}
+                <GlassInput
+                  accent={C.violet}
+                  containerStyle={{ marginBottom: 16 }}
                   placeholder="Your answer…"
                   placeholderTextColor={C.dim}
                   value={soloSolveInput}
@@ -3118,8 +3182,10 @@ export default function EnigmaGame() {
             {/* Question input — sits right below the feed */}
             {!limitReached && (
               <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
-                <TextInput
-                  style={[S.input, { flex: 1, marginBottom: 0, fontSize: 15 }]}
+                <GlassInput
+                  accent={C.violet}
+                  containerStyle={{ flex: 1 }}
+                  style={{ fontSize: 15 }}
                   placeholder={canAsk ? 'Ask a yes/no question…' : soloLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
                   placeholderTextColor={C.dim}
                   value={soloInput} onChangeText={setSoloInput}
@@ -3245,8 +3311,9 @@ export default function EnigmaGame() {
           <Text style={S.h2}>Create Game</Text>
           <Text style={[S.muted, { marginBottom: 24 }]}>You'll be the first host this round.</Text>
           <Text style={S.fieldLabel}>Your Name</Text>
-          <TextInput
-            style={S.input} placeholder="Enter your name..." placeholderTextColor={C.dim}
+          <GlassInput
+            containerStyle={{ marginBottom: 8 }}
+            placeholder="Enter your name..." placeholderTextColor={C.dim}
             value={nameInput} onChangeText={setNameInput} maxLength={20}
             autoFocus onSubmitEditing={createGame} returnKeyType="go"
           />
@@ -3295,15 +3362,17 @@ export default function EnigmaGame() {
           <Text style={S.h2}>Join Game</Text>
           <Text style={[S.muted, { marginBottom: 24 }]}>Get the room code from your host.</Text>
           <Text style={S.fieldLabel}>Room Code</Text>
-          <TextInput
-            style={[S.input, { textAlign: 'center', fontFamily: 'Cinzel_700Bold', fontSize: 28, letterSpacing: 8, color: C.gold }]}
+          <GlassInput
+            containerStyle={{ marginBottom: 8 }}
+            style={{ textAlign: 'center', fontFamily: 'Cinzel_700Bold', fontSize: 28, letterSpacing: 8, color: C.gold }}
             placeholder="XXXXXX" placeholderTextColor={C.dim}
             value={codeInput} onChangeText={(t) => setCodeInput(t.toUpperCase())}
             maxLength={6} autoCapitalize="characters" autoFocus
           />
           <Text style={[S.fieldLabel, { marginTop: 16 }]}>Your Name</Text>
-          <TextInput
-            style={S.input} placeholder="Enter your name..." placeholderTextColor={C.dim}
+          <GlassInput
+            containerStyle={{ marginBottom: 8 }}
+            placeholder="Enter your name..." placeholderTextColor={C.dim}
             value={nameInput} onChangeText={setNameInput}
             maxLength={20} onSubmitEditing={joinGame} returnKeyType="go"
           />
@@ -3345,8 +3414,9 @@ export default function EnigmaGame() {
           <Text style={[S.muted, { marginBottom: 18 }]}>Jump into a room that's waiting for players.</Text>
 
           <Text style={S.fieldLabel}>Your Name</Text>
-          <TextInput
-            style={S.input} placeholder="Enter your name..." placeholderTextColor={C.dim}
+          <GlassInput
+            containerStyle={{ marginBottom: 8 }}
+            placeholder="Enter your name..." placeholderTextColor={C.dim}
             value={nameInput} onChangeText={setNameInput} maxLength={20}
           />
           <AvatarPicker selected={selectedAvatarIdx} onSelect={setSelectedAvatarIdx} />
@@ -3666,15 +3736,15 @@ export default function EnigmaGame() {
                 <>
                   <Text style={[S.muted, { marginBottom: 18 }]}>Think of something within the theme. Guessers must unravel it.</Text>
                   <Text style={S.fieldLabel}>Secret Answer</Text>
-                  <TextInput
-                    style={S.input}
+                  <GlassInput
+                    containerStyle={{ marginBottom: 8 }}
                     placeholder={`e.g. "Nikola Tesla", "The Magna Carta"...`}
                     placeholderTextColor={C.dim}
                     value={secretInput} onChangeText={setSecretInput} autoFocus
                   />
                   <Text style={[S.fieldLabel, { marginTop: 8 }]}>Optional Hint (visible to guessers)</Text>
-                  <TextInput
-                    style={S.input}
+                  <GlassInput
+                    containerStyle={{ marginBottom: 8 }}
                     placeholder='e.g. "A scientist from the 19th century"'
                     placeholderTextColor={C.dim}
                     value={hintInput} onChangeText={setHintInput}
@@ -3823,8 +3893,9 @@ export default function EnigmaGame() {
               <View style={S.modalHandle} />
               <Text style={S.modalTitle}>Make Your Guess</Text>
               <Text style={S.modalSub}>Be confident — a wrong guess eliminates you from the round!</Text>
-              <TextInput
-                style={[S.input, { marginBottom: 12 }]}
+              <GlassInput
+                accent={C.violet}
+                containerStyle={{ marginBottom: 12 }}
                 placeholder="Type your answer..." placeholderTextColor={C.dim}
                 value={solveInput} onChangeText={setSolveInput}
                 autoFocus onSubmitEditing={submitSolve} returnKeyType="done"
@@ -4004,8 +4075,10 @@ export default function EnigmaGame() {
                 </View>
                 {partlyMode && (
                   <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <TextInput
-                      style={[S.input, { flex: 1, paddingVertical: 10, fontSize: 13, marginBottom: 0 }]}
+                    <GlassInput
+                      accent={C.violet}
+                      containerStyle={{ flex: 1 }}
+                      style={{ paddingVertical: 10, fontSize: 13 }}
                       placeholder="Add a note (optional)..." placeholderTextColor={C.dim}
                       value={partlyNote} onChangeText={setPartlyNote}
                       onSubmitEditing={() => answerQ('PARTLY', partlyNote)}
@@ -4036,8 +4109,10 @@ export default function EnigmaGame() {
                     </View>
                   </View>
                   <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-                    <TextInput
-                      style={[S.input, { flex: 1, paddingVertical: 12, fontSize: 14, marginBottom: 0 }]}
+                    <GlassInput
+                      accent={C.violet}
+                      containerStyle={{ flex: 1 }}
+                      style={{ paddingVertical: 12, fontSize: 14 }}
                       placeholder="Ask a yes/no question..." placeholderTextColor={C.dim}
                       value={questionInput} onChangeText={setQuestionInput}
                       onSubmitEditing={submitQuestion} returnKeyType="send"
