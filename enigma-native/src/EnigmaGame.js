@@ -2317,15 +2317,118 @@ export default function EnigmaGame() {
           onContentSizeChange={() => feedScrollRef.current?.scrollToEnd({ animated: true })}
           keyboardShouldPersistTaps="handled"
         >
+          {/* Dialogue card — Daily Challenge host */}
           {dailyQuestions.length === 0 && (
-            <View style={{ marginBottom: 16, backgroundColor: 'rgba(212,168,74,0.05)', borderWidth: 1.5, borderColor: 'rgba(212,168,74,0.2)', borderRadius: 20, padding: 26, alignItems: 'center' }}>
-              <Text style={{ fontSize: 50, marginBottom: 12 }}>🌍</Text>
-              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16, color: C.gold, letterSpacing: 1.5, textTransform: 'uppercase', textAlign: 'center', marginBottom: 8 }}>
-                One Secret. Everyone. Today.
-              </Text>
-              <Text style={{ color: C.muted, fontFamily: 'Outfit_400Regular', fontSize: 14, textAlign: 'center', lineHeight: 22 }}>
-                The same mystery is challenging players worldwide right now. Ask your first yes/no question and start closing in — you have <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text>.
-              </Text>
+            <View style={{ marginBottom: 16 }}>
+              <View style={{
+                borderRadius: 24,
+                shadowColor: C.gold,
+                shadowOffset: { width: 0, height: 14 },
+                shadowOpacity: 0.40,
+                shadowRadius: 28,
+                elevation: 14,
+              }}>
+                <LinearGradient
+                  colors={['rgba(255,232,160,0.65)', 'rgba(212,168,74,0.22)', 'rgba(130,85,14,0.55)']}
+                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                  style={{ borderRadius: 24, padding: 1.5 }}
+                >
+                  <LinearGradient
+                    colors={['rgba(45,30,8,0.96)', 'rgba(30,20,5,0.93)', 'rgba(12,8,3,0.97)']}
+                    locations={[0, 0.55, 1]}
+                    start={{ x: 0, y: 0 }} end={{ x: 0.85, y: 1 }}
+                    style={{ borderRadius: 23, overflow: 'hidden' }}
+                  >
+                    {/* Cinematic top-light sweep */}
+                    <LinearGradient
+                      colors={['rgba(255,210,90,0.22)', 'rgba(212,168,74,0.07)', 'transparent']}
+                      style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 90 }}
+                    />
+                    {/* Left-edge accent glow */}
+                    <LinearGradient
+                      colors={['rgba(255,225,140,0.30)', 'transparent']}
+                      start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                      style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 3 }}
+                    />
+
+                    {/* Status bar */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingTop: 20 }}>
+                      <View style={{
+                        width: 7, height: 7, borderRadius: 3.5,
+                        backgroundColor: C.gold,
+                        shadowColor: C.gold, shadowRadius: 6, shadowOpacity: 1, elevation: 3,
+                      }} />
+                      <Text style={{ fontSize: 10, color: 'rgba(255,210,130,0.72)', fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase' }}>
+                        Daily Challenge · Worldwide
+                      </Text>
+                    </View>
+
+                    {/* Avatar medallion */}
+                    <View style={{ alignItems: 'center', paddingTop: 22, paddingBottom: 18 }}>
+                      <View style={{
+                        width: 84, height: 84, borderRadius: 42,
+                        shadowColor: C.gold, shadowOffset: { width: 0, height: 6 },
+                        shadowOpacity: 0.65, shadowRadius: 16, elevation: 10,
+                      }}>
+                        <View style={{
+                          width: 84, height: 84, borderRadius: 42,
+                          borderWidth: 1.5, borderColor: 'rgba(255,210,100,0.52)',
+                          overflow: 'hidden',
+                        }}>
+                          <LinearGradient
+                            colors={['rgba(212,168,74,0.48)', 'rgba(45,28,6,0.90)']}
+                            start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                            style={StyleSheet.absoluteFillObject}
+                          />
+                          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                            <Text style={{ fontSize: 44 }}>🌍</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* Copy */}
+                    <View style={{ paddingHorizontal: 22, paddingBottom: 22, alignItems: 'center' }}>
+                      <Text style={{
+                        fontFamily: 'Cinzel_700Bold', fontSize: 18, color: C.gold,
+                        letterSpacing: 0.8, textAlign: 'center', lineHeight: 27,
+                        textShadowColor: 'rgba(212,168,74,0.55)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 10,
+                        marginBottom: 10,
+                      }}>
+                        One Secret. Everyone. Today.
+                      </Text>
+                      <Text style={{ fontSize: 14, color: 'rgba(225,195,145,0.88)', fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 22 }}>
+                        The same mystery challenges players worldwide.
+                      </Text>
+
+                      {/* Separator */}
+                      <LinearGradient
+                        colors={['transparent', 'rgba(212,168,74,0.45)', 'transparent']}
+                        start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                        style={{ width: '100%', height: 1, marginVertical: 18 }}
+                      />
+
+                      {/* Info row */}
+                      <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', gap: 12 }}>
+                        <Text style={{ flex: 1, fontSize: 13, color: 'rgba(220,195,140,0.82)', fontFamily: 'Outfit_400Regular', lineHeight: 20 }}>
+                          Ask yes/no questions — you have{' '}
+                          <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text>{' '}
+                          to crack the secret.
+                        </Text>
+                        <View style={{
+                          backgroundColor: 'rgba(212,168,74,0.10)',
+                          borderWidth: 1, borderColor: 'rgba(212,168,74,0.42)',
+                          borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8,
+                          alignItems: 'center',
+                        }}>
+                          <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, color: C.gold, lineHeight: 20 }}>20</Text>
+                          <Text style={{ fontSize: 9, color: 'rgba(212,168,74,0.65)', fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>ASKS</Text>
+                        </View>
+                      </View>
+                    </View>
+                  </LinearGradient>
+                </LinearGradient>
+              </View>
             </View>
           )}
           {dailyQuestions.map((q, i) => {
@@ -2741,17 +2844,124 @@ export default function EnigmaGame() {
         {/* Q&A feed + input (input lives in scroll so it sits right below the card) */}
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
           <ScrollView ref={feedScrollRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 16 }} onContentSizeChange={() => feedScrollRef.current?.scrollToEnd({ animated: true })} keyboardShouldPersistTaps="handled">
-            {/* Empty state card */}
+            {/* Dialogue card — premium AI game host */}
             {qCount === 0 && (
               <View style={{ marginBottom: 16 }}>
-                <View style={{ backgroundColor: 'rgba(167,139,250,0.05)', borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.18)', borderRadius: 20, padding: 28, alignItems: 'center' }}>
-                  <Text style={{ fontSize: 52, marginBottom: 14 }}>🤖</Text>
-                  <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 18, color: C.violet2, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 }}>
-                    I'm thinking of a {soloChallenge.categoryLabel}…
-                  </Text>
-                  <Text style={{ fontSize: 15, color: C.muted, fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 23 }}>
-                    Ask yes/no questions to narrow it down.{'\n'}You have <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> to crack the secret!
-                  </Text>
+                {/* Outer glow wrapper */}
+                <View style={{
+                  borderRadius: 24,
+                  shadowColor: '#7c3aed',
+                  shadowOffset: { width: 0, height: 14 },
+                  shadowOpacity: 0.5,
+                  shadowRadius: 28,
+                  elevation: 14,
+                }}>
+                  {/* Gradient accent border ring */}
+                  <LinearGradient
+                    colors={['rgba(216,180,254,0.60)', 'rgba(124,58,237,0.22)', 'rgba(70,30,140,0.50)']}
+                    start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                    style={{ borderRadius: 24, padding: 1.5 }}
+                  >
+                    {/* Glass body */}
+                    <LinearGradient
+                      colors={['rgba(28,14,60,0.95)', 'rgba(18,9,44,0.92)', 'rgba(8,5,22,0.97)']}
+                      locations={[0, 0.55, 1]}
+                      start={{ x: 0, y: 0 }} end={{ x: 0.85, y: 1 }}
+                      style={{ borderRadius: 23, overflow: 'hidden' }}
+                    >
+                      {/* Cinematic top-light sweep */}
+                      <LinearGradient
+                        colors={['rgba(167,139,250,0.26)', 'rgba(124,58,237,0.08)', 'transparent']}
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 90 }}
+                      />
+                      {/* Left-edge accent glow */}
+                      <LinearGradient
+                        colors={['rgba(216,180,254,0.28)', 'transparent']}
+                        start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                        style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 3 }}
+                      />
+
+                      {/* Status bar */}
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingTop: 20 }}>
+                        <View style={{
+                          width: 7, height: 7, borderRadius: 3.5,
+                          backgroundColor: '#a78bfa',
+                          shadowColor: '#7c3aed', shadowRadius: 6, shadowOpacity: 1, elevation: 3,
+                        }} />
+                        <Text style={{ fontSize: 10, color: 'rgba(200,175,255,0.72)', fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase' }}>
+                          Enigma AI · Game Host
+                        </Text>
+                      </View>
+
+                      {/* Avatar medallion */}
+                      <View style={{ alignItems: 'center', paddingTop: 22, paddingBottom: 18 }}>
+                        {/* Shadow halo */}
+                        <View style={{
+                          width: 84, height: 84, borderRadius: 42,
+                          shadowColor: '#7c3aed', shadowOffset: { width: 0, height: 6 },
+                          shadowOpacity: 0.75, shadowRadius: 16, elevation: 10,
+                        }}>
+                          <View style={{
+                            width: 84, height: 84, borderRadius: 42,
+                            borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.50)',
+                            overflow: 'hidden',
+                          }}>
+                            <LinearGradient
+                              colors={['rgba(124,58,237,0.55)', 'rgba(30,14,70,0.90)']}
+                              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                              style={StyleSheet.absoluteFillObject}
+                            />
+                            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                              <Text style={{ fontSize: 44 }}>🤖</Text>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+
+                      {/* Copy */}
+                      <View style={{ paddingHorizontal: 22, paddingBottom: 22, alignItems: 'center' }}>
+                        <Text style={{
+                          fontFamily: 'Cinzel_700Bold', fontSize: 18, color: '#fff',
+                          letterSpacing: 0.8, textAlign: 'center', lineHeight: 27,
+                          textShadowColor: 'rgba(124,58,237,0.65)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 10,
+                          marginBottom: 10,
+                        }}>
+                          I've locked a secret in my mind.
+                        </Text>
+                        <Text style={{ fontSize: 14, color: 'rgba(185,165,230,0.90)', fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 22 }}>
+                          Ask yes/no questions to close in on it.
+                        </Text>
+
+                        {/* Separator */}
+                        <LinearGradient
+                          colors={['transparent', 'rgba(167,139,250,0.42)', 'transparent']}
+                          start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                          style={{ width: '100%', height: 1, marginVertical: 18 }}
+                        />
+
+                        {/* Category + question budget row */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', gap: 12 }}>
+                          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                            <Text style={{ fontSize: 24 }}>{soloChallenge.categoryIcon}</Text>
+                            <View>
+                              <Text style={{ fontSize: 10, color: 'rgba(200,175,255,0.65)', fontFamily: 'Outfit_700Bold', letterSpacing: 2, textTransform: 'uppercase' }}>Target</Text>
+                              <Text style={{ fontSize: 15, color: '#fff', fontFamily: 'Outfit_600SemiBold', marginTop: 1 }}>{soloChallenge.categoryLabel}</Text>
+                            </View>
+                          </View>
+                          {/* Question budget chip */}
+                          <View style={{
+                            backgroundColor: 'rgba(212,168,74,0.10)',
+                            borderWidth: 1, borderColor: 'rgba(212,168,74,0.38)',
+                            borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8,
+                            alignItems: 'center',
+                          }}>
+                            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, color: C.gold, lineHeight: 20 }}>20</Text>
+                            <Text style={{ fontSize: 9, color: 'rgba(212,168,74,0.65)', fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>ASKS</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </LinearGradient>
+                  </LinearGradient>
                 </View>
               </View>
             )}
