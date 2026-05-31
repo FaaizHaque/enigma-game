@@ -2470,7 +2470,7 @@ export default function EnigmaGame() {
         </View>
 
         <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 22, letterSpacing: 5, color: C.gold, marginBottom: 4, paddingHorizontal: 24 }}>20 QUESTIONS</Text>
-        <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginBottom: 20, paddingHorizontal: 24 }}>Choose a game mode to play.</Text>
+        <Text style={[S.tCaption, { color: C.muted, marginBottom: 20, paddingHorizontal: 24 }]}>Choose a game mode to play.</Text>
 
         {/* Three cards equally spaced */}
         <View style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-evenly' }}>
@@ -2491,8 +2491,8 @@ export default function EnigmaGame() {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 16 }}>
               <Text style={{ fontSize: 40 }}>📅</Text>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, letterSpacing: 1, color: C.gold, marginBottom: 5 }}>Daily Challenge</Text>
-                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 18 }}>
+                <Text style={[S.tH3, { letterSpacing: 1, color: C.gold, marginBottom: 5 }]}>Daily Challenge</Text>
+                <Text style={[S.tBodySm, { color: C.muted, lineHeight: 18 }]}>
                   One secret. 20 questions. Crack today's mystery!
                 </Text>
               </View>
@@ -2510,8 +2510,8 @@ export default function EnigmaGame() {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <Text style={{ fontSize: 40 }}>👥</Text>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, letterSpacing: 1, color: C.violet2, marginBottom: 5 }}>Multiplayer</Text>
-                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 18 }}>
+                <Text style={[S.tH3, { letterSpacing: 1, color: C.violet2, marginBottom: 5 }]}>Multiplayer</Text>
+                <Text style={[S.tBodySm, { color: C.muted, lineHeight: 18 }]}>
                   Public or private room. One host sets the secret, everyone guesses.
                 </Text>
               </View>
@@ -2527,8 +2527,8 @@ export default function EnigmaGame() {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <MascotIcon size={52} uid="mode" pulse={false} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, letterSpacing: 1, color: C.success, marginBottom: 5 }}>Solo Mode</Text>
-                <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', lineHeight: 18 }}>
+                <Text style={[S.tH3, { letterSpacing: 1, color: C.success, marginBottom: 5 }]}>Solo Mode</Text>
+                <Text style={[S.tBodySm, { color: C.muted, lineHeight: 18 }]}>
                   A secret is chosen for you. 20 questions to figure it out.
                 </Text>
               </View>
@@ -2582,10 +2582,10 @@ export default function EnigmaGame() {
 
           <View style={{ alignItems: 'center', paddingVertical: 24 }}>
             <Text style={{ fontSize: 48 }}>📅</Text>
-            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.gold, marginTop: 12, letterSpacing: 2 }}>
+            <Text style={[S.tH1, { color: C.gold, marginTop: 12, letterSpacing: 2 }]}>
               Daily Challenge
             </Text>
-            <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 6 }}>{dateStr}</Text>
+            <Text style={[S.tBodySm, { color: C.muted, marginTop: 6 }]}>{dateStr}</Text>
           </View>
 
           <View style={[S.infoCard, { marginBottom: 24 }]}>
@@ -2998,31 +2998,31 @@ export default function EnigmaGame() {
           {/* Result hero */}
           <View style={{ alignItems: 'center', paddingVertical: 28 }}>
             <Text style={{ fontSize: 56, marginBottom: 10 }}>{solved ? '🎉' : '😔'}</Text>
-            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 24, color: solved ? C.gold : C.muted, letterSpacing: 2 }}>
+            <Text style={[S.tH1, { color: solved ? C.gold : C.muted, letterSpacing: 2 }]}>
               {solved ? 'You Solved It!' : 'Better Luck Tomorrow'}
             </Text>
-            <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 8 }}>
+            <Text style={[S.tBodySm, { color: C.muted, marginTop: 8 }]}>
               {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
             </Text>
           </View>
 
           {/* Secret reveal */}
           <View style={{ backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1, borderColor: 'rgba(109,40,217,0.4)', borderRadius: 14, padding: 20, alignItems: 'center', marginBottom: 16 }}>
-            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 8 }}>Today's Secret</Text>
-            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.gold, textAlign: 'center' }}>{dailyChallenge.secret}</Text>
-            <Text style={{ fontSize: 12, color: C.muted, fontFamily: 'Outfit_400Regular', marginTop: 6 }}>{dailyChallenge.categoryIcon} {dailyChallenge.categoryLabel}</Text>
+            <Text style={[S.tLabel, { color: C.dim, letterSpacing: 3, marginBottom: 8 }]}>Today's Secret</Text>
+            <Text style={[S.tH1, { color: C.gold, textAlign: 'center' }]}>{dailyChallenge.secret}</Text>
+            <Text style={[S.tCaption, { color: C.muted, marginTop: 6 }]}>{dailyChallenge.categoryIcon} {dailyChallenge.categoryLabel}</Text>
           </View>
 
           {/* Educational data card */}
           {(dailyChallenge.facts || []).length > 0 && (
             <View style={[S.infoCard, { marginBottom: 16 }]}>
-              <Text style={{ fontSize: 10, color: C.gold, fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 14 }}>📖 About This Secret</Text>
+              <Text style={[S.tOverline, { letterSpacing: 3, marginBottom: 14 }]}>📖 About This Secret</Text>
               {(dailyChallenge.facts || []).map((fact, i) => (
                 <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 12, paddingBottom: 12, borderBottomWidth: i < dailyChallenge.facts.length - 1 ? 1 : 0, borderBottomColor: C.border }}>
                   <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(109,40,217,0.18)', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
                     <Text style={{ fontSize: 11, color: C.violet2, fontFamily: 'Outfit_700Bold' }}>{i + 1}</Text>
                   </View>
-                  <Text style={{ flex: 1, fontSize: 13, color: C.text, fontFamily: 'Outfit_400Regular', lineHeight: 20 }}>{fact}</Text>
+                  <Text style={[S.tBodySm, { flex: 1, color: C.text, lineHeight: 20 }]}>{fact}</Text>
                 </View>
               ))}
             </View>
@@ -3032,7 +3032,7 @@ export default function EnigmaGame() {
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
             <View style={[S.infoCard, { flex: 1, alignItems: 'center' }]}>
               <Text style={{ fontSize: 24, fontFamily: 'Cinzel_700Bold', color: C.violet2 }}>{questionsUsed}</Text>
-              <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_400Regular', textTransform: 'uppercase', letterSpacing: 1 }}>Questions</Text>
+              <Text style={[S.tLabel, { color: C.dim, letterSpacing: 1 }]}>Questions</Text>
             </View>
             <View style={[S.infoCard, { flex: 1, alignItems: 'center' }]}>
               <Text style={{ fontSize: 24, fontFamily: 'Cinzel_700Bold', color: C.violet2 }}>{timeStr}</Text>
