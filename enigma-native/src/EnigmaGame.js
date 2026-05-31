@@ -1343,6 +1343,60 @@ function ProgressCounter({ count, limit = 20 }) {
   );
 }
 
+// ─── Solve Button ─────────────────────────────────────────────────────────────
+// Large, casino-grade metallic gold CTA. A darker gold plinth gives real 3D
+// thickness; a bright bevel ring frames a polished multi-stop gold face; a top
+// gloss plus diagonal shine streaks read as reflected light; and the engraved
+// Cinzel serif label sits on a soft light shadow. Soft gold glow makes it pop.
+function SolveButton({ label = '✓ I Know the Answer — Solve!', onPress }) {
+  return (
+    <View style={{
+      borderRadius: 18,
+      shadowColor: C.gold, shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.60, shadowRadius: 18, elevation: 14,
+    }}>
+      {/* Dark-gold plinth — the button's 3D thickness */}
+      <LinearGradient colors={['#7a5a1e', '#4a3510']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={{ borderRadius: 18, paddingBottom: 3.5 }}>
+        <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={{ borderRadius: 17 }}>
+          {/* Bright bevel ring */}
+          <LinearGradient
+            colors={['rgba(255,247,205,0.95)', 'rgba(212,168,74,0.40)', 'rgba(120,85,20,0.92)']}
+            start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
+            style={{ borderRadius: 17, padding: 1.5 }}
+          >
+            {/* Polished metallic face */}
+            <LinearGradient
+              colors={['#ffe9a8', '#f3d678', '#d9ad4e', '#c2902f', '#eccf72']}
+              locations={[0, 0.18, 0.52, 0.82, 1]}
+              start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
+              style={{ borderRadius: 15.6, overflow: 'hidden', paddingVertical: 19, alignItems: 'center', justifyContent: 'center' }}
+            >
+              {/* Top gloss */}
+              <LinearGradient
+                colors={['rgba(255,255,255,0.55)', 'rgba(255,255,255,0.06)', 'transparent']}
+                locations={[0, 0.45, 1]}
+                style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%' }}
+              />
+              {/* Diagonal polished-light shine streaks */}
+              <View pointerEvents="none" style={{ position: 'absolute', top: -30, left: '20%', width: 54, height: 150, backgroundColor: 'rgba(255,255,255,0.28)', transform: [{ rotate: '22deg' }] }} />
+              <View pointerEvents="none" style={{ position: 'absolute', top: -30, left: '34%', width: 18, height: 150, backgroundColor: 'rgba(255,255,255,0.42)', transform: [{ rotate: '22deg' }] }} />
+              {/* Reflective bottom edge */}
+              <View pointerEvents="none" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 2, backgroundColor: 'rgba(255,247,215,0.5)' }} />
+              {/* Engraved serif label */}
+              <Text style={{
+                fontFamily: 'Cinzel_700Bold', fontSize: 18, color: '#3a2606', letterSpacing: 1,
+                textShadowColor: 'rgba(255,247,215,0.65)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 1,
+              }}>
+                {label}
+              </Text>
+            </LinearGradient>
+          </LinearGradient>
+        </TouchableOpacity>
+      </LinearGradient>
+    </View>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function EnigmaGame() {
   const insets = useSafeAreaInsets();
@@ -2885,26 +2939,7 @@ export default function EnigmaGame() {
 
         {/* Solve button — fixed at very bottom, bold gold */}
         <View style={{ backgroundColor: C.surface, borderTopWidth: 1, borderTopColor: C.border2, padding: 14, paddingBottom: insets.bottom + 14 }}>
-          <TouchableOpacity
-            style={{
-              backgroundColor: C.gold,
-              borderRadius: 16, paddingVertical: 18,
-              alignItems: 'center', justifyContent: 'center',
-              borderTopColor: 'rgba(255,230,120,0.7)',
-              borderLeftColor: 'rgba(255,230,120,0.7)',
-              borderBottomColor: 'rgba(160,110,20,0.8)',
-              borderRightColor: 'rgba(160,110,20,0.8)',
-              borderWidth: 1.5,
-              shadowColor: C.gold,
-              shadowOffset: { width: 0, height: 6 },
-              shadowOpacity: 0.55,
-              shadowRadius: 14,
-              elevation: 10,
-            }}
-            onPress={() => { setDailySolveInput(''); setDailySolveOpen(true); }}
-          >
-            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, color: '#06060f', letterSpacing: 1 }}>✓ I Know the Answer — Solve!</Text>
-          </TouchableOpacity>
+          <SolveButton onPress={() => { setDailySolveInput(''); setDailySolveOpen(true); }} />
         </View>
         </KeyboardAvoidingView>
       </View>
@@ -3405,26 +3440,7 @@ export default function EnigmaGame() {
 
           {/* Solve button — fixed at very bottom, bold gold */}
           <View style={{ backgroundColor: C.surface, borderTopWidth: 1, borderTopColor: C.border2, padding: 14, paddingBottom: insets.bottom + 14 }}>
-            <TouchableOpacity
-              style={{
-                backgroundColor: C.gold,
-                borderRadius: 16, paddingVertical: 18,
-                alignItems: 'center', justifyContent: 'center',
-                borderTopColor: 'rgba(255,230,120,0.7)',
-                borderLeftColor: 'rgba(255,230,120,0.7)',
-                borderBottomColor: 'rgba(160,110,20,0.8)',
-                borderRightColor: 'rgba(160,110,20,0.8)',
-                borderWidth: 1.5,
-                shadowColor: C.gold,
-                shadowOffset: { width: 0, height: 6 },
-                shadowOpacity: 0.55,
-                shadowRadius: 14,
-                elevation: 10,
-              }}
-              onPress={() => { setSoloSolveInput(''); setSoloSolveOpen(true); }}
-            >
-              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, color: '#06060f', letterSpacing: 1 }}>✓ I Know the Answer — Solve!</Text>
-            </TouchableOpacity>
+            <SolveButton onPress={() => { setSoloSolveInput(''); setSoloSolveOpen(true); }} />
           </View>
         </KeyboardAvoidingView>
       </View>
