@@ -1869,7 +1869,7 @@ function HintCard({ hintNum, text, total = 2 }) {
 
 // Reveal-hint CTA — inviting gold glass button that encourages a tap; an "AD"
 // badge sets the watch-an-ad expectation, with a chevron affordance.
-function HintButton({ nextHint, total = 2, onPress }) {
+function HintButton({ nextHint, total = 2, onPress, free = false }) {
   return (
     <TouchableOpacity
       activeOpacity={0.85} onPress={onPress}
@@ -1899,10 +1899,21 @@ function HintButton({ nextHint, total = 2, onPress }) {
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 15, color: C.gold2, fontFamily: 'Outfit_700Bold', letterSpacing: 0.3 }}>Reveal Hint {nextHint} of {total}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                <View style={{ backgroundColor: 'rgba(255,224,140,0.15)', borderWidth: 1, borderColor: 'rgba(255,224,140,0.3)', borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1.5 }}>
-                  <Text style={{ fontSize: 9, color: 'rgba(255,215,130,0.95)', fontFamily: 'Outfit_700Bold', letterSpacing: 1 }}>▶ AD</Text>
-                </View>
-                <Text style={{ fontSize: 12, color: 'rgba(220,195,140,0.78)', fontFamily: 'Outfit_400Regular' }}>Watch a short ad to unlock</Text>
+                {free ? (
+                  <>
+                    <View style={{ backgroundColor: 'rgba(120,220,140,0.18)', borderWidth: 1, borderColor: 'rgba(120,220,140,0.4)', borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1.5 }}>
+                      <Text style={{ fontSize: 9, color: 'rgba(150,235,170,0.95)', fontFamily: 'Outfit_700Bold', letterSpacing: 1 }}>FREE</Text>
+                    </View>
+                    <Text style={{ fontSize: 12, color: 'rgba(220,195,140,0.78)', fontFamily: 'Outfit_400Regular' }}>Tap to reveal a clue</Text>
+                  </>
+                ) : (
+                  <>
+                    <View style={{ backgroundColor: 'rgba(255,224,140,0.15)', borderWidth: 1, borderColor: 'rgba(255,224,140,0.3)', borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1.5 }}>
+                      <Text style={{ fontSize: 9, color: 'rgba(255,215,130,0.95)', fontFamily: 'Outfit_700Bold', letterSpacing: 1 }}>▶ AD</Text>
+                    </View>
+                    <Text style={{ fontSize: 12, color: 'rgba(220,195,140,0.78)', fontFamily: 'Outfit_400Regular' }}>Watch a short ad to unlock</Text>
+                  </>
+                )}
               </View>
             </View>
             <Text style={{ fontSize: 24, color: 'rgba(255,215,130,0.55)', fontFamily: 'Outfit_400Regular', marginTop: -2 }}>›</Text>
@@ -3652,27 +3663,35 @@ export default function EnigmaGame() {
             </View>
           )}
 
-          {/* Question input — sits right below the feed */}
+          {/* Question composer — clearly delineated input zone */}
           {!limitReached && (
-            <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
-              <GlassInput
-                accent={C.gold}
-                containerStyle={{ flex: 1 }}
-                style={{ fontSize: 15 }}
-                placeholder={canAsk ? 'Ask a yes/no question…' : dailyLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
-                placeholderTextColor={C.dim}
-                value={dailyInput}
-                onChangeText={setDailyInput}
-                editable={canAsk}
-                returnKeyType="send"
-                onSubmitEditing={() => askDailyQuestion(dailyInput)}
-              />
-              <PremiumButton
-                square
-                icon={<SendGlyph size={20} />}
-                onPress={() => askDailyQuestion(dailyInput)}
-                disabled={!canAsk || !dailyInput.trim()}
-              />
+            <View style={{ marginTop: 20 }}>
+              {/* Eyebrow label with dividers, so the input never gets lost in the feed */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 11 }}>
+                <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.22)' }} />
+                <Text style={{ fontFamily: F.sansBold, fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: C.gold }}>Ask a yes / no question</Text>
+                <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.22)' }} />
+              </View>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <GlassInput
+                  accent={C.gold}
+                  containerStyle={{ flex: 1 }}
+                  style={{ fontSize: 16, paddingVertical: 17 }}
+                  placeholder={canAsk ? 'e.g. Is it a person?' : dailyLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
+                  placeholderTextColor={C.dim}
+                  value={dailyInput}
+                  onChangeText={setDailyInput}
+                  editable={canAsk}
+                  returnKeyType="send"
+                  onSubmitEditing={() => askDailyQuestion(dailyInput)}
+                />
+                <PremiumButton
+                  square
+                  icon={<SendGlyph size={20} />}
+                  onPress={() => askDailyQuestion(dailyInput)}
+                  disabled={!canAsk || !dailyInput.trim()}
+                />
+              </View>
             </View>
           )}
 
@@ -4247,25 +4266,33 @@ export default function EnigmaGame() {
               </View>
             )}
 
-            {/* Question input — sits right below the feed */}
+            {/* Question composer — clearly delineated input zone */}
             {!limitReached && (
-              <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
-                <GlassInput
-                  accent={C.violet}
-                  containerStyle={{ flex: 1 }}
-                  style={{ fontSize: 15 }}
-                  placeholder={canAsk ? 'Ask a yes/no question…' : soloLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
-                  placeholderTextColor={C.dim}
-                  value={soloInput} onChangeText={setSoloInput}
-                  editable={canAsk} returnKeyType="send"
-                  onSubmitEditing={() => askSoloQuestion(soloInput)}
-                />
-                <PremiumButton
-                  square
-                  icon={<SendGlyph size={20} />}
-                  onPress={() => askSoloQuestion(soloInput)}
-                  disabled={!canAsk || !soloInput.trim()}
-                />
+              <View style={{ marginTop: 20 }}>
+                {/* Eyebrow label with dividers, so the input never gets lost in the feed */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 11 }}>
+                  <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(167,139,250,0.22)' }} />
+                  <Text style={{ fontFamily: F.sansBold, fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: C.violet2 }}>Ask a yes / no question</Text>
+                  <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(167,139,250,0.22)' }} />
+                </View>
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <GlassInput
+                    accent={C.violet}
+                    containerStyle={{ flex: 1 }}
+                    style={{ fontSize: 16, paddingVertical: 17 }}
+                    placeholder={canAsk ? 'e.g. Is it a person?' : soloLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
+                    placeholderTextColor={C.dim}
+                    value={soloInput} onChangeText={setSoloInput}
+                    editable={canAsk} returnKeyType="send"
+                    onSubmitEditing={() => askSoloQuestion(soloInput)}
+                  />
+                  <PremiumButton
+                    square
+                    icon={<SendGlyph size={20} />}
+                    onPress={() => askSoloQuestion(soloInput)}
+                    disabled={!canAsk || !soloInput.trim()}
+                  />
+                </View>
               </View>
             )}
 
@@ -4274,6 +4301,7 @@ export default function EnigmaGame() {
               <HintButton
                 nextHint={soloHintsUsed + 1}
                 total={soloTier === 'junior' ? 3 : 2}
+                free={soloTier === 'junior'}
                 onPress={soloTier === 'junior' ? useSoloHint : () => openAdForHint('solo')}
               />
             )}
