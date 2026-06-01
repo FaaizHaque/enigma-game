@@ -4984,34 +4984,39 @@ export default function EnigmaGame() {
         {/* Host warning modal — appears when 15s expires, gives 10s to answer */}
         <Modal visible={!!hostWarningData && viewerIsHost} transparent animationType="fade" onRequestClose={() => {}}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-            <View style={{ backgroundColor: C.surface, borderWidth: 2, borderColor: C.danger, borderRadius: 20, padding: 24, width: '100%' }}>
-              <Text style={[S.tH2, { color: C.danger, textAlign: 'center', marginBottom: 4 }]}>⏰ Answer Now!</Text>
-              <Text style={[S.tCaption, { color: C.muted, textAlign: 'center', marginBottom: 16 }]}>
-                {(game?.hostConsecutiveMisses || 0) === 0
-                  ? 'Miss 1 of 2 — answer or the question will be skipped'
-                  : '⚠️ Miss 2 of 2 — answer or you will be eliminated as host!'}
-              </Text>
-              <View style={{ alignItems: 'center', marginBottom: 14 }}>
-                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 44, color: hostWarningSecsLeft <= 4 ? C.danger : C.warn }}>{hostWarningSecsLeft}</Text>
-                <View style={{ height: 4, width: '100%', backgroundColor: C.border2, borderRadius: 2, marginTop: 4 }}>
-                  <Animated.View style={{ height: 4, width: hostWarnBarAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }), backgroundColor: hostWarningSecsLeft <= 4 ? C.danger : C.warn, borderRadius: 2 }} />
-                </View>
-              </View>
-              <View style={{ backgroundColor: C.card, borderRadius: 10, padding: 12, marginBottom: 16 }}>
-                <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 2, marginBottom: 4, fontFamily: 'Outfit_700Bold' }}>QUESTION</Text>
-                <Text style={{ fontSize: 15, color: C.text, fontFamily: 'Outfit_400Regular', lineHeight: 22 }}>{hostWarningData?.question}</Text>
-              </View>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <TouchableOpacity style={[S.btnYes, { flex: 1 }]} onPress={() => { setHostWarningData(null); answerQ('YES'); }}>
-                  <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>✓ YES</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[S.btnPartly, { flex: 1 }]} onPress={() => { setHostWarningData(null); answerQ('PARTLY'); }}>
-                  <Text style={{ color: C.warn, fontFamily: 'Outfit_700Bold', fontSize: 13 }}>~ PARTLY</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[S.btnNo, { flex: 1 }]} onPress={() => { setHostWarningData(null); answerQ('NO'); }}>
-                  <Text style={{ color: C.danger, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>✗ NO</Text>
-                </TouchableOpacity>
-              </View>
+            <View style={{ width: '100%', borderRadius: 22, shadowColor: C.danger, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.45, shadowRadius: 22, elevation: 14 }}>
+              <LinearGradient colors={['rgba(255,120,110,0.85)', 'rgba(248,81,73,0.40)', 'rgba(150,30,25,0.60)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 2 }}>
+                <LinearGradient colors={['rgba(248,81,73,0.16)', 'rgba(40,8,8,0.40)', 'rgba(15,15,40,0.55)']} locations={[0, 0.5, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 20, overflow: 'hidden', padding: 24 }}>
+                  <LinearGradient colors={['rgba(255,120,110,0.18)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 60 }} />
+                  <Text style={{ fontFamily: F.serifBold, fontSize: 20, color: C.danger, textAlign: 'center', marginBottom: 4, letterSpacing: 0.3 }}>⏰ Answer Now!</Text>
+                  <Text style={[S.tCaption, { color: C.muted, textAlign: 'center', marginBottom: 16 }]}>
+                    {(game?.hostConsecutiveMisses || 0) === 0
+                      ? 'Miss 1 of 2 — answer or the question will be skipped'
+                      : '⚠️ Miss 2 of 2 — answer or you will be eliminated as host!'}
+                  </Text>
+                  <View style={{ alignItems: 'center', marginBottom: 14 }}>
+                    <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 46, color: hostWarningSecsLeft <= 4 ? C.danger : C.warn }}>{hostWarningSecsLeft}</Text>
+                    <View style={{ height: 5, width: '100%', backgroundColor: 'rgba(0,0,0,0.35)', borderRadius: 3, marginTop: 4, overflow: 'hidden' }}>
+                      <Animated.View style={{ height: 5, width: hostWarnBarAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }), backgroundColor: hostWarningSecsLeft <= 4 ? C.danger : C.warn, borderRadius: 3 }} />
+                    </View>
+                  </View>
+                  <View style={{ backgroundColor: 'rgba(0,0,0,0.30)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: 12, padding: 13, marginBottom: 16 }}>
+                    <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 2, marginBottom: 4, fontFamily: 'Outfit_700Bold' }}>QUESTION</Text>
+                    <Text style={{ fontSize: 15, color: C.text, fontFamily: 'Outfit_400Regular', lineHeight: 22 }}>{hostWarningData?.question}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <TouchableOpacity style={[S.btnYes, { flex: 1 }]} onPress={() => { setHostWarningData(null); answerQ('YES'); }}>
+                      <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>✓ YES</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[S.btnPartly, { flex: 1 }]} onPress={() => { setHostWarningData(null); answerQ('PARTLY'); }}>
+                      <Text style={{ color: C.warn, fontFamily: 'Outfit_700Bold', fontSize: 13 }}>~ PARTLY</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[S.btnNo, { flex: 1 }]} onPress={() => { setHostWarningData(null); answerQ('NO'); }}>
+                      <Text style={{ color: C.danger, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>✗ NO</Text>
+                    </TouchableOpacity>
+                  </View>
+                </LinearGradient>
+              </LinearGradient>
             </View>
           </View>
         </Modal>
@@ -5023,23 +5028,34 @@ export default function EnigmaGame() {
               <View style={S.modalHandle} />
               <Text style={S.modalTitle}>Verify Guess</Text>
               <Text style={S.modalSub}>{game.pendingSolve?.playerName} thinks they cracked it!</Text>
-              <View style={{ backgroundColor: C.card, borderRadius: 12, padding: 16, alignItems: 'center', marginBottom: 14 }}>
-                <Text style={{ fontSize: 11, color: C.dim, letterSpacing: 1, marginBottom: 4, fontFamily: 'Outfit_400Regular' }}>THEIR GUESS</Text>
-                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.gold }}>{game.pendingSolve?.answer}</Text>
-                {game.pendingSolve && (() => {
-                  const looks = fuzzyMatch(game.pendingSolve.answer, game.secretAnswer);
-                  return (
-                    <View style={{ marginTop: 8, backgroundColor: looks ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 }}>
-                      <Text style={{ fontSize: 11, color: looks ? C.success : C.danger, fontFamily: 'Outfit_400Regular' }}>
-                        {looks ? '🤖 Looks correct' : '🤖 Looks wrong'} — but you decide!
-                      </Text>
-                    </View>
-                  );
-                })()}
+              {/* Their guess — gold glass */}
+              <View style={{ borderRadius: 14, marginBottom: 12, shadowColor: C.gold, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.22, shadowRadius: 10, elevation: 5 }}>
+                <LinearGradient colors={['rgba(255,232,160,0.50)', 'rgba(212,168,74,0.18)', 'rgba(140,90,18,0.34)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14, padding: 1.5 }}>
+                  <LinearGradient colors={['rgba(212,168,74,0.14)', 'rgba(60,40,10,0.10)', 'rgba(30,20,5,0.20)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 12.5, overflow: 'hidden', padding: 16, alignItems: 'center' }}>
+                    <LinearGradient colors={['rgba(255,232,160,0.16)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 36 }} />
+                    <Text style={{ fontSize: 10, color: 'rgba(255,220,140,0.70)', letterSpacing: 2, marginBottom: 4, fontFamily: F.sansBold }}>THEIR GUESS</Text>
+                    <Text style={{ fontFamily: F.serifBold, fontSize: 22, color: C.gold, letterSpacing: 0.3 }}>{game.pendingSolve?.answer}</Text>
+                    {game.pendingSolve && (() => {
+                      const looks = fuzzyMatch(game.pendingSolve.answer, game.secretAnswer);
+                      return (
+                        <View style={{ marginTop: 8, backgroundColor: looks ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)', borderRadius: 7, paddingHorizontal: 10, paddingVertical: 4 }}>
+                          <Text style={{ fontSize: 11, color: looks ? C.success : C.danger, fontFamily: 'Outfit_500Medium' }}>
+                            {looks ? '🤖 Looks correct' : '🤖 Looks wrong'} — but you decide!
+                          </Text>
+                        </View>
+                      );
+                    })()}
+                  </LinearGradient>
+                </LinearGradient>
               </View>
-              <View style={{ backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1, borderColor: 'rgba(109,40,217,0.4)', borderRadius: 12, padding: 14, alignItems: 'center', marginBottom: 16 }}>
-                <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4, fontFamily: 'Outfit_400Regular' }}>Actual Secret</Text>
-                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 20, color: C.violet2 }}>{game.secretAnswer}</Text>
+              {/* Actual secret — violet glass */}
+              <View style={{ borderRadius: 14, marginBottom: 16, shadowColor: C.violet, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.24, shadowRadius: 10, elevation: 5 }}>
+                <LinearGradient colors={['rgba(180,140,255,0.52)', 'rgba(124,58,237,0.20)', 'rgba(70,20,160,0.36)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14, padding: 1.5 }}>
+                  <LinearGradient colors={['rgba(124,58,237,0.16)', 'rgba(70,25,150,0.10)', 'rgba(30,8,80,0.22)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 12.5, overflow: 'hidden', padding: 14, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 10, color: C.violet2, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4, fontFamily: F.sansBold }}>Actual Secret</Text>
+                    <Text style={{ fontFamily: F.serifBold, fontSize: 20, color: C.text, letterSpacing: 0.3 }}>{game.secretAnswer}</Text>
+                  </LinearGradient>
+                </LinearGradient>
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TouchableOpacity style={[S.btnNo, { flex: 1 }]} onPress={() => hostVerify(false)}>
@@ -5059,12 +5075,20 @@ export default function EnigmaGame() {
             <View style={S.modal}>
               <View style={S.modalHandle} />
               <View style={{ alignItems: 'center', paddingVertical: 10, paddingBottom: 4 }}>
-                <Text style={{ fontSize: 52, marginBottom: 12 }}>⚖️</Text>
-                <Text style={S.modalTitle}>Host is deciding...</Text>
+                <View style={{ width: 86, height: 86, borderRadius: 43, backgroundColor: 'rgba(124,58,237,0.14)', borderWidth: 2, borderColor: 'rgba(167,139,250,0.40)', alignItems: 'center', justifyContent: 'center', marginBottom: 16, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 16, elevation: 10 }}>
+                  <Text style={{ fontSize: 42 }}>⚖️</Text>
+                </View>
+                <Text style={S.modalTitle}>Host is deciding…</Text>
                 <Text style={S.modalSub}>{game.pendingSolve?.playerName} submitted an answer — waiting for the verdict.</Text>
-                <View style={{ backgroundColor: C.card, borderRadius: 12, padding: 16, width: '100%', alignItems: 'center', marginBottom: 16 }}>
-                  <Text style={{ fontSize: 11, color: C.dim, letterSpacing: 1, marginBottom: 6, fontFamily: 'Outfit_400Regular' }}>ANSWER SUBMITTED</Text>
-                  <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.gold }}>{game.pendingSolve?.answer}</Text>
+                {/* Submitted answer — gold glass */}
+                <View style={{ alignSelf: 'stretch', borderRadius: 14, marginBottom: 16, shadowColor: C.gold, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.20, shadowRadius: 10, elevation: 5 }}>
+                  <LinearGradient colors={['rgba(255,232,160,0.48)', 'rgba(212,168,74,0.18)', 'rgba(140,90,18,0.34)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14, padding: 1.5 }}>
+                    <LinearGradient colors={['rgba(212,168,74,0.14)', 'rgba(60,40,10,0.10)', 'rgba(30,20,5,0.20)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 12.5, overflow: 'hidden', padding: 16, alignItems: 'center' }}>
+                      <LinearGradient colors={['rgba(255,232,160,0.16)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 36 }} />
+                      <Text style={{ fontSize: 10, color: 'rgba(255,220,140,0.70)', letterSpacing: 2, marginBottom: 6, fontFamily: F.sansBold }}>ANSWER SUBMITTED</Text>
+                      <Text style={{ fontFamily: F.serifBold, fontSize: 22, color: C.gold, letterSpacing: 0.3 }}>{game.pendingSolve?.answer}</Text>
+                    </LinearGradient>
+                  </LinearGradient>
                 </View>
                 <TouchableOpacity
                   style={[S.btnGold, { alignSelf: 'stretch' }]}
@@ -5083,8 +5107,13 @@ export default function EnigmaGame() {
             <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => setSolveModalOpen(false)} />
             <View style={S.modal}>
               <View style={S.modalHandle} />
-              <Text style={S.modalTitle}>Make Your Guess</Text>
-              <Text style={S.modalSub}>Be confident — a wrong guess costs you 5 points!</Text>
+              <View style={{ alignItems: 'center', marginBottom: 14 }}>
+                <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(124,58,237,0.14)', borderWidth: 2, borderColor: 'rgba(167,139,250,0.40)', alignItems: 'center', justifyContent: 'center', marginBottom: 12, shadowColor: C.violet, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.36, shadowRadius: 14, elevation: 9 }}>
+                  <Text style={{ fontSize: 34 }}>💡</Text>
+                </View>
+                <Text style={[S.modalTitle, { textAlign: 'center' }]}>Make Your Guess</Text>
+                <Text style={[S.modalSub, { textAlign: 'center', marginBottom: 0 }]}>Be confident — a wrong guess costs you 5 points!</Text>
+              </View>
               <GlassInput
                 accent={C.violet}
                 containerStyle={{ marginBottom: 12 }}
