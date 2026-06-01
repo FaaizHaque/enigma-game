@@ -2328,13 +2328,14 @@ export default function EnigmaGame() {
     return () => { supabase.removeChannel(channel); };
   }, [game?.roomCode, viewerId]);
 
-  // Auto game-over check
+  // Auto game-over check — only the host triggers this to avoid race conditions
   useEffect(() => {
     if (screen !== 'game' || !game || game.status !== 'playing') return;
-    const activeG = game.players.filter((p) => !p.isHost && !p.isEliminated);
+    const isHost = game.players.find(p => p.id === viewerId)?.isHost;
+    if (!isHost) return;
     const qUsed = game.questions.filter((q) => q.answer !== null).length;
-    if (activeG.length === 0 || qUsed >= 20) endRound(null, game);
-  }, [game?.players, game?.questions]);
+    if (qUsed >= 20) endRound(null, game);
+  }, [game?.questions]);
 
   // Keep gameRef in sync for use inside timer callbacks
   useEffect(() => { gameRef.current = game; }, [game]);
@@ -2343,8 +2344,8 @@ export default function EnigmaGame() {
   useEffect(() => {
     if (!game || screen !== 'game') { setGuesserSecsLeft(30); return; }
     const vwr = game.players.find(p => p.id === viewerId);
-    if (!vwr || vwr.isHost || vwr.isEliminated) { setGuesserSecsLeft(30); return; }
-    const active = game.players.filter(p => !p.isHost && !p.isEliminated);
+    if (!vwr || vwr.isHost) { setGuesserSecsLeft(30); return; }
+    const active = game.players.filter(p => !p.isHost);
     const cur = active.length ? active[game.currentQuestionerIndex % active.length] : null;
     if (cur?.id !== viewerId) { setGuesserSecsLeft(30); return; }
     if (game.questions.some(q => q.answer === null)) { setGuesserSecsLeft(30); return; }
@@ -2357,7 +2358,7 @@ export default function EnigmaGame() {
       if (secs <= 0) {
         clearInterval(iv);
         const g = gameRef.current;
-        const active2 = g.players.filter(p => !p.isHost && !p.isEliminated);
+        const active2 = g.players.filter(p => !p.isHost);
         const nextIdx = (g.currentQuestionerIndex + 1) % (active2.length || 1);
         const nextName = active2[nextIdx]?.name || 'Next player';
         setTimeoutToast(`⏱ Time's up! ${nextName}'s turn`);
@@ -2440,7 +2441,7 @@ export default function EnigmaGame() {
   // ─── Derived ──────────────────────────────────────────────────────────────
   const viewer = game?.players.find((p) => p.id === viewerId);
   const host = game?.players.find((p) => p.isHost);
-  const activeGuessers = game?.players.filter((p) => !p.isHost && !p.isEliminated) || [];
+  const activeGuessers = game?.players.filter((p) => !p.isHost) || [];
   const currentQuestioner = activeGuessers.length > 0
     ? activeGuessers[game.currentQuestionerIndex % activeGuessers.length]
     : null;
@@ -2676,7 +2677,9 @@ export default function EnigmaGame() {
       sounds.eliminated();
       const newGame = {
         ...game,
-        players: game.players.map((p) => p.id === game.pendingSolve.playerId ? { ...p, isEliminated: true } : p),
+        players: game.players.map((p) =>
+          p.id === game.pendingSolve.playerId ? { ...p, score: Math.max(0, p.score - 5) } : p
+        ),
         pendingSolve: null,
       };
       setGame(newGame);
@@ -3073,7 +3076,7 @@ export default function EnigmaGame() {
                   <Text style={[S.bodyText, { marginTop: 8 }]}>The Host answers every question with <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold' }}>Yes</Text>, <Text style={{ color: C.danger, fontFamily: 'Outfit_700Bold' }}>No</Text>, or <Text style={{ color: C.warn, fontFamily: 'Outfit_700Bold' }}>Partly</Text>. There are <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> shared among all guessers.</Text>
                   <Text style={[S.bodyText, { marginTop: 6 }]}>
                     {'• '}<Text style={{ color: C.success }}>Correct guess</Text>{' → Guesser wins, earns '}<Text style={{ color: C.gold }}>10 pts\n</Text>
-                    {'• '}<Text style={{ color: C.danger }}>Wrong guess</Text>{' → Guesser is eliminated\n'}
+                    {'• '}<Text style={{ color: C.danger }}>Wrong guess</Text>{' → −5 pts, but you stay in the game\n'}
                     {'• All questions used → '}<Text style={{ color: C.gold }}>Host wins, earns 5 pts</Text>
                   </Text>
                   <Text style={[S.bodyText, { marginTop: 6 }]}>After each round the Host role rotates automatically. Play as many rounds as you like!</Text>
@@ -4815,16 +4818,10 @@ export default function EnigmaGame() {
                     <Text style={[S.tBodySm, { flex: 1, color: C.muted, lineHeight: 20 }]}>{f}</Text>
                   </View>
                 ))}
-                {libraryBriefing?.hint ? (
-                  <View style={{ backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1, borderColor: 'rgba(109,40,217,0.3)', borderRadius: 10, padding: 12, marginTop: 6 }}>
-                    <Text style={{ fontSize: 10, color: C.violet2, letterSpacing: 2, fontFamily: 'Outfit_700Bold', marginBottom: 4 }}>HINT TO GUESSERS</Text>
-                    <Text style={[S.tBodySm, { color: C.muted }]}>{libraryBriefing.hint}</Text>
-                  </View>
-                ) : null}
               </ScrollView>
               <TouchableOpacity
                 style={S.btnGold}
-                onPress={() => { const item = libraryBriefing; setLibraryBriefing(null); lockSecret(item.secret, item.hint || ''); }}
+                onPress={() => { const item = libraryBriefing; setLibraryBriefing(null); lockSecret(item.secret, ''); }}
               >
                 <Text style={S.btnGoldText}>I'm Ready — Start Round →</Text>
               </TouchableOpacity>
@@ -4893,13 +4890,6 @@ export default function EnigmaGame() {
                     placeholderTextColor={C.dim}
                     value={secretInput} onChangeText={setSecretInput} autoFocus
                   />
-                  <Text style={[S.fieldLabel, { marginTop: 8 }]}>Optional Hint (visible to guessers)</Text>
-                  <GlassInput
-                    containerStyle={{ marginBottom: 8 }}
-                    placeholder='e.g. "A scientist from the 19th century"'
-                    placeholderTextColor={C.dim}
-                    value={hintInput} onChangeText={setHintInput}
-                  />
                   <View style={{ backgroundColor: 'rgba(245,158,11,0.07)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.2)', borderRadius: 10, padding: 12, marginVertical: 10 }}>
                     <Text style={[S.tCaption, { color: C.warn }]}>🔒 Your answer is hidden until the round ends.</Text>
                   </View>
@@ -4924,7 +4914,7 @@ export default function EnigmaGame() {
   // ─── GAME ─────────────────────────────────────────────────────────────────
   if (screen === 'game') {
     const qLeft = 20 - answeredQs;
-    const canAsk = !viewerIsHost && !viewerIsEliminated && isMyTurn && !pendingQ;
+    const canAsk = !viewerIsHost && isMyTurn && !pendingQ;
 
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
@@ -5002,7 +4992,7 @@ export default function EnigmaGame() {
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TouchableOpacity style={[S.btnNo, { flex: 1 }]} onPress={() => hostVerify(false)}>
-                  <Text style={{ color: C.danger, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>✗ Wrong</Text>
+                  <Text style={{ color: C.danger, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>✗ Wrong  −5 pts</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[S.btnYes, { flex: 1 }]} onPress={() => hostVerify(true)}>
                   <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>✓ Correct!</Text>
@@ -5077,12 +5067,6 @@ export default function EnigmaGame() {
                 {game.theme?.icon}{'  '}{game.theme?.label}
               </Text>
             </View>
-            {game.hostHint ? (
-              <View style={{ backgroundColor: 'rgba(245,158,11,0.1)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.4)', borderRadius: 10, padding: 10, alignItems: 'center' }}>
-                <Text style={{ fontSize: 10, color: C.warn, letterSpacing: 2, marginBottom: 4, fontFamily: 'Outfit_700Bold' }}>💡 HINT</Text>
-                <Text style={{ fontSize: 15, color: C.text, fontFamily: 'Outfit_500Medium', textAlign: 'center' }}>{game.hostHint}</Text>
-              </View>
-            ) : null}
           </View>
 
           {/* Progress bar */}
@@ -5106,13 +5090,13 @@ export default function EnigmaGame() {
               const a = av(p.avatarIdx);
               const isCur = currentQuestioner?.id === p.id && !p.isHost;
               return (
-                <View key={p.id} style={[S.stripItem, isCur && S.stripItemCur, p.isEliminated && { opacity: 0.4 }]}>
+                <View key={p.id} style={[S.stripItem, isCur && S.stripItemCur]}>
                   <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Text style={{ fontSize: 16 }}>{a.emoji}</Text>
                   </View>
                   <View style={{ flexShrink: 1 }}>
                     <Text style={{ fontSize: 11, color: C.muted, fontFamily: 'Outfit_500Medium', maxWidth: 60 }} numberOfLines={1}>
-                      {p.isHost ? '👑 ' : p.isEliminated ? '❌ ' : ''}{p.name.split(' ')[0]}
+                      {p.isHost ? '👑 ' : ''}{p.name.split(' ')[0]}
                     </Text>
                     <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 12, color: C.gold }}>{p.score} pts</Text>
                   </View>
@@ -5240,12 +5224,6 @@ export default function EnigmaGame() {
                     </TouchableOpacity>
                   </View>
                 )}
-              </View>
-            ) : viewerIsEliminated ? (
-              <View style={{ padding: 14, backgroundColor: 'rgba(239,68,68,0.07)', borderRadius: 10, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)', alignItems: 'center' }}>
-                <Text style={[S.tBodySm, { color: C.danger }]}>
-                  ❌ You've been eliminated — watch the others play on...
-                </Text>
               </View>
             ) : !viewerIsHost ? (
               canAsk ? (
