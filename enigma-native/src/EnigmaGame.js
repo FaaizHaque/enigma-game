@@ -5084,7 +5084,7 @@ export default function EnigmaGame() {
             <View style={S.modal}>
               <View style={S.modalHandle} />
               <Text style={S.modalTitle}>Make Your Guess</Text>
-              <Text style={S.modalSub}>Be confident — a wrong guess eliminates you from the round!</Text>
+              <Text style={S.modalSub}>Be confident — a wrong guess costs you 5 points!</Text>
               <GlassInput
                 accent={C.violet}
                 containerStyle={{ marginBottom: 12 }}
@@ -5106,28 +5106,34 @@ export default function EnigmaGame() {
 
         {/* Game content */}
         <View style={{ flex: 1, paddingHorizontal: 16 }}>
-          {/* Top bar — Round top-right, Category centered, Hint below */}
-          <View style={{ paddingTop: 10, paddingBottom: 6 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 4 }}>
-              <View style={{ backgroundColor: 'rgba(200,168,74,0.14)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 5 }}>
-                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 13, color: C.gold }}>Round {game.round}</Text>
-              </View>
-            </View>
-            <View style={{ alignItems: 'center', marginBottom: 8 }}>
-              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 22, color: C.violet2, textAlign: 'center' }}>
-                {game.theme?.icon}{'  '}{game.theme?.label}
-              </Text>
+          {/* Category header — violet glass bar with Round chip */}
+          <View style={{ paddingTop: 10, paddingBottom: 8 }}>
+            <View style={{ borderRadius: 16, shadowColor: C.violet, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.30, shadowRadius: 12, elevation: 7 }}>
+              <LinearGradient colors={['rgba(180,140,255,0.55)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.5 }}>
+                <LinearGradient colors={['rgba(124,58,237,0.18)', 'rgba(70,25,150,0.12)', 'rgba(30,8,80,0.24)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 14.5, overflow: 'hidden', paddingVertical: 13, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <LinearGradient colors={['rgba(180,140,255,0.18)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 30 }} />
+                  <Text style={{ fontSize: 22 }}>{game.theme?.icon}</Text>
+                  <Text style={{ fontFamily: F.serifBold, fontSize: 17, color: C.violet2, flex: 1, letterSpacing: 0.3 }} numberOfLines={1}>{game.theme?.label}</Text>
+                  <View style={{ backgroundColor: 'rgba(200,168,74,0.16)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}>
+                    <Text style={{ fontFamily: F.serifBold, fontSize: 12, color: C.gold }}>Round {game.round}</Text>
+                  </View>
+                </LinearGradient>
+              </LinearGradient>
             </View>
           </View>
 
           {/* Progress bar */}
           <View style={{ marginBottom: 10 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-              <Text style={{ fontSize: 14, color: C.muted, fontFamily: 'Outfit_600SemiBold' }}>Questions Remaining</Text>
-              <Text style={{ fontSize: 14, color: qLeft <= 5 ? C.danger : C.gold, fontFamily: 'Outfit_700Bold' }}>{qLeft} / 20</Text>
+              <Text style={{ fontSize: 13, color: C.muted, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>Questions Remaining</Text>
+              <Text style={{ fontSize: 13, color: qLeft <= 5 ? C.danger : C.gold, fontFamily: F.sansBold }}>{qLeft} / 20</Text>
             </View>
-            <View style={{ height: 3, backgroundColor: C.border2, borderRadius: 2 }}>
-              <View style={{ height: 3, width: `${(answeredQs / 20) * 100}%`, backgroundColor: qLeft <= 5 ? C.danger : C.gold, borderRadius: 2 }} />
+            <View style={{ height: 5, backgroundColor: C.border2, borderRadius: 3, overflow: 'hidden' }}>
+              <LinearGradient
+                colors={qLeft <= 5 ? ['#ff7a6e', C.danger] : [C.gold2, C.gold]}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                style={{ height: 5, width: `${(answeredQs / 20) * 100}%`, borderRadius: 3 }}
+              />
             </View>
           </View>
 
@@ -5135,21 +5141,31 @@ export default function EnigmaGame() {
           <ScrollView
             horizontal showsHorizontalScrollIndicator={false}
             style={{ marginBottom: 8 }}
-            contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 2 }}
+            contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 2, gap: 8 }}
           >
             {game.players.map((p) => {
               const a = av(p.avatarIdx);
               const isCur = currentQuestioner?.id === p.id && !p.isHost;
               return (
-                <View key={p.id} style={[S.stripItem, isCur && S.stripItemCur]}>
+                <View
+                  key={p.id}
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', gap: 8,
+                    borderRadius: 13, paddingVertical: 6, paddingHorizontal: 10,
+                    borderWidth: 1.5,
+                    borderColor: isCur ? C.violet2 : C.border2,
+                    backgroundColor: isCur ? 'rgba(124,58,237,0.16)' : 'rgba(255,255,255,0.03)',
+                    ...(isCur ? { shadowColor: C.violet, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 6 } : {}),
+                  }}
+                >
                   <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Text style={{ fontSize: 16 }}>{a.emoji}</Text>
                   </View>
                   <View style={{ flexShrink: 1 }}>
-                    <Text style={{ fontSize: 11, color: C.muted, fontFamily: 'Outfit_500Medium', maxWidth: 60 }} numberOfLines={1}>
+                    <Text style={{ fontSize: 11, color: isCur ? C.violet2 : C.muted, fontFamily: F.sansSemi, maxWidth: 60 }} numberOfLines={1}>
                       {p.isHost ? '👑 ' : ''}{p.name.split(' ')[0]}
                     </Text>
-                    <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 12, color: C.gold }}>{p.score} pts</Text>
+                    <Text style={{ fontFamily: F.serifBold, fontSize: 12, color: C.gold }}>{p.score} pts</Text>
                   </View>
                 </View>
               );
@@ -5173,11 +5189,15 @@ export default function EnigmaGame() {
             </View>
           )}
 
-          {/* Host secret reveal */}
+          {/* Host secret reveal — violet glass */}
           {viewerIsHost && (
-            <View style={{ backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1, borderColor: 'rgba(109,40,217,0.4)', borderRadius: 12, padding: 12, alignItems: 'center', marginBottom: 8 }}>
-              <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4, fontFamily: 'Outfit_400Regular' }}>Your Secret</Text>
-              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 20, color: C.violet2 }}>{game.secretAnswer}</Text>
+            <View style={{ borderRadius: 14, marginBottom: 8, shadowColor: C.violet, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.26, shadowRadius: 11, elevation: 6 }}>
+              <LinearGradient colors={['rgba(180,140,255,0.50)', 'rgba(124,58,237,0.20)', 'rgba(70,20,160,0.36)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14, padding: 1.5 }}>
+                <LinearGradient colors={['rgba(124,58,237,0.16)', 'rgba(70,25,150,0.10)', 'rgba(30,8,80,0.22)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 12.5, overflow: 'hidden', paddingVertical: 11, alignItems: 'center' }}>
+                  <Text style={{ fontSize: 10, color: C.violet2, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 3, fontFamily: F.sansBold }}>🔒 Your Secret</Text>
+                  <Text style={{ fontFamily: F.serifBold, fontSize: 19, color: C.text, letterSpacing: 0.3 }}>{game.secretAnswer}</Text>
+                </LinearGradient>
+              </LinearGradient>
             </View>
           )}
 
@@ -5193,13 +5213,15 @@ export default function EnigmaGame() {
               game.questions.map((q, i) => {
                 const a = av(q.askerAvatarIdx);
                 return (
-                  <View key={q.id} style={{ backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: 12, padding: 12, marginBottom: 8 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                  <View key={q.id} style={{ backgroundColor: 'rgba(255,255,255,0.035)', borderWidth: 1, borderColor: C.border2, borderLeftWidth: 3, borderLeftColor: 'rgba(167,139,250,0.55)', borderRadius: 12, padding: 12, marginBottom: 8 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 7 }}>
                       <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}>
                         <Text style={{ fontSize: 14 }}>{a.emoji}</Text>
                       </View>
-                      <Text style={{ fontSize: 15, fontFamily: 'Outfit_700Bold', color: C.text, flex: 1 }}>{q.askerName}</Text>
-                      <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_700Bold' }}>Q{i + 1}</Text>
+                      <Text style={{ fontSize: 14, fontFamily: F.sansBold, color: C.text, flex: 1 }}>{q.askerName}</Text>
+                      <View style={{ backgroundColor: 'rgba(200,168,74,0.14)', borderRadius: 7, paddingHorizontal: 8, paddingVertical: 2 }}>
+                        <Text style={{ fontSize: 12, color: C.gold, fontFamily: F.sansBold }}>Q{i + 1}</Text>
+                      </View>
                     </View>
                     <Text style={[S.tBodyLg, { color: C.text, lineHeight: 23 }]}>{q.text}</Text>
                     {q.answer === null ? (
@@ -5312,9 +5334,9 @@ export default function EnigmaGame() {
                 </View>
               ) : (
                 <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <View style={{ flex: 1, padding: 12, backgroundColor: C.card, borderRadius: 10, borderWidth: 1, borderColor: C.border, justifyContent: 'center' }}>
+                  <View style={{ flex: 1, paddingVertical: 12, paddingHorizontal: 14, backgroundColor: 'rgba(124,58,237,0.07)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(124,58,237,0.22)', justifyContent: 'center' }}>
                     <Text style={[S.tCaption, { color: C.muted }]}>
-                      {pendingQ ? 'Waiting for host to answer...' : `Waiting for ${currentQuestioner?.name || 'next player'}...`}
+                      {pendingQ ? '⏳ Waiting for host to answer…' : `⏳ Waiting for ${currentQuestioner?.name || 'next player'}…`}
                     </Text>
                   </View>
                   <TouchableOpacity style={[S.btnSolve, { paddingHorizontal: 16 }]} onPress={() => { setSolveInput(''); setSolveModalOpen(true); }}>
@@ -5323,9 +5345,9 @@ export default function EnigmaGame() {
                 </View>
               )
             ) : (
-              <View style={{ padding: 12, alignItems: 'center' }}>
-                <Text style={[S.tCaption, { color: C.dim }]}>
-                  Host — watch and answer questions as they come in.
+              <View style={{ paddingVertical: 12, paddingHorizontal: 14, alignItems: 'center', backgroundColor: 'rgba(124,58,237,0.06)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(124,58,237,0.20)' }}>
+                <Text style={[S.tCaption, { color: C.muted, textAlign: 'center' }]}>
+                  👑 You're the host — watch and answer questions as they come in.
                 </Text>
               </View>
             )}
