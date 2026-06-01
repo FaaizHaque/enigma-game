@@ -891,6 +891,35 @@ function Chip({ label, style = 'gold' }) {
   );
 }
 
+// ─── Generic Calendar Icon ──────────────────────────────────────────────────
+// A clean vector calendar (no specific date) so it reads the same on every
+// platform — the 📅 emoji renders a fixed "Jul 17" on Apple devices, which we
+// don't want. Pure SVG: gold binder rings, header band, and a small grid.
+function CalendarGlyph({ size = 30 }) {
+  const w = size;
+  const h = size * 1.04;
+  return (
+    <Svg width={w} height={h} viewBox="0 0 32 33">
+      {/* Binder rings */}
+      <Rect x="8" y="0" width="2.6" height="6" rx="1.3" fill="#d4a84a" />
+      <Rect x="21.4" y="0" width="2.6" height="6" rx="1.3" fill="#d4a84a" />
+      {/* Body */}
+      <Rect x="2" y="3.5" width="28" height="27" rx="4.5" fill="rgba(255,244,220,0.95)" stroke="#d4a84a" strokeWidth="1.4" />
+      {/* Header band */}
+      <Path d="M2 8 a4.5 4.5 0 0 1 4.5 -4.5 h19 a4.5 4.5 0 0 1 4.5 4.5 v3 h-28 z" fill="#d4a84a" />
+      {/* Date grid dots */}
+      <G fill="#b88a2e">
+        <Rect x="7"  y="15.5" width="3.4" height="3.4" rx="1" />
+        <Rect x="14.3" y="15.5" width="3.4" height="3.4" rx="1" />
+        <Rect x="21.6" y="15.5" width="3.4" height="3.4" rx="1" />
+        <Rect x="7"  y="22" width="3.4" height="3.4" rx="1" />
+        <Rect x="14.3" y="22" width="3.4" height="3.4" rx="1" fill="#7c3aed" />
+        <Rect x="21.6" y="22" width="3.4" height="3.4" rx="1" />
+      </G>
+    </Svg>
+  );
+}
+
 // ─── AI Game Mascot ───────────────────────────────────────────────────────────
 // Friendly, intelligent, slightly mysterious AI orb-host. Pure vector (SVG) so
 // it stays crisp at any size and animates a soft glowing "thinking" pulse.
@@ -1890,7 +1919,7 @@ export default function EnigmaGame() {
       await supabase.from('sessions').upsert({ room_code: roomCode, data: sessionData, is_public: !!sessionData.isPublic });
       setGame(sessionData);
       setViewerId(playerId);
-      setNameInput('');
+      // Keep name & avatar so the player doesn't have to re-enter them later.
       setCodeInput('');
       setScreen('lobby');
     } catch (e) {
@@ -1916,7 +1945,7 @@ export default function EnigmaGame() {
       await supabase.from('sessions').upsert({ room_code: roomCode, data: session, is_public: isPublicRoom });
       setGame(session);
       setViewerId(playerId);
-      setNameInput('');
+      // Keep name & avatar so the player doesn't have to re-enter them later.
       setScreen('lobby');
     } catch {
       Alert.alert('Error', 'Could not create game. Check your connection.');
@@ -1950,7 +1979,7 @@ export default function EnigmaGame() {
       await supabase.from('sessions').upsert({ room_code: roomCode, data: sessionData, is_public: !!sessionData.isPublic });
       setGame(sessionData);
       setViewerId(playerId);
-      setNameInput('');
+      // Keep name & avatar so the player doesn't have to re-enter them later.
       setCodeInput('');
       setScreen('lobby');
     } catch (e) {
@@ -2544,38 +2573,38 @@ export default function EnigmaGame() {
           </View>
         </View>
 
-        <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 22, letterSpacing: 5, color: C.gold, marginBottom: 4, paddingHorizontal: 24 }}>20 QUESTIONS</Text>
-        <Text style={[S.tCaption, { color: C.muted, marginBottom: 20, paddingHorizontal: 24 }]}>Choose a game mode to play.</Text>
+        <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 27, letterSpacing: 5, color: C.gold, marginBottom: 6, paddingHorizontal: 24 }}>20 QUESTIONS</Text>
+        <Text style={{ fontFamily: F.sansMed, fontSize: 15, color: C.muted, marginBottom: 22, paddingHorizontal: 24, letterSpacing: 0.2 }}>Choose a game mode to play.</Text>
 
-        {/* Three cards — glass morphism */}
+        {/* Three cards — glass morphism (thicker rims, larger type) */}
         <View style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-evenly' }}>
 
           {/* Daily Challenge — gold glass */}
           <TouchableOpacity onPress={() => setScreen('daily_setup')} activeOpacity={0.85}>
-            <View style={{ borderRadius: 22, shadowColor: C.gold, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.38, shadowRadius: 22, elevation: 12 }}>
-              <LinearGradient colors={['rgba(255,232,160,0.72)', 'rgba(212,168,74,0.30)', 'rgba(140,90,18,0.50)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 1.5 }}>
-                <LinearGradient colors={['rgba(212,168,74,0.26)', 'rgba(120,80,15,0.15)', 'rgba(50,30,5,0.30)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 20.5, overflow: 'hidden', padding: 20 }}>
+            <View style={{ borderRadius: 22, shadowColor: C.gold, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.42, shadowRadius: 22, elevation: 12 }}>
+              <LinearGradient colors={['rgba(255,236,170,0.92)', 'rgba(212,168,74,0.55)', 'rgba(150,98,22,0.70)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 3 }}>
+                <LinearGradient colors={['rgba(212,168,74,0.26)', 'rgba(120,80,15,0.15)', 'rgba(50,30,5,0.30)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 19.5, overflow: 'hidden', padding: 20 }}>
                   <LinearGradient colors={['rgba(255,232,160,0.30)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 56 }} />
-                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 19.5, borderWidth: 1, borderColor: 'rgba(255,232,160,0.16)' }} />
+                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 18.5, borderWidth: 1, borderColor: 'rgba(255,232,160,0.20)' }} />
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16 }}>
-                    <LinearGradient colors={[C.gold2, C.gold, C.goldDim]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
-                      <Text style={{ color: '#1a0f00', fontSize: 10, fontFamily: F.sansBold, letterSpacing: 1.5 }}>DAILY</Text>
+                    <LinearGradient colors={[C.gold2, C.gold, C.goldDim]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 6, paddingHorizontal: 9, paddingVertical: 4 }}>
+                      <Text style={{ color: '#1a0f00', fontSize: 11, fontFamily: F.sansBold, letterSpacing: 1.5 }}>DAILY</Text>
                     </LinearGradient>
-                    <Text style={{ fontSize: 11, color: 'rgba(255,220,140,0.65)', fontFamily: F.sans, letterSpacing: 0.5 }}>
+                    <Text style={{ fontSize: 12, color: 'rgba(255,220,140,0.70)', fontFamily: F.sans, letterSpacing: 0.5 }}>
                       {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                     </Text>
                   </View>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-                    <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(212,168,74,0.15)', borderWidth: 1.5, borderColor: 'rgba(255,220,140,0.50)', alignItems: 'center', justifyContent: 'center' }}>
-                      <Text style={{ fontSize: 28 }}>📅</Text>
+                    <View style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: 'rgba(212,168,74,0.15)', borderWidth: 1.5, borderColor: 'rgba(255,220,140,0.50)', alignItems: 'center', justifyContent: 'center' }}>
+                      <CalendarGlyph size={30} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontFamily: F.serifBold, fontSize: 18, color: C.gold, letterSpacing: 0.5, marginBottom: 4 }}>Daily Challenge</Text>
-                      <Text style={{ fontFamily: F.sans, fontSize: 13, color: 'rgba(255,220,140,0.75)', lineHeight: 18 }}>One secret. 20 questions. Crack today's mystery!</Text>
+                      <Text style={{ fontFamily: F.serifBold, fontSize: 21, color: C.gold, letterSpacing: 0.5, marginBottom: 5 }}>Daily Challenge</Text>
+                      <Text style={{ fontFamily: F.sans, fontSize: 15, color: 'rgba(255,220,140,0.80)', lineHeight: 21 }}>One secret. 20 questions. Crack today's mystery!</Text>
                     </View>
                   </View>
-                  <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 12, paddingVertical: 13, alignItems: 'center' }}>
-                    <Text style={{ color: '#1a0f00', fontSize: 14, fontFamily: F.sansBold, letterSpacing: 0.5 }}>Play Today's Challenge →</Text>
+                  <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 12, paddingVertical: 14, alignItems: 'center' }}>
+                    <Text style={{ color: '#1a0f00', fontSize: 15, fontFamily: F.sansBold, letterSpacing: 0.5 }}>Play Today's Challenge →</Text>
                   </LinearGradient>
                 </LinearGradient>
               </LinearGradient>
@@ -2584,20 +2613,20 @@ export default function EnigmaGame() {
 
           {/* Multiplayer — violet glass */}
           <TouchableOpacity onPress={() => setScreen('multi_home')} activeOpacity={0.85}>
-            <View style={{ borderRadius: 20, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.34, shadowRadius: 18, elevation: 10 }}>
-              <LinearGradient colors={['rgba(180,140,255,0.65)', 'rgba(124,58,237,0.28)', 'rgba(70,20,160,0.46)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 1.5 }}>
-                <LinearGradient colors={['rgba(124,58,237,0.22)', 'rgba(80,30,180,0.14)', 'rgba(40,10,90,0.28)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 18.5, overflow: 'hidden', padding: 20 }}>
+            <View style={{ borderRadius: 20, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 18, elevation: 10 }}>
+              <LinearGradient colors={['rgba(190,155,255,0.90)', 'rgba(124,58,237,0.52)', 'rgba(76,24,170,0.68)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 3 }}>
+                <LinearGradient colors={['rgba(124,58,237,0.22)', 'rgba(80,30,180,0.14)', 'rgba(40,10,90,0.28)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 17.5, overflow: 'hidden', padding: 20 }}>
                   <LinearGradient colors={['rgba(200,160,255,0.24)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 50 }} />
-                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 17.5, borderWidth: 1, borderColor: 'rgba(180,140,255,0.13)' }} />
+                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 16.5, borderWidth: 1, borderColor: 'rgba(180,140,255,0.17)' }} />
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-                    <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(124,58,237,0.20)', borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.42)', alignItems: 'center', justifyContent: 'center' }}>
-                      <Text style={{ fontSize: 28 }}>👥</Text>
+                    <View style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: 'rgba(124,58,237,0.20)', borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.42)', alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 30 }}>👥</Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontFamily: F.serifBold, fontSize: 18, color: C.violet2, letterSpacing: 0.5, marginBottom: 4 }}>Multiplayer</Text>
-                      <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, lineHeight: 18 }}>Public or private room. One host sets the secret, everyone guesses.</Text>
+                      <Text style={{ fontFamily: F.serifBold, fontSize: 21, color: C.violet2, letterSpacing: 0.5, marginBottom: 5 }}>Multiplayer</Text>
+                      <Text style={{ fontFamily: F.sans, fontSize: 15, color: C.muted, lineHeight: 21 }}>Public or private room. One host sets the secret, everyone guesses.</Text>
                     </View>
-                    <Text style={{ color: C.violet2, fontSize: 22 }}>›</Text>
+                    <Text style={{ color: C.violet2, fontSize: 24 }}>›</Text>
                   </View>
                 </LinearGradient>
               </LinearGradient>
@@ -2606,18 +2635,18 @@ export default function EnigmaGame() {
 
           {/* Solo — emerald glass */}
           <TouchableOpacity onPress={() => setScreen('solo_setup')} activeOpacity={0.85}>
-            <View style={{ borderRadius: 20, shadowColor: C.success, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.30, shadowRadius: 16, elevation: 10 }}>
-              <LinearGradient colors={['rgba(100,255,160,0.62)', 'rgba(34,197,94,0.26)', 'rgba(10,100,40,0.42)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 1.5 }}>
-                <LinearGradient colors={['rgba(34,197,94,0.18)', 'rgba(20,120,55,0.12)', 'rgba(5,60,20,0.25)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 18.5, overflow: 'hidden', padding: 20 }}>
+            <View style={{ borderRadius: 20, shadowColor: C.success, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.38, shadowRadius: 16, elevation: 10 }}>
+              <LinearGradient colors={['rgba(120,255,175,0.88)', 'rgba(34,197,94,0.50)', 'rgba(12,110,44,0.66)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 3 }}>
+                <LinearGradient colors={['rgba(34,197,94,0.18)', 'rgba(20,120,55,0.12)', 'rgba(5,60,20,0.25)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 17.5, overflow: 'hidden', padding: 20 }}>
                   <LinearGradient colors={['rgba(100,255,160,0.22)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 50 }} />
-                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 17.5, borderWidth: 1, borderColor: 'rgba(100,255,160,0.11)' }} />
+                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 16.5, borderWidth: 1, borderColor: 'rgba(100,255,160,0.15)' }} />
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-                    <MascotIcon size={52} uid="mode-solo" pulse={false} />
+                    <MascotIcon size={54} uid="mode-solo" pulse={false} />
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontFamily: F.serifBold, fontSize: 18, color: C.success, letterSpacing: 0.5, marginBottom: 4 }}>Solo Mode</Text>
-                      <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, lineHeight: 18 }}>A secret is chosen for you. 20 questions to figure it out.</Text>
+                      <Text style={{ fontFamily: F.serifBold, fontSize: 21, color: C.success, letterSpacing: 0.5, marginBottom: 5 }}>Solo Mode</Text>
+                      <Text style={{ fontFamily: F.sans, fontSize: 15, color: C.muted, lineHeight: 21 }}>A secret is chosen for you. 20 questions to figure it out.</Text>
                     </View>
-                    <Text style={{ color: C.success, fontSize: 22 }}>›</Text>
+                    <Text style={{ color: C.success, fontSize: 24 }}>›</Text>
                   </View>
                 </LinearGradient>
               </LinearGradient>
@@ -2733,7 +2762,7 @@ export default function EnigmaGame() {
           </View>
 
           <View style={{ alignItems: 'center', paddingVertical: 24 }}>
-            <Text style={{ fontSize: 48 }}>📅</Text>
+            <CalendarGlyph size={52} />
             <Text style={[S.tH1, { color: C.gold, marginTop: 12, letterSpacing: 2 }]}>
               Daily Challenge
             </Text>
@@ -2792,7 +2821,7 @@ export default function EnigmaGame() {
               </View>
               <View style={{ height: 200, backgroundColor: '#0d0d1f', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
                 <Text style={{ fontSize: 48 }}>🎮</Text>
-                <Text style={[S.tH3, { color: C.gold, letterSpacing: 1 }]}>Enigma</Text>
+                <Text style={[S.tH3, { color: C.gold, letterSpacing: 1 }]}>20 Questions</Text>
                 <Text style={[S.tBodySm, { color: C.muted }]}>Challenge your friends today</Text>
               </View>
               <View style={{ padding: 20 }}>
@@ -3278,7 +3307,7 @@ export default function EnigmaGame() {
               {/* Fake ad content */}
               <View style={{ height: 200, backgroundColor: '#0d0d1f', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
                 <Text style={{ fontSize: 48 }}>🎮</Text>
-                <Text style={[S.tH3, { color: C.gold, letterSpacing: 1 }]}>Enigma</Text>
+                <Text style={[S.tH3, { color: C.gold, letterSpacing: 1 }]}>20 Questions</Text>
                 <Text style={[S.tBodySm, { color: C.muted }]}>Challenge your friends today</Text>
               </View>
               {/* Reward notice + button */}
@@ -3451,7 +3480,7 @@ export default function EnigmaGame() {
                           shadowColor: '#7c3aed', shadowRadius: 6, shadowOpacity: 1, elevation: 3,
                         }} />
                         <Text style={{ fontSize: 10, color: 'rgba(200,175,255,0.72)', fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase' }}>
-                          Enigma AI · Game Host
+                          AI · Game Host
                         </Text>
                       </View>
 
