@@ -707,6 +707,559 @@ const CONTENT_LIBRARY = {
   ],
 };
 
+// ─── Junior (Explorer) content ───────────────────────────────────────────────
+const JUNIOR_THEMES = [
+  { id: 'famous_people',      label: 'Famous People',        icon: '🌟', desc: 'Heroes, leaders and legends',           color: '#ff6b35' },
+  { id: 'famous_places',      label: 'Famous Places',        icon: '🗺️',  desc: 'Wonders and iconic landmarks',          color: '#00c9a7' },
+  { id: 'movies_cartoons',    label: 'Movies & Cartoons',    icon: '🎬', desc: 'Beloved characters and stories',         color: '#ff6b9d' },
+  { id: 'animals_nature',     label: 'Animals & Nature',     icon: '🦁', desc: 'Amazing creatures and habitats',         color: '#a8e063' },
+  { id: 'sports_games',       label: 'Sports & Games',       icon: '⚽', desc: 'Sports stars and great competitions',    color: '#4fc3f7' },
+  { id: 'science_inventions', label: 'Science & Inventions', icon: '🔬', desc: 'Discoveries that changed the world',     color: '#c77dff' },
+];
+
+const JUNIOR_LIBRARY = {
+  famous_people: [
+    {
+      secret: 'Albert Einstein',
+      hint: 'A wild-haired scientist who came up with the most famous equation in physics',
+      facts: [
+        'Albert Einstein was born in Germany in 1879 and won the Nobel Prize in Physics in 1921 for explaining how light works.',
+        'He developed the theory of relativity, which changed how scientists understand time, space, and gravity.',
+        'His famous equation E=mc² shows that energy and mass are two forms of the same thing — a huge discovery.',
+        'Einstein did not speak fluently until he was about four years old, but he grew up to become one of the greatest thinkers ever.',
+        'He loved playing the violin and once said that if he had not been a scientist, he would have been a musician.',
+      ],
+    },
+    {
+      secret: 'Usain Bolt',
+      hint: 'The Jamaican sprinter who became the fastest human ever recorded',
+      facts: [
+        'Usain Bolt was born in Jamaica in 1986 and set the world record for the 100 metres at 9.58 seconds in 2009.',
+        'He won eight Olympic gold medals across three different Games — 2008, 2012 and 2016 — making him one of the greatest Olympic athletes ever.',
+        'Bolt\'s top speed during a race was measured at about 44.7 km/h, faster than any human in recorded history.',
+        'He is so tall for a sprinter — 1.95 m — that coaches once worried his height would slow him down. It did not.',
+        'His trademark lightning-bolt celebration after races became one of the most recognised poses in sports history.',
+      ],
+    },
+    {
+      secret: 'Malala Yousafzai',
+      hint: 'The Pakistani girl who was shot for going to school and became the youngest Nobel Peace Prize winner',
+      facts: [
+        'Malala Yousafzai was born in Pakistan in 1997 and stood up for girls\' right to go to school even when it was dangerous to do so.',
+        'At age 15 she was shot by the Taliban while on her school bus, but she survived and continued fighting for education.',
+        'In 2014, at just 17 years old, she became the youngest person ever to win the Nobel Peace Prize.',
+        'She started speaking out publicly when she was only 11, writing a blog about life under the Taliban using a fake name.',
+        'She founded the Malala Fund, a charity that helps millions of girls around the world go to school.',
+      ],
+    },
+    {
+      secret: 'Neil Armstrong',
+      hint: 'The American astronaut who was the first human to walk on the Moon',
+      facts: [
+        'Neil Armstrong was born in Ohio in 1930 and trained as a pilot and engineer before becoming an astronaut.',
+        'On 20 July 1969, as commander of Apollo 11, he became the first human being to set foot on the Moon.',
+        'His famous words as he stepped onto the lunar surface were: "That\'s one small step for man, one giant leap for mankind."',
+        'Armstrong and fellow astronaut Buzz Aldrin spent about two and a half hours walking on the Moon and collected rock samples to bring back to Earth.',
+        'After leaving NASA, Armstrong went on to teach engineering at a university and rarely gave interviews, preferring a quiet life.',
+      ],
+    },
+    {
+      secret: 'Nelson Mandela',
+      hint: 'The South African leader who spent 27 years in prison before becoming his country\'s first democratically elected president',
+      facts: [
+        'Nelson Mandela was born in South Africa in 1918 and spent his life fighting against a system called apartheid, which treated Black people unfairly.',
+        'He was sentenced to life in prison in 1964 and spent 27 years locked up, yet he never gave up his beliefs.',
+        'After his release in 1990, he helped lead South Africa to its first free elections in 1994 and was elected president.',
+        'He won the Nobel Peace Prize in 1993 together with South African president F.W. de Klerk for their peaceful work to end apartheid.',
+        'Mandela is celebrated worldwide as a symbol of courage, forgiveness, and the struggle for equal rights for everyone.',
+      ],
+    },
+    {
+      secret: 'Amelia Earhart',
+      hint: 'The daring American aviator who was the first woman to fly solo across the Atlantic Ocean',
+      facts: [
+        'Amelia Earhart was born in Kansas in 1897 and became fascinated with flying after attending an airshow as a child.',
+        'In 1932 she became the first woman — and only the second person — to fly solo non-stop across the Atlantic Ocean.',
+        'She set many speed and altitude records and worked hard to encourage other women to pursue careers in aviation.',
+        'In 1937 she attempted to fly around the entire world; she disappeared over the Pacific Ocean and was never found.',
+        'Her bravery and determination made her a hero and a symbol of what women could achieve at a time when many doors were closed to them.',
+      ],
+    },
+    {
+      secret: 'Leonardo da Vinci',
+      hint: 'The Italian Renaissance genius who painted the Mona Lisa and designed flying machines 500 years before aeroplanes existed',
+      facts: [
+        'Leonardo da Vinci was born in Italy in 1452 and was curious about almost everything — art, science, engineering, music, and nature.',
+        'He painted the Mona Lisa and The Last Supper, two of the most famous paintings in the world.',
+        'His notebooks are full of detailed drawings of inventions including a flying machine, a tank, and a solar power device — centuries before they were built.',
+        'Leonardo was left-handed and often wrote his notes in mirror writing, from right to left, which you need a mirror to read easily.',
+        'He studied human anatomy by examining bodies, making hundreds of incredibly detailed drawings of muscles and bones that are still admired today.',
+      ],
+    },
+    {
+      secret: 'Cristiano Ronaldo',
+      hint: 'The Portuguese football superstar often called one of the greatest players of all time',
+      facts: [
+        'Cristiano Ronaldo was born in Madeira, Portugal in 1985 and signed his first professional contract with Sporting CP aged 16.',
+        'He has won the Ballon d\'Or — the award for the world\'s best footballer — five times and has scored over 900 career goals.',
+        'Ronaldo is famous for his powerful free-kicks, his incredible fitness, and his determination to train harder than almost anyone else.',
+        'He has played for top clubs including Manchester United, Real Madrid, and Juventus, and is the all-time top scorer for the Portuguese national team.',
+        'Off the pitch he is known for his charity work, having donated money for disaster relief and children\'s hospitals many times.',
+      ],
+    },
+  ],
+  famous_places: [
+    {
+      secret: 'Eiffel Tower',
+      hint: 'The tall iron tower built for a world fair in Paris that became France\'s most iconic landmark',
+      facts: [
+        'The Eiffel Tower was built in Paris, France, between 1887 and 1889 for the World\'s Fair celebrating 100 years since the French Revolution.',
+        'It stands about 330 metres tall — taller than a 70-storey building — and was the world\'s tallest man-made structure for 41 years.',
+        'The tower is made of about 18,000 iron parts held together by 2.5 million rivets, and it was built in under two years.',
+        'About 7 million people visit every year, making it the most visited paid monument in the world.',
+        'The tower is repainted every seven years to protect it from rust, and it actually grows about 15 cm taller in summer when the iron expands in the heat.',
+      ],
+    },
+    {
+      secret: 'Great Wall of China',
+      hint: 'The ancient stone wall stretching thousands of kilometres across northern China, built to keep out invaders',
+      facts: [
+        'The Great Wall of China is a series of walls and fortifications built over many centuries, mainly to protect China from northern invaders.',
+        'It stretches about 21,000 kilometres in total — long enough to go halfway around the Earth.',
+        'Construction started more than 2,000 years ago and continued through several dynasties; millions of workers, including soldiers and prisoners, helped build it.',
+        'Contrary to the popular myth, you cannot actually see the Great Wall from space with the naked eye — it is too thin compared to its length.',
+        'The wall is a UNESCO World Heritage Site and attracts around 10 million visitors every year.',
+      ],
+    },
+    {
+      secret: 'Pyramids of Giza',
+      hint: 'The enormous ancient stone structures built as tombs for Egyptian pharaohs near Cairo',
+      facts: [
+        'The Pyramids of Giza were built in Egypt around 4,500 years ago as giant tombs for the pharaohs Khufu, Khafre, and Menkaure.',
+        'The Great Pyramid of Khufu is made of about 2.3 million stone blocks, each weighing on average as much as a car.',
+        'The Great Pyramid was the tallest man-made structure in the world for nearly 4,000 years — a record that lasted until the Eiffel Tower was built.',
+        'Scientists still debate exactly how the ancient Egyptians moved and lifted such enormous stones without modern machinery.',
+        'The nearby Great Sphinx — a massive statue with a human head and lion body — stands guard over the pyramid complex.',
+      ],
+    },
+    {
+      secret: 'Taj Mahal',
+      hint: 'The stunning white marble mausoleum in India built by an emperor as a symbol of love for his wife',
+      facts: [
+        'The Taj Mahal is located in Agra, India, and was built by Mughal Emperor Shah Jahan starting in 1632 as a tomb for his beloved wife Mumtaz Mahal.',
+        'It took about 20,000 workers and craftsmen over 20 years to complete the building, which is made almost entirely of white marble.',
+        'The white marble appears to change colour depending on the time of day — pinkish at dawn, white at midday, and golden by moonlight.',
+        'The Taj Mahal is a UNESCO World Heritage Site and is considered one of the most beautiful buildings ever created.',
+        'Around 7–8 million tourists visit each year, making it one of India\'s most popular attractions.',
+      ],
+    },
+    {
+      secret: 'Mount Everest',
+      hint: 'The highest mountain on Earth, located in the Himalayas on the border of Nepal and Tibet',
+      facts: [
+        'Mount Everest stands at 8,849 metres above sea level — the highest point on Earth — and sits on the border between Nepal and Tibet.',
+        'It was first climbed on 29 May 1953 by New Zealander Edmund Hillary and Nepali Sherpa Tenzing Norgay.',
+        'The mountain is named after British surveyor George Everest, who helped map South Asia in the 19th century.',
+        'At the summit, the air has only about one third of the oxygen found at sea level, so most climbers carry oxygen tanks.',
+        'More than 6,000 people have reached the summit, but the climb is very dangerous — high winds, extreme cold and altitude sickness make it a serious challenge.',
+      ],
+    },
+    {
+      secret: 'Amazon Rainforest',
+      hint: 'The vast tropical jungle in South America that is home to the greatest variety of wildlife on Earth',
+      facts: [
+        'The Amazon Rainforest covers about 5.5 million square kilometres — roughly the same size as the whole of Australia.',
+        'It is home to about 10% of all species on Earth, including over 40,000 plant species, 1,300 bird species, and 3,000 types of fish.',
+        'The Amazon River, which flows through the forest, carries more water than any other river in the world.',
+        'Scientists believe there are still indigenous tribes living in the Amazon who have never had contact with the outside world.',
+        'The forest produces so much oxygen and absorbs so much carbon dioxide that it is often called "the lungs of the Earth".',
+      ],
+    },
+    {
+      secret: 'Statue of Liberty',
+      hint: 'The giant copper statue of a woman holding a torch that stands in New York Harbour as a symbol of freedom',
+      facts: [
+        'The Statue of Liberty was a gift from France to the United States and was unveiled on 28 October 1886.',
+        'She stands about 93 metres tall from the ground to the tip of her torch and weighs about 225 tonnes.',
+        'The statue was designed by French sculptor Frédéric Auguste Bartholdi, and her iron framework was built by the same engineer who later designed the Eiffel Tower.',
+        'The statue has turned green over the years because of a chemical reaction called oxidation — the copper surface reacting with air and water.',
+        'Millions of immigrants arriving by ship to America saw the statue as their first glimpse of their new homeland, making her a powerful symbol of hope and freedom.',
+      ],
+    },
+    {
+      secret: 'Great Barrier Reef',
+      hint: 'The world\'s largest coral reef system off the coast of Australia, visible from space',
+      facts: [
+        'The Great Barrier Reef is located off the coast of Queensland, Australia, and stretches over 2,300 kilometres — the largest living structure on Earth.',
+        'It is made up of more than 2,900 individual reefs and 900 islands, and is home to over 1,500 species of fish and 4,000 species of mollusc.',
+        'The reef is so large it can be seen from outer space, and it has been a UNESCO World Heritage Site since 1981.',
+        'Coral bleaching caused by rising ocean temperatures is a serious threat; large parts of the reef have been damaged in recent decades.',
+        'About 2 million people visit the Great Barrier Reef each year to snorkel and dive among its extraordinary colours and wildlife.',
+      ],
+    },
+  ],
+  movies_cartoons: [
+    {
+      secret: 'Simba',
+      hint: 'The lion prince from Disney\'s The Lion King who must reclaim his kingdom after his father is killed',
+      facts: [
+        'Simba is the main character of Disney\'s The Lion King (1994), one of the highest-grossing animated films ever made.',
+        'His story is inspired by Shakespeare\'s Hamlet — a prince who runs away after his father is killed by a treacherous relative.',
+        'The name "Simba" means "lion" in Swahili, the language spoken across much of East Africa.',
+        'The Lion King\'s soundtrack was written by Elton John and Tim Rice; the song "Circle of Life" opens the film with one of cinema\'s most memorable scenes.',
+        'A photo-realistic computer-animated remake of The Lion King was released in 2019 and became one of the highest-grossing films of all time.',
+      ],
+    },
+    {
+      secret: 'Elsa',
+      hint: 'The ice-powered queen from Disney\'s Frozen who sings "Let It Go" and can create blizzards with her hands',
+      facts: [
+        'Elsa is the main character of Disney\'s Frozen (2013), which became the highest-grossing animated film of its time.',
+        'She is inspired by the Snow Queen, a character from a fairy tale by Danish author Hans Christian Andersen.',
+        'Her signature song "Let It Go" won the Academy Award for Best Original Song and was recorded in 42 different languages.',
+        'Unlike most Disney films of the time, Frozen focused on the bond between two sisters — Elsa and Anna — rather than a romantic story.',
+        'Frozen was so popular that it became the first animated film to earn over $1 billion at the box office, and a sequel, Frozen 2, was released in 2019.',
+      ],
+    },
+    {
+      secret: 'SpongeBob SquarePants',
+      hint: 'The cheerful yellow sea sponge who lives in a pineapple under the sea and works as a fry cook',
+      facts: [
+        'SpongeBob SquarePants first appeared on Nickelodeon in 1999 and was created by marine science educator Stephen Hillenburg.',
+        'He lives in an underwater city called Bikini Bottom in a house shaped like a pineapple, with his best friend Patrick the starfish next door.',
+        'Despite being a fry cook at the Krabby Patty restaurant, SpongeBob is the most enthusiastic and cheerful character in his neighbourhood.',
+        'The show became a global cultural phenomenon; SpongeBob memes and references have spread widely across the internet.',
+        'Stephen Hillenburg was a real marine biologist before becoming an animator, which is why the underwater world in the show is full of accurate sea creatures.',
+      ],
+    },
+    {
+      secret: 'Harry Potter',
+      hint: 'The boy wizard with a lightning-bolt scar who discovers he is famous in the magical world',
+      facts: [
+        'Harry Potter is the hero of seven novels written by J.K. Rowling, starting with Harry Potter and the Philosopher\'s Stone (1997).',
+        'He discovers on his 11th birthday that he is a wizard and is accepted into Hogwarts School of Witchcraft and Wizardry.',
+        'Harry is famous in the wizarding world because as a baby he survived an attack by the dark wizard Voldemort, leaving a lightning-bolt scar on his forehead.',
+        'The Harry Potter series has sold over 500 million copies worldwide, making it the best-selling book series in history.',
+        'The eight Harry Potter films together earned over $7.7 billion at the box office, and the franchise continues with theme parks, stage plays and spin-off films.',
+      ],
+    },
+    {
+      secret: 'Woody',
+      hint: 'The cowboy pull-string toy who is Andy\'s favourite in Disney Pixar\'s Toy Story',
+      facts: [
+        'Woody is the main character of the Toy Story franchise (1995–2019), the beloved Pixar series about toys that come to life when humans are not watching.',
+        'He is a pull-string cowboy doll and Andy\'s favourite toy — until a flashy new space ranger called Buzz Lightyear arrives.',
+        'Woody\'s catchphrase is "There\'s a snake in my boot!" — one of several phrases he says when his pull-string is yanked.',
+        'The original Toy Story (1995) was the first feature film ever made entirely with computer animation — a landmark moment in film history.',
+        'Throughout the series, Woody\'s greatest fear is being abandoned or thrown away, which drives much of the emotional story.',
+      ],
+    },
+    {
+      secret: 'Shrek',
+      hint: 'The grumpy green ogre who lives in a swamp and goes on a quest to rescue a princess',
+      facts: [
+        'Shrek is the main character of DreamWorks Animation\'s Shrek (2001) and its sequels, based on a picture book by William Steig.',
+        'He is a large, grumpy green ogre who just wants to be left alone in his swamp, but ends up on a quest to rescue Princess Fiona with a talking donkey as his companion.',
+        'The first Shrek film won the very first Academy Award for Best Animated Feature when that category was created in 2002.',
+        'Shrek subverted fairy-tale traditions by making the "monster" the hero and showing that beauty is not what it seems — Fiona turns out to be an ogre herself.',
+        'The Shrek franchise has earned over $3.5 billion worldwide and became one of the most popular animated series ever made.',
+      ],
+    },
+    {
+      secret: 'Nemo',
+      hint: 'The little clownfish with a small fin who gets lost in the ocean while his worried dad swims across the sea to find him',
+      facts: [
+        'Nemo is the main character of Pixar\'s Finding Nemo (2003), a film about a father\'s incredible journey to rescue his son.',
+        'He is a clownfish with one small fin — called a "lucky fin" by his dad Marlin — who gets scooped up by a scuba diver and taken to a fish tank in a Sydney dentist\'s office.',
+        'Clownfish really do live among the stinging tentacles of sea anemones, which protect them from predators.',
+        'Finding Nemo was the best-selling DVD of all time when it was released and held that record for many years.',
+        'A sequel, Finding Dory (2016), follows Nemo\'s forgetful blue tang friend Dory as she searches for her own family.',
+      ],
+    },
+    {
+      secret: 'Moana',
+      hint: 'The brave Polynesian teenager who sails across the ocean to restore the heart of the goddess Te Fiti',
+      facts: [
+        'Moana is the main character of Disney\'s Moana (2016), a film inspired by the seafaring cultures of Polynesia.',
+        'She is the daughter of the chief of the island of Motunui and is chosen by the ocean to return the stolen heart of the goddess Te Fiti.',
+        'Disney researchers spent years studying Pacific Island cultures, visiting Fiji, Samoa, Tahiti and other islands to make the film as accurate as possible.',
+        'The ocean itself acts as a character in the film, helping and guiding Moana on her journey.',
+        'The film\'s songs were written with the help of Lin-Manuel Miranda, the creator of the Broadway musical Hamilton, making the soundtrack full of energy.',
+      ],
+    },
+  ],
+  animals_nature: [
+    {
+      secret: 'Blue Whale',
+      hint: 'The largest animal ever known to have lived on Earth — a giant ocean creature whose heart is the size of a small car',
+      facts: [
+        'The blue whale is the largest animal known to have ever existed on Earth, reaching lengths of up to 30 metres and weights of up to 200 tonnes.',
+        'Its heart is about the size of a small car, and a human could crawl through its main blood vessels.',
+        'Despite being so enormous, blue whales eat almost nothing but tiny shrimp-like creatures called krill — they can swallow about 4 tonnes of krill per day.',
+        'Blue whales communicate with deep rumbling sounds that can travel thousands of kilometres through the ocean.',
+        'They were hunted nearly to extinction during the 20th century; today they are protected, but their numbers are still very low.',
+      ],
+    },
+    {
+      secret: 'Cheetah',
+      hint: 'The world\'s fastest land animal, capable of reaching 100 km/h in just a few seconds',
+      facts: [
+        'The cheetah is the fastest land animal, reaching speeds of up to 112 km/h during short chases after prey.',
+        'It can accelerate from 0 to 100 km/h in just about 3 seconds — faster than most sports cars.',
+        'Unlike other big cats, cheetahs cannot roar. Instead they purr, chirp and make bird-like chirruping sounds.',
+        'A cheetah\'s distinctive black "tear marks" running from its eyes to its mouth help reduce glare from the sun when hunting.',
+        'Cheetahs are now an endangered species; fewer than 7,000 are estimated to remain in the wild, mostly in sub-Saharan Africa.',
+      ],
+    },
+    {
+      secret: 'Giant Panda',
+      hint: 'The black-and-white bear from China that has become one of the world\'s most beloved symbols of wildlife conservation',
+      facts: [
+        'Giant pandas live in the mountain forests of central China and are famous for their distinctive black-and-white colouring.',
+        'They eat almost nothing but bamboo — up to 14 kg a day — and spend about 12 hours a day just eating to get enough energy.',
+        'Giant pandas have a special wrist bone that works a bit like a thumb, helping them grip bamboo stalks.',
+        'For a long time giant pandas were classified as endangered; thanks to conservation efforts in China, they were reclassified as "vulnerable" in 2016.',
+        'Giant pandas are very rare in the wild; there are fewer than 2,000 remaining, all in China. They are a symbol of conservation worldwide.',
+      ],
+    },
+    {
+      secret: 'Tyrannosaurus Rex',
+      hint: 'The fearsome giant meat-eating dinosaur with tiny arms and enormous jaws that ruled the Late Cretaceous period',
+      facts: [
+        'Tyrannosaurus Rex lived about 66–68 million years ago and was one of the largest meat-eating dinosaurs ever to walk the Earth.',
+        'It could grow up to 12 metres long and weigh about 8 tonnes — heavier than an African elephant.',
+        'Despite its terrifying reputation, scientists now believe T. rex may have had feathers on parts of its body, similar to modern birds.',
+        'Its tiny arms were actually quite strong and may have been used to grip prey, but they were so short they could not reach its own mouth.',
+        'T. rex is one of the most studied dinosaurs ever; new fossils are discovered fairly regularly, and scientists are always learning new things about it.',
+      ],
+    },
+    {
+      secret: 'Polar Bear',
+      hint: 'The world\'s largest land carnivore, a white bear that lives on Arctic sea ice and swims long distances in freezing water',
+      facts: [
+        'Polar bears are the world\'s largest land carnivores; males can weigh over 700 kg and stand nearly 3 metres tall on their hind legs.',
+        'Their fur appears white but is actually transparent and hollow, helping to trap warmth and scatter light.',
+        'Polar bears are excellent swimmers and have been tracked swimming over 300 km without stopping in search of food.',
+        'They rely almost entirely on sea ice to hunt ringed seals, their main prey — making them highly vulnerable to climate change.',
+        'Polar bear cubs are born in snow dens in winter and weigh only about half a kilogram at birth, smaller than a guinea pig.',
+      ],
+    },
+    {
+      secret: 'Bald Eagle',
+      hint: 'The national bird and symbol of the United States — a large bird of prey with a distinctive white head and brown body',
+      facts: [
+        'The bald eagle is the national bird of the United States and appears on the country\'s official seal and many symbols.',
+        'Despite its name, it is not bald — adults have a striking white head and tail feathers that contrast with their dark brown body.',
+        'Bald eagles build the largest nests of any bird in North America; one record nest in Florida weighed nearly 3 tonnes after decades of additions.',
+        'They can spot a fish from up to 3 kilometres away and dive at speeds of up to 150 km/h to snatch it from the water.',
+        'By 1963 bald eagles were nearly extinct due to hunting and pesticides, but conservation efforts brought them back; they were removed from the endangered species list in 2007.',
+      ],
+    },
+    {
+      secret: 'Dolphin',
+      hint: 'The intelligent, playful sea mammal that communicates with clicks and whistles and loves to ride the bow waves of boats',
+      facts: [
+        'Dolphins are highly intelligent marine mammals; they use a system of clicks, whistles and body language to communicate with each other.',
+        'They are one of the few animals that can recognise themselves in a mirror — a sign of self-awareness shared with only a handful of species.',
+        'Dolphins sleep with one half of their brain at a time, keeping one eye open so they can watch for dangers and come up to breathe.',
+        'They hunt using echolocation — sending out sound waves and listening to the echoes to find fish even in murky water.',
+        'Dolphins are known for playing, surfing in the wake of boats, and even helping humans and other animals in distress — there are many documented cases of dolphins guiding stranded whales back to sea.',
+      ],
+    },
+    {
+      secret: 'Monarch Butterfly',
+      hint: 'The orange-and-black butterfly famous for its extraordinary migration journey of thousands of kilometres across North America',
+      facts: [
+        'Monarch butterflies are famous for their incredible annual migration: millions of them travel up to 4,500 kilometres from Canada and the United States to spend winter in Mexico.',
+        'Each individual butterfly lives only a few months, so the return journey is completed by the grandchildren or great-grandchildren of the original migrants.',
+        'Scientists are still not fully certain how monarchs navigate such enormous distances — they may use the position of the sun and Earth\'s magnetic field.',
+        'Their orange-and-black colouring warns predators that they are poisonous — they absorb toxins from milkweed plants they eat as caterpillars.',
+        'Monarch populations have declined sharply in recent decades due to loss of milkweed habitat and climate change, making conservation efforts very important.',
+      ],
+    },
+  ],
+  sports_games: [
+    {
+      secret: 'The Olympics',
+      hint: 'The great international sporting competition held every four years where athletes from all over the world compete for gold, silver and bronze medals',
+      facts: [
+        'The modern Olympic Games began in Athens, Greece, in 1896, inspired by the ancient Greek Olympics that took place over 1,000 years ago.',
+        'Athletes from nearly every country on Earth participate — the Tokyo 2020 Olympics (held in 2021) featured 206 national delegations.',
+        'The Olympic rings — five interlocking circles in blue, yellow, black, green and red — represent the five inhabited continents of the world.',
+        'The Olympic flame is lit in Olympia, Greece, and carried by relay runners to the host city before every Games.',
+        'Both Summer and Winter Games are held every four years, but staggered two years apart so there is an Olympic event every two years.',
+      ],
+    },
+    {
+      secret: 'Chess',
+      hint: 'The ancient strategy board game played on a 64-square board where two players try to trap each other\'s king',
+      facts: [
+        'Chess is one of the oldest games still played today; it is believed to have originated in India around 1,500 years ago before spreading to Persia, Arabia and Europe.',
+        'Each player starts with 16 pieces — one king, one queen, two rooks, two knights, two bishops and eight pawns — with different rules for how each piece moves.',
+        'The word "checkmate" comes from the Persian phrase "shah mat," meaning "the king is helpless."',
+        'There are more possible chess games than there are atoms in the observable universe — making it one of the most complex games ever invented.',
+        'Many countries teach chess in schools because it develops concentration, problem-solving skills and strategic thinking.',
+      ],
+    },
+    {
+      secret: 'Wimbledon',
+      hint: 'The world\'s oldest and most famous tennis tournament, held every summer on grass courts in London',
+      facts: [
+        'Wimbledon is the oldest tennis tournament in the world, first held in London in 1877 — making it the most prestigious event in the sport.',
+        'It is the only Grand Slam tournament still played on grass courts, which makes the ball bounce faster and lower than on other surfaces.',
+        'Players must wear almost entirely white clothing at Wimbledon — a tradition that has been enforced for over a century.',
+        'Strawberries and cream are a famous Wimbledon tradition; about 28,000 kg of strawberries are eaten at the tournament every year.',
+        'The tournament is held at the All England Club in Wimbledon, London, and the women\'s and men\'s singles champions each receive a trophy and prize money worth millions of pounds.',
+      ],
+    },
+    {
+      secret: 'FIFA World Cup',
+      hint: 'The biggest football tournament in the world, held every four years and watched by billions of people',
+      facts: [
+        'The FIFA World Cup is the world\'s most watched sporting event; the 2022 final between Argentina and France was seen by over 1.5 billion people.',
+        'The first World Cup was held in Uruguay in 1930; Brazil have won it a record five times.',
+        'The tournament is held every four years and involves teams from all over the world qualifying through regional competitions.',
+        'The golden trophy that teams compete for weighs 6.1 kg and is made of 18-carat gold — but the winning team only receives a replica to keep.',
+        'The 2022 World Cup in Qatar was the first to be held in the Middle East and the last to feature 32 teams; from 2026 onwards, 48 teams will compete.',
+      ],
+    },
+    {
+      secret: 'Cricket',
+      hint: 'The bat-and-ball sport played over days that is hugely popular in England, India, Australia and the Caribbean',
+      facts: [
+        'Cricket is one of the world\'s most popular sports, with around 2.5 billion fans mostly in South Asia, the UK, Australia and the Caribbean.',
+        'A Test match — the longest form of the game — can last up to five days, which is unique among major sports.',
+        'The sport originated in England and the first recorded match took place in the late 16th century; the rules were formalised in 1744.',
+        'A cricket ball is hard and red (or white for shorter formats) and the bat is flat on one side and curved on the other.',
+        'India vs Pakistan matches are considered among the most watched sporting events in the world, with hundreds of millions of viewers tuning in.',
+      ],
+    },
+    {
+      secret: 'Basketball',
+      hint: 'The fast-paced sport invented in America where players score by throwing a ball through an elevated hoop',
+      facts: [
+        'Basketball was invented in 1891 by Canadian-American physical education teacher James Naismith, who wanted an indoor sport for his students to play in winter.',
+        'The first "baskets" were actual peach baskets nailed to a wall; someone had to climb up and retrieve the ball by hand after every goal.',
+        'The NBA — the National Basketball Association — is the world\'s top professional basketball league, headquartered in the United States.',
+        'Players like Michael Jordan, LeBron James and Kobe Bryant became global celebrities and helped make basketball one of the most popular sports in the world.',
+        'A regulation basketball court is 28 metres long and the hoop is exactly 3.05 metres above the ground.',
+      ],
+    },
+    {
+      secret: 'Swimming',
+      hint: 'The Olympic sport where athletes race through the water using different strokes including freestyle, butterfly, breaststroke and backstroke',
+      facts: [
+        'Swimming has been an Olympic sport since the first modern Games in 1896 and is one of the most popular and widely practised sports in the world.',
+        'There are four main competitive strokes: freestyle (front crawl), backstroke, breaststroke and butterfly — each requiring different techniques.',
+        'Michael Phelps, the American swimmer, is the most decorated Olympian in history with 23 gold medals and 28 medals in total.',
+        'Competitive swimmers shave their bodies and wear specially designed tight suits to reduce drag in the water and swim faster.',
+        'Swimming is also one of the best exercises for the whole body because it works nearly every muscle group without putting stress on the joints.',
+      ],
+    },
+    {
+      secret: 'The Marathon',
+      hint: 'The long-distance running race of exactly 42.195 kilometres that is named after an ancient Greek battle',
+      facts: [
+        'The marathon distance of 42.195 kilometres is named after the ancient Greek city of Marathon, where a famous battle was fought in 490 BC.',
+        'Legend says a Greek soldier named Pheidippides ran all the way from Marathon to Athens to announce the Greek victory, then dropped dead from exhaustion.',
+        'The first modern Olympic marathon was run in 1896, and the distance was standardised at 42.195 km at the 1908 London Olympics.',
+        'Running a marathon is considered a major personal challenge; millions of people complete one every year around the world.',
+        'The current world record for the marathon is under two hours and one minute for men, set by Eliud Kipchoge of Kenya in 2022.',
+      ],
+    },
+  ],
+  science_inventions: [
+    {
+      secret: 'The Telephone',
+      hint: 'The invention that allowed people to speak to each other across long distances for the first time',
+      facts: [
+        'The telephone was patented by Alexander Graham Bell in 1876; the first words ever spoken on one were reportedly "Mr Watson, come here, I want to see you."',
+        'Before the telephone, the fastest way to send a message over long distances was the telegraph, which used electrical signals to send coded text.',
+        'Within 10 years of its invention, over 150,000 telephones were in use in the United States alone.',
+        'The telephone transformed business, politics and everyday life by making instant voice communication possible across any distance.',
+        'Today\'s smartphones are direct descendants of Bell\'s invention — though they can now send video, browse the internet and run millions of apps.',
+      ],
+    },
+    {
+      secret: 'The Internet',
+      hint: 'The global network of computers that allows billions of people to share information, communicate and access knowledge instantly',
+      facts: [
+        'The Internet began as a US military research project called ARPANET in the late 1960s, designed to keep communication working even if part of the network was destroyed.',
+        'The World Wide Web — the system of websites and links most people think of as "the internet" — was invented by British scientist Tim Berners-Lee in 1989.',
+        'As of 2024, over 5 billion people — roughly two-thirds of the world\'s population — use the internet.',
+        'About 4 million new blog posts, 500 million tweets and 300 billion emails are sent every single day.',
+        'The internet has transformed almost every aspect of human life: shopping, entertainment, education, science, politics and how people keep in touch.',
+      ],
+    },
+    {
+      secret: 'The Aeroplane',
+      hint: 'The powered flying machine invented by the Wright Brothers in 1903 that changed how people travel around the world',
+      facts: [
+        'On 17 December 1903, Orville and Wilbur Wright made the first successful powered aeroplane flight at Kitty Hawk, North Carolina.',
+        'The first flight lasted just 12 seconds and covered 36 metres — barely the length of a large room.',
+        'Within 66 years of that first flight, humans had reached the Moon — showing how fast aviation technology advanced.',
+        'Today, over 100,000 flights take off every day around the world, and about 4.5 billion passengers fly every year.',
+        'Modern jet engines — which power most commercial aircraft — were developed during World War II and have made the world much smaller by connecting distant places in hours.',
+      ],
+    },
+    {
+      secret: 'The Printing Press',
+      hint: 'The machine invented in the 1440s that allowed books and ideas to be copied quickly and cheaply for the first time',
+      facts: [
+        'The movable-type printing press was invented by Johannes Gutenberg in Germany around 1440 and revolutionised how information was shared.',
+        'Before it, books were copied by hand — a slow and expensive process that meant only the very wealthy could own them.',
+        'The first major book printed on Gutenberg\'s press was the Bible; it could produce 3,600 pages per day, compared to just a few pages by hand.',
+        'The printing press helped spread the ideas of the Renaissance and the Scientific Revolution across Europe at extraordinary speed.',
+        'Historians consider it one of the most important inventions in human history — it made literacy, education and the free exchange of ideas possible on a large scale.',
+      ],
+    },
+    {
+      secret: 'Vaccines',
+      hint: 'The medical invention that teaches your immune system to fight a disease before you ever catch it, and has saved hundreds of millions of lives',
+      facts: [
+        'The first vaccine was created by English doctor Edward Jenner in 1796, when he discovered that giving people a mild disease called cowpox protected them from the deadly smallpox.',
+        'Vaccines work by introducing a harmless version of a virus or bacteria into the body, which teaches the immune system how to fight the real disease.',
+        'Smallpox, which once killed millions of people every year, was completely eradicated by 1980 thanks to a global vaccination campaign.',
+        'Vaccines have saved an estimated 150 million lives over the past 50 years, making them one of the most successful public health tools ever developed.',
+        'Today there are vaccines for diseases including measles, polio, flu, hepatitis and COVID-19 — many of which were once major causes of death and disability.',
+      ],
+    },
+    {
+      secret: 'The Telescope',
+      hint: 'The optical instrument that allows humans to see objects far away in space, from distant planets to galaxies billions of light-years off',
+      facts: [
+        'The telescope was invented around 1608 in the Netherlands, and Galileo Galilei was one of the first to use it to study the night sky in 1609.',
+        'Galileo\'s observations with his telescope showed that the Moon had mountains, Jupiter had moons, and the Milky Way was made of countless stars.',
+        'The Hubble Space Telescope, launched in 1990, orbits Earth above the atmosphere and has taken some of the most detailed images of the universe ever seen.',
+        'Modern telescopes can detect light from galaxies over 13 billion light-years away — almost as old as the universe itself.',
+        'The James Webb Space Telescope, launched in 2021, is so powerful it can see through dust clouds in space and study the atmospheres of distant planets.',
+      ],
+    },
+    {
+      secret: 'The Bicycle',
+      hint: 'The two-wheeled, human-powered vehicle that became the world\'s most common form of transport',
+      facts: [
+        'The first recognisable bicycle — called the "dandy horse" — was invented by German Karl von Drais in 1817; it had no pedals and riders pushed with their feet.',
+        'Pedals were added in the 1860s, and the modern chain-driven bicycle design appeared in the 1880s, quickly becoming popular worldwide.',
+        'There are over 1 billion bicycles in the world — more than any other type of vehicle — and they outnumber cars by about 2 to 1.',
+        'The bicycle played an important role in women\'s liberation; it gave women in the 1890s a new freedom of movement and independence.',
+        'Bicycles are one of the most energy-efficient forms of transport ever invented — a person on a bicycle uses less energy per kilometre than any other form of transport.',
+      ],
+    },
+    {
+      secret: 'The Light Bulb',
+      hint: 'The electrical invention that allowed homes and cities to be lit up at night, ending the need for candles and gas lamps',
+      facts: [
+        'Thomas Edison is most often credited with inventing the practical electric light bulb in 1879, though several other inventors made important contributions around the same time.',
+        'Edison\'s bulb used a thin carbon filament in a glass vacuum — electricity passing through the filament caused it to glow brightly without burning up quickly.',
+        'Before electric lighting, most homes and streets were lit by candles, oil lamps or gas lamps, which were dim, smelly and a constant fire hazard.',
+        'The light bulb made factories safer by allowing workers to work at night with better visibility, and transformed nightlife, entertainment and society.',
+        'Modern LED bulbs use about 90% less energy than the original incandescent bulbs and last up to 25 times longer, making them much better for the environment.',
+      ],
+    },
+  ],
+};
+
 const DEMO_PLAYERS = [
   { name: 'Ayesha', avatarIdx: 1 },
   { name: 'Marcus', avatarIdx: 2 },
@@ -1631,6 +2184,7 @@ export default function EnigmaGame() {
   const [soloLoading, setSoloLoading] = useState(false);
   const [soloResult, setSoloResult] = useState(null);
   const [soloCategory, setSoloCategory] = useState('random');
+  const [soloTier, setSoloTier] = useState('senior');
   const [soloHintsUsed, setSoloHintsUsed] = useState(0);
   const [dailyHintsUsed, setDailyHintsUsed] = useState(0);
   const [adModalVisible, setAdModalVisible] = useState(false);
@@ -2190,29 +2744,27 @@ export default function EnigmaGame() {
   };
 
   // ─── Solo Mode helpers ────────────────────────────────────────────────────
-  const getRandomChallenge = (categoryId = 'random') => {
-    const themeIds = categoryId === 'random' ? Object.keys(CONTENT_LIBRARY) : [categoryId];
-    const pool = themeIds.flatMap((id) => CONTENT_LIBRARY[id].map((item) => ({ themeId: id, item })));
+  const getRandomChallenge = (categoryId = 'random', tier = 'senior') => {
+    const library = tier === 'junior' ? JUNIOR_LIBRARY : CONTENT_LIBRARY;
+    const themes = tier === 'junior' ? JUNIOR_THEMES : THEMES;
+    const themeIds = categoryId === 'random' ? Object.keys(library) : [categoryId];
+    const pool = themeIds.flatMap((id) => (library[id] || []).map((item) => ({ themeId: id, item })));
+    if (!pool.length) return getRandomChallenge('random', tier);
     const picked = pool[Math.floor(Math.random() * pool.length)];
-    const theme = THEMES.find((t) => t.id === picked.themeId) || THEMES[0];
+    const theme = themes.find((t) => t.id === picked.themeId) || themes[0];
     return { secret: picked.item.secret, hint: picked.item.hint, facts: picked.item.facts, categoryLabel: theme.label, categoryIcon: theme.icon };
   };
 
-  const computeHint = (secret, hintNum) => {
+  const computeHint = (secret, hintNum, challengeHint = null) => {
     const words = secret.trim().split(/\s+/);
-    if (hintNum === 1) {
-      const n = words.length;
-      return `The secret is ${n} word${n !== 1 ? 's' : ''} long`;
-    }
-    if (hintNum === 2) {
-      const firstMeaningful = words[0].toLowerCase() === 'the' && words.length > 1 ? words[1] : words[0];
-      return `It starts with the letter "${firstMeaningful[0].toUpperCase()}"`;
-    }
+    if (hintNum === 1) { const n = words.length; return `The secret is ${n} word${n !== 1 ? 's' : ''} long`; }
+    if (hintNum === 2) { const firstMeaningful = words[0].toLowerCase() === 'the' && words.length > 1 ? words[1] : words[0]; return `It starts with the letter "${firstMeaningful[0].toUpperCase()}"`; }
+    if (hintNum === 3 && challengeHint) return challengeHint;
     return null;
   };
 
   const startSoloChallenge = () => {
-    setSoloChallenge(getRandomChallenge(soloCategory));
+    setSoloChallenge(getRandomChallenge(soloCategory, soloTier));
     setSoloQuestions([]);
     setSoloInput('');
     setSoloSolveInput('');
@@ -2254,7 +2806,7 @@ export default function EnigmaGame() {
     setAdModalVisible(false);
     if (pendingHintMode === 'solo') {
       const nextHint = soloHintsUsed + 1;
-      setSoloQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(soloChallenge.secret, nextHint) }]);
+      setSoloQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(soloChallenge.secret, nextHint, soloChallenge.hint) }]);
       setSoloHintsUsed(nextHint);
     } else if (pendingHintMode === 'daily') {
       const nextHint = dailyHintsUsed + 1;
@@ -2265,9 +2817,10 @@ export default function EnigmaGame() {
   };
 
   const useSoloHint = () => {
-    if (soloHintsUsed >= 2 || !soloChallenge) return;
+    const maxHints = soloTier === 'junior' ? 3 : 2;
+    if (soloHintsUsed >= maxHints || !soloChallenge) return;
     const nextHint = soloHintsUsed + 1;
-    setSoloQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(soloChallenge.secret, nextHint) }]);
+    setSoloQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(soloChallenge.secret, nextHint, soloChallenge.hint) }]);
     setSoloHintsUsed(nextHint);
   };
 
@@ -3226,6 +3779,7 @@ export default function EnigmaGame() {
 
   // ─── SOLO SETUP ──────────────────────────────────────────────────────────
   if (screen === 'solo_setup') {
+    const isJunior = soloTier === 'junior';
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
@@ -3241,39 +3795,160 @@ export default function EnigmaGame() {
           </Text>
         </View>
 
-        <Text style={[S.sectionLabel, { marginTop: 8, marginBottom: 12 }]}>Choose a Category</Text>
-
-        {/* Random tile */}
-        <TouchableOpacity
-          onPress={() => setSoloCategory('random')}
-          style={{ backgroundColor: soloCategory === 'random' ? 'rgba(212,168,74,0.1)' : C.card, borderWidth: 1.5, borderColor: soloCategory === 'random' ? C.gold : C.border2, borderRadius: 14, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-          <Text style={{ fontSize: 28 }}>🎲</Text>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === 'random' ? C.gold : C.text }}>Any Category</Text>
-            <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>Surprise me — pick from all categories</Text>
-          </View>
-          {soloCategory === 'random' && <Text style={{ color: C.gold, fontSize: 18 }}>✓</Text>}
-        </TouchableOpacity>
-
-        {/* Theme tiles */}
-        {THEMES.map((t) => (
+        {/* ── Tier Picker ── */}
+        <Text style={[S.sectionLabel, { marginTop: 4, marginBottom: 12 }]}>Choose Your Level</Text>
+        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
+          {/* Explorer tile */}
           <TouchableOpacity
-            key={t.id}
-            onPress={() => setSoloCategory(t.id)}
-            style={{ backgroundColor: soloCategory === t.id ? 'rgba(212,168,74,0.1)' : C.card, borderWidth: 1.5, borderColor: soloCategory === t.id ? C.gold : C.border2, borderRadius: 14, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-            <Text style={{ fontSize: 28 }}>{t.icon}</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === t.id ? C.gold : C.text }}>{t.label}</Text>
-              <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>{t.desc}</Text>
-            </View>
-            {soloCategory === t.id && <Text style={{ color: C.gold, fontSize: 18 }}>✓</Text>}
+            style={{ flex: 1 }}
+            onPress={() => { setSoloTier('junior'); setSoloCategory('random'); }}
+          >
+            {isJunior ? (
+              <LinearGradient
+                colors={['rgba(255,200,130,0.72)', 'rgba(255,107,53,0.35)', 'rgba(180,60,20,0.50)']}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                style={{ borderRadius: 16, padding: 1.5 }}
+              >
+                <View style={{ borderRadius: 14.5, backgroundColor: 'rgba(255,107,53,0.14)', padding: 16, alignItems: 'center', gap: 6 }}>
+                  <Text style={{ fontSize: 28 }}>🌟</Text>
+                  <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: '#ff6b35', textAlign: 'center' }}>Explorer</Text>
+                  <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.muted, textAlign: 'center' }}>Fun topics · ages 10+</Text>
+                </View>
+              </LinearGradient>
+            ) : (
+              <View style={{ borderRadius: 16, borderWidth: 1.5, borderColor: C.border2, backgroundColor: C.card, padding: 16, alignItems: 'center', gap: 6, opacity: 0.6 }}>
+                <Text style={{ fontSize: 28 }}>🌟</Text>
+                <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: C.muted, textAlign: 'center' }}>Explorer</Text>
+                <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.dim, textAlign: 'center' }}>Fun topics · ages 10+</Text>
+              </View>
+            )}
           </TouchableOpacity>
-        ))}
 
-        <View style={{ height: 12 }} />
-        <TouchableOpacity style={S.btnGold} onPress={startSoloChallenge}>
-          <Text style={S.btnGoldText}>Start Game →</Text>
-        </TouchableOpacity>
+          {/* Scholar tile */}
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={() => { setSoloTier('senior'); setSoloCategory('random'); }}
+          >
+            {!isJunior ? (
+              <LinearGradient
+                colors={['rgba(216,180,254,0.72)', 'rgba(124,58,237,0.35)', 'rgba(60,20,120,0.50)']}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                style={{ borderRadius: 16, padding: 1.5 }}
+              >
+                <View style={{ borderRadius: 14.5, backgroundColor: 'rgba(124,58,237,0.14)', padding: 16, alignItems: 'center', gap: 6 }}>
+                  <Text style={{ fontSize: 28 }}>📚</Text>
+                  <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: C.violet2, textAlign: 'center' }}>Scholar</Text>
+                  <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.muted, textAlign: 'center' }}>Deep trivia · all ages</Text>
+                </View>
+              </LinearGradient>
+            ) : (
+              <View style={{ borderRadius: 16, borderWidth: 1.5, borderColor: C.border2, backgroundColor: C.card, padding: 16, alignItems: 'center', gap: 6, opacity: 0.6 }}>
+                <Text style={{ fontSize: 28 }}>📚</Text>
+                <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: C.muted, textAlign: 'center' }}>Scholar</Text>
+                <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.dim, textAlign: 'center' }}>Deep trivia · all ages</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        <Text style={[S.sectionLabel, { marginTop: 0, marginBottom: 12 }]}>Choose a Category</Text>
+
+        {isJunior ? (
+          <>
+            {/* Random tile — Explorer */}
+            <TouchableOpacity
+              onPress={() => setSoloCategory('random')}
+              style={{ backgroundColor: soloCategory === 'random' ? 'rgba(255,107,53,0.10)' : C.card, borderWidth: 1.5, borderColor: soloCategory === 'random' ? '#ff6b35' : C.border2, borderRadius: 14, padding: 16, marginBottom: 14, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <Text style={{ fontSize: 28 }}>🎲</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === 'random' ? '#ff6b35' : C.text }}>Random — Surprise Me 🎲</Text>
+                <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>Pick from all Explorer categories</Text>
+              </View>
+              {soloCategory === 'random' && <Text style={{ color: '#ff6b35', fontSize: 18 }}>✓</Text>}
+            </TouchableOpacity>
+
+            {/* 2-column grid of JUNIOR_THEMES */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+              {JUNIOR_THEMES.map((t) => {
+                const sel = soloCategory === t.id;
+                return (
+                  <TouchableOpacity
+                    key={t.id}
+                    onPress={() => setSoloCategory(t.id)}
+                    style={{ width: '48%' }}
+                  >
+                    {sel ? (
+                      <LinearGradient
+                        colors={[`${t.color}b8`, `${t.color}59`, `${t.color}80`]}
+                        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                        style={{ borderRadius: 16, padding: 1.5 }}
+                      >
+                        <View style={{ borderRadius: 14.5, backgroundColor: `${t.color}22`, padding: 16, alignItems: 'flex-start', gap: 4 }}>
+                          <Text style={{ fontSize: 30, marginBottom: 4 }}>{t.icon}</Text>
+                          <Text style={{ fontFamily: F.sansBold, fontSize: 14, color: t.color }}>{t.label}</Text>
+                          <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, marginTop: 2 }}>{t.desc}</Text>
+                          <Text style={{ color: t.color, fontSize: 16, marginTop: 4 }}>✓</Text>
+                        </View>
+                      </LinearGradient>
+                    ) : (
+                      <View style={{ borderRadius: 16, borderWidth: 1.5, borderColor: C.border2, backgroundColor: C.card, padding: 16, alignItems: 'flex-start', gap: 4 }}>
+                        <Text style={{ fontSize: 30, marginBottom: 4 }}>{t.icon}</Text>
+                        <Text style={{ fontFamily: F.sansBold, fontSize: 14, color: C.text }}>{t.label}</Text>
+                        <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, marginTop: 2 }}>{t.desc}</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </>
+        ) : (
+          <>
+            {/* Random tile — Scholar */}
+            <TouchableOpacity
+              onPress={() => setSoloCategory('random')}
+              style={{ backgroundColor: soloCategory === 'random' ? 'rgba(212,168,74,0.1)' : C.card, borderWidth: 1.5, borderColor: soloCategory === 'random' ? C.gold : C.border2, borderRadius: 14, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <Text style={{ fontSize: 28 }}>🎲</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === 'random' ? C.gold : C.text }}>Any Category</Text>
+                <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>Surprise me — pick from all categories</Text>
+              </View>
+              {soloCategory === 'random' && <Text style={{ color: C.gold, fontSize: 18 }}>✓</Text>}
+            </TouchableOpacity>
+
+            {/* Theme tiles */}
+            {THEMES.map((t) => (
+              <TouchableOpacity
+                key={t.id}
+                onPress={() => setSoloCategory(t.id)}
+                style={{ backgroundColor: soloCategory === t.id ? 'rgba(212,168,74,0.1)' : C.card, borderWidth: 1.5, borderColor: soloCategory === t.id ? C.gold : C.border2, borderRadius: 14, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                <Text style={{ fontSize: 28 }}>{t.icon}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === t.id ? C.gold : C.text }}>{t.label}</Text>
+                  <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>{t.desc}</Text>
+                </View>
+                {soloCategory === t.id && <Text style={{ color: C.gold, fontSize: 18 }}>✓</Text>}
+              </TouchableOpacity>
+            ))}
+          </>
+        )}
+
+        <View style={{ height: 16 }} />
+        {isJunior ? (
+          <TouchableOpacity onPress={startSoloChallenge} style={{ borderRadius: 14, overflow: 'hidden' }}>
+            <LinearGradient
+              colors={['#ffb347', '#ff6b35', '#cc4400']}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+              style={{ paddingVertical: 16, alignItems: 'center', borderRadius: 14 }}
+            >
+              <Text style={{ fontFamily: F.sansBold, fontSize: 16, color: '#fff', letterSpacing: 0.5 }}>Start Exploring! 🌟</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={S.btnGold} onPress={startSoloChallenge}>
+            <Text style={S.btnGoldText}>Start Game →</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
       </View>
     );
@@ -3560,7 +4235,7 @@ export default function EnigmaGame() {
             {/* Q&A entries */}
             {soloQuestions.map((q, idx) => {
               if (q.type === 'hint') {
-                return <HintCard key={q.id} hintNum={q.hintNum} text={q.text} />;
+                return <HintCard key={q.id} hintNum={q.hintNum} text={q.text} total={soloTier === 'junior' ? 3 : 2} />;
               }
               const qNum = soloQuestions.slice(0, idx + 1).filter(x => !x.type).length;
               return <QACard key={q.id} num={qNum} text={q.text} answer={q.answer} accent="violet" />;
@@ -3595,8 +4270,12 @@ export default function EnigmaGame() {
             )}
 
             {/* Hint button — below input */}
-            {soloHintsUsed < 2 && (
-              <HintButton nextHint={soloHintsUsed + 1} onPress={() => openAdForHint('solo')} />
+            {soloHintsUsed < (soloTier === 'junior' ? 3 : 2) && (
+              <HintButton
+                nextHint={soloHintsUsed + 1}
+                total={soloTier === 'junior' ? 3 : 2}
+                onPress={soloTier === 'junior' ? useSoloHint : () => openAdForHint('solo')}
+              />
             )}
           </ScrollView>
 
