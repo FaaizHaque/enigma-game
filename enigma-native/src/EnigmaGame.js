@@ -4501,23 +4501,29 @@ export default function EnigmaGame() {
             </TouchableOpacity>
           </View>
           <Text style={S.h2}>Join Game</Text>
-          <Text style={[S.muted, { marginBottom: 24 }]}>Get the room code from your host.</Text>
+          <Text style={[S.muted, { marginBottom: 24 }]}>Enter the room code your host shared with you.</Text>
           <Text style={S.fieldLabel}>Room Code</Text>
           <GlassInput
-            containerStyle={{ marginBottom: 8 }}
+            containerStyle={{ marginBottom: 20 }}
             style={{ textAlign: 'center', fontFamily: 'Cinzel_700Bold', fontSize: 28, letterSpacing: 8, color: C.gold }}
             placeholder="XXXXXX" placeholderTextColor={C.dim}
             value={codeInput} onChangeText={(t) => setCodeInput(t.toUpperCase())}
             maxLength={6} autoCapitalize="characters" autoFocus
+            onSubmitEditing={joinGame} returnKeyType="go"
           />
-          <Text style={[S.fieldLabel, { marginTop: 16 }]}>Your Name</Text>
-          <GlassInput
-            containerStyle={{ marginBottom: 8 }}
-            placeholder="Enter your name..." placeholderTextColor={C.dim}
-            value={nameInput} onChangeText={setNameInput}
-            maxLength={20} onSubmitEditing={joinGame} returnKeyType="go"
-          />
-          <AvatarPicker selected={selectedAvatarIdx} onSelect={setSelectedAvatarIdx} />
+
+          {/* Joining as — read-only identity (set on the home screen) */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: C.border2, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 20 }}>
+            <PlayerAvatar p={{ avatarIdx: selectedAvatarIdx }} size={44} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: F.sansBold, fontSize: 11, color: C.dim, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 2 }}>Joining as</Text>
+              <Text style={{ fontFamily: F.sansSemi, fontSize: 16, color: C.text }}>{nameInput.trim() || 'Player'}</Text>
+            </View>
+            <TouchableOpacity onPress={() => setScreen('home')}>
+              <Text style={{ fontFamily: F.sansSemi, fontSize: 13, color: C.gold }}>Edit</Text>
+            </TouchableOpacity>
+          </View>
+
           <TouchableOpacity style={[S.btnGold, !joinReady && S.btnDisabled]} onPress={joinGame} disabled={!joinReady}>
             <Text style={S.btnGoldText}>Join →</Text>
           </TouchableOpacity>
