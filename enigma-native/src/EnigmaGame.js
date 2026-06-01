@@ -2536,7 +2536,7 @@ export default function EnigmaGame() {
   };
 
   // ─── Actions ──────────────────────────────────────────────────────────────
-  const createGame = async () => {
+  const createGame = async (isPublic = isPublicRoom) => {
     if (!nameInput.trim()) return;
     try {
       const roomCode = await uniqueCode();
@@ -2547,9 +2547,9 @@ export default function EnigmaGame() {
         round: 1, theme: null, secretAnswer: '', hostHint: '',
         questions: [], currentQuestionerIndex: 0, status: 'lobby',
         pendingSolve: null, roundWinnerId: null, hostConsecutiveMisses: 0,
-        isPublic: isPublicRoom, createdAt: new Date().toISOString(),
+        isPublic, createdAt: new Date().toISOString(),
       };
-      await supabase.from('sessions').upsert({ room_code: roomCode, data: session, is_public: isPublicRoom });
+      await supabase.from('sessions').upsert({ room_code: roomCode, data: session, is_public: isPublic });
       setGame(session);
       setViewerId(playerId);
       // Keep name & avatar so the player doesn't have to re-enter them later.
@@ -4438,52 +4438,48 @@ export default function EnigmaGame() {
             </TouchableOpacity>
           </View>
           <Text style={S.h2}>Create Game</Text>
-          <Text style={[S.muted, { marginBottom: 24 }]}>You'll be the first host this round.</Text>
-          <Text style={S.fieldLabel}>Your Name</Text>
-          <GlassInput
-            containerStyle={{ marginBottom: 8 }}
-            placeholder="Enter your name..." placeholderTextColor={C.dim}
-            value={nameInput} onChangeText={setNameInput} maxLength={20}
-            autoFocus onSubmitEditing={createGame} returnKeyType="go"
-          />
-          <AvatarPicker selected={selectedAvatarIdx} onSelect={setSelectedAvatarIdx} />
+          <Text style={[S.muted, { marginBottom: 28 }]}>Choose a room type — you'll be the first host this round.</Text>
 
-          <Text style={S.fieldLabel}>Room Visibility</Text>
-          <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
-            {/* Private */}
-            <TouchableOpacity onPress={() => setIsPublicRoom(false)} activeOpacity={0.8} style={{ flex: 1 }}>
-              <View style={{ borderRadius: 14, shadowColor: !isPublicRoom ? C.gold : 'transparent', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.28, shadowRadius: 10, elevation: !isPublicRoom ? 6 : 0 }}>
-                <LinearGradient
-                  colors={!isPublicRoom ? ['rgba(255,232,160,0.60)', 'rgba(212,168,74,0.22)', 'rgba(140,90,18,0.38)'] : ['rgba(50,50,100,0.40)', 'rgba(28,28,62,0.30)', 'rgba(16,16,48,0.40)']}
-                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14, padding: 1.2 }}>
-                  <View style={{ borderRadius: 13, backgroundColor: !isPublicRoom ? 'rgba(212,168,74,0.12)' : 'rgba(22,22,52,0.88)', padding: 14, alignItems: 'center' }}>
-                    <Text style={{ fontSize: 24, marginBottom: 6 }}>🔒</Text>
-                    <Text style={{ fontFamily: F.sansBold, fontSize: 14, color: !isPublicRoom ? C.gold : C.text, marginBottom: 3 }}>Private</Text>
-                    <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, textAlign: 'center', lineHeight: 14 }}>Share a code or QR with friends</Text>
+          {/* Private — big gold box */}
+          <TouchableOpacity onPress={() => createGame(false)} activeOpacity={0.85} style={{ marginBottom: 16 }}>
+            <View style={{ borderRadius: 20, shadowColor: C.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.35, shadowRadius: 16, elevation: 10 }}>
+              <LinearGradient colors={['rgba(255,236,170,0.90)', 'rgba(212,168,74,0.50)', 'rgba(150,98,22,0.68)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 3 }}>
+                <LinearGradient colors={['rgba(212,168,74,0.22)', 'rgba(120,80,15,0.14)', 'rgba(50,30,5,0.28)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 17.5, overflow: 'hidden', padding: 22 }}>
+                  <LinearGradient colors={['rgba(255,232,160,0.26)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 56 }} />
+                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 16.5, borderWidth: 1, borderColor: 'rgba(255,232,160,0.18)' }} />
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                    <View style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: 'rgba(212,168,74,0.16)', borderWidth: 1.5, borderColor: 'rgba(255,220,140,0.45)', alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 30 }}>🔒</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: F.serifBold, fontSize: 20, color: C.gold, letterSpacing: 0.5, marginBottom: 4 }}>Private Room</Text>
+                      <Text style={{ fontFamily: F.sans, fontSize: 14, color: 'rgba(255,220,140,0.78)', lineHeight: 19 }}>Share a code or QR with friends. Only they can join.</Text>
+                    </View>
+                    <Text style={{ color: C.gold, fontSize: 24 }}>›</Text>
                   </View>
                 </LinearGradient>
-              </View>
-            </TouchableOpacity>
-            {/* Public */}
-            <TouchableOpacity onPress={() => setIsPublicRoom(true)} activeOpacity={0.8} style={{ flex: 1 }}>
-              <View style={{ borderRadius: 14, shadowColor: isPublicRoom ? C.violet : 'transparent', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.28, shadowRadius: 10, elevation: isPublicRoom ? 6 : 0 }}>
-                <LinearGradient
-                  colors={isPublicRoom ? ['rgba(180,140,255,0.60)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.38)'] : ['rgba(50,50,100,0.40)', 'rgba(28,28,62,0.30)', 'rgba(16,16,48,0.40)']}
-                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14, padding: 1.2 }}>
-                  <View style={{ borderRadius: 13, backgroundColor: isPublicRoom ? 'rgba(124,58,237,0.12)' : 'rgba(22,22,52,0.88)', padding: 14, alignItems: 'center' }}>
-                    <Text style={{ fontSize: 24, marginBottom: 6 }}>🌐</Text>
-                    <Text style={{ fontFamily: F.sansBold, fontSize: 14, color: isPublicRoom ? C.violet2 : C.text, marginBottom: 3 }}>Public</Text>
-                    <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, textAlign: 'center', lineHeight: 14 }}>Anyone can find and join this room</Text>
+              </LinearGradient>
+            </View>
+          </TouchableOpacity>
+
+          {/* Public — big violet box */}
+          <TouchableOpacity onPress={() => createGame(true)} activeOpacity={0.85}>
+            <View style={{ borderRadius: 20, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 16, elevation: 10 }}>
+              <LinearGradient colors={['rgba(190,155,255,0.90)', 'rgba(124,58,237,0.50)', 'rgba(76,24,170,0.68)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 3 }}>
+                <LinearGradient colors={['rgba(124,58,237,0.22)', 'rgba(80,30,180,0.14)', 'rgba(40,10,90,0.28)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 17.5, overflow: 'hidden', padding: 22 }}>
+                  <LinearGradient colors={['rgba(200,160,255,0.24)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 56 }} />
+                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 16.5, borderWidth: 1, borderColor: 'rgba(180,140,255,0.17)' }} />
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                    <View style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: 'rgba(124,58,237,0.20)', borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.42)', alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 30 }}>🌐</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: F.serifBold, fontSize: 20, color: C.violet2, letterSpacing: 0.5, marginBottom: 4 }}>Public Room</Text>
+                      <Text style={{ fontFamily: F.sans, fontSize: 14, color: C.muted, lineHeight: 19 }}>Open to anyone. Great for meeting new players!</Text>
+                    </View>
+                    <Text style={{ color: C.violet2, fontSize: 24 }}>›</Text>
                   </View>
                 </LinearGradient>
-              </View>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity disabled={!nameInput.trim()} onPress={createGame} activeOpacity={0.85} style={!nameInput.trim() ? { opacity: 0.4 } : {}}>
-            <View style={{ borderRadius: 14, shadowColor: C.gold, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 14, elevation: 8 }}>
-              <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 14, paddingVertical: 16, alignItems: 'center' }}>
-                <Text style={{ fontFamily: F.sansBold, fontSize: 15, color: '#1a0f00', letterSpacing: 0.5 }}>Create Room →</Text>
               </LinearGradient>
             </View>
           </TouchableOpacity>
@@ -4567,7 +4563,7 @@ export default function EnigmaGame() {
               <Text style={{ fontSize: 38, marginBottom: 10 }}>🪐</Text>
               <Text style={[S.h2, { textAlign: 'center', fontSize: 16, marginBottom: 6 }]}>No open rooms right now</Text>
               <Text style={[S.muted, { textAlign: 'center', marginBottom: 14 }]}>Be the first — create a public room and friends can join from here.</Text>
-              <TouchableOpacity style={S.btnOutlineSm} onPress={() => { setIsPublicRoom(true); setScreen('create'); }}>
+              <TouchableOpacity style={S.btnOutlineSm} onPress={() => createGame(true)}>
                 <Text style={S.btnOutlineSmText}>+ Create Public Room</Text>
               </TouchableOpacity>
             </View>
