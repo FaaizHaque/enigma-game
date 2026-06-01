@@ -2501,21 +2501,27 @@ export default function EnigmaGame() {
 
           {/* Play */}
           <TouchableOpacity
-            style={[S.btnGold, !nameInput.trim() && S.btnDisabled]}
             disabled={!nameInput.trim()}
             onPress={() => setScreen('modes')}
+            activeOpacity={0.85}
+            style={!nameInput.trim() ? { opacity: 0.4 } : {}}
           >
-            <Text style={S.btnGoldText}>Play →</Text>
+            <View style={{ borderRadius: 16, shadowColor: C.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 18, elevation: 10 }}>
+              <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 16, paddingVertical: 17, paddingHorizontal: 28, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 }}>
+                <Text style={{ fontFamily: F.sansBold, fontSize: 16, color: '#1a0f00', letterSpacing: 0.5 }}>Play</Text>
+                <Text style={{ fontFamily: F.serifBold, fontSize: 18, color: '#1a0f00' }}>→</Text>
+              </LinearGradient>
+            </View>
           </TouchableOpacity>
 
-          <View style={{ height: 10 }} />
+          <View style={{ height: 12 }} />
 
           {/* How to Play */}
           <TouchableOpacity
-            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(212,168,74,0.22)', backgroundColor: 'rgba(212,168,74,0.04)' }}
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(212,168,74,0.24)', backgroundColor: 'rgba(212,168,74,0.05)' }}
             onPress={() => setHowToPlayOpen(true)}>
             <Text style={{ fontSize: 16 }}>📖</Text>
-            <Text style={{ color: C.gold, fontSize: 14, fontFamily: 'Outfit_600SemiBold' }}>How to Play</Text>
+            <Text style={{ color: C.gold, fontSize: 14, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>How to Play</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -2541,67 +2547,80 @@ export default function EnigmaGame() {
         <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 22, letterSpacing: 5, color: C.gold, marginBottom: 4, paddingHorizontal: 24 }}>20 QUESTIONS</Text>
         <Text style={[S.tCaption, { color: C.muted, marginBottom: 20, paddingHorizontal: 24 }]}>Choose a game mode to play.</Text>
 
-        {/* Three cards equally spaced */}
+        {/* Three cards — glass morphism */}
         <View style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-evenly' }}>
 
-          {/* Daily Challenge */}
-          <TouchableOpacity
-            onPress={() => setScreen('daily_setup')}
-            activeOpacity={0.85}
-            style={{ backgroundColor: 'rgba(212,168,74,0.07)', borderWidth: 1.5, borderColor: C.gold, borderRadius: 20, padding: 20 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 14 }}>
-              <View style={{ backgroundColor: C.gold, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
-                <Text style={{ color: '#1a0f00', fontSize: 10, fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>DAILY</Text>
-              </View>
-              <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_400Regular', letterSpacing: 1 }}>
-                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-              </Text>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 16 }}>
-              <Text style={{ fontSize: 40 }}>📅</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={[S.tH3, { letterSpacing: 1, color: C.gold, marginBottom: 5 }]}>Daily Challenge</Text>
-                <Text style={[S.tBodySm, { color: C.muted, lineHeight: 18 }]}>
-                  One secret. 20 questions. Crack today's mystery!
-                </Text>
-              </View>
-            </View>
-            <View style={{ backgroundColor: C.gold, borderRadius: 12, paddingVertical: 13, alignItems: 'center' }}>
-              <Text style={{ color: '#1a0f00', fontSize: 14, fontFamily: 'Outfit_700Bold', letterSpacing: 0.5 }}>Play Today's Challenge →</Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* Multiplayer */}
-          <TouchableOpacity
-            onPress={() => setScreen('multi_home')}
-            activeOpacity={0.85}
-            style={{ backgroundColor: 'rgba(124,58,237,0.07)', borderWidth: 1.5, borderColor: 'rgba(124,58,237,0.45)', borderRadius: 20, padding: 20 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-              <Text style={{ fontSize: 40 }}>👥</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={[S.tH3, { letterSpacing: 1, color: C.violet2, marginBottom: 5 }]}>Multiplayer</Text>
-                <Text style={[S.tBodySm, { color: C.muted, lineHeight: 18 }]}>
-                  Public or private room. One host sets the secret, everyone guesses.
-                </Text>
-              </View>
-              <Text style={{ fontSize: 22, color: C.violet2 }}>›</Text>
+          {/* Daily Challenge — gold glass */}
+          <TouchableOpacity onPress={() => setScreen('daily_setup')} activeOpacity={0.85}>
+            <View style={{ borderRadius: 22, shadowColor: C.gold, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.38, shadowRadius: 22, elevation: 12 }}>
+              <LinearGradient colors={['rgba(255,232,160,0.72)', 'rgba(212,168,74,0.30)', 'rgba(140,90,18,0.50)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 1.5 }}>
+                <LinearGradient colors={['rgba(212,168,74,0.26)', 'rgba(120,80,15,0.15)', 'rgba(50,30,5,0.30)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 20.5, overflow: 'hidden', padding: 20 }}>
+                  <LinearGradient colors={['rgba(255,232,160,0.30)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 56 }} />
+                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 19.5, borderWidth: 1, borderColor: 'rgba(255,232,160,0.16)' }} />
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16 }}>
+                    <LinearGradient colors={[C.gold2, C.gold, C.goldDim]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+                      <Text style={{ color: '#1a0f00', fontSize: 10, fontFamily: F.sansBold, letterSpacing: 1.5 }}>DAILY</Text>
+                    </LinearGradient>
+                    <Text style={{ fontSize: 11, color: 'rgba(255,220,140,0.65)', fontFamily: F.sans, letterSpacing: 0.5 }}>
+                      {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                    </Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+                    <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(212,168,74,0.15)', borderWidth: 1.5, borderColor: 'rgba(255,220,140,0.50)', alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 28 }}>📅</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: F.serifBold, fontSize: 18, color: C.gold, letterSpacing: 0.5, marginBottom: 4 }}>Daily Challenge</Text>
+                      <Text style={{ fontFamily: F.sans, fontSize: 13, color: 'rgba(255,220,140,0.75)', lineHeight: 18 }}>One secret. 20 questions. Crack today's mystery!</Text>
+                    </View>
+                  </View>
+                  <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 12, paddingVertical: 13, alignItems: 'center' }}>
+                    <Text style={{ color: '#1a0f00', fontSize: 14, fontFamily: F.sansBold, letterSpacing: 0.5 }}>Play Today's Challenge →</Text>
+                  </LinearGradient>
+                </LinearGradient>
+              </LinearGradient>
             </View>
           </TouchableOpacity>
 
-          {/* Solo */}
-          <TouchableOpacity
-            onPress={() => setScreen('solo_setup')}
-            activeOpacity={0.85}
-            style={{ backgroundColor: 'rgba(34,197,94,0.10)', borderWidth: 1.5, borderColor: 'rgba(34,197,94,0.70)', borderRadius: 20, padding: 20 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-              <MascotIcon size={52} uid="mode" pulse={false} />
-              <View style={{ flex: 1 }}>
-                <Text style={[S.tH3, { letterSpacing: 1, color: C.success, marginBottom: 5 }]}>Solo Mode</Text>
-                <Text style={[S.tBodySm, { color: C.muted, lineHeight: 18 }]}>
-                  A secret is chosen for you. 20 questions to figure it out.
-                </Text>
-              </View>
-              <Text style={{ fontSize: 22, color: C.success }}>›</Text>
+          {/* Multiplayer — violet glass */}
+          <TouchableOpacity onPress={() => setScreen('multi_home')} activeOpacity={0.85}>
+            <View style={{ borderRadius: 20, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.34, shadowRadius: 18, elevation: 10 }}>
+              <LinearGradient colors={['rgba(180,140,255,0.65)', 'rgba(124,58,237,0.28)', 'rgba(70,20,160,0.46)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 1.5 }}>
+                <LinearGradient colors={['rgba(124,58,237,0.22)', 'rgba(80,30,180,0.14)', 'rgba(40,10,90,0.28)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 18.5, overflow: 'hidden', padding: 20 }}>
+                  <LinearGradient colors={['rgba(200,160,255,0.24)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 50 }} />
+                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 17.5, borderWidth: 1, borderColor: 'rgba(180,140,255,0.13)' }} />
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                    <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(124,58,237,0.20)', borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.42)', alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 28 }}>👥</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: F.serifBold, fontSize: 18, color: C.violet2, letterSpacing: 0.5, marginBottom: 4 }}>Multiplayer</Text>
+                      <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, lineHeight: 18 }}>Public or private room. One host sets the secret, everyone guesses.</Text>
+                    </View>
+                    <Text style={{ color: C.violet2, fontSize: 22 }}>›</Text>
+                  </View>
+                </LinearGradient>
+              </LinearGradient>
+            </View>
+          </TouchableOpacity>
+
+          {/* Solo — emerald glass */}
+          <TouchableOpacity onPress={() => setScreen('solo_setup')} activeOpacity={0.85}>
+            <View style={{ borderRadius: 20, shadowColor: C.success, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.30, shadowRadius: 16, elevation: 10 }}>
+              <LinearGradient colors={['rgba(100,255,160,0.62)', 'rgba(34,197,94,0.26)', 'rgba(10,100,40,0.42)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 1.5 }}>
+                <LinearGradient colors={['rgba(34,197,94,0.18)', 'rgba(20,120,55,0.12)', 'rgba(5,60,20,0.25)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 18.5, overflow: 'hidden', padding: 20 }}>
+                  <LinearGradient colors={['rgba(100,255,160,0.22)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 50 }} />
+                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 17.5, borderWidth: 1, borderColor: 'rgba(100,255,160,0.11)' }} />
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                    <MascotIcon size={52} uid="mode-solo" pulse={false} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: F.serifBold, fontSize: 18, color: C.success, letterSpacing: 0.5, marginBottom: 4 }}>Solo Mode</Text>
+                      <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, lineHeight: 18 }}>A secret is chosen for you. 20 questions to figure it out.</Text>
+                    </View>
+                    <Text style={{ color: C.success, fontSize: 22 }}>›</Text>
+                  </View>
+                </LinearGradient>
+              </LinearGradient>
             </View>
           </TouchableOpacity>
 
@@ -2615,20 +2634,84 @@ export default function EnigmaGame() {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
         <PremiumBackground />
-        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
+        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 36 }]}>
           <View style={S.screenHeader}>
             <TouchableOpacity onPress={() => setScreen('modes')}>
               <Text style={S.backBtn}>← Back</Text>
             </TouchableOpacity>
           </View>
-          <Text style={S.h2}>Multiplayer</Text>
-          <Text style={[S.muted, { marginBottom: 28 }]}>Start a new room or join an existing one with a code.</Text>
-          <TouchableOpacity style={S.btnGold} onPress={() => setScreen('create')}>
-            <Text style={S.btnGoldText}>✦  Create New Game</Text>
+
+          {/* Hero */}
+          <View style={{ alignItems: 'center', marginBottom: 36 }}>
+            <View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: 'rgba(124,58,237,0.14)', borderWidth: 2, borderColor: 'rgba(167,139,250,0.38)', alignItems: 'center', justifyContent: 'center', marginBottom: 18, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 18, elevation: 10 }}>
+              <Text style={{ fontSize: 36 }}>👥</Text>
+            </View>
+            <Text style={{ fontFamily: F.serifBlack, fontSize: 26, color: C.text, letterSpacing: 1.5, marginBottom: 8 }}>MULTIPLAYER</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', marginBottom: 10 }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(124,58,237,0.25)' }} />
+              <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: 'rgba(167,139,250,0.45)', marginHorizontal: 8 }} />
+              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(124,58,237,0.25)' }} />
+            </View>
+            <Text style={{ fontFamily: F.sans, fontSize: 14, color: C.muted, textAlign: 'center', lineHeight: 20, maxWidth: 260 }}>
+              Gather your friends. One host picks the secret,{'\n'}everyone else deduces.
+            </Text>
+          </View>
+
+          {/* Create card — gold glass */}
+          <TouchableOpacity onPress={() => setScreen('create')} activeOpacity={0.85} style={{ marginBottom: 14 }}>
+            <View style={{ borderRadius: 20, shadowColor: C.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.30, shadowRadius: 18, elevation: 10 }}>
+              <LinearGradient colors={['rgba(255,232,160,0.68)', 'rgba(212,168,74,0.28)', 'rgba(140,90,18,0.44)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 1.5 }}>
+                <LinearGradient colors={['rgba(212,168,74,0.20)', 'rgba(100,65,10,0.13)', 'rgba(40,25,5,0.26)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 18.5, overflow: 'hidden', padding: 20 }}>
+                  <LinearGradient colors={['rgba(255,232,160,0.26)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 52 }} />
+                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 17.5, borderWidth: 1, borderColor: 'rgba(255,232,160,0.13)' }} />
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                    <View style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: 'rgba(212,168,74,0.16)', borderWidth: 1.5, borderColor: 'rgba(255,220,140,0.40)', alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontFamily: F.serifBold, fontSize: 22, color: C.gold }}>✦</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: F.serifBold, fontSize: 17, color: C.gold, letterSpacing: 0.5, marginBottom: 3 }}>Create New Game</Text>
+                      <Text style={{ fontFamily: F.sans, fontSize: 13, color: 'rgba(255,220,140,0.65)', lineHeight: 18 }}>Start a private or public room as host</Text>
+                    </View>
+                    <Text style={{ color: C.gold, fontSize: 22 }}>›</Text>
+                  </View>
+                </LinearGradient>
+              </LinearGradient>
+            </View>
           </TouchableOpacity>
-          <Divider />
-          <TouchableOpacity style={S.btnOutline} onPress={() => setScreen('join')}>
-            <Text style={S.btnOutlineText}>Join with a Code</Text>
+
+          {/* OR divider */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 6 }}>
+            <View style={{ flex: 1, height: 1, backgroundColor: C.border }} />
+            <Text style={{ fontFamily: F.sansMed, fontSize: 11, color: C.dim, letterSpacing: 2 }}>OR</Text>
+            <View style={{ flex: 1, height: 1, backgroundColor: C.border }} />
+          </View>
+
+          {/* Join card — violet glass */}
+          <TouchableOpacity onPress={() => setScreen('join')} activeOpacity={0.85} style={{ marginTop: 14, marginBottom: 6 }}>
+            <View style={{ borderRadius: 20, shadowColor: C.violet, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.28, shadowRadius: 14, elevation: 8 }}>
+              <LinearGradient colors={['rgba(180,140,255,0.58)', 'rgba(124,58,237,0.24)', 'rgba(70,20,160,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 1.5 }}>
+                <LinearGradient colors={['rgba(124,58,237,0.18)', 'rgba(70,25,150,0.11)', 'rgba(30,8,80,0.24)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 18.5, overflow: 'hidden', padding: 20 }}>
+                  <LinearGradient colors={['rgba(180,140,255,0.20)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 50 }} />
+                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 17.5, borderWidth: 1, borderColor: 'rgba(180,140,255,0.11)' }} />
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                    <View style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: 'rgba(124,58,237,0.18)', borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.38)', alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 24 }}>🔑</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: F.serifBold, fontSize: 17, color: C.violet2, letterSpacing: 0.5, marginBottom: 3 }}>Join with a Code</Text>
+                      <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, lineHeight: 18 }}>Enter the 6-letter code from your host</Text>
+                    </View>
+                    <Text style={{ color: C.violet2, fontSize: 22 }}>›</Text>
+                  </View>
+                </LinearGradient>
+              </LinearGradient>
+            </View>
+          </TouchableOpacity>
+
+          {/* Browse public rooms link */}
+          <TouchableOpacity onPress={() => setScreen('rooms')} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 16, marginTop: 6 }}>
+            <Text style={{ fontFamily: F.sansMed, fontSize: 13, color: C.dim }}>🌐</Text>
+            <Text style={{ fontFamily: F.sansMed, fontSize: 13, color: C.dim, letterSpacing: 0.3 }}>Browse public rooms</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -3578,27 +3661,43 @@ export default function EnigmaGame() {
           <AvatarPicker selected={selectedAvatarIdx} onSelect={setSelectedAvatarIdx} />
 
           <Text style={S.fieldLabel}>Room Visibility</Text>
-          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
-            <TouchableOpacity
-              onPress={() => setIsPublicRoom(false)}
-              style={[S.visTile, !isPublicRoom && S.visTileSel]}
-            >
-              <Text style={{ fontSize: 22, marginBottom: 6 }}>🔒</Text>
-              <Text style={[S.visTileTitle, !isPublicRoom && { color: C.gold }]}>Private</Text>
-              <Text style={S.visTileDesc}>Share a code or QR with friends</Text>
+          <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
+            {/* Private */}
+            <TouchableOpacity onPress={() => setIsPublicRoom(false)} activeOpacity={0.8} style={{ flex: 1 }}>
+              <View style={{ borderRadius: 14, shadowColor: !isPublicRoom ? C.gold : 'transparent', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.28, shadowRadius: 10, elevation: !isPublicRoom ? 6 : 0 }}>
+                <LinearGradient
+                  colors={!isPublicRoom ? ['rgba(255,232,160,0.60)', 'rgba(212,168,74,0.22)', 'rgba(140,90,18,0.38)'] : ['rgba(50,50,100,0.40)', 'rgba(28,28,62,0.30)', 'rgba(16,16,48,0.40)']}
+                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14, padding: 1.2 }}>
+                  <View style={{ borderRadius: 13, backgroundColor: !isPublicRoom ? 'rgba(212,168,74,0.12)' : 'rgba(22,22,52,0.88)', padding: 14, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 24, marginBottom: 6 }}>🔒</Text>
+                    <Text style={{ fontFamily: F.sansBold, fontSize: 14, color: !isPublicRoom ? C.gold : C.text, marginBottom: 3 }}>Private</Text>
+                    <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, textAlign: 'center', lineHeight: 14 }}>Share a code or QR with friends</Text>
+                  </View>
+                </LinearGradient>
+              </View>
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setIsPublicRoom(true)}
-              style={[S.visTile, isPublicRoom && S.visTileSel]}
-            >
-              <Text style={{ fontSize: 22, marginBottom: 6 }}>🌐</Text>
-              <Text style={[S.visTileTitle, isPublicRoom && { color: C.gold }]}>Public</Text>
-              <Text style={S.visTileDesc}>Anyone can find and join this room</Text>
+            {/* Public */}
+            <TouchableOpacity onPress={() => setIsPublicRoom(true)} activeOpacity={0.8} style={{ flex: 1 }}>
+              <View style={{ borderRadius: 14, shadowColor: isPublicRoom ? C.violet : 'transparent', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.28, shadowRadius: 10, elevation: isPublicRoom ? 6 : 0 }}>
+                <LinearGradient
+                  colors={isPublicRoom ? ['rgba(180,140,255,0.60)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.38)'] : ['rgba(50,50,100,0.40)', 'rgba(28,28,62,0.30)', 'rgba(16,16,48,0.40)']}
+                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14, padding: 1.2 }}>
+                  <View style={{ borderRadius: 13, backgroundColor: isPublicRoom ? 'rgba(124,58,237,0.12)' : 'rgba(22,22,52,0.88)', padding: 14, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 24, marginBottom: 6 }}>🌐</Text>
+                    <Text style={{ fontFamily: F.sansBold, fontSize: 14, color: isPublicRoom ? C.violet2 : C.text, marginBottom: 3 }}>Public</Text>
+                    <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, textAlign: 'center', lineHeight: 14 }}>Anyone can find and join this room</Text>
+                  </View>
+                </LinearGradient>
+              </View>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={[S.btnGold, !nameInput.trim() && S.btnDisabled]} onPress={createGame} disabled={!nameInput.trim()}>
-            <Text style={S.btnGoldText}>Create Room →</Text>
+          <TouchableOpacity disabled={!nameInput.trim()} onPress={createGame} activeOpacity={0.85} style={!nameInput.trim() ? { opacity: 0.4 } : {}}>
+            <View style={{ borderRadius: 14, shadowColor: C.gold, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 14, elevation: 8 }}>
+              <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 14, paddingVertical: 16, alignItems: 'center' }}>
+                <Text style={{ fontFamily: F.sansBold, fontSize: 15, color: '#1a0f00', letterSpacing: 0.5 }}>Create Room →</Text>
+              </LinearGradient>
+            </View>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -3693,26 +3792,33 @@ export default function EnigmaGame() {
                 return (
                   <TouchableOpacity
                     key={r.roomCode}
-                    style={[S.roomRow, full && { opacity: 0.5 }]}
+                    activeOpacity={0.82}
+                    style={{ marginBottom: 10, opacity: full ? 0.5 : 1 }}
                     onPress={() => !full && readyToJoin && joinPublicRoom(r.roomCode)}
                     disabled={full || !readyToJoin}
                   >
-                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}>
-                      <Text style={{ fontSize: 22 }}>{a.emoji}</Text>
+                    <View style={{ borderRadius: 16, shadowColor: C.violet, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.22, shadowRadius: 10, elevation: 6 }}>
+                      <LinearGradient colors={['rgba(130,100,200,0.45)', 'rgba(60,30,130,0.22)', 'rgba(28,14,80,0.35)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1 }}>
+                        <View style={{ borderRadius: 15, backgroundColor: 'rgba(22,22,52,0.88)', flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
+                          <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.30)' }}>
+                            <Text style={{ fontSize: 24 }}>{a.emoji}</Text>
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={{ fontFamily: F.sansBold, fontSize: 15, color: C.text }}>{r.hostName}'s room</Text>
+                            <Text style={{ fontSize: 11, color: C.dim, fontFamily: F.sans, marginTop: 2 }}>
+                              Code {r.roomCode} · {r.playerCount} player{r.playerCount !== 1 ? 's' : ''} waiting
+                            </Text>
+                          </View>
+                          {full ? (
+                            <View style={S.badgeGuesser}>
+                              <Text style={S.badgeGuesserText}>Full</Text>
+                            </View>
+                          ) : (
+                            <Text style={{ color: C.violet2, fontSize: 22 }}>›</Text>
+                          )}
+                        </View>
+                      </LinearGradient>
                     </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: C.text }}>{r.hostName}'s room</Text>
-                      <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 2 }}>
-                        Code {r.roomCode} · {r.playerCount} player{r.playerCount !== 1 ? 's' : ''} waiting
-                      </Text>
-                    </View>
-                    {full ? (
-                      <View style={S.badgeGuesser}>
-                        <Text style={S.badgeGuesserText}>Full</Text>
-                      </View>
-                    ) : (
-                      <Text style={{ color: C.gold, fontSize: 22, fontFamily: 'Outfit_400Regular' }}>›</Text>
-                    )}
                   </TouchableOpacity>
                 );
               })}
@@ -3744,64 +3850,70 @@ export default function EnigmaGame() {
 
           {/* Room code + QR */}
           {game.isPublic ? (
-            <View style={{
-              backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1,
-              borderColor: 'rgba(109,40,217,0.4)', borderRadius: 16,
-              padding: 20, alignItems: 'center', marginVertical: 14,
-            }}>
-              <Text style={{ fontSize: 32, marginBottom: 8 }}>🌐</Text>
-              <Text style={[S.tH3, { color: C.violet2, marginBottom: 4 }]}>
-                Room is Public
-              </Text>
-              <Text style={[S.tCaption, { color: C.muted, textAlign: 'center', lineHeight: 18, marginBottom: 14 }]}>
-                Your room is listed in the public browser.{'\n'}Anyone can find and join while you wait here.
-              </Text>
-              <View style={{ height: 1, backgroundColor: C.border2, width: '100%', marginBottom: 14 }} />
-              <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6, fontFamily: 'Outfit_400Regular' }}>
-                Or share directly
-              </Text>
-              <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 30, color: C.gold, letterSpacing: 8, marginBottom: 4 }}>
-                {game.roomCode}
-              </Text>
-              <View style={{ backgroundColor: '#fff', borderRadius: 10, padding: 8, marginTop: 8 }}>
-                <QRCode
-                  value={joinLink || `enigma://join?code=${game.roomCode}`}
-                  size={110} backgroundColor="#ffffff" color="#06060f"
-                />
-              </View>
+            <View style={{ borderRadius: 20, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.32, shadowRadius: 18, elevation: 10, marginVertical: 14 }}>
+              <LinearGradient colors={['rgba(180,140,255,0.62)', 'rgba(124,58,237,0.26)', 'rgba(70,20,160,0.42)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 1.5 }}>
+                <LinearGradient colors={['rgba(124,58,237,0.20)', 'rgba(80,30,180,0.13)', 'rgba(40,10,90,0.26)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 18.5, overflow: 'hidden', padding: 22, alignItems: 'center' }}>
+                  <LinearGradient colors={['rgba(200,160,255,0.22)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 56 }} />
+                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 17.5, borderWidth: 1, borderColor: 'rgba(180,140,255,0.13)' }} />
+                  <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: 'rgba(124,58,237,0.20)', borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.40)', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                    <Text style={{ fontSize: 26 }}>🌐</Text>
+                  </View>
+                  <Text style={{ fontFamily: F.serifBold, fontSize: 17, color: C.violet2, marginBottom: 6, letterSpacing: 0.3 }}>Room is Public</Text>
+                  <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, textAlign: 'center', lineHeight: 18, marginBottom: 16 }}>
+                    Your room is listed in the public browser.{'\n'}Anyone can find and join while you wait here.
+                  </Text>
+                  <View style={{ height: 1, backgroundColor: 'rgba(167,139,250,0.20)', width: '100%', marginBottom: 16 }} />
+                  <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 8, fontFamily: F.sansBold }}>Or share directly</Text>
+                  <Text style={{ fontFamily: F.serifBlack, fontSize: 32, color: C.gold, letterSpacing: 8, marginBottom: 4, textShadowColor: 'rgba(212,168,74,0.4)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 }}>{game.roomCode}</Text>
+                  <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 10, marginTop: 10 }}>
+                    <QRCode
+                      value={joinLink || `enigma://join?code=${game.roomCode}`}
+                      size={110} backgroundColor="#ffffff" color="#06060f"
+                    />
+                  </View>
+                </LinearGradient>
+              </LinearGradient>
             </View>
           ) : (
-            <View style={S.codeBox}>
-              <Text style={S.codeBoxLabel}>Room Code</Text>
-              <Text style={S.codeBoxValue}>{game.roomCode}</Text>
-              <Text style={S.codeBoxSub}>Share this code or scan QR to join</Text>
-              <View style={{ marginTop: 16, alignItems: 'center' }}>
-                <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 10 }}>
-                  <QRCode
-                    value={joinLink || `enigma://join?code=${game.roomCode}`}
-                    size={140} backgroundColor="#ffffff" color="#06060f"
-                  />
-                </View>
-              </View>
+            <View style={{ borderRadius: 22, shadowColor: C.gold, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.38, shadowRadius: 22, elevation: 12, marginVertical: 14 }}>
+              <LinearGradient colors={['rgba(255,232,160,0.72)', 'rgba(212,168,74,0.30)', 'rgba(140,90,18,0.50)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 1.5 }}>
+                <LinearGradient colors={['rgba(212,168,74,0.24)', 'rgba(120,80,15,0.14)', 'rgba(50,30,5,0.28)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 20.5, overflow: 'hidden', padding: 24, alignItems: 'center' }}>
+                  <LinearGradient colors={['rgba(255,232,160,0.28)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 60 }} />
+                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 19.5, borderWidth: 1, borderColor: 'rgba(255,232,160,0.16)' }} />
+                  <Text style={{ fontSize: 10, color: 'rgba(255,220,140,0.65)', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 10, fontFamily: F.sansBold }}>Room Code</Text>
+                  <Text style={{ fontFamily: F.serifBlack, fontSize: 40, color: C.gold, letterSpacing: 10, textShadowColor: 'rgba(212,168,74,0.5)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8 }}>{game.roomCode}</Text>
+                  <Text style={{ fontFamily: F.sans, fontSize: 12, color: 'rgba(255,220,140,0.55)', marginTop: 8, marginBottom: 18 }}>Share this code or scan QR to join</Text>
+                  <View style={{ backgroundColor: '#fff', borderRadius: 14, padding: 12 }}>
+                    <QRCode
+                      value={joinLink || `enigma://join?code=${game.roomCode}`}
+                      size={140} backgroundColor="#ffffff" color="#06060f"
+                    />
+                  </View>
+                </LinearGradient>
+              </LinearGradient>
             </View>
           )}
 
           {/* Players */}
-          <View style={S.card}>
-            <Text style={S.cardTitle}>Players</Text>
-            {game.players.map((p) => (
-              <View key={p.id} style={S.playerItem}>
-                <PlayerAvatar p={p} />
-                <Text style={[S.playerName, { flex: 1 }]}>
-                  {p.name}{p.id === viewerId ? <Text style={{ color: C.dim, fontSize: 11 }}> (You)</Text> : ''}
-                </Text>
-                <View style={p.isHost ? S.badgeHost : S.badgeGuesser}>
-                  <Text style={p.isHost ? S.badgeHostText : S.badgeGuesserText}>
-                    {p.isHost ? '👑 Host' : 'Guesser'}
-                  </Text>
-                </View>
+          <View style={{ borderRadius: 18, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 6, marginBottom: 12 }}>
+            <LinearGradient colors={['rgba(80,60,160,0.55)', 'rgba(30,20,80,0.30)', 'rgba(16,10,50,0.45)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 18, padding: 1 }}>
+              <View style={{ borderRadius: 17, backgroundColor: 'rgba(22,22,52,0.92)', padding: 16 }}>
+                <Text style={[S.cardTitle, { marginBottom: 12 }]}>Players in Room</Text>
+                {game.players.map((p) => (
+                  <View key={p.id} style={[S.playerItem, { backgroundColor: 'rgba(28,28,62,0.70)', borderColor: C.border2 }]}>
+                    <PlayerAvatar p={p} />
+                    <Text style={[S.playerName, { flex: 1 }]}>
+                      {p.name}{p.id === viewerId ? <Text style={{ color: C.dim, fontSize: 11 }}> (You)</Text> : ''}
+                    </Text>
+                    <View style={p.isHost ? S.badgeHost : S.badgeGuesser}>
+                      <Text style={p.isHost ? S.badgeHostText : S.badgeGuesserText}>
+                        {p.isHost ? '👑 Host' : 'Guesser'}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
               </View>
-            ))}
+            </LinearGradient>
           </View>
 
           {/* Demo players */}
@@ -3819,15 +3931,15 @@ export default function EnigmaGame() {
         </ScrollView>
 
         {viewerIsHost && (
-          <View style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0,
-            padding: 16, paddingBottom: insets.bottom + 16,
-            backgroundColor: C.bg, borderTopWidth: 1, borderTopColor: C.border,
-          }}>
-            {game.players.length >= 2
-              ? <TouchableOpacity style={S.btnGold} onPress={startGame}><Text style={S.btnGoldText}>Start Game →</Text></TouchableOpacity>
-              : <Text style={[S.muted, { textAlign: 'center' }]}>Need at least 2 players to start</Text>
-            }
+          <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
+            <LinearGradient colors={['transparent', 'rgba(6,6,15,0.92)', '#06060f']} style={{ paddingTop: 20, paddingHorizontal: 20, paddingBottom: insets.bottom + 20 }}>
+              {game.players.length >= 2
+                ? <SolveButton label="Start Game →" onPress={startGame} />
+                : <View style={{ alignItems: 'center', paddingVertical: 14, backgroundColor: 'rgba(28,28,62,0.60)', borderRadius: 12, borderWidth: 1, borderColor: C.border }}>
+                    <Text style={[S.muted, { textAlign: 'center' }]}>Need at least 2 players to start</Text>
+                  </View>
+              }
+            </LinearGradient>
           </View>
         )}
       </View>
@@ -4416,26 +4528,38 @@ export default function EnigmaGame() {
       <PremiumBackground />
         <SBar />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 24 }]}>
-          {/* Winner block */}
-          <View style={{ alignItems: 'center', padding: 28, backgroundColor: 'rgba(200,168,74,0.06)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 20, marginVertical: 16 }}>
-            <Text style={{ fontSize: 52, marginBottom: 8 }}>{abandoned ? '👻' : hostWon ? '🎩' : '🎉'}</Text>
-            <Text style={[S.tH1, { color: C.gold }]}>
-              {abandoned ? `${game.abandonedHostName || 'The host'} left` : hostWon ? host?.name : winner?.name}
-            </Text>
-            <Text style={{ fontSize: 10, color: C.goldDim, letterSpacing: 3, textTransform: 'uppercase', marginTop: 8, fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 16 }}>
-              {abandoned
-                ? `Round ended — no points awarded.\n${host?.name || 'Next player'} is the new host.`
-                : hostWon
-                  ? 'defended the secret — nobody cracked it!'
-                  : 'cracked the secret!'}
-            </Text>
+          {/* Winner block — gold glass */}
+          <View style={{ borderRadius: 24, shadowColor: C.gold, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.40, shadowRadius: 24, elevation: 14, marginVertical: 16 }}>
+            <LinearGradient colors={['rgba(255,232,160,0.72)', 'rgba(212,168,74,0.30)', 'rgba(140,90,18,0.50)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 1.5 }}>
+              <LinearGradient colors={['rgba(212,168,74,0.24)', 'rgba(120,80,15,0.14)', 'rgba(50,30,5,0.28)']} locations={[0, 0.5, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 22.5, overflow: 'hidden', padding: 28, alignItems: 'center' }}>
+                <LinearGradient colors={['rgba(255,232,160,0.28)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 70 }} />
+                <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 21.5, borderWidth: 1, borderColor: 'rgba(255,232,160,0.16)' }} />
+                <Text style={{ fontSize: 56, marginBottom: 12 }}>{abandoned ? '👻' : hostWon ? '🎩' : '🎉'}</Text>
+                <Text style={{ fontFamily: F.serifBlack, fontSize: 26, color: C.gold, textAlign: 'center', letterSpacing: 0.5, textShadowColor: 'rgba(212,168,74,0.6)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8 }}>
+                  {abandoned ? `${game.abandonedHostName || 'The host'} left` : hostWon ? host?.name : winner?.name}
+                </Text>
+                <View style={{ width: 48, height: 1, backgroundColor: 'rgba(212,168,74,0.40)', marginVertical: 12 }} />
+                <Text style={{ fontSize: 11, color: 'rgba(255,220,140,0.75)', letterSpacing: 2.5, textTransform: 'uppercase', fontFamily: F.sansBold, textAlign: 'center', lineHeight: 18 }}>
+                  {abandoned
+                    ? `Round ended — no points awarded.\n${host?.name || 'Next player'} is the new host.`
+                    : hostWon
+                      ? 'defended the secret — nobody cracked it!'
+                      : 'cracked the secret!'}
+                </Text>
+              </LinearGradient>
+            </LinearGradient>
           </View>
 
-          {/* Secret reveal */}
-          <View style={{ backgroundColor: 'rgba(109,40,217,0.08)', borderWidth: 1, borderColor: 'rgba(109,40,217,0.4)', borderRadius: 12, padding: 14, alignItems: 'center', marginBottom: 16 }}>
-            <Text style={{ fontSize: 10, color: C.dim, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4, fontFamily: 'Outfit_400Regular' }}>The Secret Was</Text>
-            <Text style={[S.tH2, { color: C.violet2 }]}>{game.secretAnswer}</Text>
-            <Text style={[S.tCaption, { color: C.dim, marginTop: 4 }]}>{game.theme?.icon} {game.theme?.label}</Text>
+          {/* Secret reveal — violet glass */}
+          <View style={{ borderRadius: 16, shadowColor: C.violet, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.28, shadowRadius: 14, elevation: 8, marginBottom: 16 }}>
+            <LinearGradient colors={['rgba(180,140,255,0.58)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.38)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.5 }}>
+              <LinearGradient colors={['rgba(124,58,237,0.18)', 'rgba(70,25,150,0.11)', 'rgba(30,8,80,0.22)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 14.5, overflow: 'hidden', padding: 18, alignItems: 'center' }}>
+                <LinearGradient colors={['rgba(180,140,255,0.20)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 44 }} />
+                <Text style={{ fontSize: 10, color: C.violet2, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6, fontFamily: F.sansBold }}>The Secret Was</Text>
+                <Text style={{ fontFamily: F.serifBold, fontSize: 22, color: C.text, textAlign: 'center', letterSpacing: 0.3 }}>{game.secretAnswer}</Text>
+                <Text style={{ fontFamily: F.sansMed, fontSize: 12, color: C.dim, marginTop: 6 }}>{game.theme?.icon} {game.theme?.label}</Text>
+              </LinearGradient>
+            </LinearGradient>
           </View>
 
           {/* Leaderboard */}
@@ -4481,31 +4605,55 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
-        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}>
-          <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-            <Text style={{ fontSize: 60, marginBottom: 10 }}>🏆</Text>
-            <Text style={[S.tDisplay, { color: C.gold }]}>Final Standings</Text>
+        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 32 }]}>
+          {/* Trophy hero */}
+          <View style={{ alignItems: 'center', paddingVertical: 28 }}>
+            <View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: 'rgba(212,168,74,0.12)', borderWidth: 2, borderColor: 'rgba(212,168,74,0.40)', alignItems: 'center', justifyContent: 'center', marginBottom: 18, shadowColor: C.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.45, shadowRadius: 20, elevation: 12 }}>
+              <Text style={{ fontSize: 44 }}>🏆</Text>
+            </View>
+            <Text style={{ fontFamily: F.serifBlack, fontSize: 28, color: C.gold, letterSpacing: 1, textShadowColor: 'rgba(212,168,74,0.5)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 10 }}>Final Standings</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', width: '60%', marginTop: 10 }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.22)' }} />
+              <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: 'rgba(212,168,74,0.45)', marginHorizontal: 8 }} />
+              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.22)' }} />
+            </View>
           </View>
-          <View style={S.card}>
+
+          {/* Leaderboard */}
+          <View style={[S.card, { padding: 12 }]}>
             {sorted.map((p, i) => {
               const a = av(p.avatarIdx);
-              return (
-                <View key={p.id} style={[S.sbRow, i === 0 && S.sbRowFirst]}>
-                  <Text style={[S.sbRank, { fontSize: i === 0 ? 22 : 18 }, i === 0 && { color: C.gold }]}>
-                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
-                  </Text>
-                  <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ fontSize: 22 }}>{a.emoji}</Text>
+              if (i === 0) {
+                return (
+                  <View key={p.id} style={{ borderRadius: 16, shadowColor: C.gold, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.30, shadowRadius: 14, elevation: 8, marginBottom: 8 }}>
+                    <LinearGradient colors={['rgba(255,232,160,0.65)', 'rgba(212,168,74,0.26)', 'rgba(140,90,18,0.44)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.5 }}>
+                      <LinearGradient colors={['rgba(212,168,74,0.22)', 'rgba(100,65,10,0.13)', 'rgba(40,25,5,0.24)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 14.5, overflow: 'hidden', flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14 }}>
+                        <LinearGradient colors={['rgba(255,232,160,0.24)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 40 }} />
+                        <Text style={{ fontFamily: F.serifBlack, fontSize: 24, color: C.gold, width: 28, textAlign: 'center' }}>🥇</Text>
+                        <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'rgba(255,220,140,0.40)' }}>
+                          <Text style={{ fontSize: 24 }}>{a.emoji}</Text>
+                        </View>
+                        <Text style={{ flex: 1, fontFamily: F.sansBold, fontSize: 16, color: C.gold }}>{p.name}</Text>
+                        <Text style={{ fontFamily: F.serifBold, fontSize: 26, color: C.gold }}>{p.score}</Text>
+                      </LinearGradient>
+                    </LinearGradient>
                   </View>
-                  <Text style={{ flex: 1, fontSize: 15, fontFamily: i === 0 ? 'Outfit_700Bold' : 'Outfit_500Medium', color: C.text }}>{p.name}</Text>
-                  <Text style={[S.sbPts, { fontSize: i === 0 ? 24 : 20 }]}>{p.score}</Text>
+                );
+              }
+              return (
+                <View key={p.id} style={[S.sbRow, { marginBottom: 6 }]}>
+                  <Text style={[S.sbRank, { fontSize: 18 }]}>{i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</Text>
+                  <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 20 }}>{a.emoji}</Text>
+                  </View>
+                  <Text style={{ flex: 1, fontFamily: F.sansMed, fontSize: 15, color: C.text }}>{p.name}</Text>
+                  <Text style={[S.sbPts, { fontSize: 20 }]}>{p.score}</Text>
                 </View>
               );
             })}
           </View>
-          <TouchableOpacity style={[S.btnGold, { marginTop: 16 }]} onPress={goHome}>
-            <Text style={S.btnGoldText}>Play Again</Text>
-          </TouchableOpacity>
+
+          <SolveButton label="Play Again" onPress={goHome} />
         </ScrollView>
       </View>
     );
