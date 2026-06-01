@@ -4868,44 +4868,53 @@ export default function EnigmaGame() {
 
           {viewerIsHost ? (
             <>
-              <Text style={S.h2}>Choose Your Secret</Text>
+              <Text style={[S.h2, { letterSpacing: 0.5 }]}>Choose Your Secret</Text>
+              <Text style={[S.muted, { marginBottom: 18 }]}>Guessers will try to unravel it in 20 questions.</Text>
 
-              {/* Source tabs */}
+              {/* Source tabs — segmented glass */}
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
-                <TouchableOpacity
-                  style={[{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', borderWidth: 1 },
-                    secretSource === 'library'
-                      ? { backgroundColor: 'rgba(200,168,74,0.12)', borderColor: C.goldDim }
-                      : { backgroundColor: C.card, borderColor: C.border2 }]}
-                  onPress={() => setSecretSource('library')}
-                >
-                  <Text style={{ fontSize: 13, fontFamily: 'Outfit_600SemiBold', color: secretSource === 'library' ? C.gold : C.muted }}>📚 From Library</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', borderWidth: 1 },
-                    secretSource === 'manual'
-                      ? { backgroundColor: 'rgba(200,168,74,0.12)', borderColor: C.goldDim }
-                      : { backgroundColor: C.card, borderColor: C.border2 }]}
-                  onPress={() => setSecretSource('manual')}
-                >
-                  <Text style={{ fontSize: 13, fontFamily: 'Outfit_600SemiBold', color: secretSource === 'manual' ? C.gold : C.muted }}>✏️ Write My Own</Text>
-                </TouchableOpacity>
+                {[
+                  { id: 'library', label: '📚 From Library' },
+                  { id: 'manual', label: '✏️ Write My Own' },
+                ].map((tab) => {
+                  const on = secretSource === tab.id;
+                  return (
+                    <TouchableOpacity key={tab.id} style={{ flex: 1 }} activeOpacity={0.85} onPress={() => setSecretSource(tab.id)}>
+                      {on ? (
+                        <LinearGradient colors={['rgba(255,232,160,0.55)', 'rgba(212,168,74,0.22)', 'rgba(140,90,18,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 12, padding: 1.2 }}>
+                          <View style={{ borderRadius: 11, backgroundColor: 'rgba(212,168,74,0.14)', paddingVertical: 12, alignItems: 'center' }}>
+                            <Text style={{ fontSize: 13, fontFamily: F.sansBold, color: C.gold }}>{tab.label}</Text>
+                          </View>
+                        </LinearGradient>
+                      ) : (
+                        <View style={{ borderRadius: 12, borderWidth: 1, borderColor: C.border2, backgroundColor: C.card, paddingVertical: 13, alignItems: 'center' }}>
+                          <Text style={{ fontSize: 13, fontFamily: F.sansSemi, color: C.muted }}>{tab.label}</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
 
               {secretSource === 'library' ? (
                 <>
                   <Text style={[S.muted, { marginBottom: 14 }]}>Pick a secret — you'll get private facts to help you answer questions confidently.</Text>
                   {themeLibrary.map((item, i) => (
-                    <TouchableOpacity
-                      key={i}
-                      style={{ backgroundColor: C.card2, borderWidth: 1, borderColor: C.border2, borderRadius: 14, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 12 }}
-                      onPress={() => setLibraryBriefing(item)}
-                    >
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: C.text, marginBottom: 3 }}>{item.secret}</Text>
-                        <Text style={[S.tCaption, { color: C.muted }]}>{item.hint}</Text>
+                    <TouchableOpacity key={i} activeOpacity={0.85} onPress={() => setLibraryBriefing(item)} style={{ marginBottom: 11 }}>
+                      <View style={{ borderRadius: 16, shadowColor: C.gold, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.18, shadowRadius: 10, elevation: 5 }}>
+                        <LinearGradient colors={['rgba(255,232,160,0.40)', 'rgba(212,168,74,0.16)', 'rgba(140,90,18,0.28)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.2 }}>
+                          <LinearGradient colors={['rgba(212,168,74,0.13)', 'rgba(60,40,10,0.10)', 'rgba(30,20,5,0.20)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 14.8, overflow: 'hidden', padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                            <LinearGradient colors={['rgba(255,232,160,0.16)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 36 }} />
+                            <View style={{ flex: 1 }}>
+                              <Text style={{ fontFamily: F.serifBold, fontSize: 15, color: C.text, marginBottom: 3, letterSpacing: 0.3 }}>{item.secret}</Text>
+                              <Text style={[S.tCaption, { color: 'rgba(255,220,140,0.70)' }]}>{item.hint}</Text>
+                            </View>
+                            <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(212,168,74,0.16)', borderWidth: 1, borderColor: 'rgba(255,220,140,0.40)', alignItems: 'center', justifyContent: 'center' }}>
+                              <Text style={{ color: C.gold, fontSize: 18 }}>›</Text>
+                            </View>
+                          </LinearGradient>
+                        </LinearGradient>
                       </View>
-                      <Text style={{ color: C.gold, fontSize: 22, fontFamily: 'Outfit_400Regular' }}>›</Text>
                     </TouchableOpacity>
                   ))}
                 </>
@@ -4929,10 +4938,23 @@ export default function EnigmaGame() {
               )}
             </>
           ) : (
-            <View style={{ flex: 1, alignItems: 'center', paddingTop: 80 }}>
-              <Text style={{ fontSize: 60, marginBottom: 16 }}>🤫</Text>
-              <Text style={[S.h2, { textAlign: 'center', marginBottom: 8 }]}>Host is choosing their secret...</Text>
-              <Text style={[S.muted, { textAlign: 'center' }]}>Stay sharp. The questioning begins soon.</Text>
+            <View style={{ flex: 1, alignItems: 'center', paddingTop: 56 }}>
+              <View style={{ width: 92, height: 92, borderRadius: 46, backgroundColor: 'rgba(124,58,237,0.14)', borderWidth: 2, borderColor: 'rgba(167,139,250,0.40)', alignItems: 'center', justifyContent: 'center', marginBottom: 22, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 18, elevation: 10 }}>
+                <Text style={{ fontSize: 46 }}>🤫</Text>
+              </View>
+              <Text style={[S.h2, { textAlign: 'center', marginBottom: 8 }]}>Host is choosing their secret…</Text>
+              <Text style={[S.muted, { textAlign: 'center', maxWidth: 260, marginBottom: 28 }]}>Stay sharp. The questioning begins soon.</Text>
+
+              {/* Host card — violet glass */}
+              <View style={{ borderRadius: 18, shadowColor: C.violet, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.32, shadowRadius: 14, elevation: 8, alignSelf: 'stretch', marginHorizontal: 8 }}>
+                <LinearGradient colors={['rgba(180,140,255,0.58)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 18, padding: 1.5 }}>
+                  <LinearGradient colors={['rgba(124,58,237,0.18)', 'rgba(70,25,150,0.12)', 'rgba(30,8,80,0.24)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 16.5, overflow: 'hidden', paddingVertical: 18, paddingHorizontal: 28, alignItems: 'center' }}>
+                    <LinearGradient colors={['rgba(180,140,255,0.20)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 44 }} />
+                    <Text style={{ fontSize: 10, color: C.violet2, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 6, fontFamily: F.sansBold }}>Host This Round</Text>
+                    <Text style={{ fontFamily: F.serifBold, fontSize: 22, color: C.text, letterSpacing: 0.3 }}>{host?.name}</Text>
+                  </LinearGradient>
+                </LinearGradient>
+              </View>
             </View>
           )}
         </ScrollView>
