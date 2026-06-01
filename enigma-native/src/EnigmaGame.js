@@ -4753,35 +4753,64 @@ export default function EnigmaGame() {
 
           {viewerIsHost ? (
             <>
-              <Text style={S.h2}>Choose a Theme</Text>
-              <Text style={[S.muted, { marginBottom: 18 }]}>Your secret must fit within this category.</Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
-                {THEMES.map((t) => (
-                  <TouchableOpacity
-                    key={t.id}
-                    style={[S.themeTile, selectedTheme?.id === t.id && S.themeTileSel]}
-                    onPress={() => setSelectedTheme(t)}
-                  >
-                    <Text style={{ fontSize: 26, marginBottom: 7 }}>{t.icon}</Text>
-                    <Text style={{ fontSize: 12, fontFamily: 'Outfit_600SemiBold', color: C.text, textAlign: 'center', lineHeight: 16 }}>{t.label}</Text>
-                    <Text style={{ fontSize: 10, color: C.muted, marginTop: 4, textAlign: 'center', lineHeight: 14, fontFamily: 'Outfit_400Regular' }}>{t.desc}</Text>
-                  </TouchableOpacity>
-                ))}
+              <Text style={[S.h2, { letterSpacing: 0.5 }]}>Choose a Theme</Text>
+              <Text style={[S.muted, { marginBottom: 20 }]}>Your secret must fit within this category.</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+                {THEMES.map((t) => {
+                  const sel = selectedTheme?.id === t.id;
+                  return (
+                    <TouchableOpacity key={t.id} onPress={() => setSelectedTheme(t)} activeOpacity={0.85} style={{ width: '47%' }}>
+                      {sel ? (
+                        <View style={{ borderRadius: 16, shadowColor: C.violet, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.42, shadowRadius: 14, elevation: 9 }}>
+                          <LinearGradient colors={['rgba(190,155,255,0.92)', 'rgba(124,58,237,0.52)', 'rgba(76,24,170,0.70)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 2 }}>
+                            <LinearGradient colors={['rgba(124,58,237,0.26)', 'rgba(80,30,180,0.16)', 'rgba(40,10,90,0.30)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 14, overflow: 'hidden', padding: 15, minHeight: 132 }}>
+                              <LinearGradient colors={['rgba(200,160,255,0.26)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 42 }} />
+                              <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                                <Text style={{ fontSize: 28, marginBottom: 8 }}>{t.icon}</Text>
+                                <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: C.violet2, alignItems: 'center', justifyContent: 'center' }}>
+                                  <Text style={{ fontSize: 11, color: '#1a0830', fontFamily: F.sansBold }}>✓</Text>
+                                </View>
+                              </View>
+                              <Text style={{ fontFamily: F.serifBold, fontSize: 14, color: C.violet2, marginBottom: 4, letterSpacing: 0.3 }}>{t.label}</Text>
+                              <Text style={{ fontFamily: F.sans, fontSize: 11, color: 'rgba(200,180,255,0.78)', lineHeight: 15 }}>{t.desc}</Text>
+                            </LinearGradient>
+                          </LinearGradient>
+                        </View>
+                      ) : (
+                        <View style={{ borderRadius: 16, borderWidth: 1.5, borderColor: C.border2, backgroundColor: C.card, padding: 17, minHeight: 132 }}>
+                          <Text style={{ fontSize: 28, marginBottom: 8 }}>{t.icon}</Text>
+                          <Text style={{ fontFamily: F.serifBold, fontSize: 14, color: C.text, marginBottom: 4, letterSpacing: 0.3 }}>{t.label}</Text>
+                          <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, lineHeight: 15 }}>{t.desc}</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
               <TouchableOpacity style={[S.btnGold, !selectedTheme && S.btnDisabled]} onPress={confirmTheme} disabled={!selectedTheme}>
                 <Text style={S.btnGoldText}>Continue →</Text>
               </TouchableOpacity>
             </>
           ) : (
-            <View style={{ flex: 1, alignItems: 'center', paddingTop: 60 }}>
-              <Text style={{ fontSize: 60, marginBottom: 16 }}>⏳</Text>
-              <Text style={[S.h2, { textAlign: 'center', marginBottom: 8 }]}>Host is choosing...</Text>
-              <Text style={[S.muted, { textAlign: 'center', marginBottom: 28 }]}>The host is selecting a theme. Prepare your mind.</Text>
-              <View style={{ backgroundColor: C.card, borderWidth: 1, borderColor: C.border2, borderRadius: 14, paddingVertical: 16, paddingHorizontal: 28, alignItems: 'center' }}>
-                <Text style={{ fontSize: 11, color: C.dim, letterSpacing: 2, marginBottom: 4, fontFamily: 'Outfit_400Regular' }}>HOST THIS ROUND</Text>
-                <Text style={[S.tH2, { color: C.gold }]}>{host?.name}</Text>
+            <View style={{ flex: 1, alignItems: 'center', paddingTop: 48 }}>
+              <View style={{ width: 92, height: 92, borderRadius: 46, backgroundColor: 'rgba(124,58,237,0.14)', borderWidth: 2, borderColor: 'rgba(167,139,250,0.40)', alignItems: 'center', justifyContent: 'center', marginBottom: 22, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 18, elevation: 10 }}>
+                <Text style={{ fontSize: 46 }}>⏳</Text>
               </View>
-              <Text style={{ fontSize: 11, color: C.dim, marginTop: 20, fontFamily: 'Outfit_400Regular' }}>
+              <Text style={[S.h2, { textAlign: 'center', marginBottom: 8 }]}>Host is choosing…</Text>
+              <Text style={[S.muted, { textAlign: 'center', marginBottom: 28, maxWidth: 260 }]}>The host is selecting a theme. Prepare your mind.</Text>
+
+              {/* Host card — violet glass */}
+              <View style={{ borderRadius: 18, shadowColor: C.violet, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.32, shadowRadius: 14, elevation: 8, alignSelf: 'stretch', marginHorizontal: 8 }}>
+                <LinearGradient colors={['rgba(180,140,255,0.58)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 18, padding: 1.5 }}>
+                  <LinearGradient colors={['rgba(124,58,237,0.18)', 'rgba(70,25,150,0.12)', 'rgba(30,8,80,0.24)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 16.5, overflow: 'hidden', paddingVertical: 18, paddingHorizontal: 28, alignItems: 'center' }}>
+                    <LinearGradient colors={['rgba(180,140,255,0.20)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 44 }} />
+                    <Text style={{ fontSize: 10, color: C.violet2, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 6, fontFamily: F.sansBold }}>Host This Round</Text>
+                    <Text style={{ fontFamily: F.serifBold, fontSize: 22, color: C.text, letterSpacing: 0.3 }}>{host?.name}</Text>
+                  </LinearGradient>
+                </LinearGradient>
+              </View>
+
+              <Text style={{ fontSize: 11, color: C.dim, marginTop: 20, fontFamily: 'Outfit_400Regular', textAlign: 'center' }}>
                 Switch to host in the bar above to proceed
               </Text>
             </View>
