@@ -707,7 +707,7 @@ const CONTENT_LIBRARY = {
   ],
 };
 
-// ─── Junior (Explorer) content ───────────────────────────────────────────────
+// ─── Junior content ───────────────────────────────────────────────────────────
 const JUNIOR_THEMES = [
   { id: 'famous_people',      label: 'Famous People',        icon: '🌟', desc: 'Heroes, leaders and legends',           color: '#ff6b35' },
   { id: 'famous_places',      label: 'Famous Places',        icon: '🗺️',  desc: 'Wonders and iconic landmarks',          color: '#00c9a7' },
@@ -3798,7 +3798,7 @@ export default function EnigmaGame() {
         {/* ── Tier Picker ── */}
         <Text style={[S.sectionLabel, { marginTop: 4, marginBottom: 12 }]}>Choose Your Level</Text>
         <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
-          {/* Explorer tile */}
+          {/* Junior tile */}
           <TouchableOpacity
             style={{ flex: 1 }}
             onPress={() => { setSoloTier('junior'); setSoloCategory('random'); }}
@@ -3811,15 +3811,15 @@ export default function EnigmaGame() {
               >
                 <View style={{ borderRadius: 14.5, backgroundColor: 'rgba(255,107,53,0.14)', padding: 16, alignItems: 'center', gap: 6 }}>
                   <Text style={{ fontSize: 28 }}>🌟</Text>
-                  <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: '#ff6b35', textAlign: 'center' }}>Explorer</Text>
-                  <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.muted, textAlign: 'center' }}>Fun topics · ages 10+</Text>
+                  <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: '#ff6b35', textAlign: 'center' }}>Junior</Text>
+                  <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, textAlign: 'center', lineHeight: 16 }}>Fun categories{'\n'}Easy clues · Learn as you play</Text>
                 </View>
               </LinearGradient>
             ) : (
               <View style={{ borderRadius: 16, borderWidth: 1.5, borderColor: C.border2, backgroundColor: C.card, padding: 16, alignItems: 'center', gap: 6, opacity: 0.6 }}>
                 <Text style={{ fontSize: 28 }}>🌟</Text>
-                <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: C.muted, textAlign: 'center' }}>Explorer</Text>
-                <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.dim, textAlign: 'center' }}>Fun topics · ages 10+</Text>
+                <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: C.muted, textAlign: 'center' }}>Junior</Text>
+                <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.dim, textAlign: 'center', lineHeight: 16 }}>Fun categories{'\n'}Easy clues · Learn as you play</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -3838,14 +3838,14 @@ export default function EnigmaGame() {
                 <View style={{ borderRadius: 14.5, backgroundColor: 'rgba(124,58,237,0.14)', padding: 16, alignItems: 'center', gap: 6 }}>
                   <Text style={{ fontSize: 28 }}>📚</Text>
                   <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: C.violet2, textAlign: 'center' }}>Scholar</Text>
-                  <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.muted, textAlign: 'center' }}>Deep trivia · all ages</Text>
+                  <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, textAlign: 'center', lineHeight: 16 }}>Deep trivia · Tougher secrets{'\n'}For seasoned players</Text>
                 </View>
               </LinearGradient>
             ) : (
               <View style={{ borderRadius: 16, borderWidth: 1.5, borderColor: C.border2, backgroundColor: C.card, padding: 16, alignItems: 'center', gap: 6, opacity: 0.6 }}>
                 <Text style={{ fontSize: 28 }}>📚</Text>
                 <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: C.muted, textAlign: 'center' }}>Scholar</Text>
-                <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.dim, textAlign: 'center' }}>Deep trivia · all ages</Text>
+                <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.dim, textAlign: 'center', lineHeight: 16 }}>Deep trivia · Tougher secrets{'\n'}For seasoned players</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -3855,14 +3855,14 @@ export default function EnigmaGame() {
 
         {isJunior ? (
           <>
-            {/* Random tile — Explorer */}
+            {/* Random tile — Junior */}
             <TouchableOpacity
               onPress={() => setSoloCategory('random')}
               style={{ backgroundColor: soloCategory === 'random' ? 'rgba(255,107,53,0.10)' : C.card, borderWidth: 1.5, borderColor: soloCategory === 'random' ? '#ff6b35' : C.border2, borderRadius: 14, padding: 16, marginBottom: 14, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <Text style={{ fontSize: 28 }}>🎲</Text>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === 'random' ? '#ff6b35' : C.text }}>Random — Surprise Me 🎲</Text>
-                <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>Pick from all Explorer categories</Text>
+                <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>Pick from all Junior categories</Text>
               </View>
               {soloCategory === 'random' && <Text style={{ color: '#ff6b35', fontSize: 18 }}>✓</Text>}
             </TouchableOpacity>
@@ -3941,7 +3941,7 @@ export default function EnigmaGame() {
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
               style={{ paddingVertical: 16, alignItems: 'center', borderRadius: 14 }}
             >
-              <Text style={{ fontFamily: F.sansBold, fontSize: 16, color: '#fff', letterSpacing: 0.5 }}>Start Exploring! 🌟</Text>
+              <Text style={{ fontFamily: F.sansBold, fontSize: 16, color: '#fff', letterSpacing: 0.5 }}>Start Junior Game! 🌟</Text>
             </LinearGradient>
           </TouchableOpacity>
         ) : (
