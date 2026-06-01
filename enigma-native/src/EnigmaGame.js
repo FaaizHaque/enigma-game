@@ -104,6 +104,18 @@ const AVATARS = [
   { emoji: '🌙', bg: '#1a1a3a' },
   { emoji: '🐯', bg: '#3a2a0a' },
   { emoji: '🦅', bg: '#2a2a1a' },
+  { emoji: '🦄', bg: '#2a1a3a' },
+  { emoji: '🐼', bg: '#1a1a1a' },
+  { emoji: '🐸', bg: '#0a2a0a' },
+  { emoji: '🚀', bg: '#0a0a3a' },
+  { emoji: '🦖', bg: '#2a3a0a' },
+  { emoji: '🌈', bg: '#1a2a3a' },
+  { emoji: '🎮', bg: '#2a0a3a' },
+  { emoji: '🍕', bg: '#3a1a0a' },
+  { emoji: '🎨', bg: '#1a0a3a' },
+  { emoji: '🏆', bg: '#3a2a0a' },
+  { emoji: '🎪', bg: '#3a0a2a' },
+  { emoji: '🐻', bg: '#2a1a0a' },
 ];
 
 // ─── Content Library ──────────────────────────────────────────────────────────
@@ -1390,28 +1402,58 @@ function SimBar({ players, viewerId, onSwitch, onHome, topInset = 0 }) {
 }
 
 function AvatarPicker({ selected, onSelect }) {
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const a = AVATARS[selected % AVATARS.length];
+
   return (
     <View style={{ marginBottom: 20 }}>
       <Text style={{ fontSize: 11, fontFamily: 'Outfit_700Bold', color: C.muted, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>
         Choose Your Avatar
       </Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-        {AVATARS.map((a, i) => (
-          <TouchableOpacity
-            key={i}
-            onPress={() => onSelect(i)}
-            style={{
-              width: 52, height: 52, borderRadius: 26,
-              backgroundColor: a.bg,
-              borderWidth: selected === i ? 3 : 1.5,
-              borderColor: selected === i ? C.gold : C.border2,
-              alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            <Text style={{ fontSize: selected === i ? 22 : 26 }}>{a.emoji}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+
+      {/* Compact button showing current avatar */}
+      <TouchableOpacity
+        onPress={() => setPickerOpen(true)}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1.5, borderColor: C.border2, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12 }}
+      >
+        <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: a.bg, borderWidth: 2.5, borderColor: C.gold, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ fontSize: 26 }}>{a.emoji}</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontFamily: F.sansSemi, fontSize: 14, color: C.text }}>Your Avatar</Text>
+          <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.muted, marginTop: 2 }}>Tap to browse all avatars</Text>
+        </View>
+        <Text style={{ color: C.dim, fontSize: 20 }}>›</Text>
+      </TouchableOpacity>
+
+      {/* Modal grid picker */}
+      <Modal visible={pickerOpen} animationType="slide" transparent onRequestClose={() => setPickerOpen(false)}>
+        <View style={S.overlay}>
+          <View style={[S.modal, { maxHeight: '82%' }]}>
+            <View style={S.modalHandle} />
+            <Text style={[S.modalTitle, { marginBottom: 4 }]}>Pick Your Avatar</Text>
+            <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, textAlign: 'center', marginBottom: 20 }}>Tap any avatar to select it</Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center', paddingBottom: 20 }}>
+                {AVATARS.map((av, i) => (
+                  <TouchableOpacity
+                    key={i}
+                    onPress={() => { onSelect(i); setPickerOpen(false); }}
+                    style={{ width: 68, height: 68, borderRadius: 34, backgroundColor: av.bg, borderWidth: selected === i ? 3 : 1.5, borderColor: selected === i ? C.gold : C.border2, alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Text style={{ fontSize: 30 }}>{av.emoji}</Text>
+                    {selected === i && (
+                      <View style={{ position: 'absolute', bottom: 2, right: 2, width: 16, height: 16, borderRadius: 8, backgroundColor: C.gold, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 9, color: '#1a0f00', fontFamily: F.sansBold }}>✓</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -3010,7 +3052,12 @@ export default function EnigmaGame() {
                 <View style={{ backgroundColor: 'rgba(34,197,94,0.07)', borderWidth: 1, borderColor: 'rgba(34,197,94,0.3)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
                   <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold', fontSize: 15, marginBottom: 8 }}>🤖 Solo Mode</Text>
                   <Text style={S.bodyText}>Play alone against the AI. Choose a category or go fully random. You get <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> to identify the secret.</Text>
-                  <Text style={[S.bodyText, { marginTop: 6 }]}>Ask yes/no questions, then tap <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold' }}>💡 I Know the Answer</Text> when you're ready to guess. Play as many rounds as you like — a new secret is picked every time.</Text>
+                  <Text style={[S.bodyText, { marginTop: 8 }]}>Pick your difficulty tier:</Text>
+                  <Text style={[S.bodyText, { marginTop: 4 }]}>
+                    {'🟢 '}<Text style={{ color: '#ff6b35', fontFamily: 'Outfit_700Bold' }}>Junior</Text>{' — Fun categories, easy clues and up to 3 free hints. Great for younger players and beginners.\n'}
+                    {'🟣 '}<Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold' }}>Scholar</Text>{' — Deep trivia, tougher secrets and 2 ad-unlocked hints. For seasoned players.'}
+                  </Text>
+                  <Text style={[S.bodyText, { marginTop: 8 }]}>Ask yes/no questions, then tap <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold' }}>💡 I Know the Answer</Text> when you're ready to guess. Play as many rounds as you like — a new secret is picked every time.</Text>
                   <Text style={[S.bodyText, { marginTop: 6 }]}>After each round, the <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>About This Secret</Text> card teaches you fascinating facts about what you were guessing.</Text>
                 </View>
 
@@ -3018,7 +3065,12 @@ export default function EnigmaGame() {
                 <View style={{ backgroundColor: 'rgba(124,58,237,0.07)', borderWidth: 1, borderColor: 'rgba(124,58,237,0.3)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
                   <Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold', fontSize: 15, marginBottom: 8 }}>👥 Multiplayer</Text>
                   <Text style={S.bodyText}>Create or join a room with friends. One player is the <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>Host</Text> who picks a secret; everyone else is a <Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold' }}>Guesser</Text>.</Text>
-                  <Text style={[S.bodyText, { marginTop: 6 }]}>The Host answers every question with <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold' }}>Yes</Text>, <Text style={{ color: C.danger, fontFamily: 'Outfit_700Bold' }}>No</Text>, or <Text style={{ color: C.warn, fontFamily: 'Outfit_700Bold' }}>Partly</Text>. There are <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> shared among all guessers.</Text>
+                  <Text style={[S.bodyText, { marginTop: 8 }]}>Choose your room type when creating a game:</Text>
+                  <Text style={[S.bodyText, { marginTop: 4 }]}>
+                    {'🔒 '}<Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>Private Room</Text>{' — Share the room code with friends. Only players with the code can join.\n'}
+                    {'🌐 '}<Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold' }}>Public Room</Text>{' — Open to anyone. Great for meeting new players!'}
+                  </Text>
+                  <Text style={[S.bodyText, { marginTop: 8 }]}>The Host answers every question with <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold' }}>Yes</Text>, <Text style={{ color: C.danger, fontFamily: 'Outfit_700Bold' }}>No</Text>, or <Text style={{ color: C.warn, fontFamily: 'Outfit_700Bold' }}>Partly</Text>. There are <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> shared among all guessers.</Text>
                   <Text style={[S.bodyText, { marginTop: 6 }]}>
                     {'• '}<Text style={{ color: C.success }}>Correct guess</Text>{' → Guesser wins, earns '}<Text style={{ color: C.gold }}>10 pts\n</Text>
                     {'• '}<Text style={{ color: C.danger }}>Wrong guess</Text>{' → Guesser is eliminated\n'}
@@ -3208,7 +3260,7 @@ export default function EnigmaGame() {
                     <MascotIcon size={54} uid="mode-solo" pulse={false} />
                     <View style={{ flex: 1 }}>
                       <Text style={{ fontFamily: F.serifBold, fontSize: 21, color: C.success, letterSpacing: 0.5, marginBottom: 5 }}>Solo Mode</Text>
-                      <Text style={{ fontFamily: F.sans, fontSize: 15, color: C.muted, lineHeight: 21 }}>A secret is chosen for you. 20 questions to figure it out.</Text>
+                      <Text style={{ fontFamily: F.sans, fontSize: 15, color: 'rgba(100,255,160,0.78)', lineHeight: 21 }}>A secret is chosen for you. 20 questions to figure it out.</Text>
                     </View>
                     <Text style={{ color: C.success, fontSize: 24 }}>›</Text>
                   </View>
