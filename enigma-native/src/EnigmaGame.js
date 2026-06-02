@@ -4323,47 +4323,6 @@ function PlayerAvatar({ p, size = 36 }) {
   );
 }
 
-function SimBar({ players, viewerId, onSwitch, onHome, topInset = 0 }) {
-  return (
-    <View style={{
-      backgroundColor: C.surface, borderBottomWidth: 1, borderBottomColor: C.border2,
-      paddingHorizontal: 12, paddingTop: topInset + 10, paddingBottom: 10,
-      flexDirection: 'row', alignItems: 'center',
-    }}>
-      <TouchableOpacity
-        onPress={onHome}
-        style={{ borderWidth: 1, borderColor: C.border2, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4, marginRight: 6 }}
-      >
-        <Text style={{ fontSize: 14 }}>🏠</Text>
-      </TouchableOpacity>
-      <Text style={{ fontSize: 9, fontFamily: 'Outfit_700Bold', color: C.dim, letterSpacing: 2, marginRight: 6 }}>
-        VIEW AS:
-      </Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
-        {players.map((p) => (
-          <TouchableOpacity
-            key={p.id}
-            onPress={() => onSwitch(p.id)}
-            style={{
-              backgroundColor: viewerId === p.id ? 'rgba(200,168,74,0.12)' : C.card,
-              borderWidth: 1,
-              borderColor: viewerId === p.id ? C.goldDim : C.border2,
-              borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4, marginRight: 6,
-            }}
-          >
-            <Text style={{
-              fontSize: 11, fontFamily: 'Outfit_600SemiBold',
-              color: viewerId === p.id ? C.gold : C.muted,
-            }}>
-              {p.isHost ? '👑 ' : ''}{p.name.split(' ')[0]}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </View>
-  );
-}
-
 function AvatarPicker({ selected, onSelect }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const a = AVATARS[selected % AVATARS.length];
@@ -5210,6 +5169,7 @@ export default function EnigmaGame() {
 
   const feedScrollRef = useRef(null);
   const gameRef = useRef(game);
+  const prevRoomCodeRef = useRef(null);
   const [guesserSecsLeft, setGuesserSecsLeft] = useState(30);
   const [hostSecsLeft, setHostSecsLeft] = useState(15);
   const [timeoutToast, setTimeoutToast] = useState(null);
@@ -5433,12 +5393,14 @@ export default function EnigmaGame() {
   const loadPublicRooms = async () => {
     setLoadingRooms(true);
     try {
+      const cutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
       const { data } = await supabase
         .from('sessions')
         .select('room_code, data, created_at')
         .eq('is_public', true)
+        .gte('created_at', cutoff)
         .order('created_at', { ascending: false })
-        .limit(30);
+        .limit(20);
       const rows = (data || [])
         .filter((r) => r.data?.status === 'lobby')
         .map((r) => {
@@ -5503,6 +5465,11 @@ export default function EnigmaGame() {
   const createGame = async (isPublic = isPublicRoom) => {
     if (!nameInput.trim()) return;
     try {
+      // Clean up any room this player previously created so stale lobbies don't accumulate
+      if (prevRoomCodeRef.current) {
+        try { await supabase.from('sessions').delete().eq('room_code', prevRoomCodeRef.current); } catch {}
+        prevRoomCodeRef.current = null;
+      }
       const roomCode = await uniqueCode();
       const playerId = 'p1';
       const session = {
@@ -5514,9 +5481,9 @@ export default function EnigmaGame() {
         isPublic, createdAt: new Date().toISOString(),
       };
       await supabase.from('sessions').upsert({ room_code: roomCode, data: session, is_public: isPublic });
+      prevRoomCodeRef.current = roomCode;
       setGame(session);
       setViewerId(playerId);
-      // Keep name & avatar so the player doesn't have to re-enter them later.
       setScreen('lobby');
     } catch {
       Alert.alert('Error', 'Could not create game. Check your connection.');
@@ -5930,10 +5897,6 @@ export default function EnigmaGame() {
   const joinLink = game?.roomCode
     ? LinkingExpo.createURL('/', { queryParams: { join: game.roomCode } })
     : `enigma://join?code=${game?.roomCode}`;
-
-  const SBar = () => game
-    ? <SimBar players={game.players} viewerId={viewerId} onSwitch={setViewerId} onHome={goHome} topInset={insets.top} />
-    : null;
 
   // ─── SPLASH ───────────────────────────────────────────────────────────────
   if (screen === 'splash') {
@@ -7607,7 +7570,6 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
-        <SBar />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 90 }]}>
           <View style={S.screenHeader}>
             <Chip label="Lobby" />
@@ -7719,7 +7681,6 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
-        <SBar />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 24 }]}>
           <View style={S.screenHeader}>
             <Chip label={`Round ${game.round}`} />
@@ -7786,7 +7747,7 @@ export default function EnigmaGame() {
               </View>
 
               <Text style={{ fontSize: 11, color: C.dim, marginTop: 20, fontFamily: 'Outfit_400Regular', textAlign: 'center' }}>
-                Switch to host in the bar above to proceed
+                Get ready — your questions are coming soon!
               </Text>
             </View>
           )}
@@ -7802,7 +7763,6 @@ export default function EnigmaGame() {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
         <PremiumBackground />
-        <SBar />
 
         {/* Host Briefing Modal — private facts revealed after picking a library secret */}
         <Modal visible={!!libraryBriefing} transparent animationType="slide" onRequestClose={() => setLibraryBriefing(null)}>
@@ -7945,7 +7905,6 @@ export default function EnigmaGame() {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
         <PremiumBackground />
-        <SBar />
 
         {/* Timeout toast — centred */}
         {timeoutToast && (
@@ -8065,12 +8024,9 @@ export default function EnigmaGame() {
                     </LinearGradient>
                   </LinearGradient>
                 </View>
-                <TouchableOpacity
-                  style={[S.btnGold, { alignSelf: 'stretch' }]}
-                  onPress={() => setViewerId(game.players.find(p => p.isHost)?.id)}
-                >
-                  <Text style={S.btnGoldText}>👑 Switch to Host to Verify</Text>
-                </TouchableOpacity>
+                <Text style={{ fontSize: 12, color: C.muted, textAlign: 'center', fontFamily: 'Outfit_400Regular' }}>
+                  Waiting for the host to accept or reject this answer…
+                </Text>
               </View>
             </View>
           </View>
@@ -8371,7 +8327,6 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
-        <SBar />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 24 }]}>
           {/* Winner block — gold glass */}
           <View style={{ borderRadius: 24, shadowColor: C.gold, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.40, shadowRadius: 24, elevation: 14, marginVertical: 16 }}>
@@ -8435,9 +8390,15 @@ export default function EnigmaGame() {
             <TouchableOpacity style={[S.btnOutline, { flex: 1 }]} onPress={() => setScreen('scoreboard')}>
               <Text style={S.btnOutlineText}>Final Scores</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[S.btnGold, { flex: 1 }]} onPress={nextRound}>
-              <Text style={S.btnGoldText}>Next Round →</Text>
-            </TouchableOpacity>
+            {viewerIsHost ? (
+              <TouchableOpacity style={[S.btnGold, { flex: 1 }]} onPress={nextRound}>
+                <Text style={S.btnGoldText}>Next Round →</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={[S.btnGold, S.btnDisabled, { flex: 1, alignItems: 'center', justifyContent: 'center' }]}>
+                <Text style={S.btnGoldText}>Waiting for host…</Text>
+              </View>
+            )}
           </View>
         </ScrollView>
       </View>
