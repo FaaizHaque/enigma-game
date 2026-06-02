@@ -767,6 +767,10 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Neil Armstrong',
       hint: 'The American astronaut who was the first human to walk on the Moon',
+      born: '5 August 1930',
+      died: '25 August 2012',
+      field: 'Space Exploration',
+      nationality: 'American',
       facts: [
         'Neil Armstrong was born in Ohio in 1930 and trained as a pilot and engineer before becoming an astronaut.',
         'On 20 July 1969, as commander of Apollo 11, he became the first human being to set foot on the Moon.',
@@ -817,6 +821,364 @@ const JUNIOR_LIBRARY = {
         'Ronaldo is famous for his powerful free-kicks, his incredible fitness, and his determination to train harder than almost anyone else.',
         'He has played for top clubs including Manchester United, Real Madrid, and Juventus, and is the all-time top scorer for the Portuguese national team.',
         'Off the pitch he is known for his charity work, having donated money for disaster relief and children\'s hospitals many times.',
+      ],
+    },
+    {
+      secret: 'Isaac Newton',
+      hint: 'The British scientist who discovered gravity and changed how we understand the universe',
+      born: '4 January 1643',
+      died: '31 March 1727',
+      field: 'Physics & Mathematics',
+      nationality: 'British',
+      facts: [
+        'Isaac Newton was born in England in 1643 and is famous for developing the laws of gravity and motion that explain how things move.',
+        'The story goes that he was sitting under an apple tree when an apple fell and made him wonder why things always fall downwards.',
+        'He invented a whole new type of mathematics called calculus to help him solve problems about moving objects — and he did it before he was 27!',
+        'Newton also discovered that white light is actually made up of all the colours of the rainbow by shining it through a glass prism.',
+        'His book Principia Mathematica (1687) is one of the most important science books ever written and is still studied today.',
+      ],
+    },
+    {
+      secret: 'Walt Disney',
+      hint: 'The American animator who created Mickey Mouse and built a magical entertainment empire',
+      born: '5 December 1901',
+      died: '15 December 1966',
+      field: 'Animation & Entertainment',
+      nationality: 'American',
+      facts: [
+        'Walt Disney was born in Illinois, USA in 1901 and fell in love with drawing from a very young age.',
+        'He created Mickey Mouse in 1928 — one of the most recognised cartoon characters in the world — and gave Mickey his own voice.',
+        'Disney produced the world\'s first full-length animated film, Snow White and the Seven Dwarfs, in 1937, which many people said was impossible to make.',
+        'He opened Disneyland in California in 1955 and dreamed up Walt Disney World in Florida, which opened in 1971 after he passed away.',
+        'Disney won more Academy Awards (22) than anyone else in history and built a company that today makes some of the world\'s most beloved films.',
+      ],
+    },
+    {
+      secret: 'Michael Jackson',
+      hint: 'The American pop star known as the "King of Pop" whose moonwalk dance move stunned the world',
+      born: '29 August 1958',
+      died: '25 June 2009',
+      field: 'Music & Entertainment',
+      nationality: 'American',
+      facts: [
+        'Michael Jackson was born in Indiana, USA in 1958 and started performing with his brothers in a group called The Jackson 5 when he was just five years old.',
+        'His album Thriller (1982) is the best-selling album of all time, with over 70 million copies sold worldwide.',
+        'He invented the "moonwalk" dance move in 1983 — a slide that makes it look like you are walking forward while actually moving backwards.',
+        'Jackson was known for his incredible stage shows, his signature white glove, and his high-pitched singing voice.',
+        'He was also a huge charity supporter and donated more than $300 million to charity during his lifetime.',
+      ],
+    },
+    {
+      secret: 'Lionel Messi',
+      hint: 'The Argentine football wizard widely considered the greatest footballer of all time',
+      born: '24 June 1987',
+      field: 'Football (Soccer)',
+      nationality: 'Argentine',
+      facts: [
+        'Lionel Messi was born in Rosario, Argentina in 1987 and moved to Spain as a child so he could get treatment for a growth condition and train with FC Barcelona.',
+        'He won the FIFA World Cup with Argentina in 2022, completing the one trophy that had been missing from his extraordinary career.',
+        'Messi has won the Ballon d\'Or — the award for the world\'s best player — a record eight times.',
+        'He is famous for his incredible dribbling skills; he can change direction at full speed while keeping the ball so close it looks glued to his foot.',
+        'During his time at FC Barcelona he became the club\'s all-time top scorer with over 672 goals, more than any other player in the club\'s history.',
+      ],
+    },
+    {
+      secret: 'Muhammad Ali',
+      hint: 'The American boxing champion known as "The Greatest" who was also a fearless civil rights activist',
+      born: '17 January 1942',
+      died: '3 June 2016',
+      field: 'Boxing & Activism',
+      nationality: 'American',
+      facts: [
+        'Muhammad Ali was born Cassius Clay in Louisville, Kentucky in 1942 and started boxing when he was 12 years old after someone stole his bicycle.',
+        'He won the Olympic gold medal in 1960 and became world heavyweight champion three times — more than any boxer before him.',
+        'Ali was known for his lightning-fast footwork and his famous battle cry: "Float like a butterfly, sting like a bee!"',
+        'He refused to fight in the Vietnam War, saying it went against his beliefs, which cost him three years of his boxing career but earned worldwide respect.',
+        'Outside the ring he was a passionate speaker for civil rights, equality, and peace, and is remembered as one of the greatest sportsmen and humanitarians in history.',
+      ],
+    },
+    {
+      secret: 'Bill Gates',
+      hint: 'The American tech billionaire who co-founded Microsoft and made personal computers available to everyone',
+      born: '28 October 1955',
+      field: 'Technology & Philanthropy',
+      nationality: 'American',
+      facts: [
+        'Bill Gates was born in Seattle, USA in 1955 and wrote his first computer program aged 13, scheduling classes at his school.',
+        'He co-founded Microsoft with Paul Allen in 1975, and their software — including Windows — helped put a personal computer in millions of homes and offices.',
+        'Gates became the world\'s richest person in the 1990s, a title he held on and off for many years.',
+        'He left his day-to-day role at Microsoft to focus on the Bill & Melinda Gates Foundation, which works to fight diseases and improve education in poorer countries.',
+        'The foundation has spent over $65 billion on global health and development projects, helping to nearly wipe out diseases like polio.',
+      ],
+    },
+    {
+      secret: 'Steve Jobs',
+      hint: 'The American visionary who co-founded Apple and gave the world the iPhone, iPad and iPod',
+      born: '24 February 1955',
+      died: '5 October 2011',
+      field: 'Technology & Entrepreneurship',
+      nationality: 'American',
+      facts: [
+        'Steve Jobs was born in San Francisco in 1955 and co-founded Apple in his parents\' garage at age 21 together with Steve Wozniak.',
+        'He was fired from Apple in 1985 but returned in 1997 to rescue the company and turned it into the most valuable business in the world.',
+        'Jobs introduced the iPod in 2001, revolutionising music; the iPhone in 2007, which changed how we use phones; and the iPad in 2010.',
+        'He was famous for his spectacular product launches where he wore his signature black turtleneck and jeans.',
+        'His motto was "Stay hungry, stay foolish" — encouraging people to keep learning and never be afraid to take risks.',
+      ],
+    },
+    {
+      secret: 'J.K. Rowling',
+      hint: 'The British author who wrote the Harry Potter series and became one of the most successful writers in history',
+      born: '31 July 1965',
+      field: 'Literature',
+      nationality: 'British',
+      facts: [
+        'J.K. Rowling was born in England in 1965 and had the idea for Harry Potter on a delayed train journey in 1990, scribbling notes on whatever scraps of paper she could find.',
+        'She was a single mother living on government benefits when she finished the first Harry Potter book — multiple publishers rejected it before one finally said yes.',
+        'The Harry Potter series has sold more than 600 million copies in over 80 languages, making it the best-selling book series in history.',
+        'Rowling created an entire magical world complete with its own sports (Quidditch), schools (Hogwarts), creatures, spells and history.',
+        'She is the first author to become a billionaire through writing books, though she later lost that status partly through generous donations to charity.',
+      ],
+    },
+    {
+      secret: 'Christopher Columbus',
+      hint: 'The Italian explorer who sailed west from Europe and reached the Americas in 1492',
+      born: 'c. 1451',
+      died: '20 May 1506',
+      field: 'Exploration & Navigation',
+      nationality: 'Italian (sailed for Spain)',
+      facts: [
+        'Christopher Columbus was born in Genoa, Italy around 1451 and became a skilled sailor and navigator from a young age.',
+        'In 1492 he sailed west from Spain with three ships — the Niña, the Pinta, and the Santa María — hoping to reach Asia by going the other way around the world.',
+        'Instead he reached the islands of the Caribbean, becoming one of the first Europeans to make contact with the Americas.',
+        'Columbus made four voyages to the Americas in total, exploring the Caribbean islands and parts of Central and South America.',
+        'His voyages opened the door to centuries of European exploration and settlement in the Americas, changing the history of the entire world.',
+      ],
+    },
+    {
+      secret: 'Queen Elizabeth II',
+      hint: 'The British monarch who was the longest-reigning queen in history, ruling for 70 years',
+      born: '21 April 1926',
+      died: '8 September 2022',
+      field: 'Monarchy & Public Service',
+      nationality: 'British',
+      facts: [
+        'Queen Elizabeth II was born in London in 1926 and became queen in 1952 at the age of 25 when her father King George VI died.',
+        'She was the longest-reigning British monarch and the longest-serving female head of state in world history, ruling for 70 years.',
+        'During her reign, Britain changed enormously — she saw the creation of the internet, the moon landings, and the end of the British Empire.',
+        'She was known for her sense of duty and dedication; she delivered her Christmas message to the nation every single year of her reign without fail.',
+        'The Queen was also a skilled horse rider and a passionate fan of horse racing, which she loved her whole life.',
+      ],
+    },
+    {
+      secret: 'Princess Diana',
+      hint: 'The British princess known as the "People\'s Princess" for her compassion and charity work',
+      born: '1 July 1961',
+      died: '31 August 1997',
+      field: 'Royalty & Humanitarian Work',
+      nationality: 'British',
+      facts: [
+        'Princess Diana was born Lady Diana Spencer in Norfolk, England in 1961 and married Prince Charles in 1981 in a ceremony watched by 750 million people worldwide.',
+        'She was mother to Princes William and Harry and was famous for her warmth, her ability to connect with ordinary people, and her deep compassion.',
+        'Diana shook hands with AIDS patients at a time when many people were afraid to touch them, helping to remove the stigma around the disease.',
+        'She walked through minefields in Angola to highlight the danger of landmines and campaigned vigorously for a global ban on them.',
+        'She died in a car crash in Paris in 1997 at the age of 36; millions of people around the world mourned her as the "People\'s Princess".',
+      ],
+    },
+    {
+      secret: 'Neymar Jr.',
+      hint: 'The flamboyant Brazilian footballer famous for his dazzling skills and goal-scoring for Brazil and PSG',
+      born: '5 February 1992',
+      field: 'Football (Soccer)',
+      nationality: 'Brazilian',
+      facts: [
+        'Neymar Jr. was born in Mogi das Cruzes, Brazil in 1992 and was spotted by scouts for Santos FC when he was just a teenager.',
+        'He won the Copa América with Brazil and the Champions League with FC Barcelona, becoming one of the most feared attackers in the world.',
+        'In 2017 he moved from Barcelona to Paris Saint-Germain (PSG) for a world-record transfer fee of £198 million.',
+        'Neymar is famous for his breathtaking tricks, flicks, and stepovers that leave defenders standing still in confusion.',
+        'He represented Brazil at three Olympic Games and won a gold medal on home soil at the 2016 Rio Olympics, becoming a national hero.',
+      ],
+    },
+    {
+      secret: 'Serena Williams',
+      hint: 'The American tennis champion who won more Grand Slam singles titles than any other player in the Open Era',
+      born: '26 September 1981',
+      field: 'Tennis',
+      nationality: 'American',
+      facts: [
+        'Serena Williams was born in Michigan, USA in 1981 and learned to play tennis on public courts in Compton, California with her father as coach.',
+        'She won 23 Grand Slam singles titles — the most by any player in the Open Era of tennis — and topped the world rankings for over 300 weeks.',
+        'Serena and her older sister Venus both became world champions, making them one of the greatest sporting families in history.',
+        'She returned to win the 2017 Australian Open while in the early stages of pregnancy, showing remarkable determination.',
+        'Beyond tennis, Serena became a fashion designer and businesswoman, and is admired worldwide as an icon of strength and perseverance.',
+      ],
+    },
+    {
+      secret: 'Michael Jordan',
+      hint: 'The American basketball legend who led the Chicago Bulls to six NBA championships and became a global sports icon',
+      born: '17 February 1963',
+      field: 'Basketball',
+      nationality: 'American',
+      facts: [
+        'Michael Jordan was born in Brooklyn, New York in 1963 and was cut from his high school basketball team — a setback he used as motivation to work even harder.',
+        'He led the Chicago Bulls to six NBA championships and was named the Finals Most Valuable Player every single time.',
+        'Jordan was famous for his incredible ability to jump — fans called him "Air Jordan" — and for his fierce determination to win at all costs.',
+        'His Nike Air Jordan trainers, first released in 1985, became one of the best-selling sports shoe lines in history and are still hugely popular today.',
+        'He is widely considered the greatest basketball player of all time and helped turn the NBA into a truly global sport.',
+      ],
+    },
+    {
+      secret: 'Roger Federer',
+      hint: 'The Swiss tennis master whose graceful playing style and 20 Grand Slam titles made him a legend of the sport',
+      born: '8 August 1981',
+      field: 'Tennis',
+      nationality: 'Swiss',
+      facts: [
+        'Roger Federer was born in Basel, Switzerland in 1981 and fell in love with tennis as a young child, practising for hours every day.',
+        'He won 20 Grand Slam singles titles during his career, including a record eight Wimbledon titles on the grass courts he loved most.',
+        'Federer was famous not just for winning but for how beautifully he played — his smooth, seemingly effortless strokes made him a joy to watch.',
+        'He spent a total of 310 weeks as world number one — the most in history — and is widely regarded as one of the greatest athletes of any sport.',
+        'He retired in 2022 at age 41 and his final match at the Laver Cup, alongside rivals-turned-friends Rafael Nadal, was watched by millions.',
+      ],
+    },
+    {
+      secret: 'Emma Watson',
+      hint: 'The British actress who grew up playing Hermione Granger in Harry Potter and became a UN Women Goodwill Ambassador',
+      born: '15 April 1990',
+      field: 'Acting & Activism',
+      nationality: 'British',
+      facts: [
+        'Emma Watson was born in Paris, France and grew up in England; she was cast as Hermione Granger in the Harry Potter films at just nine years old.',
+        'She appeared in all eight Harry Potter films as the clever, brave witch Hermione, a role that made her one of the most famous young actresses in the world.',
+        'Despite her early fame, Watson studied hard and earned a degree in English Literature from Brown University in the USA.',
+        'She became a United Nations Goodwill Ambassador for Women and launched the HeForShe campaign to promote gender equality worldwide.',
+        'Watson has been a vocal advocate for sustainable and ethical fashion, encouraging people to think about how their clothes are made.',
+      ],
+    },
+    {
+      secret: 'Leonardo DiCaprio',
+      hint: 'The American actor and passionate environmentalist famous for films like Titanic and The Revenant',
+      born: '11 November 1974',
+      field: 'Acting & Environmentalism',
+      nationality: 'American',
+      facts: [
+        'Leonardo DiCaprio was born in Los Angeles, California in 1974 and appeared in his first TV commercials as a toddler.',
+        'He starred in Titanic (1997) which became the highest-grossing film in history at the time and made him the most famous actor on the planet.',
+        'After being nominated for an Academy Award four times, he finally won for The Revenant (2016) — and used his acceptance speech to call for action on climate change.',
+        'DiCaprio founded the Leonardo DiCaprio Foundation in 1998, which has donated over $100 million to environmental causes around the world.',
+        'He is known for preparing intensely for his roles — for The Revenant he reportedly ate raw bison liver and slept inside an animal carcass to survive the cold.',
+      ],
+    },
+    {
+      secret: 'Will Smith',
+      hint: 'The American actor and rapper who starred in Men in Black and The Fresh Prince of Bel-Air',
+      born: '25 September 1968',
+      field: 'Acting & Music',
+      nationality: 'American',
+      facts: [
+        'Will Smith was born in Philadelphia, USA in 1968 and started his career as a rapper called "The Fresh Prince" before becoming a global film star.',
+        'His TV show The Fresh Prince of Bel-Air (1990–96) made him famous around the world and is still loved by fans today.',
+        'He has starred in some of the biggest blockbusters in history, including Men in Black, Bad Boys, and Ali.',
+        'Smith received Academy Award nominations for Ali and The Pursuit of Happyness, and won the Best Actor Oscar for King Richard in 2022.',
+        'He is also a producer, author, and one of the most followed celebrities on social media, famous for his motivational messages and family values.',
+      ],
+    },
+    {
+      secret: 'Tom Cruise',
+      hint: 'The American action movie star famous for performing his own breathtaking stunts in the Mission: Impossible films',
+      born: '3 July 1962',
+      field: 'Acting',
+      nationality: 'American',
+      facts: [
+        'Tom Cruise was born in Syracuse, New York in 1962 and first became famous in the 1980s with films like Top Gun and Risky Business.',
+        'He is famous for doing almost all of his own dangerous stunts — he has learned to fly jets, hang off the side of a plane mid-flight, and scale the Burj Khalifa skyscraper.',
+        'His Mission: Impossible franchise has earned over $4 billion worldwide and is known for having some of the most thrilling action sequences in cinema.',
+        'Cruise has been nominated for Academy Awards three times and has consistently been one of the highest-paid actors in Hollywood for over 30 years.',
+        'Despite being in his 60s, he continues to push the boundaries of what is possible in action films, planning to film a scene in space.',
+      ],
+    },
+    {
+      secret: 'Johnny Depp',
+      hint: 'The American actor famous for playing eccentric characters like Captain Jack Sparrow in Pirates of the Caribbean',
+      born: '9 June 1963',
+      field: 'Acting',
+      nationality: 'American',
+      facts: [
+        'Johnny Depp was born in Kentucky, USA in 1963 and first became famous on the TV show 21 Jump Street in the 1980s.',
+        'His portrayal of the quirky pirate Captain Jack Sparrow in Pirates of the Caribbean (2003) is one of the most beloved characters in film history.',
+        'Depp is known for completely transforming himself for roles — he often changes his appearance, voice, and mannerisms to create unforgettable characters.',
+        'He has collaborated multiple times with director Tim Burton on dark, quirky films like Edward Scissorhands and Sweeney Todd.',
+        'Besides acting, Depp is an accomplished guitarist and has played with rock legends including Aerosmith and Alice Cooper.',
+      ],
+    },
+    {
+      secret: 'Justin Bieber',
+      hint: 'The Canadian pop star who was discovered through YouTube videos posted as a young teenager and became a global sensation',
+      born: '1 March 1994',
+      field: 'Music',
+      nationality: 'Canadian',
+      facts: [
+        'Justin Bieber was born in London, Ontario, Canada in 1994 and taught himself to play the drums, guitar, and piano as a young child.',
+        'His mother posted videos of him singing covers of popular songs on YouTube when he was around 12; talent manager Scooter Braun discovered him and signed him.',
+        'His debut single "One Time" reached the top 30 in ten countries, making him one of the youngest artists ever to achieve such wide international success.',
+        'Bieber has sold over 150 million records worldwide, making him one of the best-selling music artists in history.',
+        'He married model Hailey Baldwin in 2018 and has spoken publicly about his faith and his struggles with mental health, helping to inspire millions of young fans.',
+      ],
+    },
+    {
+      secret: 'Shakira',
+      hint: 'The Colombian pop star famous for her unique hip-shaking dance moves and the massive hit Waka Waka',
+      born: '2 February 1977',
+      field: 'Music',
+      nationality: 'Colombian',
+      facts: [
+        'Shakira Isabel Mebarak Ripoll was born in Barranquilla, Colombia in 1977 and showed an extraordinary talent for music and dance from a tiny age.',
+        'She learned to belly dance as a child and later combined it with her unique hip movements, creating a style of dancing that became her trademark.',
+        'Her song Waka Waka (This Time for Africa) was the official anthem of the 2010 FIFA World Cup and became one of the best-selling World Cup songs ever.',
+        'Shakira sings in both Spanish and English and has sold over 80 million records worldwide, making her one of the best-selling Latin artists in history.',
+        'She is also famous for her charity work, founding the Pies Descalzos Foundation to build and support schools for disadvantaged children in Colombia.',
+      ],
+    },
+    {
+      secret: 'Madonna',
+      hint: 'The American pop star known as the "Queen of Pop" whose reinventions and bold performances changed the music industry',
+      born: '16 August 1958',
+      field: 'Music & Entertainment',
+      nationality: 'American',
+      facts: [
+        'Madonna Louise Ciccone was born in Bay City, Michigan, USA in 1958 and moved to New York City at 19 with just $35 to pursue a career in dance and music.',
+        'She burst onto the pop scene in the 1980s with hits like Like a Virgin and Material Girl, becoming one of the biggest stars in the world.',
+        'Madonna is famous for constantly reinventing her image and music style — from pop to dance to rock to electronica — staying relevant for over four decades.',
+        'She has sold over 300 million records worldwide, making her the best-selling female music artist of all time.',
+        'Beyond music, she has starred in films, directed movies, written children\'s books, and run her own entertainment company.',
+      ],
+    },
+    {
+      secret: 'Elon Musk',
+      hint: 'The South African-born tech billionaire who founded SpaceX and Tesla and bought Twitter',
+      born: '28 June 1971',
+      field: 'Technology & Space Exploration',
+      nationality: 'South African-American',
+      facts: [
+        'Elon Musk was born in Pretoria, South Africa in 1971 and taught himself to code; he sold his first computer game aged 12 for $500.',
+        'He co-founded PayPal, which changed how people pay online, and then founded SpaceX with the goal of eventually sending humans to live on Mars.',
+        'His company Tesla made electric cars cool and popular, helping to speed up the world\'s move away from petrol-powered vehicles.',
+        'SpaceX developed reusable rockets that land themselves after launch — a breakthrough that dramatically reduced the cost of getting to space.',
+        'He became the world\'s richest person on multiple occasions and is known for his ambitious and sometimes controversial ideas about technology and the future.',
+      ],
+    },
+    {
+      secret: 'Donald Trump',
+      hint: 'The American businessman and TV personality who became the 45th and 47th President of the United States',
+      born: '14 June 1946',
+      field: 'Business & Politics',
+      nationality: 'American',
+      facts: [
+        'Donald John Trump was born in Queens, New York in 1946 and built a career as a real estate developer, constructing hotels, casinos, and skyscrapers.',
+        'He hosted the popular US TV show The Apprentice from 2004, in which contestants competed for a job at his company, and his catchphrase "You\'re fired!" became famous worldwide.',
+        'Trump ran for US President in 2016 as the Republican candidate and defeated Hillary Clinton in a surprise result that shocked the world.',
+        'He became the first US President to be impeached twice by the House of Representatives, though he was not convicted either time by the Senate.',
+        'After losing the 2020 election to Joe Biden, he ran again in 2024 and won, making him only the second person in American history to serve as president for two non-consecutive terms.',
       ],
     },
   ],
@@ -4404,6 +4766,32 @@ export default function EnigmaGame() {
         {(soloChallenge.facts || []).length > 0 && (
           <View style={[S.infoCard, { marginBottom: 24 }]}>
             <Text style={[S.tOverline, { letterSpacing: 3, marginBottom: 14 }]}>📖 About This Secret</Text>
+            {/* Bio info row — shown for Famous People entries */}
+            {(soloChallenge.born || soloChallenge.field || soloChallenge.nationality) && (
+              <View style={{ backgroundColor: 'rgba(212,168,74,0.08)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.25)', borderRadius: 10, padding: 12, marginBottom: 16, gap: 6 }}>
+                {soloChallenge.born && (
+                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 13 }}>🎂</Text>
+                    <Text style={[S.tBodySm, { color: C.gold, fontFamily: 'Outfit_600SemiBold' }]}>Born: </Text>
+                    <Text style={[S.tBodySm, { color: C.text, flex: 1 }]}>{soloChallenge.born}{soloChallenge.died ? `  ·  Died: ${soloChallenge.died}` : ''}</Text>
+                  </View>
+                )}
+                {soloChallenge.field && (
+                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 13 }}>🏆</Text>
+                    <Text style={[S.tBodySm, { color: C.gold, fontFamily: 'Outfit_600SemiBold' }]}>Field: </Text>
+                    <Text style={[S.tBodySm, { color: C.text, flex: 1 }]}>{soloChallenge.field}</Text>
+                  </View>
+                )}
+                {soloChallenge.nationality && (
+                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 13 }}>🌍</Text>
+                    <Text style={[S.tBodySm, { color: C.gold, fontFamily: 'Outfit_600SemiBold' }]}>Nationality: </Text>
+                    <Text style={[S.tBodySm, { color: C.text, flex: 1 }]}>{soloChallenge.nationality}</Text>
+                  </View>
+                )}
+              </View>
+            )}
             {(soloChallenge.facts || []).map((fact, i) => (
               <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 12, paddingBottom: 12, borderBottomWidth: i < soloChallenge.facts.length - 1 ? 1 : 0, borderBottomColor: C.border }}>
                 <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(109,40,217,0.18)', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
