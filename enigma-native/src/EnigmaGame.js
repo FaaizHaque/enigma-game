@@ -5770,7 +5770,7 @@ export default function EnigmaGame() {
     if (hintNum === 2) {
       const letter = words[0][0].toUpperCase();
       if (words[0].toLowerCase() === 'the' && words.length > 1) {
-        return `It starts with the letter "${letter}" (key word: "${words[1][0].toUpperCase()}")`;
+        return `It starts with "The" — next word starts with "${words[1][0].toUpperCase()}"`;
       }
       return `It starts with the letter "${letter}"`;
     }
