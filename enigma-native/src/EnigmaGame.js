@@ -4299,6 +4299,23 @@ const askWithRetry = async (payload, maxWaitMs = 5 * 60 * 1000) => {
   return 'TIMEOUT';
 };
 
+// Returns true only for properly-formed yes/no questions.
+// Rejects one-word fragments, dangling starters ("Is it", "As"), and
+// anything that isn't a real sentence the AI can evaluate.
+const QUESTION_STARTERS = new Set([
+  'is','was','were','are','did','do','does','has','have','had',
+  'can','could','would','will','should','might','may',
+  'what','which','who','where','when','why','how',
+]);
+const isValidQuestion = (text) => {
+  const trimmed = text.trim().replace(/\?$/, '').trim();
+  const words = trimmed.split(/\s+/).filter(Boolean);
+  if (words.length < 3) return false;
+  if (trimmed.length < 10) return false;
+  const first = words[0].toLowerCase().replace(/[^a-z]/g, '');
+  return QUESTION_STARTERS.has(first);
+};
+
 const dailyStars = (questions, solved) => {
   if (!solved) return { stars: 0, label: 'Better luck tomorrow!' };
   if (questions <= 5)  return { stars: 3, label: 'Legendary! ✦✦✦' };
@@ -5567,6 +5584,10 @@ export default function EnigmaGame() {
 
   const submitQuestion = async () => {
     if (!questionInput.trim() || !isMyTurn || pendingQ) return;
+    if (!isValidQuestion(questionInput)) {
+      Alert.alert('Incomplete question', 'Please ask a full yes/no question — e.g. "Is it a person?" or "Was it invented before 1900?"');
+      return;
+    }
     const q = {
       id: Date.now(), askerId: viewerId, askerName: viewer.name,
       askerAvatarIdx: viewer.avatarIdx, text: questionInput.trim(), answer: null,
@@ -5814,6 +5835,10 @@ export default function EnigmaGame() {
     const q = question.trim();
     const realQCount = soloQuestions.filter(qq => !qq.type).length;
     if (!q || soloLoading || realQCount >= 20 || !soloChallenge) return;
+    if (!isValidQuestion(q)) {
+      Alert.alert('Incomplete question', 'Please ask a full yes/no question — e.g. "Is it a person?" or "Was it invented before 1900?"');
+      return;
+    }
     const entry = { id: Date.now(), text: q, answer: null };
     setSoloQuestions(prev => [...prev, entry]);
     setSoloInput('');
@@ -5864,6 +5889,10 @@ export default function EnigmaGame() {
     const q = question.trim();
     const realQCount = dailyQuestions.filter(qq => !qq.type).length;
     if (!q || dailyLoading || realQCount >= 20) return;
+    if (!isValidQuestion(q)) {
+      Alert.alert('Incomplete question', 'Please ask a full yes/no question — e.g. "Is it a person?" or "Was it invented before 1900?"');
+      return;
+    }
     const entry = { id: Date.now(), text: q, answer: null };
     setDailyQuestions(prev => [...prev, entry]);
     setDailyInput('');
