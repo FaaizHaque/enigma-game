@@ -83,12 +83,12 @@ const T = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const THEMES = [
-  { id: 'personality', label: 'Famous Personality', icon: '👤', desc: 'A real person known worldwide' },
-  { id: 'event', label: 'Historical Event', icon: '📜', desc: 'A pivotal moment that shaped history' },
-  { id: 'object', label: 'Legendary Object', icon: '🏺', desc: 'An iconic object of great significance' },
-  { id: 'place', label: 'Famous Place', icon: '🗺️', desc: 'A landmark or renowned location' },
-  { id: 'invention', label: 'Great Invention', icon: '💡', desc: 'A discovery that changed the world' },
-  { id: 'character', label: 'Fictional Character', icon: '🎭', desc: 'A beloved character from books, film or legend' },
+  { id: 'personality', label: 'Famous Personality', icon: '👤', desc: 'A real person known worldwide',               color: '#c084fc' },
+  { id: 'event',       label: 'Historical Event',   icon: '📜', desc: 'A pivotal moment that shaped history',        color: '#fb923c' },
+  { id: 'object',      label: 'Legendary Object',   icon: '🏺', desc: 'An iconic object of great significance',      color: '#fbbf24' },
+  { id: 'place',       label: 'Famous Place',       icon: '🗺️',  desc: 'A landmark or renowned location',            color: '#34d399' },
+  { id: 'invention',   label: 'Great Invention',    icon: '💡', desc: 'A discovery that changed the world',          color: '#60a5fa' },
+  { id: 'character',   label: 'Fictional Character',icon: '🎭', desc: 'A beloved character from books, film or legend', color: '#f472b6' },
 ];
 
 const AVATARS = [
@@ -6907,29 +6907,49 @@ export default function EnigmaGame() {
             {/* Random tile — Scholar */}
             <TouchableOpacity
               onPress={() => setSoloCategory('random')}
-              style={{ backgroundColor: soloCategory === 'random' ? 'rgba(212,168,74,0.1)' : C.card, borderWidth: 1.5, borderColor: soloCategory === 'random' ? C.gold : C.border2, borderRadius: 14, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              style={{ backgroundColor: soloCategory === 'random' ? 'rgba(212,168,74,0.10)' : C.card, borderWidth: 1.5, borderColor: soloCategory === 'random' ? C.gold : C.border2, borderRadius: 14, padding: 16, marginBottom: 14, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <Text style={{ fontSize: 28 }}>🎲</Text>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === 'random' ? C.gold : C.text }}>Any Category</Text>
-                <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>Surprise me — pick from all categories</Text>
+                <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === 'random' ? C.gold : C.text }}>Random — Surprise Me 🎲</Text>
+                <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>Pick from all Scholar categories</Text>
               </View>
               {soloCategory === 'random' && <Text style={{ color: C.gold, fontSize: 18 }}>✓</Text>}
             </TouchableOpacity>
 
-            {/* Theme tiles */}
-            {THEMES.map((t) => (
-              <TouchableOpacity
-                key={t.id}
-                onPress={() => setSoloCategory(t.id)}
-                style={{ backgroundColor: soloCategory === t.id ? 'rgba(212,168,74,0.1)' : C.card, borderWidth: 1.5, borderColor: soloCategory === t.id ? C.gold : C.border2, borderRadius: 14, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-                <Text style={{ fontSize: 28 }}>{t.icon}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === t.id ? C.gold : C.text }}>{t.label}</Text>
-                  <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>{t.desc}</Text>
-                </View>
-                {soloCategory === t.id && <Text style={{ color: C.gold, fontSize: 18 }}>✓</Text>}
-              </TouchableOpacity>
-            ))}
+            {/* 2-column grid of THEMES */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+              {THEMES.map((t) => {
+                const sel = soloCategory === t.id;
+                return (
+                  <TouchableOpacity
+                    key={t.id}
+                    onPress={() => setSoloCategory(t.id)}
+                    style={{ width: '48%' }}
+                  >
+                    {sel ? (
+                      <LinearGradient
+                        colors={[`${t.color}b8`, `${t.color}59`, `${t.color}80`]}
+                        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                        style={{ borderRadius: 16, padding: 1.5 }}
+                      >
+                        <View style={{ borderRadius: 14.5, backgroundColor: `${t.color}22`, padding: 16, alignItems: 'flex-start', gap: 4 }}>
+                          <Text style={{ fontSize: 30, marginBottom: 4 }}>{t.icon}</Text>
+                          <Text style={{ fontFamily: F.sansBold, fontSize: 14, color: t.color }}>{t.label}</Text>
+                          <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, marginTop: 2 }}>{t.desc}</Text>
+                          <Text style={{ color: t.color, fontSize: 16, marginTop: 4 }}>✓</Text>
+                        </View>
+                      </LinearGradient>
+                    ) : (
+                      <View style={{ borderRadius: 16, borderWidth: 1.5, borderColor: C.border2, backgroundColor: C.card, padding: 16, alignItems: 'flex-start', gap: 4 }}>
+                        <Text style={{ fontSize: 30, marginBottom: 4 }}>{t.icon}</Text>
+                        <Text style={{ fontFamily: F.sansBold, fontSize: 14, color: C.text }}>{t.label}</Text>
+                        <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, marginTop: 2 }}>{t.desc}</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </>
         )}
 
