@@ -5585,7 +5585,9 @@ export default function EnigmaGame() {
   const submitQuestion = async () => {
     if (!questionInput.trim() || !isMyTurn || pendingQ) return;
     if (!isValidQuestion(questionInput)) {
-      Alert.alert('Incomplete question', 'Please ask a full yes/no question — e.g. "Is it a person?" or "Was it invented before 1900?"');
+      setSolveInput(questionInput.trim());
+      setQuestionInput('');
+      setSolveModalOpen(true);
       return;
     }
     const q = {
@@ -5836,7 +5838,9 @@ export default function EnigmaGame() {
     const realQCount = soloQuestions.filter(qq => !qq.type).length;
     if (!q || soloLoading || realQCount >= 20 || !soloChallenge) return;
     if (!isValidQuestion(q)) {
-      Alert.alert('Incomplete question', 'Please ask a full yes/no question — e.g. "Is it a person?" or "Was it invented before 1900?"');
+      setSoloSolveInput(q);
+      setSoloInput('');
+      setSoloSolveOpen(true);
       return;
     }
     const entry = { id: Date.now(), text: q, answer: null };
@@ -5890,7 +5894,9 @@ export default function EnigmaGame() {
     const realQCount = dailyQuestions.filter(qq => !qq.type).length;
     if (!q || dailyLoading || realQCount >= 20) return;
     if (!isValidQuestion(q)) {
-      Alert.alert('Incomplete question', 'Please ask a full yes/no question — e.g. "Is it a person?" or "Was it invented before 1900?"');
+      setDailySolveInput(q);
+      setDailyInput('');
+      setDailySolveOpen(true);
       return;
     }
     const entry = { id: Date.now(), text: q, answer: null };
