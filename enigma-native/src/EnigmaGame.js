@@ -5767,7 +5767,7 @@ export default function EnigmaGame() {
   const computeHint = (secret, hintNum, challengeHint = null) => {
     const words = secret.trim().split(/\s+/);
     if (hintNum === 1) { const n = words.length; return `The secret is ${n} word${n !== 1 ? 's' : ''} long`; }
-    if (hintNum === 2) { const firstMeaningful = words[0].toLowerCase() === 'the' && words.length > 1 ? words[1] : words[0]; return `It starts with the letter "${firstMeaningful[0].toUpperCase()}"`; }
+    if (hintNum === 2) { return `It starts with the letter "${words[0][0].toUpperCase()}"`; }
     if (hintNum === 3 && challengeHint) return challengeHint;
     return null;
   };
