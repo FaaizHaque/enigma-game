@@ -724,7 +724,7 @@ const JUNIOR_THEMES = [
   { id: 'famous_people',      label: 'Famous People',        icon: '🌟', desc: 'Heroes, leaders and legends',           color: '#ff6b35' },
   { id: 'famous_places',      label: 'Famous Places',        icon: '🗺️',  desc: 'Wonders and iconic landmarks',          color: '#00c9a7' },
   { id: 'movies_cartoons',    label: 'Movies & Cartoons',    icon: '🎬', desc: 'Beloved characters and stories',         color: '#ff6b9d' },
-  { id: 'animals_nature',     label: 'Animals & Nature',     icon: '🦁', desc: 'Amazing creatures and habitats',         color: '#a8e063' },
+  { id: 'animals',            label: 'Animals',              icon: '🦁', desc: 'Amazing creatures from around the world', color: '#a8e063' },
   { id: 'sports_games',       label: 'Sports & Games',       icon: '⚽', desc: 'Sports stars and great competitions',    color: '#4fc3f7' },
   { id: 'science_inventions', label: 'Science & Inventions', icon: '🔬', desc: 'Discoveries that changed the world',     color: '#c77dff' },
 ];
@@ -1789,7 +1789,7 @@ const JUNIOR_LIBRARY = {
       ],
     },
   ],
-  animals_nature: [
+  animals: [
     {
       secret: 'Blue Whale',
       hint: 'The largest animal ever known to have lived on Earth — a giant ocean creature whose heart is the size of a small car',
