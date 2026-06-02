@@ -734,6 +734,12 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Albert Einstein',
       hint: 'A wild-haired scientist who came up with the most famous equation in physics',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '14 March 1879' },
+        { icon: '✝️', label: 'Died', value: '18 April 1955' },
+        { icon: '🏆', label: 'Field', value: 'Physics' },
+        { icon: '🌍', label: 'Nationality', value: 'German-American' },
+      ],
       facts: [
         'Albert Einstein was born in Germany in 1879 and won the Nobel Prize in Physics in 1921 for explaining how light works.',
         'He developed the theory of relativity, which changed how scientists understand time, space, and gravity.',
@@ -745,6 +751,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Usain Bolt',
       hint: 'The Jamaican sprinter who became the fastest human ever recorded',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '21 August 1986' },
+        { icon: '🏆', label: 'Field', value: 'Athletics (Sprinting)' },
+        { icon: '🌍', label: 'Nationality', value: 'Jamaican' },
+      ],
       facts: [
         'Usain Bolt was born in Jamaica in 1986 and set the world record for the 100 metres at 9.58 seconds in 2009.',
         'He won eight Olympic gold medals across three different Games — 2008, 2012 and 2016 — making him one of the greatest Olympic athletes ever.',
@@ -756,6 +767,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Malala Yousafzai',
       hint: 'The Pakistani girl who was shot for going to school and became the youngest Nobel Peace Prize winner',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '12 July 1997' },
+        { icon: '🏆', label: 'Field', value: 'Education & Activism' },
+        { icon: '🌍', label: 'Nationality', value: 'Pakistani' },
+      ],
       facts: [
         'Malala Yousafzai was born in Pakistan in 1997 and stood up for girls\' right to go to school even when it was dangerous to do so.',
         'At age 15 she was shot by the Taliban while on her school bus, but she survived and continued fighting for education.',
@@ -767,10 +783,12 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Neil Armstrong',
       hint: 'The American astronaut who was the first human to walk on the Moon',
-      born: '5 August 1930',
-      died: '25 August 2012',
-      field: 'Space Exploration',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '5 August 1930' },
+        { icon: '✝️', label: 'Died', value: '25 August 2012' },
+        { icon: '🏆', label: 'Field', value: 'Space Exploration' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Neil Armstrong was born in Ohio in 1930 and trained as a pilot and engineer before becoming an astronaut.',
         'On 20 July 1969, as commander of Apollo 11, he became the first human being to set foot on the Moon.',
@@ -782,6 +800,12 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Nelson Mandela',
       hint: 'The South African leader who spent 27 years in prison before becoming his country\'s first democratically elected president',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '18 July 1918' },
+        { icon: '✝️', label: 'Died', value: '5 December 2013' },
+        { icon: '🏆', label: 'Field', value: 'Politics & Civil Rights' },
+        { icon: '🌍', label: 'Nationality', value: 'South African' },
+      ],
       facts: [
         'Nelson Mandela was born in South Africa in 1918 and spent his life fighting against a system called apartheid, which treated Black people unfairly.',
         'He was sentenced to life in prison in 1964 and spent 27 years locked up, yet he never gave up his beliefs.',
@@ -793,6 +817,12 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Amelia Earhart',
       hint: 'The daring American aviator who was the first woman to fly solo across the Atlantic Ocean',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '24 July 1897' },
+        { icon: '✝️', label: 'Died', value: 'c. 2 July 1937' },
+        { icon: '🏆', label: 'Field', value: 'Aviation' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Amelia Earhart was born in Kansas in 1897 and became fascinated with flying after attending an airshow as a child.',
         'In 1932 she became the first woman — and only the second person — to fly solo non-stop across the Atlantic Ocean.',
@@ -804,6 +834,12 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Leonardo da Vinci',
       hint: 'The Italian Renaissance genius who painted the Mona Lisa and designed flying machines 500 years before aeroplanes existed',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '15 April 1452' },
+        { icon: '✝️', label: 'Died', value: '2 May 1519' },
+        { icon: '🏆', label: 'Field', value: 'Art & Science' },
+        { icon: '🌍', label: 'Nationality', value: 'Italian' },
+      ],
       facts: [
         'Leonardo da Vinci was born in Italy in 1452 and was curious about almost everything — art, science, engineering, music, and nature.',
         'He painted the Mona Lisa and The Last Supper, two of the most famous paintings in the world.',
@@ -815,6 +851,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Cristiano Ronaldo',
       hint: 'The Portuguese football superstar often called one of the greatest players of all time',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '5 February 1985' },
+        { icon: '🏆', label: 'Field', value: 'Football (Soccer)' },
+        { icon: '🌍', label: 'Nationality', value: 'Portuguese' },
+      ],
       facts: [
         'Cristiano Ronaldo was born in Madeira, Portugal in 1985 and signed his first professional contract with Sporting CP aged 16.',
         'He has won the Ballon d\'Or — the award for the world\'s best footballer — five times and has scored over 900 career goals.',
@@ -826,10 +867,12 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Isaac Newton',
       hint: 'The British scientist who discovered gravity and changed how we understand the universe',
-      born: '4 January 1643',
-      died: '31 March 1727',
-      field: 'Physics & Mathematics',
-      nationality: 'British',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '4 January 1643' },
+        { icon: '✝️', label: 'Died', value: '31 March 1727' },
+        { icon: '🏆', label: 'Field', value: 'Physics & Mathematics' },
+        { icon: '🌍', label: 'Nationality', value: 'British' },
+      ],
       facts: [
         'Isaac Newton was born in England in 1643 and is famous for developing the laws of gravity and motion that explain how things move.',
         'The story goes that he was sitting under an apple tree when an apple fell and made him wonder why things always fall downwards.',
@@ -841,10 +884,12 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Walt Disney',
       hint: 'The American animator who created Mickey Mouse and built a magical entertainment empire',
-      born: '5 December 1901',
-      died: '15 December 1966',
-      field: 'Animation & Entertainment',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '5 December 1901' },
+        { icon: '✝️', label: 'Died', value: '15 December 1966' },
+        { icon: '🏆', label: 'Field', value: 'Animation & Entertainment' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Walt Disney was born in Illinois, USA in 1901 and fell in love with drawing from a very young age.',
         'He created Mickey Mouse in 1928 — one of the most recognised cartoon characters in the world — and gave Mickey his own voice.',
@@ -856,10 +901,12 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Michael Jackson',
       hint: 'The American pop star known as the "King of Pop" whose moonwalk dance move stunned the world',
-      born: '29 August 1958',
-      died: '25 June 2009',
-      field: 'Music & Entertainment',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '29 August 1958' },
+        { icon: '✝️', label: 'Died', value: '25 June 2009' },
+        { icon: '🏆', label: 'Field', value: 'Music & Entertainment' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Michael Jackson was born in Indiana, USA in 1958 and started performing with his brothers in a group called The Jackson 5 when he was just five years old.',
         'His album Thriller (1982) is the best-selling album of all time, with over 70 million copies sold worldwide.',
@@ -871,9 +918,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Lionel Messi',
       hint: 'The Argentine football wizard widely considered the greatest footballer of all time',
-      born: '24 June 1987',
-      field: 'Football (Soccer)',
-      nationality: 'Argentine',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '24 June 1987' },
+        { icon: '🏆', label: 'Field', value: 'Football (Soccer)' },
+        { icon: '🌍', label: 'Nationality', value: 'Argentine' },
+      ],
       facts: [
         'Lionel Messi was born in Rosario, Argentina in 1987 and moved to Spain as a child so he could get treatment for a growth condition and train with FC Barcelona.',
         'He won the FIFA World Cup with Argentina in 2022, completing the one trophy that had been missing from his extraordinary career.',
@@ -885,10 +934,12 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Muhammad Ali',
       hint: 'The American boxing champion known as "The Greatest" who was also a fearless civil rights activist',
-      born: '17 January 1942',
-      died: '3 June 2016',
-      field: 'Boxing & Activism',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '17 January 1942' },
+        { icon: '✝️', label: 'Died', value: '3 June 2016' },
+        { icon: '🏆', label: 'Field', value: 'Boxing & Activism' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Muhammad Ali was born Cassius Clay in Louisville, Kentucky in 1942 and started boxing when he was 12 years old after someone stole his bicycle.',
         'He won the Olympic gold medal in 1960 and became world heavyweight champion three times — more than any boxer before him.',
@@ -900,9 +951,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Bill Gates',
       hint: 'The American tech billionaire who co-founded Microsoft and made personal computers available to everyone',
-      born: '28 October 1955',
-      field: 'Technology & Philanthropy',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '28 October 1955' },
+        { icon: '🏆', label: 'Field', value: 'Technology & Philanthropy' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Bill Gates was born in Seattle, USA in 1955 and wrote his first computer program aged 13, scheduling classes at his school.',
         'He co-founded Microsoft with Paul Allen in 1975, and their software — including Windows — helped put a personal computer in millions of homes and offices.',
@@ -914,10 +967,12 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Steve Jobs',
       hint: 'The American visionary who co-founded Apple and gave the world the iPhone, iPad and iPod',
-      born: '24 February 1955',
-      died: '5 October 2011',
-      field: 'Technology & Entrepreneurship',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '24 February 1955' },
+        { icon: '✝️', label: 'Died', value: '5 October 2011' },
+        { icon: '🏆', label: 'Field', value: 'Technology & Entrepreneurship' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Steve Jobs was born in San Francisco in 1955 and co-founded Apple in his parents\' garage at age 21 together with Steve Wozniak.',
         'He was fired from Apple in 1985 but returned in 1997 to rescue the company and turned it into the most valuable business in the world.',
@@ -929,9 +984,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'J.K. Rowling',
       hint: 'The British author who wrote the Harry Potter series and became one of the most successful writers in history',
-      born: '31 July 1965',
-      field: 'Literature',
-      nationality: 'British',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '31 July 1965' },
+        { icon: '🏆', label: 'Field', value: 'Literature' },
+        { icon: '🌍', label: 'Nationality', value: 'British' },
+      ],
       facts: [
         'J.K. Rowling was born in England in 1965 and had the idea for Harry Potter on a delayed train journey in 1990, scribbling notes on whatever scraps of paper she could find.',
         'She was a single mother living on government benefits when she finished the first Harry Potter book — multiple publishers rejected it before one finally said yes.',
@@ -943,10 +1000,12 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Christopher Columbus',
       hint: 'The Italian explorer who sailed west from Europe and reached the Americas in 1492',
-      born: 'c. 1451',
-      died: '20 May 1506',
-      field: 'Exploration & Navigation',
-      nationality: 'Italian (sailed for Spain)',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: 'c. 1451' },
+        { icon: '✝️', label: 'Died', value: '20 May 1506' },
+        { icon: '🏆', label: 'Field', value: 'Exploration & Navigation' },
+        { icon: '🌍', label: 'Nationality', value: 'Italian (sailed for Spain)' },
+      ],
       facts: [
         'Christopher Columbus was born in Genoa, Italy around 1451 and became a skilled sailor and navigator from a young age.',
         'In 1492 he sailed west from Spain with three ships — the Niña, the Pinta, and the Santa María — hoping to reach Asia by going the other way around the world.',
@@ -958,10 +1017,12 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Queen Elizabeth II',
       hint: 'The British monarch who was the longest-reigning queen in history, ruling for 70 years',
-      born: '21 April 1926',
-      died: '8 September 2022',
-      field: 'Monarchy & Public Service',
-      nationality: 'British',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '21 April 1926' },
+        { icon: '✝️', label: 'Died', value: '8 September 2022' },
+        { icon: '🏆', label: 'Field', value: 'Monarchy & Public Service' },
+        { icon: '🌍', label: 'Nationality', value: 'British' },
+      ],
       facts: [
         'Queen Elizabeth II was born in London in 1926 and became queen in 1952 at the age of 25 when her father King George VI died.',
         'She was the longest-reigning British monarch and the longest-serving female head of state in world history, ruling for 70 years.',
@@ -973,10 +1034,12 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Princess Diana',
       hint: 'The British princess known as the "People\'s Princess" for her compassion and charity work',
-      born: '1 July 1961',
-      died: '31 August 1997',
-      field: 'Royalty & Humanitarian Work',
-      nationality: 'British',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '1 July 1961' },
+        { icon: '✝️', label: 'Died', value: '31 August 1997' },
+        { icon: '🏆', label: 'Field', value: 'Royalty & Humanitarian Work' },
+        { icon: '🌍', label: 'Nationality', value: 'British' },
+      ],
       facts: [
         'Princess Diana was born Lady Diana Spencer in Norfolk, England in 1961 and married Prince Charles in 1981 in a ceremony watched by 750 million people worldwide.',
         'She was mother to Princes William and Harry and was famous for her warmth, her ability to connect with ordinary people, and her deep compassion.',
@@ -988,9 +1051,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Neymar Jr.',
       hint: 'The flamboyant Brazilian footballer famous for his dazzling skills and goal-scoring for Brazil and PSG',
-      born: '5 February 1992',
-      field: 'Football (Soccer)',
-      nationality: 'Brazilian',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '5 February 1992' },
+        { icon: '🏆', label: 'Field', value: 'Football (Soccer)' },
+        { icon: '🌍', label: 'Nationality', value: 'Brazilian' },
+      ],
       facts: [
         'Neymar Jr. was born in Mogi das Cruzes, Brazil in 1992 and was spotted by scouts for Santos FC when he was just a teenager.',
         'He won the Copa América with Brazil and the Champions League with FC Barcelona, becoming one of the most feared attackers in the world.',
@@ -1002,9 +1067,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Serena Williams',
       hint: 'The American tennis champion who won more Grand Slam singles titles than any other player in the Open Era',
-      born: '26 September 1981',
-      field: 'Tennis',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '26 September 1981' },
+        { icon: '🏆', label: 'Field', value: 'Tennis' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Serena Williams was born in Michigan, USA in 1981 and learned to play tennis on public courts in Compton, California with her father as coach.',
         'She won 23 Grand Slam singles titles — the most by any player in the Open Era of tennis — and topped the world rankings for over 300 weeks.',
@@ -1016,9 +1083,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Michael Jordan',
       hint: 'The American basketball legend who led the Chicago Bulls to six NBA championships and became a global sports icon',
-      born: '17 February 1963',
-      field: 'Basketball',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '17 February 1963' },
+        { icon: '🏆', label: 'Field', value: 'Basketball' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Michael Jordan was born in Brooklyn, New York in 1963 and was cut from his high school basketball team — a setback he used as motivation to work even harder.',
         'He led the Chicago Bulls to six NBA championships and was named the Finals Most Valuable Player every single time.',
@@ -1030,9 +1099,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Roger Federer',
       hint: 'The Swiss tennis master whose graceful playing style and 20 Grand Slam titles made him a legend of the sport',
-      born: '8 August 1981',
-      field: 'Tennis',
-      nationality: 'Swiss',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '8 August 1981' },
+        { icon: '🏆', label: 'Field', value: 'Tennis' },
+        { icon: '🌍', label: 'Nationality', value: 'Swiss' },
+      ],
       facts: [
         'Roger Federer was born in Basel, Switzerland in 1981 and fell in love with tennis as a young child, practising for hours every day.',
         'He won 20 Grand Slam singles titles during his career, including a record eight Wimbledon titles on the grass courts he loved most.',
@@ -1044,9 +1115,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Emma Watson',
       hint: 'The British actress who grew up playing Hermione Granger in Harry Potter and became a UN Women Goodwill Ambassador',
-      born: '15 April 1990',
-      field: 'Acting & Activism',
-      nationality: 'British',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '15 April 1990' },
+        { icon: '🏆', label: 'Field', value: 'Acting & Activism' },
+        { icon: '🌍', label: 'Nationality', value: 'British' },
+      ],
       facts: [
         'Emma Watson was born in Paris, France and grew up in England; she was cast as Hermione Granger in the Harry Potter films at just nine years old.',
         'She appeared in all eight Harry Potter films as the clever, brave witch Hermione, a role that made her one of the most famous young actresses in the world.',
@@ -1058,9 +1131,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Leonardo DiCaprio',
       hint: 'The American actor and passionate environmentalist famous for films like Titanic and The Revenant',
-      born: '11 November 1974',
-      field: 'Acting & Environmentalism',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '11 November 1974' },
+        { icon: '🏆', label: 'Field', value: 'Acting & Environmentalism' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Leonardo DiCaprio was born in Los Angeles, California in 1974 and appeared in his first TV commercials as a toddler.',
         'He starred in Titanic (1997) which became the highest-grossing film in history at the time and made him the most famous actor on the planet.',
@@ -1072,9 +1147,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Will Smith',
       hint: 'The American actor and rapper who starred in Men in Black and The Fresh Prince of Bel-Air',
-      born: '25 September 1968',
-      field: 'Acting & Music',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '25 September 1968' },
+        { icon: '🏆', label: 'Field', value: 'Acting & Music' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Will Smith was born in Philadelphia, USA in 1968 and started his career as a rapper called "The Fresh Prince" before becoming a global film star.',
         'His TV show The Fresh Prince of Bel-Air (1990–96) made him famous around the world and is still loved by fans today.',
@@ -1086,9 +1163,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Tom Cruise',
       hint: 'The American action movie star famous for performing his own breathtaking stunts in the Mission: Impossible films',
-      born: '3 July 1962',
-      field: 'Acting',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '3 July 1962' },
+        { icon: '🏆', label: 'Field', value: 'Acting' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Tom Cruise was born in Syracuse, New York in 1962 and first became famous in the 1980s with films like Top Gun and Risky Business.',
         'He is famous for doing almost all of his own dangerous stunts — he has learned to fly jets, hang off the side of a plane mid-flight, and scale the Burj Khalifa skyscraper.',
@@ -1100,9 +1179,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Johnny Depp',
       hint: 'The American actor famous for playing eccentric characters like Captain Jack Sparrow in Pirates of the Caribbean',
-      born: '9 June 1963',
-      field: 'Acting',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '9 June 1963' },
+        { icon: '🏆', label: 'Field', value: 'Acting' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Johnny Depp was born in Kentucky, USA in 1963 and first became famous on the TV show 21 Jump Street in the 1980s.',
         'His portrayal of the quirky pirate Captain Jack Sparrow in Pirates of the Caribbean (2003) is one of the most beloved characters in film history.',
@@ -1114,9 +1195,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Justin Bieber',
       hint: 'The Canadian pop star who was discovered through YouTube videos posted as a young teenager and became a global sensation',
-      born: '1 March 1994',
-      field: 'Music',
-      nationality: 'Canadian',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '1 March 1994' },
+        { icon: '🏆', label: 'Field', value: 'Music' },
+        { icon: '🌍', label: 'Nationality', value: 'Canadian' },
+      ],
       facts: [
         'Justin Bieber was born in London, Ontario, Canada in 1994 and taught himself to play the drums, guitar, and piano as a young child.',
         'His mother posted videos of him singing covers of popular songs on YouTube when he was around 12; talent manager Scooter Braun discovered him and signed him.',
@@ -1128,9 +1211,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Shakira',
       hint: 'The Colombian pop star famous for her unique hip-shaking dance moves and the massive hit Waka Waka',
-      born: '2 February 1977',
-      field: 'Music',
-      nationality: 'Colombian',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '2 February 1977' },
+        { icon: '🏆', label: 'Field', value: 'Music' },
+        { icon: '🌍', label: 'Nationality', value: 'Colombian' },
+      ],
       facts: [
         'Shakira Isabel Mebarak Ripoll was born in Barranquilla, Colombia in 1977 and showed an extraordinary talent for music and dance from a tiny age.',
         'She learned to belly dance as a child and later combined it with her unique hip movements, creating a style of dancing that became her trademark.',
@@ -1142,9 +1227,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Madonna',
       hint: 'The American pop star known as the "Queen of Pop" whose reinventions and bold performances changed the music industry',
-      born: '16 August 1958',
-      field: 'Music & Entertainment',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '16 August 1958' },
+        { icon: '🏆', label: 'Field', value: 'Music & Entertainment' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Madonna Louise Ciccone was born in Bay City, Michigan, USA in 1958 and moved to New York City at 19 with just $35 to pursue a career in dance and music.',
         'She burst onto the pop scene in the 1980s with hits like Like a Virgin and Material Girl, becoming one of the biggest stars in the world.',
@@ -1156,9 +1243,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Elon Musk',
       hint: 'The South African-born tech billionaire who founded SpaceX and Tesla and bought Twitter',
-      born: '28 June 1971',
-      field: 'Technology & Space Exploration',
-      nationality: 'South African-American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '28 June 1971' },
+        { icon: '🏆', label: 'Field', value: 'Technology & Space Exploration' },
+        { icon: '🌍', label: 'Nationality', value: 'South African-American' },
+      ],
       facts: [
         'Elon Musk was born in Pretoria, South Africa in 1971 and taught himself to code; he sold his first computer game aged 12 for $500.',
         'He co-founded PayPal, which changed how people pay online, and then founded SpaceX with the goal of eventually sending humans to live on Mars.',
@@ -1170,9 +1259,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Donald Trump',
       hint: 'The American businessman and TV personality who became the 45th and 47th President of the United States',
-      born: '14 June 1946',
-      field: 'Business & Politics',
-      nationality: 'American',
+      infoFields: [
+        { icon: '🎂', label: 'Born', value: '14 June 1946' },
+        { icon: '🏆', label: 'Field', value: 'Business & Politics' },
+        { icon: '🌍', label: 'Nationality', value: 'American' },
+      ],
       facts: [
         'Donald John Trump was born in Queens, New York in 1946 and built a career as a real estate developer, constructing hotels, casinos, and skyscrapers.',
         'He hosted the popular US TV show The Apprentice from 2004, in which contestants competed for a job at his company, and his catchphrase "You\'re fired!" became famous worldwide.',
@@ -1186,6 +1277,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Eiffel Tower',
       hint: 'The tall iron tower built for a world fair in Paris that became France\'s most iconic landmark',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Paris, France' },
+        { icon: '🏛️', label: 'Type', value: 'Iron Tower & Monument' },
+        { icon: '📅', label: 'Built', value: '1889' },
+      ],
       facts: [
         'The Eiffel Tower was built in Paris, France, between 1887 and 1889 for the World\'s Fair celebrating 100 years since the French Revolution.',
         'It stands about 330 metres tall — taller than a 70-storey building — and was the world\'s tallest man-made structure for 41 years.',
@@ -1197,6 +1293,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Great Wall of China',
       hint: 'The ancient stone wall stretching thousands of kilometres across northern China, built to keep out invaders',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Northern China' },
+        { icon: '🏛️', label: 'Type', value: 'Fortification Wall' },
+        { icon: '📅', label: 'Built', value: 'Started c. 221 BC' },
+      ],
       facts: [
         'The Great Wall of China is a series of walls and fortifications built over many centuries, mainly to protect China from northern invaders.',
         'It stretches about 21,000 kilometres in total — long enough to go halfway around the Earth.',
@@ -1208,6 +1309,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Pyramids of Giza',
       hint: 'The enormous ancient stone structures built as tombs for Egyptian pharaohs near Cairo',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Giza, Egypt' },
+        { icon: '🏛️', label: 'Type', value: 'Royal Tombs' },
+        { icon: '📅', label: 'Built', value: 'c. 2580–2510 BC' },
+      ],
       facts: [
         'The Pyramids of Giza were built in Egypt around 4,500 years ago as giant tombs for the pharaohs Khufu, Khafre, and Menkaure.',
         'The Great Pyramid of Khufu is made of about 2.3 million stone blocks, each weighing on average as much as a car.',
@@ -1219,6 +1325,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Taj Mahal',
       hint: 'The stunning white marble mausoleum in India built by an emperor as a symbol of love for his wife',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Agra, India' },
+        { icon: '🏛️', label: 'Type', value: 'Marble Mausoleum' },
+        { icon: '📅', label: 'Built', value: 'Completed 1653' },
+      ],
       facts: [
         'The Taj Mahal is located in Agra, India, and was built by Mughal Emperor Shah Jahan starting in 1632 as a tomb for his beloved wife Mumtaz Mahal.',
         'It took about 20,000 workers and craftsmen over 20 years to complete the building, which is made almost entirely of white marble.',
@@ -1230,6 +1341,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Mount Everest',
       hint: 'The highest mountain on Earth, located in the Himalayas on the border of Nepal and Tibet',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Nepal / Tibet border' },
+        { icon: '🏛️', label: 'Type', value: 'Natural Mountain' },
+        { icon: '📅', label: 'Age', value: '~60 million years old' },
+      ],
       facts: [
         'Mount Everest stands at 8,849 metres above sea level — the highest point on Earth — and sits on the border between Nepal and Tibet.',
         'It was first climbed on 29 May 1953 by New Zealander Edmund Hillary and Nepali Sherpa Tenzing Norgay.',
@@ -1241,6 +1357,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Amazon Rainforest',
       hint: 'The vast tropical jungle in South America that is home to the greatest variety of wildlife on Earth',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'South America' },
+        { icon: '🏛️', label: 'Type', value: 'Tropical Rainforest' },
+        { icon: '📅', label: 'Age', value: '~55 million years old' },
+      ],
       facts: [
         'The Amazon Rainforest covers about 5.5 million square kilometres — roughly the same size as the whole of Australia.',
         'It is home to about 10% of all species on Earth, including over 40,000 plant species, 1,300 bird species, and 3,000 types of fish.',
@@ -1252,6 +1373,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Statue of Liberty',
       hint: 'The giant copper statue of a woman holding a torch that stands in New York Harbour as a symbol of freedom',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'New York Harbour, USA' },
+        { icon: '🏛️', label: 'Type', value: 'Copper Statue' },
+        { icon: '📅', label: 'Built', value: '1886' },
+      ],
       facts: [
         'The Statue of Liberty was a gift from France to the United States and was unveiled on 28 October 1886.',
         'She stands about 93 metres tall from the ground to the tip of her torch and weighs about 225 tonnes.',
@@ -1263,6 +1389,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Great Barrier Reef',
       hint: 'The world\'s largest coral reef system off the coast of Australia, visible from space',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Queensland, Australia' },
+        { icon: '🏛️', label: 'Type', value: 'Coral Reef System' },
+        { icon: '📅', label: 'Age', value: '~8,000 years old' },
+      ],
       facts: [
         'The Great Barrier Reef is located off the coast of Queensland, Australia, and stretches over 2,300 kilometres — the largest living structure on Earth.',
         'It is made up of more than 2,900 individual reefs and 900 islands, and is home to over 1,500 species of fish and 4,000 species of mollusc.',
@@ -1274,6 +1405,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Big Ben',
       hint: 'The giant clock tower at the Houses of Parliament in London, one of the world\'s most famous landmarks',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'London, England' },
+        { icon: '🏛️', label: 'Type', value: 'Clock Tower' },
+        { icon: '📅', label: 'Built', value: '1859' },
+      ],
       facts: [
         'Big Ben is actually the nickname for the huge bell inside the clock tower at the end of the Houses of Parliament in London, England.',
         'The tower itself was renamed the Elizabeth Tower in 2012 to honour Queen Elizabeth II\'s 60 years on the throne.',
@@ -1285,6 +1421,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Grand Canyon',
       hint: 'The enormous gorge carved by the Colorado River in Arizona, USA — one of the natural wonders of the world',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Arizona, USA' },
+        { icon: '🏛️', label: 'Type', value: 'Natural Gorge' },
+        { icon: '📅', label: 'Age', value: '~5–6 million years old' },
+      ],
       facts: [
         'The Grand Canyon is located in Arizona, USA, and was carved over millions of years by the Colorado River cutting through layers of rock.',
         'It is about 446 kilometres long, up to 29 kilometres wide, and over 1.6 kilometres deep — so deep you could stack four Eiffel Towers inside it.',
@@ -1296,6 +1437,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Niagara Falls',
       hint: 'The thundering waterfalls on the border of Canada and the USA, famous for their incredible power and mist',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'USA / Canada border' },
+        { icon: '🏛️', label: 'Type', value: 'Waterfalls' },
+        { icon: '📅', label: 'Age', value: '~12,000 years old' },
+      ],
       facts: [
         'Niagara Falls sits on the border between the Canadian province of Ontario and the US state of New York and is actually made up of three separate waterfalls.',
         'More than 3,000 tonnes of water pour over the falls every single second — enough to fill more than 1,000 bathtubs in the blink of an eye.',
@@ -1307,6 +1453,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Golden Gate Bridge',
       hint: 'The iconic bright orange suspension bridge spanning the entrance to San Francisco Bay in California',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'San Francisco, USA' },
+        { icon: '🏛️', label: 'Type', value: 'Suspension Bridge' },
+        { icon: '📅', label: 'Built', value: '1937' },
+      ],
       facts: [
         'The Golden Gate Bridge spans the Golden Gate Strait, the opening of San Francisco Bay into the Pacific Ocean, in California, USA.',
         'It was completed in 1937 and at the time was the longest and tallest suspension bridge in the world, with towers as tall as a 65-storey building.',
@@ -1318,6 +1469,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Burj Khalifa',
       hint: 'The skyscraper in Dubai that is the tallest building in the world, soaring over half a kilometre into the sky',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Dubai, UAE' },
+        { icon: '🏛️', label: 'Type', value: 'Skyscraper' },
+        { icon: '📅', label: 'Built', value: '2010' },
+      ],
       facts: [
         'The Burj Khalifa in Dubai, United Arab Emirates, stands at 828 metres tall — the tallest building ever constructed by humans.',
         'It has 163 floors and took about six years to build, opening on 4 January 2010; at its peak, 12,000 workers were on the construction site every day.',
@@ -1329,6 +1485,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Disneyland',
       hint: 'The magical theme park created by Walt Disney in California that calls itself the "Happiest Place on Earth"',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Anaheim, California, USA' },
+        { icon: '🏛️', label: 'Type', value: 'Theme Park' },
+        { icon: '📅', label: 'Opened', value: '1955' },
+      ],
       facts: [
         'Disneyland opened in Anaheim, California on 17 July 1955 — Walt Disney\'s dream of a place where families could have fun together came true.',
         'The park was built in just 366 days and on opening day some rides broke down, but it has since grown into one of the most visited places on Earth.',
@@ -1340,6 +1501,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Universal Studios',
       hint: 'The famous film studio theme park where visitors can step inside their favourite movies and TV shows',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Hollywood, California, USA' },
+        { icon: '🏛️', label: 'Type', value: 'Film Studio & Theme Park' },
+        { icon: '📅', label: 'Founded', value: '1915' },
+      ],
       facts: [
         'Universal Studios began as a real working film studio in Hollywood, California in 1915 — one of the oldest and largest movie studios in the world.',
         'The Universal Studios theme parks let visitors experience rides and attractions based on films like Jurassic Park, Harry Potter, and Fast & Furious.',
@@ -1351,6 +1517,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'The Colosseum',
       hint: 'The giant oval amphitheatre in Rome, Italy, where ancient Romans watched gladiator battles and other spectacular events',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Rome, Italy' },
+        { icon: '🏛️', label: 'Type', value: 'Amphitheatre' },
+        { icon: '📅', label: 'Built', value: 'c. 80 AD' },
+      ],
       facts: [
         'The Colosseum in Rome, Italy was completed around 80 AD and could hold between 50,000 and 80,000 spectators — about the size of a modern football stadium.',
         'It was used for gladiator fights, animal hunts, public executions, and even mock naval battles with the arena flooded with water.',
@@ -1362,6 +1533,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Buckingham Palace',
       hint: 'The official London home of the British Royal Family, famous for its grand facade and the Changing of the Guard ceremony',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'London, England' },
+        { icon: '🏛️', label: 'Type', value: 'Royal Palace' },
+        { icon: '📅', label: 'Built', value: '1703 (remodelled 1826)' },
+      ],
       facts: [
         'Buckingham Palace has been the official residence of the British monarch in London since 1837, when Queen Victoria moved in.',
         'The palace has 775 rooms including 19 State Rooms, 52 royal and guest bedrooms, 188 staff bedrooms, 92 offices and 78 bathrooms.',
@@ -1373,6 +1549,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Champs-Élysées',
       hint: 'The famous wide boulevard in Paris lined with shops, cafés and trees, leading to the Arc de Triomphe',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Paris, France' },
+        { icon: '🏛️', label: 'Type', value: 'Famous Boulevard' },
+        { icon: '📅', label: 'Laid out', value: '1667' },
+      ],
       facts: [
         'The Champs-Élysées is a famous avenue in Paris, France, running for about 1.9 kilometres from the Place de la Concorde to the Arc de Triomphe.',
         'Its name means "Elysian Fields" in French — the paradise in Greek mythology where heroic souls go after death.',
@@ -1384,6 +1565,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Stonehenge',
       hint: 'The mysterious circle of enormous ancient standing stones on Salisbury Plain in England, built thousands of years ago',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Wiltshire, England' },
+        { icon: '🏛️', label: 'Type', value: 'Prehistoric Monument' },
+        { icon: '📅', label: 'Built', value: 'c. 3000–1500 BC' },
+      ],
       facts: [
         'Stonehenge is a prehistoric monument on Salisbury Plain in Wiltshire, England, built in several stages between about 3000 BC and 1500 BC.',
         'The largest stones — called sarsens — weigh up to 25 tonnes each and were transported from a quarry about 25 kilometres away without any modern machines.',
@@ -1395,6 +1581,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Notre-Dame Cathedral',
       hint: 'The magnificent medieval Gothic cathedral on an island in the River Seine in the heart of Paris',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Paris, France' },
+        { icon: '🏛️', label: 'Type', value: 'Gothic Cathedral' },
+        { icon: '📅', label: 'Completed', value: 'c. 1345' },
+      ],
       facts: [
         'Notre-Dame de Paris is a medieval Catholic cathedral on the Île de la Cité in the River Seine, and one of the finest examples of Gothic architecture in the world.',
         'Construction began in 1163 and took about 200 years to complete; it was so ambitious that the builders invented a new engineering technique — the flying buttress — to hold up the walls.',
@@ -1406,6 +1597,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Alhambra Palace',
       hint: 'The breathtaking Moorish palace and fortress complex in Granada, Spain, famous for its intricate Islamic architecture',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Granada, Spain' },
+        { icon: '🏛️', label: 'Type', value: 'Moorish Palace & Fortress' },
+        { icon: '📅', label: 'Built', value: '13th–14th century' },
+      ],
       facts: [
         'The Alhambra is a palace and fortress complex in Granada, southern Spain, built mainly in the 13th and 14th centuries by the Moorish rulers of the region.',
         'Its name means "the red one" in Arabic, likely referring to the reddish colour of its outer walls made from clay and sand.',
@@ -1417,6 +1613,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Cappadocia',
       hint: 'The magical region in Turkey famous for its fairy chimneys, underground cities and hot-air balloon rides at sunrise',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Central Turkey' },
+        { icon: '🏛️', label: 'Type', value: 'Natural & Historic Region' },
+        { icon: '📅', label: 'Age', value: 'Landscape ~3 million years old' },
+      ],
       facts: [
         'Cappadocia is a region in central Turkey famous for its extraordinary landscape of cone-shaped rock formations known as "fairy chimneys," carved by millions of years of volcanic eruptions and erosion.',
         'Ancient people carved homes, churches, and entire underground cities into the soft volcanic rock — some of these underground cities could house thousands of people and their animals.',
@@ -1428,6 +1629,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'The Pacific Ocean',
       hint: 'The largest and deepest ocean on Earth, covering more than a third of the planet\'s entire surface',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Between Asia/Australia & the Americas' },
+        { icon: '🏛️', label: 'Type', value: 'Ocean' },
+        { icon: '📅', label: 'Age', value: '~250 million years old' },
+      ],
       facts: [
         'The Pacific Ocean is the largest ocean on Earth, covering about 165 million square kilometres — bigger than all of Earth\'s land combined.',
         'It is also the deepest ocean; the Mariana Trench in the western Pacific reaches nearly 11 kilometres below the surface — the deepest point on Earth.',
@@ -1439,6 +1645,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Antarctica',
       hint: 'The frozen continent at the South Pole, the coldest, windiest and driest place on Earth',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'South Pole' },
+        { icon: '🏛️', label: 'Type', value: 'Frozen Continent' },
+        { icon: '📅', label: 'Age', value: 'Ice sheet ~34 million years old' },
+      ],
       facts: [
         'Antarctica is the fifth-largest continent and sits at the South Pole; it is almost entirely covered by an ice sheet up to 4.8 kilometres thick.',
         'It is the coldest place on Earth — the lowest temperature ever recorded was −89.2°C at the Soviet Vostok Station in 1983.',
@@ -1452,6 +1663,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Simba',
       hint: 'The lion prince from Disney\'s The Lion King who must reclaim his kingdom after his father is killed',
+      infoFields: [
+        { icon: '📅', label: 'Released', value: '1994' },
+        { icon: '🎬', label: 'Type', value: 'Animated Film' },
+        { icon: '🏢', label: 'Studio', value: 'Walt Disney Animation' },
+      ],
       facts: [
         'Simba is the main character of Disney\'s The Lion King (1994), one of the highest-grossing animated films ever made.',
         'His story is inspired by Shakespeare\'s Hamlet — a prince who runs away after his father is killed by a treacherous relative.',
@@ -1463,6 +1679,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Elsa',
       hint: 'The ice-powered queen from Disney\'s Frozen who sings "Let It Go" and can create blizzards with her hands',
+      infoFields: [
+        { icon: '📅', label: 'Released', value: '2013' },
+        { icon: '🎬', label: 'Type', value: 'Animated Film' },
+        { icon: '🏢', label: 'Studio', value: 'Walt Disney Animation' },
+      ],
       facts: [
         'Elsa is the main character of Disney\'s Frozen (2013), which became the highest-grossing animated film of its time.',
         'She is inspired by the Snow Queen, a character from a fairy tale by Danish author Hans Christian Andersen.',
@@ -1474,6 +1695,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'SpongeBob SquarePants',
       hint: 'The cheerful yellow sea sponge who lives in a pineapple under the sea and works as a fry cook',
+      infoFields: [
+        { icon: '📅', label: 'First aired', value: '1999' },
+        { icon: '🎬', label: 'Type', value: 'Animated TV Show' },
+        { icon: '🏢', label: 'Network', value: 'Nickelodeon' },
+      ],
       facts: [
         'SpongeBob SquarePants first appeared on Nickelodeon in 1999 and was created by marine science educator Stephen Hillenburg.',
         'He lives in an underwater city called Bikini Bottom in a house shaped like a pineapple, with his best friend Patrick the starfish next door.',
@@ -1485,6 +1711,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Harry Potter',
       hint: 'The boy wizard with a lightning-bolt scar who discovers he is famous in the magical world',
+      infoFields: [
+        { icon: '📅', label: 'Books from', value: '1997 · Films from 2001' },
+        { icon: '🎬', label: 'Type', value: 'Fantasy Film Series' },
+        { icon: '🏢', label: 'Studio', value: 'Warner Bros.' },
+      ],
       facts: [
         'Harry Potter is the hero of seven novels written by J.K. Rowling, starting with Harry Potter and the Philosopher\'s Stone (1997).',
         'He discovers on his 11th birthday that he is a wizard and is accepted into Hogwarts School of Witchcraft and Wizardry.',
@@ -1496,6 +1727,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Woody',
       hint: 'The cowboy pull-string toy who is Andy\'s favourite in Disney Pixar\'s Toy Story',
+      infoFields: [
+        { icon: '📅', label: 'Released', value: '1995' },
+        { icon: '🎬', label: 'Type', value: 'Animated Film' },
+        { icon: '🏢', label: 'Studio', value: 'Pixar / Disney' },
+      ],
       facts: [
         'Woody is the main character of the Toy Story franchise (1995–2019), the beloved Pixar series about toys that come to life when humans are not watching.',
         'He is a pull-string cowboy doll and Andy\'s favourite toy — until a flashy new space ranger called Buzz Lightyear arrives.',
@@ -1507,6 +1743,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Shrek',
       hint: 'The grumpy green ogre who lives in a swamp and goes on a quest to rescue a princess',
+      infoFields: [
+        { icon: '📅', label: 'Released', value: '2001' },
+        { icon: '🎬', label: 'Type', value: 'Animated Film' },
+        { icon: '🏢', label: 'Studio', value: 'DreamWorks Animation' },
+      ],
       facts: [
         'Shrek is the main character of DreamWorks Animation\'s Shrek (2001) and its sequels, based on a picture book by William Steig.',
         'He is a large, grumpy green ogre who just wants to be left alone in his swamp, but ends up on a quest to rescue Princess Fiona with a talking donkey as his companion.',
@@ -1518,6 +1759,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Nemo',
       hint: 'The little clownfish with a small fin who gets lost in the ocean while his worried dad swims across the sea to find him',
+      infoFields: [
+        { icon: '📅', label: 'Released', value: '2003' },
+        { icon: '🎬', label: 'Type', value: 'Animated Film' },
+        { icon: '🏢', label: 'Studio', value: 'Pixar / Disney' },
+      ],
       facts: [
         'Nemo is the main character of Pixar\'s Finding Nemo (2003), a film about a father\'s incredible journey to rescue his son.',
         'He is a clownfish with one small fin — called a "lucky fin" by his dad Marlin — who gets scooped up by a scuba diver and taken to a fish tank in a Sydney dentist\'s office.',
@@ -1529,6 +1775,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Moana',
       hint: 'The brave Polynesian teenager who sails across the ocean to restore the heart of the goddess Te Fiti',
+      infoFields: [
+        { icon: '📅', label: 'Released', value: '2016' },
+        { icon: '🎬', label: 'Type', value: 'Animated Film' },
+        { icon: '🏢', label: 'Studio', value: 'Walt Disney Animation' },
+      ],
       facts: [
         'Moana is the main character of Disney\'s Moana (2016), a film inspired by the seafaring cultures of Polynesia.',
         'She is the daughter of the chief of the island of Motunui and is chosen by the ocean to return the stolen heart of the goddess Te Fiti.',
@@ -1542,6 +1793,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Blue Whale',
       hint: 'The largest animal ever known to have lived on Earth — a giant ocean creature whose heart is the size of a small car',
+      infoFields: [
+        { icon: '🐾', label: 'Animal Type', value: 'Marine Mammal' },
+        { icon: '🌿', label: 'Habitat', value: 'All oceans worldwide' },
+        { icon: '⚠️', label: 'Status', value: 'Endangered' },
+      ],
       facts: [
         'The blue whale is the largest animal known to have ever existed on Earth, reaching lengths of up to 30 metres and weights of up to 200 tonnes.',
         'Its heart is about the size of a small car, and a human could crawl through its main blood vessels.',
@@ -1553,6 +1809,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Cheetah',
       hint: 'The world\'s fastest land animal, capable of reaching 100 km/h in just a few seconds',
+      infoFields: [
+        { icon: '🐾', label: 'Animal Type', value: 'Big Cat (Mammal)' },
+        { icon: '🌿', label: 'Habitat', value: 'African savannah & grasslands' },
+        { icon: '⚠️', label: 'Status', value: 'Vulnerable' },
+      ],
       facts: [
         'The cheetah is the fastest land animal, reaching speeds of up to 112 km/h during short chases after prey.',
         'It can accelerate from 0 to 100 km/h in just about 3 seconds — faster than most sports cars.',
@@ -1564,6 +1825,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Giant Panda',
       hint: 'The black-and-white bear from China that has become one of the world\'s most beloved symbols of wildlife conservation',
+      infoFields: [
+        { icon: '🐾', label: 'Animal Type', value: 'Bear (Mammal)' },
+        { icon: '🌿', label: 'Habitat', value: 'Central China mountain forests' },
+        { icon: '⚠️', label: 'Status', value: 'Vulnerable' },
+      ],
       facts: [
         'Giant pandas live in the mountain forests of central China and are famous for their distinctive black-and-white colouring.',
         'They eat almost nothing but bamboo — up to 14 kg a day — and spend about 12 hours a day just eating to get enough energy.',
@@ -1575,6 +1841,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Tyrannosaurus Rex',
       hint: 'The fearsome giant meat-eating dinosaur with tiny arms and enormous jaws that ruled the Late Cretaceous period',
+      infoFields: [
+        { icon: '🐾', label: 'Animal Type', value: 'Theropod Dinosaur' },
+        { icon: '🌿', label: 'Habitat', value: 'North America (prehistoric)' },
+        { icon: '⚠️', label: 'Status', value: 'Extinct (~66 million years ago)' },
+      ],
       facts: [
         'Tyrannosaurus Rex lived about 66–68 million years ago and was one of the largest meat-eating dinosaurs ever to walk the Earth.',
         'It could grow up to 12 metres long and weigh about 8 tonnes — heavier than an African elephant.',
@@ -1586,6 +1857,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Polar Bear',
       hint: 'The world\'s largest land carnivore, a white bear that lives on Arctic sea ice and swims long distances in freezing water',
+      infoFields: [
+        { icon: '🐾', label: 'Animal Type', value: 'Mammal' },
+        { icon: '🌿', label: 'Habitat', value: 'Arctic Circle' },
+        { icon: '⚠️', label: 'Status', value: 'Vulnerable' },
+      ],
       facts: [
         'Polar bears are the world\'s largest land carnivores; males can weigh over 700 kg and stand nearly 3 metres tall on their hind legs.',
         'Their fur appears white but is actually transparent and hollow, helping to trap warmth and scatter light.',
@@ -1597,6 +1873,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Bald Eagle',
       hint: 'The national bird and symbol of the United States — a large bird of prey with a distinctive white head and brown body',
+      infoFields: [
+        { icon: '🐾', label: 'Animal Type', value: 'Bird of Prey' },
+        { icon: '🌿', label: 'Habitat', value: 'North America' },
+        { icon: '⚠️', label: 'Status', value: 'Least Concern (recovered)' },
+      ],
       facts: [
         'The bald eagle is the national bird of the United States and appears on the country\'s official seal and many symbols.',
         'Despite its name, it is not bald — adults have a striking white head and tail feathers that contrast with their dark brown body.',
@@ -1608,6 +1889,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Dolphin',
       hint: 'The intelligent, playful sea mammal that communicates with clicks and whistles and loves to ride the bow waves of boats',
+      infoFields: [
+        { icon: '🐾', label: 'Animal Type', value: 'Marine Mammal' },
+        { icon: '🌿', label: 'Habitat', value: 'Oceans & rivers worldwide' },
+        { icon: '⚠️', label: 'Status', value: 'Varies by species' },
+      ],
       facts: [
         'Dolphins are highly intelligent marine mammals; they use a system of clicks, whistles and body language to communicate with each other.',
         'They are one of the few animals that can recognise themselves in a mirror — a sign of self-awareness shared with only a handful of species.',
@@ -1619,6 +1905,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Monarch Butterfly',
       hint: 'The orange-and-black butterfly famous for its extraordinary migration journey of thousands of kilometres across North America',
+      infoFields: [
+        { icon: '🐾', label: 'Animal Type', value: 'Insect' },
+        { icon: '🌿', label: 'Habitat', value: 'North America & Mexico' },
+        { icon: '⚠️', label: 'Status', value: 'Endangered' },
+      ],
       facts: [
         'Monarch butterflies are famous for their incredible annual migration: millions of them travel up to 4,500 kilometres from Canada and the United States to spend winter in Mexico.',
         'Each individual butterfly lives only a few months, so the return journey is completed by the grandchildren or great-grandchildren of the original migrants.',
@@ -1632,6 +1923,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'The Olympics',
       hint: 'The great international sporting competition held every four years where athletes from all over the world compete for gold, silver and bronze medals',
+      infoFields: [
+        { icon: '🌍', label: 'Origin', value: 'Ancient Greece' },
+        { icon: '📅', label: 'First held', value: '776 BC (ancient) · 1896 (modern)' },
+        { icon: '🏅', label: 'Type', value: 'Multi-Sport Event' },
+      ],
       facts: [
         'The modern Olympic Games began in Athens, Greece, in 1896, inspired by the ancient Greek Olympics that took place over 1,000 years ago.',
         'Athletes from nearly every country on Earth participate — the Tokyo 2020 Olympics (held in 2021) featured 206 national delegations.',
@@ -1643,6 +1939,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Chess',
       hint: 'The ancient strategy board game played on a 64-square board where two players try to trap each other\'s king',
+      infoFields: [
+        { icon: '🌍', label: 'Origin', value: 'India (c. 6th century AD)' },
+        { icon: '📅', label: 'First played', value: 'c. 600 AD' },
+        { icon: '🏅', label: 'Type', value: 'Strategy Board Game' },
+      ],
       facts: [
         'Chess is one of the oldest games still played today; it is believed to have originated in India around 1,500 years ago before spreading to Persia, Arabia and Europe.',
         'Each player starts with 16 pieces — one king, one queen, two rooks, two knights, two bishops and eight pawns — with different rules for how each piece moves.',
@@ -1654,6 +1955,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Wimbledon',
       hint: 'The world\'s oldest and most famous tennis tournament, held every summer on grass courts in London',
+      infoFields: [
+        { icon: '🌍', label: 'Origin', value: 'London, England' },
+        { icon: '📅', label: 'First held', value: '1877' },
+        { icon: '🏅', label: 'Type', value: 'Lawn Tennis Tournament' },
+      ],
       facts: [
         'Wimbledon is the oldest tennis tournament in the world, first held in London in 1877 — making it the most prestigious event in the sport.',
         'It is the only Grand Slam tournament still played on grass courts, which makes the ball bounce faster and lower than on other surfaces.',
@@ -1665,6 +1971,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'FIFA World Cup',
       hint: 'The biggest football tournament in the world, held every four years and watched by billions of people',
+      infoFields: [
+        { icon: '🌍', label: 'Origin', value: 'Worldwide' },
+        { icon: '📅', label: 'First held', value: '1930 (Uruguay)' },
+        { icon: '🏅', label: 'Type', value: 'International Football Tournament' },
+      ],
       facts: [
         'The FIFA World Cup is the world\'s most watched sporting event; the 2022 final between Argentina and France was seen by over 1.5 billion people.',
         'The first World Cup was held in Uruguay in 1930; Brazil have won it a record five times.',
@@ -1676,6 +1987,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Cricket',
       hint: 'The bat-and-ball sport played over days that is hugely popular in England, India, Australia and the Caribbean',
+      infoFields: [
+        { icon: '🌍', label: 'Origin', value: 'England' },
+        { icon: '📅', label: 'First recorded', value: '16th century' },
+        { icon: '🏅', label: 'Type', value: 'Bat-and-Ball Sport' },
+      ],
       facts: [
         'Cricket is one of the world\'s most popular sports, with around 2.5 billion fans mostly in South Asia, the UK, Australia and the Caribbean.',
         'A Test match — the longest form of the game — can last up to five days, which is unique among major sports.',
@@ -1687,6 +2003,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Basketball',
       hint: 'The fast-paced sport invented in America where players score by throwing a ball through an elevated hoop',
+      infoFields: [
+        { icon: '🌍', label: 'Origin', value: 'USA' },
+        { icon: '📅', label: 'Invented', value: '1891' },
+        { icon: '🏅', label: 'Type', value: 'Team Ball Sport' },
+      ],
       facts: [
         'Basketball was invented in 1891 by Canadian-American physical education teacher James Naismith, who wanted an indoor sport for his students to play in winter.',
         'The first "baskets" were actual peach baskets nailed to a wall; someone had to climb up and retrieve the ball by hand after every goal.',
@@ -1698,6 +2019,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Swimming',
       hint: 'The Olympic sport where athletes race through the water using different strokes including freestyle, butterfly, breaststroke and backstroke',
+      infoFields: [
+        { icon: '🌍', label: 'Origin', value: 'Worldwide' },
+        { icon: '📅', label: 'Olympic debut', value: '1896' },
+        { icon: '🏅', label: 'Type', value: 'Aquatic Sport' },
+      ],
       facts: [
         'Swimming has been an Olympic sport since the first modern Games in 1896 and is one of the most popular and widely practised sports in the world.',
         'There are four main competitive strokes: freestyle (front crawl), backstroke, breaststroke and butterfly — each requiring different techniques.',
@@ -1709,6 +2035,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'The Marathon',
       hint: 'The long-distance running race of exactly 42.195 kilometres that is named after an ancient Greek battle',
+      infoFields: [
+        { icon: '🌍', label: 'Origin', value: 'Ancient Greece' },
+        { icon: '📅', label: 'Olympic debut', value: '1896' },
+        { icon: '🏅', label: 'Type', value: 'Long-Distance Running' },
+      ],
       facts: [
         'The marathon distance of 42.195 kilometres is named after the ancient Greek city of Marathon, where a famous battle was fought in 490 BC.',
         'Legend says a Greek soldier named Pheidippides ran all the way from Marathon to Athens to announce the Greek victory, then dropped dead from exhaustion.',
@@ -1722,6 +2053,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'The Telephone',
       hint: 'The invention that allowed people to speak to each other across long distances for the first time',
+      infoFields: [
+        { icon: '👤', label: 'Inventor', value: 'Alexander Graham Bell' },
+        { icon: '📅', label: 'Invented', value: '1876' },
+        { icon: '🔬', label: 'Field', value: 'Communications' },
+      ],
       facts: [
         'The telephone was patented by Alexander Graham Bell in 1876; the first words ever spoken on one were reportedly "Mr Watson, come here, I want to see you."',
         'Before the telephone, the fastest way to send a message over long distances was the telegraph, which used electrical signals to send coded text.',
@@ -1733,6 +2069,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'The Internet',
       hint: 'The global network of computers that allows billions of people to share information, communicate and access knowledge instantly',
+      infoFields: [
+        { icon: '👤', label: 'Key pioneers', value: 'Vint Cerf, Bob Kahn, Tim Berners-Lee' },
+        { icon: '📅', label: 'Developed', value: '1960s–1989' },
+        { icon: '🔬', label: 'Field', value: 'Communications & Technology' },
+      ],
       facts: [
         'The Internet began as a US military research project called ARPANET in the late 1960s, designed to keep communication working even if part of the network was destroyed.',
         'The World Wide Web — the system of websites and links most people think of as "the internet" — was invented by British scientist Tim Berners-Lee in 1989.',
@@ -1744,6 +2085,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'The Aeroplane',
       hint: 'The powered flying machine invented by the Wright Brothers in 1903 that changed how people travel around the world',
+      infoFields: [
+        { icon: '👤', label: 'Inventors', value: 'Orville & Wilbur Wright' },
+        { icon: '📅', label: 'First flight', value: '1903' },
+        { icon: '🔬', label: 'Field', value: 'Transport' },
+      ],
       facts: [
         'On 17 December 1903, Orville and Wilbur Wright made the first successful powered aeroplane flight at Kitty Hawk, North Carolina.',
         'The first flight lasted just 12 seconds and covered 36 metres — barely the length of a large room.',
@@ -1755,6 +2101,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'The Printing Press',
       hint: 'The machine invented in the 1440s that allowed books and ideas to be copied quickly and cheaply for the first time',
+      infoFields: [
+        { icon: '👤', label: 'Inventor', value: 'Johannes Gutenberg' },
+        { icon: '📅', label: 'Invented', value: 'c. 1440' },
+        { icon: '🔬', label: 'Field', value: 'Communications & Publishing' },
+      ],
       facts: [
         'The movable-type printing press was invented by Johannes Gutenberg in Germany around 1440 and revolutionised how information was shared.',
         'Before it, books were copied by hand — a slow and expensive process that meant only the very wealthy could own them.',
@@ -1766,6 +2117,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'Vaccines',
       hint: 'The medical invention that teaches your immune system to fight a disease before you ever catch it, and has saved hundreds of millions of lives',
+      infoFields: [
+        { icon: '👤', label: 'Pioneer', value: 'Edward Jenner' },
+        { icon: '📅', label: 'First vaccine', value: '1796' },
+        { icon: '🔬', label: 'Field', value: 'Medicine' },
+      ],
       facts: [
         'The first vaccine was created by English doctor Edward Jenner in 1796, when he discovered that giving people a mild disease called cowpox protected them from the deadly smallpox.',
         'Vaccines work by introducing a harmless version of a virus or bacteria into the body, which teaches the immune system how to fight the real disease.',
@@ -1777,6 +2133,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'The Telescope',
       hint: 'The optical instrument that allows humans to see objects far away in space, from distant planets to galaxies billions of light-years off',
+      infoFields: [
+        { icon: '👤', label: 'Inventor', value: 'Hans Lippershey' },
+        { icon: '📅', label: 'Invented', value: '1608' },
+        { icon: '🔬', label: 'Field', value: 'Astronomy' },
+      ],
       facts: [
         'The telescope was invented around 1608 in the Netherlands, and Galileo Galilei was one of the first to use it to study the night sky in 1609.',
         'Galileo\'s observations with his telescope showed that the Moon had mountains, Jupiter had moons, and the Milky Way was made of countless stars.',
@@ -1788,6 +2149,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'The Bicycle',
       hint: 'The two-wheeled, human-powered vehicle that became the world\'s most common form of transport',
+      infoFields: [
+        { icon: '👤', label: 'Inventor', value: 'Karl Drais' },
+        { icon: '📅', label: 'Invented', value: '1817' },
+        { icon: '🔬', label: 'Field', value: 'Transport' },
+      ],
       facts: [
         'The first recognisable bicycle — called the "dandy horse" — was invented by German Karl von Drais in 1817; it had no pedals and riders pushed with their feet.',
         'Pedals were added in the 1860s, and the modern chain-driven bicycle design appeared in the 1880s, quickly becoming popular worldwide.',
@@ -1799,6 +2165,11 @@ const JUNIOR_LIBRARY = {
     {
       secret: 'The Light Bulb',
       hint: 'The electrical invention that allowed homes and cities to be lit up at night, ending the need for candles and gas lamps',
+      infoFields: [
+        { icon: '👤', label: 'Inventor', value: 'Thomas Edison (practical version)' },
+        { icon: '📅', label: 'Invented', value: '1879' },
+        { icon: '🔬', label: 'Field', value: 'Energy & Lighting' },
+      ],
       facts: [
         'Thomas Edison is most often credited with inventing the practical electric light bulb in 1879, though several other inventors made important contributions around the same time.',
         'Edison\'s bulb used a thin carbon filament in a glass vacuum — electricity passing through the filament caused it to glow brightly without burning up quickly.',
@@ -3346,7 +3717,7 @@ export default function EnigmaGame() {
     if (!pool.length) return getRandomChallenge('random', tier);
     const picked = pool[Math.floor(Math.random() * pool.length)];
     const theme = themes.find((t) => t.id === picked.themeId) || themes[0];
-    return { secret: picked.item.secret, hint: picked.item.hint, facts: picked.item.facts, categoryLabel: theme.label, categoryIcon: theme.icon };
+    return { secret: picked.item.secret, hint: picked.item.hint, infoFields: picked.item.infoFields || [], facts: picked.item.facts, categoryLabel: theme.label, categoryIcon: theme.icon };
   };
 
   const computeHint = (secret, hintNum, challengeHint = null) => {
@@ -4942,30 +5313,16 @@ export default function EnigmaGame() {
         {(soloChallenge.facts || []).length > 0 && (
           <View style={[S.infoCard, { marginBottom: 24 }]}>
             <Text style={[S.tOverline, { letterSpacing: 3, marginBottom: 14 }]}>📖 About This Secret</Text>
-            {/* Bio info row — shown for Famous People entries */}
-            {(soloChallenge.born || soloChallenge.field || soloChallenge.nationality) && (
+            {/* Info card row — rendered for all categories that have infoFields */}
+            {(soloChallenge.infoFields || []).length > 0 && (
               <View style={{ backgroundColor: 'rgba(212,168,74,0.08)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.25)', borderRadius: 10, padding: 12, marginBottom: 16, gap: 6 }}>
-                {soloChallenge.born && (
-                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-                    <Text style={{ fontSize: 13 }}>🎂</Text>
-                    <Text style={[S.tBodySm, { color: C.gold, fontFamily: 'Outfit_600SemiBold' }]}>Born: </Text>
-                    <Text style={[S.tBodySm, { color: C.text, flex: 1 }]}>{soloChallenge.born}{soloChallenge.died ? `  ·  Died: ${soloChallenge.died}` : ''}</Text>
+                {soloChallenge.infoFields.map((f, i) => (
+                  <View key={i} style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 13 }}>{f.icon}</Text>
+                    <Text style={[S.tBodySm, { color: C.gold, fontFamily: 'Outfit_600SemiBold' }]}>{f.label}: </Text>
+                    <Text style={[S.tBodySm, { color: C.text, flex: 1 }]}>{f.value}</Text>
                   </View>
-                )}
-                {soloChallenge.field && (
-                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-                    <Text style={{ fontSize: 13 }}>🏆</Text>
-                    <Text style={[S.tBodySm, { color: C.gold, fontFamily: 'Outfit_600SemiBold' }]}>Field: </Text>
-                    <Text style={[S.tBodySm, { color: C.text, flex: 1 }]}>{soloChallenge.field}</Text>
-                  </View>
-                )}
-                {soloChallenge.nationality && (
-                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-                    <Text style={{ fontSize: 13 }}>🌍</Text>
-                    <Text style={[S.tBodySm, { color: C.gold, fontFamily: 'Outfit_600SemiBold' }]}>Nationality: </Text>
-                    <Text style={[S.tBodySm, { color: C.text, flex: 1 }]}>{soloChallenge.nationality}</Text>
-                  </View>
-                )}
+                ))}
               </View>
             )}
             {(soloChallenge.facts || []).map((fact, i) => (
