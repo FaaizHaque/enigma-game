@@ -5292,6 +5292,7 @@ export default function EnigmaGame() {
   const [selectedAvatarIdx, setSelectedAvatarIdx] = useState(0);
   const [secretSource, setSecretSource] = useState('library');
   const [libraryBriefing, setLibraryBriefing] = useState(null);
+  const [hostCardOpen, setHostCardOpen] = useState(false);
   const [isPublicRoom, setIsPublicRoom] = useState(false);
   const [publicRooms, setPublicRooms] = useState([]);
   const [loadingRooms, setLoadingRooms] = useState(false);
@@ -5713,12 +5714,13 @@ export default function EnigmaGame() {
     await syncGame(newGame);
   };
 
-  const lockSecret = async (secretOverride, hintOverride) => {
+  const lockSecret = async (secretOverride, hintOverride, factsOverride) => {
     const secret = (secretOverride ?? secretInput).trim();
     const hint = (hintOverride ?? hintInput).trim();
     if (!secret) return;
     const newGame = {
       ...game, secretAnswer: secret, hostHint: hint,
+      hostFacts: factsOverride || null,
       status: 'playing', questions: [], currentQuestionerIndex: 0, pendingSolve: null, hostConsecutiveMisses: 0,
     };
     setGame(newGame);
@@ -5814,7 +5816,7 @@ export default function EnigmaGame() {
     }
     const newGame = {
       ...game, players, round: game.round + 1, theme: null, secretAnswer: '',
-      hostHint: '', questions: [], currentQuestionerIndex: 0,
+      hostHint: '', hostFacts: null, questions: [], currentQuestionerIndex: 0,
       status: 'theme_select', pendingSolve: null, roundWinnerId: undefined,
       hostConsecutiveMisses: 0, hostAbandoned: false, abandonedHostName: undefined,
     };
@@ -7994,7 +7996,7 @@ export default function EnigmaGame() {
               </ScrollView>
               <TouchableOpacity
                 style={S.btnGold}
-                onPress={() => { const item = libraryBriefing; setLibraryBriefing(null); lockSecret(item.secret, ''); }}
+                onPress={() => { const item = libraryBriefing; setLibraryBriefing(null); lockSecret(item.secret, '', item.facts); }}
               >
                 <Text style={S.btnGoldText}>I'm Ready — Start Round →</Text>
               </TouchableOpacity>
@@ -8114,6 +8116,33 @@ export default function EnigmaGame() {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
         <PremiumBackground />
+
+        {/* Host Info Card Modal */}
+        {viewerIsHost && (
+          <Modal visible={hostCardOpen} transparent animationType="slide" onRequestClose={() => setHostCardOpen(false)}>
+            <View style={S.overlay}>
+              <View style={[S.modal, { maxHeight: '85%' }]}>
+                <View style={S.modalHandle} />
+                <View style={{ backgroundColor: 'rgba(200,168,74,0.08)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 10, padding: 10, marginBottom: 14, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ fontSize: 13 }}>🔒</Text>
+                  <Text style={{ fontSize: 11, color: C.goldDim, fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>PRIVATE — HOST EYES ONLY</Text>
+                </View>
+                <Text style={[S.modalTitle, { fontSize: 22, marginBottom: 14 }]}>{game.secretAnswer}</Text>
+                <ScrollView showsVerticalScrollIndicator={false} style={{ marginBottom: 14 }}>
+                  {(game.hostFacts || []).map((f, i) => (
+                    <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
+                      <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold', fontSize: 14, marginTop: 1 }}>•</Text>
+                      <Text style={[S.tBodySm, { flex: 1, color: C.muted, lineHeight: 20 }]}>{f}</Text>
+                    </View>
+                  ))}
+                </ScrollView>
+                <TouchableOpacity style={S.btnGold} onPress={() => setHostCardOpen(false)}>
+                  <Text style={S.btnGoldText}>Back to Game</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        )}
 
         {/* Timeout toast — centred */}
         {timeoutToast && (
@@ -8439,6 +8468,14 @@ export default function EnigmaGame() {
                     <Animated.View style={{ height: 3, width: hostBarAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }), backgroundColor: hostSecsLeft <= 5 ? C.danger : C.warn, borderRadius: 2 }} />
                   </View>
                 </View>
+                {game.hostFacts?.length > 0 && (
+                  <TouchableOpacity
+                    style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 7, marginBottom: 8, borderWidth: 1, borderColor: C.goldDim, borderRadius: 8, backgroundColor: 'rgba(200,168,74,0.06)' }}
+                    onPress={() => setHostCardOpen(true)}
+                  >
+                    <Text style={{ fontSize: 12, color: C.goldDim, fontFamily: 'Outfit_600SemiBold', letterSpacing: 0.5 }}>📋  Consult Info Card</Text>
+                  </TouchableOpacity>
+                )}
                 <View style={{ flexDirection: 'row', gap: 6, marginBottom: partlyMode ? 8 : 0 }}>
                   <TouchableOpacity style={[S.btnYes, { flex: 1 }]} onPress={() => answerQ('YES')}>
                     <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>✓ YES</Text>
