@@ -6054,9 +6054,10 @@ export default function EnigmaGame() {
   const submitQuestion = async () => {
     if (!questionInput.trim() || !isMyTurn || pendingQ) return;
     if (!isValidQuestion(questionInput)) {
-      setSolveInput(questionInput.trim());
-      setQuestionInput('');
-      setSolveModalOpen(true);
+      Alert.alert(
+        'Ask a complete question',
+        'Type a full yes/no question (e.g. "Is it a living thing?"). To make a final guess instead, use the "I Know It — Solve!" button.',
+      );
       return;
     }
     const q = {
@@ -6340,9 +6341,10 @@ export default function EnigmaGame() {
     const realQCount = soloQuestions.filter(qq => !qq.type).length;
     if (!q || soloLoading || realQCount >= 20 || !soloChallenge) return;
     if (!isValidQuestion(q)) {
-      setSoloSolveInput(q);
-      setSoloInput('');
-      setSoloSolveOpen(true);
+      Alert.alert(
+        'Ask a complete question',
+        'Type a full yes/no question (e.g. "Is it a living thing?"). To make a final guess instead, use the Solve button.',
+      );
       return;
     }
     const entry = { id: Date.now(), text: q, answer: null };
@@ -6404,9 +6406,10 @@ export default function EnigmaGame() {
     const realQCount = dailyQuestions.filter(qq => !qq.type).length;
     if (!q || dailyLoading || realQCount >= 20) return;
     if (!isValidQuestion(q)) {
-      setDailySolveInput(q);
-      setDailyInput('');
-      setDailySolveOpen(true);
+      Alert.alert(
+        'Ask a complete question',
+        'Type a full yes/no question (e.g. "Is it a living thing?"). To make a final guess instead, use the Solve button.',
+      );
       return;
     }
     const entry = { id: Date.now(), text: q, answer: null };
