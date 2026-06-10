@@ -8114,7 +8114,7 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
-        <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 90 }]}>
+        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 90 }]}>
           <View style={S.screenHeader}>
             <Chip label="Lobby" />
             <Text style={[S.tCaption, { color: C.dim }]}>
@@ -8225,7 +8225,7 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
-        <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 24 }]}>
+        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <View style={S.screenHeader}>
             <Chip label={`Round ${game.round}`} />
             <Text style={[S.tCaption, { color: C.muted }]}>Host: {host?.name}</Text>
@@ -8333,14 +8333,14 @@ export default function EnigmaGame() {
               >
                 <Text style={S.btnGoldText}>I'm Ready — Start Round →</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={{ marginTop: 10, alignItems: 'center', padding: 8 }} onPress={() => setLibraryBriefing(null)}>
-                <Text style={[S.tBodySm, { color: C.dim }]}>← Choose a different secret</Text>
+              <TouchableOpacity style={{ marginTop: 12, alignItems: 'center', paddingVertical: 13, borderRadius: 12, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)' }} onPress={() => setLibraryBriefing(null)}>
+                <Text style={{ fontFamily: F.sansSemi, fontSize: 15, color: C.muted, letterSpacing: 0.3 }}>← Pick another from Library</Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
 
-        <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 24 }]}>
+        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <View style={S.screenHeader}>
             <Chip label={`${game.theme?.icon} ${game.theme?.label}`} style="violet" />
           </View>
@@ -8636,10 +8636,16 @@ export default function EnigmaGame() {
         </Modal>
 
         {/* Game content */}
-        <View style={{ flex: 1, paddingHorizontal: 16 }}>
-          {/* Category header — violet glass bar with Round chip */}
-          <View style={{ paddingTop: 10, paddingBottom: 8 }}>
-            <View style={{ borderRadius: 16, shadowColor: C.violet, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.30, shadowRadius: 12, elevation: 7 }}>
+        <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: insets.top }}>
+          {/* Top bar — home button + category/round glass bar */}
+          <View style={{ paddingTop: 10, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <TouchableOpacity
+              onPress={goHome}
+              style={{ width: 44, height: 44, borderRadius: 12, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Text style={{ fontSize: 20 }}>🏠</Text>
+            </TouchableOpacity>
+            <View style={{ flex: 1, borderRadius: 16, shadowColor: C.violet, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.30, shadowRadius: 12, elevation: 7 }}>
               <LinearGradient colors={['rgba(180,140,255,0.55)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.5 }}>
                 <LinearGradient colors={['rgba(124,58,237,0.18)', 'rgba(70,25,150,0.12)', 'rgba(30,8,80,0.24)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 14.5, overflow: 'hidden', paddingVertical: 13, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                   <LinearGradient colors={['rgba(180,140,255,0.18)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 30 }} />
@@ -8720,16 +8726,25 @@ export default function EnigmaGame() {
             </View>
           )}
 
-          {/* Host secret reveal — violet glass */}
+          {/* Host secret reveal — violet glass. Tappable to consult the info card. */}
           {viewerIsHost && (
-            <View style={{ borderRadius: 14, marginBottom: 8, shadowColor: C.violet, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.26, shadowRadius: 11, elevation: 6 }}>
+            <TouchableOpacity
+              activeOpacity={game.hostFacts?.length > 0 ? 0.85 : 1}
+              onPress={() => { if (game.hostFacts?.length > 0) setHostCardOpen(true); }}
+              style={{ borderRadius: 14, marginBottom: 8, shadowColor: C.violet, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.26, shadowRadius: 11, elevation: 6 }}
+            >
               <LinearGradient colors={['rgba(180,140,255,0.50)', 'rgba(124,58,237,0.20)', 'rgba(70,20,160,0.36)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14, padding: 1.5 }}>
-                <LinearGradient colors={['rgba(124,58,237,0.16)', 'rgba(70,25,150,0.10)', 'rgba(30,8,80,0.22)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 12.5, overflow: 'hidden', paddingVertical: 11, alignItems: 'center' }}>
+                <LinearGradient colors={['rgba(124,58,237,0.16)', 'rgba(70,25,150,0.10)', 'rgba(30,8,80,0.22)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 12.5, overflow: 'hidden', paddingVertical: 11, paddingHorizontal: 14, alignItems: 'center' }}>
                   <Text style={{ fontSize: 10, color: C.violet2, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 3, fontFamily: F.sansBold }}>🔒 Your Secret</Text>
                   <Text style={{ fontFamily: F.serifBold, fontSize: 19, color: C.text, letterSpacing: 0.3 }}>{game.secretAnswer}</Text>
+                  {game.hostFacts?.length > 0 && (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 7, borderWidth: 1, borderColor: C.goldDim, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: 'rgba(200,168,74,0.08)' }}>
+                      <Text style={{ fontSize: 12, color: C.gold, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>📋 Tap to consult info card</Text>
+                    </View>
+                  )}
                 </LinearGradient>
               </LinearGradient>
-            </View>
+            </TouchableOpacity>
           )}
 
           {/* Q Feed */}
@@ -8906,7 +8921,7 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
-        <ScrollView contentContainerStyle={[S.screen, { paddingTop: 4, paddingBottom: insets.bottom + 24 }]}>
+        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           {/* Winner block — gold glass */}
           <View style={{ borderRadius: 24, shadowColor: C.gold, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.40, shadowRadius: 24, elevation: 14, marginVertical: 16 }}>
             <LinearGradient colors={['rgba(255,232,160,0.72)', 'rgba(212,168,74,0.30)', 'rgba(140,90,18,0.50)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 1.5 }}>
