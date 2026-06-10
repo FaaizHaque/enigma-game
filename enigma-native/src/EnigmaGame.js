@@ -5831,6 +5831,34 @@ export default function EnigmaGame() {
   const pendingQ = game?.questions.find((q) => q.answer === null);
   const answeredQs = game?.questions.filter((q) => q.answer !== null && q.answer !== 'SKIP').length || 0;
 
+  // Pass-and-play switcher: only active when demo players are present, so it
+  // never appears (or pollutes shared state) in a real multiplayer game.
+  const hasDemoPlayers = !!game?.players?.some((p) => p.isDemo);
+  const SimBar = () => {
+    if (!hasDemoPlayers || !game) return null;
+    return (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8, paddingVertical: 8, paddingHorizontal: 10, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(124,58,237,0.30)', backgroundColor: 'rgba(124,58,237,0.08)' }}>
+        <Text style={{ fontSize: 10, color: C.violet2, fontFamily: F.sansBold, letterSpacing: 1.5, flexShrink: 0 }}>VIEW AS</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, alignItems: 'center' }}>
+          {game.players.map((p) => {
+            const on = viewerId === p.id;
+            return (
+              <TouchableOpacity
+                key={p.id}
+                onPress={() => setViewerId(p.id)}
+                style={{ paddingVertical: 6, paddingHorizontal: 11, borderRadius: 9, borderWidth: 1, borderColor: on ? C.violet2 : C.border2, backgroundColor: on ? 'rgba(124,58,237,0.28)' : 'rgba(255,255,255,0.03)' }}
+              >
+                <Text style={{ fontSize: 12, color: on ? '#fff' : C.muted, fontFamily: on ? F.sansBold : F.sansSemi }}>
+                  {p.isHost ? '👑 ' : ''}{p.name.split(' ')[0]}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
+    );
+  };
+
   // ─── Supabase helpers ─────────────────────────────────────────────────────
   const uniqueCode = async () => {
     let code;
@@ -5985,7 +6013,7 @@ export default function EnigmaGame() {
   const addDemoPlayer = async (dp) => {
     if (!game) return;
     const id = `p${game.players.length + 1}`;
-    const p = { id, name: dp.name, score: 0, isHost: false, isEliminated: false, avatarIdx: dp.avatarIdx };
+    const p = { id, name: dp.name, score: 0, isHost: false, isEliminated: false, avatarIdx: dp.avatarIdx, isDemo: true };
     const newGame = { ...game, players: [...game.players, p] };
     setGame(newGame);
     await syncGame(newGame);
@@ -8226,6 +8254,7 @@ export default function EnigmaGame() {
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
+          <SimBar />
           <View style={S.screenHeader}>
             <Chip label={`Round ${game.round}`} />
             <Text style={[S.tCaption, { color: C.muted }]}>Host: {host?.name}</Text>
@@ -8341,6 +8370,7 @@ export default function EnigmaGame() {
         </Modal>
 
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
+          <SimBar />
           <View style={S.screenHeader}>
             <Chip label={`${game.theme?.icon} ${game.theme?.label}`} style="violet" />
           </View>
@@ -8598,6 +8628,14 @@ export default function EnigmaGame() {
                 <Text style={{ fontSize: 12, color: C.muted, textAlign: 'center', fontFamily: 'Outfit_400Regular' }}>
                   Waiting for the host to accept or reject this answer…
                 </Text>
+                {hasDemoPlayers && host && (
+                  <TouchableOpacity
+                    onPress={() => setViewerId(host.id)}
+                    style={{ marginTop: 16, alignSelf: 'stretch', alignItems: 'center', paddingVertical: 13, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(124,58,237,0.45)', backgroundColor: 'rgba(124,58,237,0.16)' }}
+                  >
+                    <Text style={{ fontFamily: F.sansBold, fontSize: 14, color: C.violet2, letterSpacing: 0.3 }}>👑 Switch to host to verify →</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           </View>
@@ -8637,8 +8675,9 @@ export default function EnigmaGame() {
 
         {/* Game content */}
         <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: insets.top }}>
+          <View style={{ paddingTop: 8 }}><SimBar /></View>
           {/* Top bar — home button + category/round glass bar */}
-          <View style={{ paddingTop: 10, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <View style={{ paddingBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <TouchableOpacity
               onPress={goHome}
               style={{ width: 44, height: 44, borderRadius: 12, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)', alignItems: 'center', justifyContent: 'center' }}
@@ -8922,6 +8961,7 @@ export default function EnigmaGame() {
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
+          <SimBar />
           {/* Winner block — gold glass */}
           <View style={{ borderRadius: 24, shadowColor: C.gold, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.40, shadowRadius: 24, elevation: 14, marginVertical: 16 }}>
             <LinearGradient colors={['rgba(255,232,160,0.72)', 'rgba(212,168,74,0.30)', 'rgba(140,90,18,0.50)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 1.5 }}>
