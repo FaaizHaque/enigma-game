@@ -1826,6 +1826,134 @@ const JUNIOR_LIBRARY = {
         'No country owns Antarctica; under the 1959 Antarctic Treaty it is protected as a scientific preserve and military activity is banned there.',
       ],
     },
+    {
+      secret: 'Johnson Space Centre, Houston',
+      hint: 'NASA\'s control centre in Texas, home of Mission Control and the place where astronauts are trained',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Houston, Texas, USA' },
+        { icon: '🏛️', label: 'Type', value: 'Space Centre & Mission Control' },
+        { icon: '📅', label: 'Opened', value: '1963' },
+      ],
+      facts: [
+        'The Lyndon B. Johnson Space Centre opened near Houston, Texas in 1963 and is NASA\'s main hub for human spaceflight and astronaut training.',
+        'Its Mission Control Centre has guided crewed missions since the Gemini programme — which is why "Houston" is the first word astronauts say when calling Earth.',
+        'It was from here that flight controllers helped bring the crippled Apollo 13 crew safely home in 1970, the mission that inspired the line "Houston, we\'ve had a problem".',
+        'The centre houses the Saturn V — the giant 110-metre rocket that launched astronauts to the Moon — now displayed lying on its side for visitors.',
+        'Today it serves as Mission Control for the International Space Station, where teams monitor the orbiting laboratory 24 hours a day, every day of the year.',
+      ],
+    },
+    {
+      secret: 'Mount Kilimanjaro',
+      hint: 'The snow-capped volcano in Tanzania that is the highest mountain in Africa and the tallest free-standing mountain on Earth',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Tanzania, Africa' },
+        { icon: '🏛️', label: 'Type', value: 'Dormant Volcano' },
+        { icon: '📅', label: 'Age', value: '~1 million years old' },
+      ],
+      facts: [
+        'Mount Kilimanjaro rises 5,895 metres above sea level, making it the highest mountain in Africa and the tallest free-standing mountain in the world.',
+        'It is a dormant volcano with three cones — Kibo, Mawenzi and Shira — and Kibo could one day erupt again, though it has been quiet for thousands of years.',
+        'Even though it sits near the equator, Kilimanjaro is tall enough to have glaciers and snow at its summit, though these ice fields are shrinking fast.',
+        'Climbers pass through five different climate zones on the way up — from tropical rainforest at the base to an arctic-like summit — almost like walking from the equator to the poles.',
+        'About 30,000 people attempt to climb Kilimanjaro every year, and because no technical climbing gear is needed, it is one of the most popular high peaks to summit.',
+      ],
+    },
+    {
+      secret: 'Red Square',
+      hint: 'The vast historic public square in the heart of Moscow, framed by the Kremlin and a colourful onion-domed cathedral',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Moscow, Russia' },
+        { icon: '🏛️', label: 'Type', value: 'City Square' },
+        { icon: '📅', label: 'Dates from', value: 'Late 15th century' },
+      ],
+      facts: [
+        'Red Square lies at the heart of Moscow, Russia, separating the royal fortress known as the Kremlin from the historic merchant district of the city.',
+        'Its name does not come from the colour of the buildings or from politics — the old Russian word "krasnaya" meant both "red" and "beautiful".',
+        'On one side stands St Basil\'s Cathedral, famous for its swirling, brightly coloured onion domes that look like flames rising into the sky.',
+        'The square has hosted grand military parades for centuries and is home to Lenin\'s Mausoleum, where the preserved body of the Soviet leader is on display.',
+        'Red Square and the Kremlin became a UNESCO World Heritage Site in 1990 and together form one of the most recognisable landmarks in the world.',
+      ],
+    },
+    {
+      secret: 'Wall Street',
+      hint: 'The narrow street in New York City that became the world\'s most famous symbol of money, banking and the stock market',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'New York City, USA' },
+        { icon: '🏛️', label: 'Type', value: 'Financial District Street' },
+        { icon: '📅', label: 'Named', value: '17th century' },
+      ],
+      facts: [
+        'Wall Street is a real street in Lower Manhattan, New York City, but its name is used around the world to mean the entire American financial industry.',
+        'It is named after an actual wall — a wooden barrier built by Dutch settlers in the 1600s when the city was called New Amsterdam, to protect the colony.',
+        'The New York Stock Exchange, the largest stock exchange in the world by value, has stood on Wall Street since the late 1700s.',
+        'Traders first began buying and selling shares under a buttonwood tree on the street in 1792, an agreement that grew into the modern stock exchange.',
+        'A famous bronze statue called the "Charging Bull" stands near Wall Street as a symbol of a strong, rising stock market and financial optimism.',
+      ],
+    },
+    {
+      secret: 'Central Park, New York',
+      hint: 'The enormous green park in the middle of Manhattan, a peaceful escape surrounded on all sides by skyscrapers',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'New York City, USA' },
+        { icon: '🏛️', label: 'Type', value: 'Urban Public Park' },
+        { icon: '📅', label: 'Opened', value: '1858' },
+      ],
+      facts: [
+        'Central Park stretches across the middle of Manhattan in New York City and covers about 3.4 square kilometres — roughly the size of 600 football pitches.',
+        'Although it looks completely natural, the entire park is man-made: designers Frederick Law Olmsted and Calvert Vaux shaped its hills, lakes and woodlands in the 1850s.',
+        'It is the most visited urban park in the United States, welcoming around 42 million people every year.',
+        'The park contains lakes, an ice rink, a zoo, a castle, and more than 9,000 benches, plus over 18,000 trees that turn brilliant colours in autumn.',
+        'Central Park has appeared in hundreds of films and TV shows, making it one of the most recognisable green spaces on the planet.',
+      ],
+    },
+    {
+      secret: 'Hyde Park, London',
+      hint: 'One of London\'s grandest royal parks, famous for its lake, its Speakers\' Corner and huge open-air concerts',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'London, England' },
+        { icon: '🏛️', label: 'Type', value: 'Royal Park' },
+        { icon: '📅', label: 'Opened to public', value: '1637' },
+      ],
+      facts: [
+        'Hyde Park is one of the largest of London\'s eight Royal Parks, covering about 1.4 square kilometres in the heart of the city.',
+        'The land was taken by King Henry VIII in 1536 as a private royal hunting ground, and it was opened to the public around 1637.',
+        'At its north-east edge is Speakers\' Corner, a spot where anyone is allowed to stand up and give a public speech on almost any subject — a famous symbol of free speech.',
+        'A large lake called the Serpentine winds through the park, where visitors can hire boats, swim in summer, or feed the ducks and swans.',
+        'Hyde Park hosted the Great Exhibition of 1851 inside a giant glass building called the Crystal Palace, and today it stages some of the world\'s biggest open-air concerts.',
+      ],
+    },
+    {
+      secret: 'Keukenhof',
+      hint: 'The world-famous flower garden in the Netherlands where millions of tulips bloom in a dazzling spring display',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Lisse, Netherlands' },
+        { icon: '🏛️', label: 'Type', value: 'Flower Garden' },
+        { icon: '📅', label: 'Opened', value: '1950' },
+      ],
+      facts: [
+        'Keukenhof, in the town of Lisse, is one of the world\'s largest flower gardens, often called the "Garden of Europe".',
+        'Around 7 million flower bulbs are planted by hand every year, creating a sea of tulips, daffodils and hyacinths in spectacular ribbons of colour.',
+        'The garden is only open for about eight weeks each spring, from late March to mid-May, because that is when the bulbs are in full bloom.',
+        'Its name means "kitchen garden" in Dutch, because the land was once used to grow herbs and vegetables for a 15th-century countess\'s castle.',
+        'Keukenhof draws well over a million visitors from all over the world in its short season, making it one of the most photographed places in the Netherlands.',
+      ],
+    },
+    {
+      secret: 'Valley of the Kings',
+      hint: 'The desert valley in Egypt where pharaohs were buried in hidden tombs, including the famous tomb of Tutankhamun',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Luxor, Egypt' },
+        { icon: '🏛️', label: 'Type', value: 'Ancient Royal Burial Ground' },
+        { icon: '📅', label: 'Used', value: 'c. 1539–1075 BC' },
+      ],
+      facts: [
+        'The Valley of the Kings lies on the west bank of the Nile near Luxor, Egypt, and was the burial place of pharaohs for almost 500 years.',
+        'More than 60 tombs have been discovered there, cut deep into the rock and once filled with treasure to help the kings in the afterlife.',
+        'The most famous discovery came in 1922 when archaeologist Howard Carter found the nearly untouched tomb of the boy-king Tutankhamun, packed with golden treasures.',
+        'The pharaohs chose this hidden valley, far from their grand pyramids, hoping the secret tombs would be safe from grave robbers — though most were still raided long ago.',
+        'The valley is part of a UNESCO World Heritage Site and remains one of the richest archaeological sites in the world, with new tombs and chambers still being found.',
+      ],
+    },
   ],
   movies_cartoons: [
     {
