@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 import * as LinkingExpo from 'expo-linking';
 import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './config/supabase';
 import { genCode, getInitials, fuzzyMatch } from './utils/helpers';
 import { sounds } from './utils/sounds';
@@ -4519,26 +4520,147 @@ const DEMO_PLAYERS = [
 // ─── Daily Challenge helpers ──────────────────────────────────────────────────
 const getTodayUTC = () => new Date().toISOString().slice(0, 10);
 
+// Deterministic Fisher-Yates using a 32-bit LCG. Changing DAILY_SEED resets
+// the cycle for all players (do this deliberately on major library updates).
+const DAILY_SEED = 0xE19161;
+const DAILY_EPOCH = '2025-01-01';
+
+const _seededShuffle = (arr, seed) => {
+  const a = [...arr];
+  let s = seed >>> 0;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    const j = s % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+let _dailyFlatCache = null;
+const _getDailyFlat = () => {
+  if (!_dailyFlatCache) {
+    const flat = Object.keys(CONTENT_LIBRARY).flatMap(id =>
+      CONTENT_LIBRARY[id].map(item => ({ themeId: id, item }))
+    );
+    _dailyFlatCache = _seededShuffle(flat, DAILY_SEED);
+  }
+  return _dailyFlatCache;
+};
+
+const _dayNumber = (dateStr) =>
+  Math.floor((new Date(dateStr).getTime() - new Date(DAILY_EPOCH).getTime()) / 86400000);
+
 const getDailyChallenge = () => {
   const today = getTodayUTC();
-  let hash = 5381;
-  for (let i = 0; i < today.length; i++) {
-    hash = ((hash << 5) + hash + today.charCodeAt(i)) & 0x7fffffff;
-  }
-  // Interleave across categories so consecutive seeds cycle through all themes:
-  // slot 0 → personality[0], slot 1 → event[0], slot 2 → object[0], ...
-  // slot 6 → personality[1], slot 7 → event[1], etc.
-  const themeIds = Object.keys(CONTENT_LIBRARY);
-  const maxItems = Math.max(...themeIds.map((id) => CONTENT_LIBRARY[id].length));
-  const flat = [];
-  for (let i = 0; i < maxItems; i++) {
-    for (const id of themeIds) {
-      if (i < CONTENT_LIBRARY[id].length) flat.push({ themeId: id, item: CONTENT_LIBRARY[id][i] });
-    }
-  }
-  const picked = flat[Math.abs(hash) % flat.length];
+  const flat = _getDailyFlat();
+  const picked = flat[_dayNumber(today) % flat.length];
   const theme = THEMES.find((t) => t.id === picked.themeId) || THEMES[0];
   return { theme, item: picked.item, date: today };
+};
+
+// Returns the Set of secret strings scheduled as daily challenges for the
+// next `days` days (including today). Used to keep solo from spoiling them.
+const getUpcomingDailySecrets = (days = 14) => {
+  const flat = _getDailyFlat();
+  const today = getTodayUTC();
+  const base = _dayNumber(today);
+  const out = new Set();
+  for (let i = 0; i < days; i++) out.add(flat[(base + i) % flat.length].item.secret);
+  return out;
+};
+
+// ─── Player identity & seen-secrets (Supabase + AsyncStorage cache) ───────────
+const _seenCacheKey = (tier) => `enigma_seen_v1_${tier}`;
+
+const _generateUUID = () =>
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
+
+const getOrCreatePlayerId = async () => {
+  try {
+    const stored = await AsyncStorage.getItem('enigma_player_id_v1');
+    if (stored) return stored;
+    const id = _generateUUID();
+    await AsyncStorage.setItem('enigma_player_id_v1', id);
+    await supabase.from('player_profiles').upsert({ id }, { onConflict: 'id' });
+    return id;
+  } catch {
+    return null;
+  }
+};
+
+const loadSeenSecrets = async (playerId, tier) => {
+  if (!playerId) return new Set();
+  try {
+    const { data, error } = await supabase
+      .from('player_seen_secrets')
+      .select('secret')
+      .eq('player_id', playerId)
+      .eq('tier', tier);
+    if (!error && data) {
+      const seen = new Set(data.map(r => r.secret));
+      await AsyncStorage.setItem(_seenCacheKey(tier), JSON.stringify([...seen]));
+      return seen;
+    }
+  } catch {}
+  // Offline fallback — use local cache
+  try {
+    const cached = await AsyncStorage.getItem(_seenCacheKey(tier));
+    if (cached) return new Set(JSON.parse(cached));
+  } catch {}
+  return new Set();
+};
+
+const markSecretSeen = async (playerId, secret, tier) => {
+  // Update local cache immediately so the next pick is correct even offline
+  try {
+    const cached = await AsyncStorage.getItem(_seenCacheKey(tier));
+    const arr = cached ? JSON.parse(cached) : [];
+    if (!arr.includes(secret)) {
+      arr.push(secret);
+      await AsyncStorage.setItem(_seenCacheKey(tier), JSON.stringify(arr));
+    }
+  } catch {}
+  if (!playerId) return;
+  try {
+    await supabase.from('player_seen_secrets').upsert(
+      { player_id: playerId, secret, tier, seen_at: new Date().toISOString() },
+      { onConflict: 'player_id,secret,tier' }
+    );
+  } catch {}
+};
+
+// Called when the available pool for a tier is exhausted.
+// Fetches the 30 most-recently-seen from Supabase (ordered by seen_at),
+// deletes everything else, so the player gets a fresh start while avoiding
+// immediate repeats of what they just played.
+const resetSeenForExhaustion = async (playerId, tier) => {
+  let keepSet = new Set();
+  if (playerId) {
+    try {
+      const { data } = await supabase
+        .from('player_seen_secrets')
+        .select('secret')
+        .eq('player_id', playerId)
+        .eq('tier', tier)
+        .order('seen_at', { ascending: false })
+        .limit(30);
+      if (data) keepSet = new Set(data.map(r => r.secret));
+      await supabase.from('player_seen_secrets').delete()
+        .eq('player_id', playerId).eq('tier', tier);
+      if (keepSet.size > 0) {
+        await supabase.from('player_seen_secrets').insert(
+          [...keepSet].map(s => ({ player_id: playerId, secret: s, tier, seen_at: new Date().toISOString() }))
+        );
+      }
+    } catch {}
+  }
+  try {
+    await AsyncStorage.setItem(_seenCacheKey(tier), JSON.stringify([...keepSet]));
+  } catch {}
+  return keepSet;
 };
 
 const SERVER_URL = Constants.expoConfig?.extra?.serverUrl || 'https://enigma-game-production.up.railway.app';
@@ -5355,6 +5477,21 @@ export default function EnigmaGame() {
   const sweepX = useRef(new Animated.Value(-80)).current;
   const splashHidden = useRef(false);
 
+  // Player identity + seen-secrets (loaded once on mount)
+  const [playerId, setPlayerId] = useState(null);
+  const [seenSecrets, setSeenSecrets] = useState({ scholar: new Set(), junior: new Set() });
+
+  useEffect(() => {
+    getOrCreatePlayerId().then(id => {
+      setPlayerId(id);
+      if (!id) return;
+      Promise.all([
+        loadSeenSecrets(id, 'scholar'),
+        loadSeenSecrets(id, 'junior'),
+      ]).then(([scholar, junior]) => setSeenSecrets({ scholar, junior }));
+    });
+  }, []);
+
   // Keep Railway server warm — prevents cold-start errors
   useEffect(() => {
     pingServer();
@@ -6029,14 +6166,23 @@ export default function EnigmaGame() {
   };
 
   // ─── Solo Mode helpers ────────────────────────────────────────────────────
-  const getRandomChallenge = (categoryId = 'random', tier = 'senior') => {
+  // Pure synchronous pick — caller passes in the current seen set so this
+  // remains testable and free of async side-effects.
+  const _pickChallenge = (categoryId, tier, seen) => {
     const library = tier === 'junior' ? JUNIOR_LIBRARY : CONTENT_LIBRARY;
-    const themes = tier === 'junior' ? JUNIOR_THEMES : THEMES;
+    const themes  = tier === 'junior' ? JUNIOR_THEMES  : THEMES;
+    const libTier = tier === 'junior' ? 'junior' : 'scholar';
     const themeIds = categoryId === 'random' ? Object.keys(library) : [categoryId];
-    const pool = themeIds.flatMap((id) => (library[id] || []).map((item) => ({ themeId: id, item })));
-    if (!pool.length) return getRandomChallenge('random', tier);
+    const dailyExclude = libTier === 'scholar' ? getUpcomingDailySecrets(14) : new Set();
+    const allPool = themeIds.flatMap(id => (library[id] || []).map(item => ({ themeId: id, item })));
+    const filtered = allPool.filter(({ item }) =>
+      !seen.has(item.secret) && !dailyExclude.has(item.secret)
+    );
+    // Use filtered pool if available; fall back to full pool (exhaustion handled
+    // before this call in startSoloChallenge, but this guard covers edge cases)
+    const pool = filtered.length ? filtered : allPool;
     const picked = pool[Math.floor(Math.random() * pool.length)];
-    const theme = themes.find((t) => t.id === picked.themeId) || themes[0];
+    const theme = themes.find(t => t.id === picked.themeId) || themes[0];
     return { secret: picked.item.secret, hint: picked.item.hint, infoFields: picked.item.infoFields || [], facts: picked.item.facts, categoryLabel: theme.label, categoryIcon: theme.icon };
   };
 
@@ -6054,14 +6200,32 @@ export default function EnigmaGame() {
     return null;
   };
 
-  const startSoloChallenge = () => {
-    setSoloChallenge(getRandomChallenge(soloCategory, soloTier));
+  const startSoloChallenge = async () => {
+    setSoloLoading(true);
+    const libTier = soloTier === 'junior' ? 'junior' : 'scholar';
+    let currentSeen = seenSecrets[libTier];
+
+    // Check if pool would be exhausted for the chosen category
+    const library = soloTier === 'junior' ? JUNIOR_LIBRARY : CONTENT_LIBRARY;
+    const themeIds = soloCategory === 'random' ? Object.keys(library) : [soloCategory];
+    const dailyExclude = libTier === 'scholar' ? getUpcomingDailySecrets(14) : new Set();
+    const available = themeIds
+      .flatMap(id => (library[id] || []).map(i => i.secret))
+      .filter(s => !currentSeen.has(s) && !dailyExclude.has(s));
+
+    if (!available.length) {
+      currentSeen = await resetSeenForExhaustion(playerId, libTier);
+      setSeenSecrets(prev => ({ ...prev, [libTier]: currentSeen }));
+    }
+
+    setSoloChallenge(_pickChallenge(soloCategory, soloTier, currentSeen));
     setSoloQuestions([]);
     setSoloInput('');
     setSoloSolveInput('');
     setSoloSolveOpen(false);
     setSoloResult(null);
     setSoloHintsUsed(0);
+    setSoloLoading(false);
     setScreen('solo_game');
   };
 
@@ -6142,6 +6306,13 @@ export default function EnigmaGame() {
     setSoloResult({ solved: isCorrect, questionsUsed: soloQuestions.filter(qq => !qq.type).length });
     setSoloSolveOpen(false);
     setScreen('solo_result');
+    // Record as seen regardless of win/lose so it's not repeated
+    const libTier = soloTier === 'junior' ? 'junior' : 'scholar';
+    markSecretSeen(playerId, soloChallenge.secret, libTier);
+    setSeenSecrets(prev => ({
+      ...prev,
+      [libTier]: new Set([...prev[libTier], soloChallenge.secret]),
+    }));
   };
 
   // ─── Daily Challenge helpers ──────────────────────────────────────────────
@@ -6201,6 +6372,12 @@ export default function EnigmaGame() {
     setDailyResult({ solved: isCorrect, questionsUsed, timeSeconds });
     setDailySolveOpen(false);
     setScreen('daily_result');
+    // Mark today's daily secret as seen so solo never replays it
+    markSecretSeen(playerId, dailyChallenge.secret, 'scholar');
+    setSeenSecrets(prev => ({
+      ...prev,
+      scholar: new Set([...prev.scholar, dailyChallenge.secret]),
+    }));
     try {
       await fetch(`${SERVER_URL}/api/daily-result`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },

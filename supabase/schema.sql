@@ -77,6 +77,41 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
 
 ALTER PUBLICATION supabase_realtime ADD TABLE daily_scores;
 
+-- ─── Player profiles (device UUID for now; upgradeable to Apple/Google auth) ──
+CREATE TABLE IF NOT EXISTS player_profiles (
+  id         UUID         PRIMARY KEY,  -- generated on device first launch
+  created_at TIMESTAMPTZ  DEFAULT NOW()
+);
+
+ALTER TABLE player_profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "Public player profile access"
+  ON player_profiles FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+GRANT SELECT, INSERT, UPDATE ON player_profiles TO anon, authenticated;
+
+-- ─── Seen secrets (dedup history per player per library tier) ─────────────────
+CREATE TABLE IF NOT EXISTS player_seen_secrets (
+  player_id  UUID         NOT NULL REFERENCES player_profiles(id) ON DELETE CASCADE,
+  secret     TEXT         NOT NULL,
+  tier       TEXT         NOT NULL CHECK (tier IN ('scholar', 'junior')),
+  seen_at    TIMESTAMPTZ  DEFAULT NOW(),
+  PRIMARY KEY (player_id, secret, tier)
+);
+
+CREATE INDEX IF NOT EXISTS idx_seen_player_tier ON player_seen_secrets(player_id, tier, seen_at DESC);
+
+ALTER TABLE player_seen_secrets ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "Public seen secrets access"
+  ON player_seen_secrets FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON player_seen_secrets TO anon, authenticated;
+
 -- Optional: auto-delete sessions older than 24 hours via a cron job
 -- Enable pg_cron extension first in Supabase Dashboard → Database → Extensions
 -- SELECT cron.schedule('delete-old-sessions', '0 * * * *',
