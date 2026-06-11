@@ -5643,8 +5643,8 @@ export default function EnigmaGame() {
   const feedScrollRef = useRef(null);
   const gameRef = useRef(game);
   const prevRoomCodeRef = useRef(null);
-  const [guesserSecsLeft, setGuesserSecsLeft] = useState(30);
-  const [hostSecsLeft, setHostSecsLeft] = useState(15);
+  const [guesserSecsLeft, setGuesserSecsLeft] = useState(60);
+  const [hostSecsLeft, setHostSecsLeft] = useState(60);
   const [timeoutToast, setTimeoutToast] = useState(null);
   const [hostWarningData, setHostWarningData] = useState(null);
   const [hostWarningSecsLeft, setHostWarningSecsLeft] = useState(10);
@@ -5657,10 +5657,10 @@ export default function EnigmaGame() {
   // Smooth bar animations — each runs a 950ms tween on every 1s tick
   // so the bar glides continuously instead of jumping in 1s steps.
   useEffect(() => {
-    Animated.timing(guesserBarAnim, { toValue: guesserSecsLeft / 30, duration: 950, useNativeDriver: false }).start();
+    Animated.timing(guesserBarAnim, { toValue: guesserSecsLeft / 60, duration: 950, useNativeDriver: false }).start();
   }, [guesserSecsLeft]);
   useEffect(() => {
-    Animated.timing(hostBarAnim, { toValue: hostSecsLeft / 15, duration: 950, useNativeDriver: false }).start();
+    Animated.timing(hostBarAnim, { toValue: hostSecsLeft / 60, duration: 950, useNativeDriver: false }).start();
   }, [hostSecsLeft]);
   useEffect(() => {
     Animated.timing(hostWarnBarAnim, { toValue: hostWarningSecsLeft / 10, duration: 950, useNativeDriver: false }).start();
@@ -5736,18 +5736,18 @@ export default function EnigmaGame() {
   // Keep gameRef in sync for use inside timer callbacks
   useEffect(() => { gameRef.current = game; }, [game]);
 
-  // Guesser: 30-second turn timer — derives all conditions from raw state, not component-level consts
+  // Guesser: 60-second turn timer — derives all conditions from raw state, not component-level consts
   useEffect(() => {
-    if (!game || screen !== 'game') { setGuesserSecsLeft(30); return; }
+    if (!game || screen !== 'game') { setGuesserSecsLeft(60); return; }
     const vwr = game.players.find(p => p.id === viewerId);
-    if (!vwr || vwr.isHost) { setGuesserSecsLeft(30); return; }
+    if (!vwr || vwr.isHost) { setGuesserSecsLeft(60); return; }
     const active = game.players.filter(p => !p.isHost);
     const cur = active.length ? active[game.currentQuestionerIndex % active.length] : null;
-    if (cur?.id !== viewerId) { setGuesserSecsLeft(30); return; }
-    if (game.questions.some(q => q.answer === null)) { setGuesserSecsLeft(30); return; }
+    if (cur?.id !== viewerId) { setGuesserSecsLeft(60); return; }
+    if (game.questions.some(q => q.answer === null)) { setGuesserSecsLeft(60); return; }
 
-    let secs = 30;
-    setGuesserSecsLeft(30);
+    let secs = 60;
+    setGuesserSecsLeft(60);
     const iv = setInterval(() => {
       secs--;
       setGuesserSecsLeft(secs);
@@ -5767,17 +5767,17 @@ export default function EnigmaGame() {
     return () => clearInterval(iv);
   }, [screen, game?.currentQuestionerIndex, viewerId]);
 
-  // Host primary timer: 15s — on expiry opens the 10s warning modal
+  // Host primary timer: 60s — on expiry opens the 10s warning modal
   useEffect(() => {
-    if (!game || screen !== 'game') { setHostSecsLeft(15); setHostWarningData(null); return; }
+    if (!game || screen !== 'game') { setHostSecsLeft(60); setHostWarningData(null); return; }
     const vwr = game.players.find(p => p.id === viewerId);
-    if (!vwr?.isHost) { setHostSecsLeft(15); setHostWarningData(null); return; }
+    if (!vwr?.isHost) { setHostSecsLeft(60); setHostWarningData(null); return; }
     const pq = game.questions.find(q => q.answer === null);
-    if (!pq) { setHostSecsLeft(15); setHostWarningData(null); return; }
+    if (!pq) { setHostSecsLeft(60); setHostWarningData(null); return; }
 
     setHostWarningData(null);
-    let secs = 15;
-    setHostSecsLeft(15);
+    let secs = 60;
+    setHostSecsLeft(60);
     const iv = setInterval(() => {
       secs--;
       setHostSecsLeft(secs);
@@ -8882,33 +8882,17 @@ export default function EnigmaGame() {
                     <Text style={{ fontSize: 12, color: C.goldDim, fontFamily: 'Outfit_600SemiBold', letterSpacing: 0.5 }}>📋  Consult Info Card</Text>
                   </TouchableOpacity>
                 )}
-                <View style={{ flexDirection: 'row', gap: 6, marginBottom: partlyMode ? 8 : 0 }}>
+                <View style={{ flexDirection: 'row', gap: 6 }}>
                   <TouchableOpacity style={[S.btnYes, { flex: 1 }]} onPress={() => answerQ('YES')}>
                     <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>✓ YES</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[S.btnPartly, { flex: 1 }, partlyMode && S.btnPartlyActive]} onPress={() => { setPartlyMode((m) => !m); setPartlyNote(''); }}>
+                  <TouchableOpacity style={[S.btnPartly, { flex: 1 }]} onPress={() => answerQ('PARTLY')}>
                     <Text style={{ color: C.warn, fontFamily: 'Outfit_700Bold', fontSize: 14 }}>~ PARTLY</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[S.btnNo, { flex: 1 }]} onPress={() => answerQ('NO')}>
                     <Text style={{ color: C.danger, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>✗ NO</Text>
                   </TouchableOpacity>
                 </View>
-                {partlyMode && (
-                  <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <GlassInput
-                      accent={C.violet}
-                      containerStyle={{ flex: 1 }}
-                      style={{ paddingVertical: 10, fontSize: 13 }}
-                      placeholder="Add a note (optional)..." placeholderTextColor={C.dim}
-                      value={partlyNote} onChangeText={setPartlyNote}
-                      onSubmitEditing={() => answerQ('PARTLY', partlyNote)}
-                      autoFocus returnKeyType="done"
-                    />
-                    <TouchableOpacity style={[S.btnPartly, { paddingHorizontal: 16 }]} onPress={() => answerQ('PARTLY', partlyNote)}>
-                      <Text style={{ color: C.warn, fontFamily: 'Outfit_700Bold', fontSize: 13 }}>Submit</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
               </View>
             ) : !viewerIsHost ? (
               canAsk ? (
