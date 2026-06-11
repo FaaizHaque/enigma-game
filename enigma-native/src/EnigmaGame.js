@@ -4748,12 +4748,48 @@ const STOPWORDS = new Set([
   'yes','no','maybe','ok','okay','um','uh','hmm','please','just','really',
 ]);
 
+// Common short (≤3 letter) content words. Short tokens are the main home of
+// random gibberish ("inz", "tvr"), so a short token only counts as real if it
+// appears here — while longer tokens are validated structurally below.
+const SHORT_WORDS = new Set([
+  'ox','ax','pi','tv','id','ad','cd',
+  'act','age','aid','aim','air','ale','amp','ant','ape','apt','arc','ark','arm','art','ash','ask','axe',
+  'bad','bag','ban','bar','bat','bay','bed','bee','beg','bet','bid','big','bin','bit','boa','bob','bog','bot','bow','box','boy','bra','bud','bug','bun','bus','buy',
+  'cab','cam','cap','car','cat','cob','cod','cog','con','cop','cot','cow','cry','cub','cue','cup','cut',
+  'dad','dam','day','den','dew','die','dig','dim','din','dip','doe','dog','dot','dry','dub','due','dug','dye',
+  'ear','eat','eel','egg','ego','elf','elk','elm','emu','end','era','eve','ewe','eye',
+  'fad','fan','far','fat','fax','fee','fen','fib','fig','fin','fir','fit','fix','flu','fly','foe','fog','fox','fry','fun','fur',
+  'gag','gap','gas','gel','gem','gig','gin','god','gum','gun','gut','guy','gym',
+  'ham','hat','hay','hem','hen','hex','hip','hit','hoe','hog','hop','hot','hub','hue','hug','hum','hut',
+  'ice','icy','ill','imp','ink','inn','ion','ire','ivy','jab','jam','jar','jaw','jay','jet','jig','job','jog','jot','joy','jug',
+  'keg','key','kid','kin','kit','lab','lad','lag','lap','law','lay','leg','lid','lie','lip','lit','lob','log','lot','low','lug',
+  'mad','man','map','mar','mat','men','met','mix','mob','mod','mop','mud','mug','mum',
+  'nag','nap','net','nib','nip','nod','nub','nun','nut','oak','oar','oat','odd','ode','oil','old','orb','ore','owl',
+  'pad','pal','pan','par','pat','paw','pea','peg','pen','pet','pie','pig','pin','pit','pod','pot','pro','pub','pug','pun','pup','put',
+  'rag','ram','rap','rat','raw','ray','red','rib','rig','rim','rip','rob','rod','roe','rot','row','rub','rug','rum','run','rye',
+  'sac','sad','sag','sap','saw','sax','sea','see','set','sin','sip','sir','sit','six','ski','sky','sly','sob','sod','son','sow','soy','spa','spy','sub','sum','sun',
+  'tab','tag','tan','tap','tar','tax','tea','ten','tie','tin','tip','toe','ton','top','toy','try','tub','tug','two',
+  'urn','use','van','vat','vet','via','vow','wad','wag','war','wax','way','web','wed','wig','win','wit','woe','wok','won','yak','yam','yen','yew','zap','zip','zoo',
+]);
+
+const VOWELS = new Set(['a','e','i','o','u','y']);
+
+// Does a single non-stopword token look like a real word (vs. gibberish)?
+const looksLikeWord = (w) => {
+  if (/[0-9]/.test(w)) return true;             // years/numbers are meaningful ("1900s")
+  if (w.length <= 3) return SHORT_WORDS.has(w);  // short → must be a known word
+  if (![...w].some((c) => VOWELS.has(c))) return false;  // longer words need a vowel
+  let run = 0;                                   // reject 4+ consonants in a row
+  for (const c of w) { if (VOWELS.has(c)) run = 0; else if (++run >= 4) return false; }
+  return true;
+};
+
 const isValidQuestion = (text) => {
   const cleaned = (text || '').trim().toLowerCase().replace(/\?+$/, '').trim();
   if (!cleaned) return false;
   const words = cleaned.split(/\s+/).map((w) => w.replace(/[^a-z0-9]/g, '')).filter(Boolean);
-  // Accept if at least one meaningful content word is present.
-  return words.some((w) => w.length >= 2 && /[a-z]/.test(w) && !STOPWORDS.has(w));
+  // Accept if at least one real, meaningful (non-filler, word-like) token exists.
+  return words.some((w) => !STOPWORDS.has(w) && looksLikeWord(w));
 };
 
 const dailyStars = (questions, solved) => {
@@ -5649,6 +5685,15 @@ export default function EnigmaGame() {
   const [hostWarningData, setHostWarningData] = useState(null);
   const [hostWarningSecsLeft, setHostWarningSecsLeft] = useState(10);
 
+  // In-app warning banner (replaces the plain OS alert for invalid questions)
+  const [answerWarn, setAnswerWarn] = useState(null);
+  const answerWarnTimer = useRef(null);
+  const showAnswerWarn = (msg) => {
+    setAnswerWarn(msg);
+    if (answerWarnTimer.current) clearTimeout(answerWarnTimer.current);
+    answerWarnTimer.current = setTimeout(() => setAnswerWarn(null), 3600);
+  };
+
   // Animated values for smooth timer bars (avoid 1s jump steps)
   const guesserBarAnim = useRef(new Animated.Value(1)).current;
   const hostBarAnim = useRef(new Animated.Value(1)).current;
@@ -5875,6 +5920,26 @@ export default function EnigmaGame() {
     );
   };
 
+  // Floating amber glass banner shown when a typed question is rejected.
+  const AnswerWarnBanner = () => {
+    if (!answerWarn) return null;
+    return (
+      <View style={{ position: 'absolute', top: insets.top + 10, left: 14, right: 14, zIndex: 1000 }} pointerEvents="box-none">
+        <View style={{ borderRadius: 16, shadowColor: C.warn, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 12 }}>
+          <LinearGradient colors={['rgba(245,170,60,0.95)', 'rgba(220,130,30,0.55)', 'rgba(150,80,15,0.70)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.5 }}>
+            <LinearGradient colors={['rgba(40,28,8,0.97)', 'rgba(28,18,6,0.98)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14.5, overflow: 'hidden', paddingVertical: 13, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <LinearGradient colors={['rgba(245,170,60,0.20)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 30 }} />
+              <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(245,170,60,0.18)', borderWidth: 1, borderColor: 'rgba(245,170,60,0.5)', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Text style={{ fontSize: 18 }}>💡</Text>
+              </View>
+              <Text style={{ flex: 1, color: '#ffe6b8', fontFamily: F.sansSemi, fontSize: 13.5, lineHeight: 19 }}>{answerWarn}</Text>
+            </LinearGradient>
+          </LinearGradient>
+        </View>
+      </View>
+    );
+  };
+
   // ─── Supabase helpers ─────────────────────────────────────────────────────
   const uniqueCode = async () => {
     let code;
@@ -6073,10 +6138,7 @@ export default function EnigmaGame() {
   const submitQuestion = async () => {
     if (!questionInput.trim() || !isMyTurn || pendingQ) return;
     if (!isValidQuestion(questionInput)) {
-      Alert.alert(
-        'Add a describing word',
-        'Include at least one meaningful word — e.g. "alive", "a scientist", or "is it in Europe?". A lone word like "the" or "how" isn\'t enough. To make a final guess instead, use the "I Know It — Solve!" button.',
-      );
+      showAnswerWarn('That doesn\'t look like a real question. Add a describing word — e.g. "alive", "a scientist", or "is it in Europe?". To guess the answer, use the Solve button.');
       return;
     }
     const q = {
@@ -6360,10 +6422,7 @@ export default function EnigmaGame() {
     const realQCount = soloQuestions.filter(qq => !qq.type).length;
     if (!q || soloLoading || realQCount >= 20 || !soloChallenge) return;
     if (!isValidQuestion(q)) {
-      Alert.alert(
-        'Add a describing word',
-        'Include at least one meaningful word — e.g. "alive", "a scientist", or "is it in Europe?". A lone word like "the" or "how" isn\'t enough. To make a final guess instead, use the Solve button.',
-      );
+      showAnswerWarn('That doesn\'t look like a real question. Add a describing word — e.g. "alive", "a scientist", or "is it in Europe?". To guess the answer, use the Solve button.');
       return;
     }
     const entry = { id: Date.now(), text: q, answer: null };
@@ -6425,10 +6484,7 @@ export default function EnigmaGame() {
     const realQCount = dailyQuestions.filter(qq => !qq.type).length;
     if (!q || dailyLoading || realQCount >= 20) return;
     if (!isValidQuestion(q)) {
-      Alert.alert(
-        'Add a describing word',
-        'Include at least one meaningful word — e.g. "alive", "a scientist", or "is it in Europe?". A lone word like "the" or "how" isn\'t enough. To make a final guess instead, use the Solve button.',
-      );
+      showAnswerWarn('That doesn\'t look like a real question. Add a describing word — e.g. "alive", "a scientist", or "is it in Europe?". To guess the answer, use the Solve button.');
       return;
     }
     const entry = { id: Date.now(), text: q, answer: null };
@@ -6926,6 +6982,7 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
+        <AnswerWarnBanner />
         {/* Ad simulation modal */}
         <Modal visible={adModalVisible} animationType="fade" transparent onRequestClose={() => {}}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
@@ -7560,6 +7617,7 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
+        <AnswerWarnBanner />
         {/* Ad simulation modal */}
         <Modal visible={adModalVisible} animationType="fade" transparent onRequestClose={() => {}}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
@@ -8501,6 +8559,7 @@ export default function EnigmaGame() {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
         <PremiumBackground />
+        <AnswerWarnBanner />
 
         {/* Host Info Card Modal */}
         {viewerIsHost && (
