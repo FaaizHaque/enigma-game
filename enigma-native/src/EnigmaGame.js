@@ -4726,18 +4726,34 @@ const askWithRetry = async (payload, maxWaitMs = 5 * 60 * 1000) => {
 // Returns true only for properly-formed yes/no questions.
 // Rejects one-word fragments, dangling starters ("Is it", "As"), and
 // anything that isn't a real sentence the AI can evaluate.
-const QUESTION_STARTERS = new Set([
-  'is','was','were','are','did','do','does','has','have','had',
-  'can','could','would','will','should','might','may',
-  'what','which','who','where','when','why','how',
+// Words that carry no meaning on their own. A question is accepted as long as
+// it contains at least one token that ISN'T in this set — so keyword-style
+// queries ("alive", "a scientific event") pass, while lone fillers ("how",
+// "the", "one", "is it") are rejected before they reach the AI.
+const STOPWORDS = new Set([
+  // articles / determiners
+  'a','an','the','this','that','these','those','some','any','no','each','every',
+  // pronouns
+  'it','he','she','they','them','we','you','i','him','her','his','its','their','your','our',
+  // auxiliary / linking verbs
+  'is','are','was','were','be','been','being','am','do','does','did','has','have','had',
+  'can','could','will','would','shall','should','may','might','must',
+  // lone question words
+  'how','what','who','whom','whose','why','when','where','which',
+  // conjunctions / prepositions
+  'and','or','but','of','to','in','on','at','by','for','with','as','from','about',
+  'than','then','so','if','into','over','under','out','up','down',
+  // generic fillers
+  'one','ones','thing','things','something','anything','someone','anyone',
+  'yes','no','maybe','ok','okay','um','uh','hmm','please','just','really',
 ]);
+
 const isValidQuestion = (text) => {
-  const trimmed = text.trim().replace(/\?$/, '').trim();
-  const words = trimmed.split(/\s+/).filter(Boolean);
-  if (words.length < 3) return false;
-  if (trimmed.length < 10) return false;
-  const first = words[0].toLowerCase().replace(/[^a-z]/g, '');
-  return QUESTION_STARTERS.has(first);
+  const cleaned = (text || '').trim().toLowerCase().replace(/\?+$/, '').trim();
+  if (!cleaned) return false;
+  const words = cleaned.split(/\s+/).map((w) => w.replace(/[^a-z0-9]/g, '')).filter(Boolean);
+  // Accept if at least one meaningful content word is present.
+  return words.some((w) => w.length >= 2 && /[a-z]/.test(w) && !STOPWORDS.has(w));
 };
 
 const dailyStars = (questions, solved) => {
@@ -6055,8 +6071,8 @@ export default function EnigmaGame() {
     if (!questionInput.trim() || !isMyTurn || pendingQ) return;
     if (!isValidQuestion(questionInput)) {
       Alert.alert(
-        'Ask a complete question',
-        'Type a full yes/no question (e.g. "Is it a living thing?"). To make a final guess instead, use the "I Know It — Solve!" button.',
+        'Add a describing word',
+        'Include at least one meaningful word — e.g. "alive", "a scientist", or "is it in Europe?". A lone word like "the" or "how" isn\'t enough. To make a final guess instead, use the "I Know It — Solve!" button.',
       );
       return;
     }
@@ -6342,8 +6358,8 @@ export default function EnigmaGame() {
     if (!q || soloLoading || realQCount >= 20 || !soloChallenge) return;
     if (!isValidQuestion(q)) {
       Alert.alert(
-        'Ask a complete question',
-        'Type a full yes/no question (e.g. "Is it a living thing?"). To make a final guess instead, use the Solve button.',
+        'Add a describing word',
+        'Include at least one meaningful word — e.g. "alive", "a scientist", or "is it in Europe?". A lone word like "the" or "how" isn\'t enough. To make a final guess instead, use the Solve button.',
       );
       return;
     }
@@ -6407,8 +6423,8 @@ export default function EnigmaGame() {
     if (!q || dailyLoading || realQCount >= 20) return;
     if (!isValidQuestion(q)) {
       Alert.alert(
-        'Ask a complete question',
-        'Type a full yes/no question (e.g. "Is it a living thing?"). To make a final guess instead, use the Solve button.',
+        'Add a describing word',
+        'Include at least one meaningful word — e.g. "alive", "a scientist", or "is it in Europe?". A lone word like "the" or "how" isn\'t enough. To make a final guess instead, use the Solve button.',
       );
       return;
     }
