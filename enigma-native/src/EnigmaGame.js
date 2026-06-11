@@ -5965,30 +5965,33 @@ export default function EnigmaGame() {
   // ─── Actions ──────────────────────────────────────────────────────────────
   const createGame = async (isPublic = isPublicRoom) => {
     if (!nameInput.trim()) return;
-    try {
-      // Clean up any room this player previously created so stale lobbies don't accumulate
-      if (prevRoomCodeRef.current) {
-        try { await supabase.from('sessions').delete().eq('room_code', prevRoomCodeRef.current); } catch {}
-        prevRoomCodeRef.current = null;
+    // Generate the code locally (random 6-char; collisions are astronomically
+    // unlikely) so we don't wait on a DB uniqueness check.
+    const roomCode = genCode();
+    const playerId = 'p1';
+    const session = {
+      roomCode,
+      players: [{ id: playerId, name: nameInput.trim(), score: 0, isHost: true, isEliminated: false, avatarIdx: selectedAvatarIdx }],
+      round: 1, theme: null, secretAnswer: '', hostHint: '',
+      questions: [], currentQuestionerIndex: 0, status: 'lobby',
+      pendingSolve: null, roundWinnerId: null, hostConsecutiveMisses: 0,
+      isPublic, createdAt: new Date().toISOString(),
+    };
+    // Navigate to the lobby immediately — persist to Supabase in the background
+    // so there's no network lag on the screen transition.
+    const prevCode = prevRoomCodeRef.current;
+    prevRoomCodeRef.current = roomCode;
+    setGame(session);
+    setViewerId(playerId);
+    setScreen('lobby');
+    (async () => {
+      try {
+        if (prevCode) { try { await supabase.from('sessions').delete().eq('room_code', prevCode); } catch {} }
+        await supabase.from('sessions').upsert({ room_code: roomCode, data: session, is_public: isPublic });
+      } catch {
+        Alert.alert('Connection issue', 'The room was created but could not be saved. Check your connection — others may not be able to join yet.');
       }
-      const roomCode = await uniqueCode();
-      const playerId = 'p1';
-      const session = {
-        roomCode,
-        players: [{ id: playerId, name: nameInput.trim(), score: 0, isHost: true, isEliminated: false, avatarIdx: selectedAvatarIdx }],
-        round: 1, theme: null, secretAnswer: '', hostHint: '',
-        questions: [], currentQuestionerIndex: 0, status: 'lobby',
-        pendingSolve: null, roundWinnerId: null, hostConsecutiveMisses: 0,
-        isPublic, createdAt: new Date().toISOString(),
-      };
-      await supabase.from('sessions').upsert({ room_code: roomCode, data: session, is_public: isPublic });
-      prevRoomCodeRef.current = roomCode;
-      setGame(session);
-      setViewerId(playerId);
-      setScreen('lobby');
-    } catch {
-      Alert.alert('Error', 'Could not create game. Check your connection.');
-    }
+    })();
   };
 
   const joinGame = async () => {
