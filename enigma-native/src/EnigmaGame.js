@@ -5578,7 +5578,11 @@ export default function EnigmaGame() {
 
   const [splashScale, setSplashScale] = useState(0.30);
   const [splashImgReady, setSplashImgReady] = useState(false);
+  const [splashPhase, setSplashPhase] = useState('haque');
   const sweepX = useRef(new Animated.Value(-80)).current;
+  const haqueOpacity = useRef(new Animated.Value(1)).current;
+  const logo20qOpacity = useRef(new Animated.Value(0)).current;
+  const logo20qScale = useRef(new Animated.Value(0.75)).current;
   const splashHidden = useRef(false);
 
   // Player identity + seen-secrets (loaded once on mount)
@@ -5605,13 +5609,8 @@ export default function EnigmaGame() {
 
   useEffect(() => {
     if (screen !== 'splash') return;
-    // Wait for the logo bitmap to be decoded and ready to render —
-    // otherwise the rAF ticks happen during decode and the screen
-    // jumps straight to the final frame.
     if (!splashImgReady) return;
-    // Manual rAF-driven zoom. MaskedView on iOS ignores transforms
-    // on its parent, so we drive React state and pass real width/
-    // height to MaskedView itself — forces a layout pass per frame.
+    // Phase 1 — Haque Games logo: rAF-driven zoom over 3500ms
     const ZOOM_MS = 3500;
     const startScale = 0.30;
     const endScale = 1.0;
@@ -5619,7 +5618,7 @@ export default function EnigmaGame() {
     let raf;
     const tick = () => {
       const t = Math.min(1, (Date.now() - t0) / ZOOM_MS);
-      const eased = 1 - Math.pow(1 - t, 3);   // ease-out cubic
+      const eased = 1 - Math.pow(1 - t, 3);
       setSplashScale(startScale + (endScale - startScale) * eased);
       if (t < 1) raf = requestAnimationFrame(tick);
     };
@@ -5634,9 +5633,24 @@ export default function EnigmaGame() {
       ])
     );
     sweep.start();
-    // 7000ms total: 3500ms zoom + 3500ms at full size
-    const timerId = setTimeout(() => setScreen('home'), 7000);
-    return () => { clearTimeout(timerId); sweep.stop(); if (raf) cancelAnimationFrame(raf); };
+    // At 4500ms: fade out Haque Games, then bring in 20Q logo
+    const timer1 = setTimeout(() => {
+      sweep.stop();
+      Animated.timing(haqueOpacity, { toValue: 0, duration: 700, useNativeDriver: true }).start(() => {
+        setSplashPhase('logo20q');
+        Animated.parallel([
+          Animated.timing(logo20qOpacity, { toValue: 1, duration: 700, useNativeDriver: true }),
+          Animated.spring(logo20qScale, { toValue: 1, friction: 7, tension: 80, useNativeDriver: true }),
+        ]).start();
+      });
+    }, 4500);
+    // At 7500ms: fade out 20Q logo and go to home
+    const timer2 = setTimeout(() => {
+      Animated.timing(logo20qOpacity, { toValue: 0, duration: 600, useNativeDriver: true }).start(() => {
+        setScreen('home');
+      });
+    }, 7500);
+    return () => { clearTimeout(timer1); clearTimeout(timer2); sweep.stop(); if (raf) cancelAnimationFrame(raf); };
   }, [screen, splashImgReady]);
 
   // Hide the native splash only AFTER the JS splash has painted —
@@ -6563,50 +6577,63 @@ export default function EnigmaGame() {
         onLayout={onSplashLayout}
         style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}
       >
-        <View style={{
-          width: LW,
-          height: LH,
-          shadowColor: '#000',
-          shadowOpacity: 0.7,
-          shadowRadius: 16,
-          shadowOffset: { width: 0, height: 8 },
+        {/* Phase 1 — Haque Games logo with zoom + sweep */}
+        <Animated.View style={{ opacity: haqueOpacity, position: 'absolute', alignItems: 'center', justifyContent: 'center' }}>
+          <View style={{
+            width: LW,
+            height: LH,
+            shadowColor: '#000',
+            shadowOpacity: 0.7,
+            shadowRadius: 16,
+            shadowOffset: { width: 0, height: 8 },
+          }}>
+            <MaskedView
+              style={{ width: LW, height: LH, overflow: 'hidden' }}
+              maskElement={
+                <Image source={logoSrc} style={{ width: LW, height: LH }} resizeMode="contain" />
+              }
+            >
+              <View style={{ width: LW, height: LH, overflow: 'hidden' }}>
+                <Image
+                  source={logoSrc}
+                  style={{ width: LW, height: LH }}
+                  resizeMode="contain"
+                  onLoad={() => setSplashImgReady(true)}
+                />
+                <Animated.View
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute', top: 0, height: LH, width: 90,
+                    backgroundColor: 'rgba(255,255,255,0.22)',
+                    transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(32)) }, { skewX: '-16deg' }],
+                  }}
+                />
+                <Animated.View
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute', top: 0, height: LH, width: 28,
+                    backgroundColor: 'rgba(255,255,255,0.90)',
+                    transform: [{ translateX: sweepX }, { skewX: '-16deg' }],
+                  }}
+                />
+              </View>
+            </MaskedView>
+          </View>
+        </Animated.View>
+
+        {/* Phase 2 — 20Q logo fades + springs in */}
+        <Animated.View style={{
+          opacity: logo20qOpacity,
+          transform: [{ scale: logo20qScale }],
+          position: 'absolute',
+          alignItems: 'center', justifyContent: 'center',
         }}>
-          {/* Logo + sweep both clipped to letter shapes by a single MaskedView */}
-          <MaskedView
-            style={{ width: LW, height: LH, overflow: 'hidden' }}
-            maskElement={
-              <Image source={logoSrc} style={{ width: LW, height: LH }} resizeMode="contain" />
-            }
-          >
-            <View style={{ width: LW, height: LH, overflow: 'hidden' }}>
-              {/* The visible logo — onLoad flips splashImgReady to start zoom */}
-              <Image
-                source={logoSrc}
-                style={{ width: LW, height: LH }}
-                resizeMode="contain"
-                onLoad={() => setSplashImgReady(true)}
-              />
-              {/* Soft halo behind core */}
-              <Animated.View
-                pointerEvents="none"
-                style={{
-                  position: 'absolute', top: 0, height: LH, width: 90,
-                  backgroundColor: 'rgba(255,255,255,0.22)',
-                  transform: [{ translateX: Animated.subtract(sweepX, new Animated.Value(32)) }, { skewX: '-16deg' }],
-                }}
-              />
-              {/* Bright sweep core */}
-              <Animated.View
-                pointerEvents="none"
-                style={{
-                  position: 'absolute', top: 0, height: LH, width: 28,
-                  backgroundColor: 'rgba(255,255,255,0.90)',
-                  transform: [{ translateX: sweepX }, { skewX: '-16deg' }],
-                }}
-              />
-            </View>
-          </MaskedView>
-        </View>
+          <Image
+            source={require('../assets/icon.png')}
+            style={{ width: 200, height: 200, borderRadius: 44 }}
+            resizeMode="contain"
+          />
+        </Animated.View>
       </View>
     );
   }
