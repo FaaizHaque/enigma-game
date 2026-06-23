@@ -6630,7 +6630,7 @@ export default function EnigmaGame() {
         }}>
           <Image
             source={require('../assets/icon.png')}
-            style={{ width: 200, height: 200, borderRadius: 44 }}
+            style={{ width: 200, height: 200 }}
             resizeMode="contain"
           />
         </Animated.View>
@@ -6697,36 +6697,14 @@ export default function EnigmaGame() {
         </Modal>
 
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 32, paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
-          {/* Game Logo — 20 Questions */}
-          <View style={{ alignItems: 'center', marginBottom: 40 }}>
-            {/* Icon mark: magnifying glass with "?" inside */}
-            <View style={{ marginBottom: 18, alignItems: 'center', justifyContent: 'center' }}>
-              {/* Outer ring glow — brighter, thicker */}
-              <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: 'rgba(212,168,74,0.10)', borderWidth: 2.5, borderColor: 'rgba(212,168,74,0.65)', alignItems: 'center', justifyContent: 'center', position: 'absolute' }} />
-              {/* Magnifying glass circle — thicker ring */}
-              <View style={{ width: 72, height: 72, borderRadius: 36, borderWidth: 5, borderColor: C.gold, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(212,168,74,0.08)' }}>
-                {/* Big question mark */}
-                <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 34, color: C.gold, lineHeight: 38 }}>?</Text>
-              </View>
-              {/* Magnifying glass handle */}
-              <View style={{
-                position: 'absolute', bottom: 6, right: 6,
-                width: 26, height: 5, borderRadius: 3,
-                backgroundColor: C.gold,
-                transform: [{ rotate: '45deg' }],
-              }} />
-            </View>
-
-            {/* "20" large number */}
-            <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: 2 }}>
-              <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 52, color: C.gold, letterSpacing: 2, lineHeight: 56 }}>20</Text>
-            </View>
-
-            {/* "QUESTIONS" subtitle */}
-            <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 15, letterSpacing: 7, color: C.gold, marginBottom: 10 }}>QUESTIONS</Text>
-
-            {/* Decorative divider with tagline */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', width: '90%', marginBottom: 8 }}>
+          {/* Game Logo — 20Q icon */}
+          <View style={{ alignItems: 'center', marginBottom: 36 }}>
+            <Image
+              source={require('../assets/icon.png')}
+              style={{ width: 140, height: 140 }}
+              resizeMode="contain"
+            />
+            <View style={{ flexDirection: 'row', alignItems: 'center', width: '80%', marginTop: 16, marginBottom: 8 }}>
               <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.25)' }} />
               <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: 'rgba(212,168,74,0.50)', marginHorizontal: 10 }} />
               <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.25)' }} />
@@ -6799,7 +6777,13 @@ export default function EnigmaGame() {
           </View>
         </View>
 
-        <Text style={{ fontFamily: 'Cinzel_900Black', fontSize: 27, letterSpacing: 5, color: C.gold, marginBottom: 6, paddingHorizontal: 24 }}>20 QUESTIONS</Text>
+        <View style={{ alignItems: 'center', marginBottom: 16 }}>
+          <Image
+            source={require('../assets/icon.png')}
+            style={{ width: 80, height: 80 }}
+            resizeMode="contain"
+          />
+        </View>
         <Text style={{ fontFamily: F.sansMed, fontSize: 15, color: C.muted, marginBottom: 22, paddingHorizontal: 24, letterSpacing: 0.2 }}>Choose a game mode to play.</Text>
 
         {/* Three cards — glass morphism (thicker rims, larger type) */}
