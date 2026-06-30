@@ -5667,6 +5667,76 @@ function QACard({ num, text, answer, accent = 'violet' }) {
   );
 }
 
+// Collapsible Q&A transcript shown on result screens. Self-contained open/close
+// state so it can drop into any result screen without touching parent hooks.
+// `questions` accepts solo/daily entries ({ text, answer } + hint rows) and
+// multiplayer entries ({ text, answer, askerName, note }).
+function QAReview({ questions, accent = 'violet', showAsker = false }) {
+  const [open, setOpen] = useState(false);
+  if (!questions || questions.length === 0) return null;
+  const isGold = accent === 'gold';
+  const tint = isGold ? C.gold : C.violet2;
+  const realCount = questions.filter((q) => !q.type).length;
+
+  return (
+    <View style={{ marginBottom: 16 }}>
+      <TouchableOpacity
+        onPress={() => setOpen((o) => !o)}
+        activeOpacity={0.8}
+        style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+          paddingVertical: 14, borderRadius: 12, borderWidth: 1,
+          borderColor: isGold ? 'rgba(212,168,74,0.3)' : 'rgba(124,58,237,0.35)',
+          backgroundColor: isGold ? 'rgba(212,168,74,0.05)' : 'rgba(124,58,237,0.06)',
+        }}
+      >
+        <Text style={{ fontSize: 13, color: tint, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>
+          {open ? '▾' : '▸'}  Review {realCount} question{realCount !== 1 ? 's' : ''} & answers
+        </Text>
+      </TouchableOpacity>
+
+      {open && (
+        <View style={{ marginTop: 10, gap: 8 }}>
+          {questions.map((q, i) => {
+            if (q.type === 'hint') {
+              return (
+                <View key={q.id || i} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 9, paddingHorizontal: 12, borderRadius: 10, backgroundColor: 'rgba(212,168,74,0.06)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.18)' }}>
+                  <Text style={{ fontSize: 12 }}>💡</Text>
+                  <Text style={{ flex: 1, fontSize: 12, color: C.gold2, fontFamily: F.sansMed, fontStyle: 'italic' }}>
+                    Hint {q.hintNum} revealed{q.text ? `: ${q.text}` : ''}
+                  </Text>
+                </View>
+              );
+            }
+            const qNum = questions.slice(0, i + 1).filter((x) => !x.type).length;
+            const a = q.answer && ANSWER_STYLES[q.answer] ? ANSWER_STYLES[q.answer] : null;
+            const badgeLabel = a ? a.label : (q.answer === 'SKIP' ? '— Skipped' : '—');
+            return (
+              <View key={q.id || i} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10, backgroundColor: 'rgba(30,30,58,0.5)', borderWidth: 1, borderColor: 'rgba(120,120,185,0.12)' }}>
+                <View style={{ width: 22, height: 22, borderRadius: 7, backgroundColor: isGold ? 'rgba(212,168,74,0.16)' : 'rgba(124,58,237,0.2)', alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
+                  <Text style={{ fontSize: 10, color: tint, fontFamily: F.sansBold }}>{qNum}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 13, color: C.text, fontFamily: F.sansMed, lineHeight: 18 }}>{q.text}</Text>
+                  {showAsker && q.askerName ? (
+                    <Text style={{ fontSize: 11, color: C.dim, fontFamily: F.sans, marginTop: 2 }}>— {q.askerName}</Text>
+                  ) : null}
+                  {q.answer === 'PARTLY' && q.note ? (
+                    <Text style={{ fontSize: 11, color: C.warn, fontFamily: F.sans, marginTop: 3, fontStyle: 'italic' }}>"{q.note}"</Text>
+                  ) : null}
+                </View>
+                <View style={{ alignSelf: 'flex-start', borderRadius: 8, paddingHorizontal: 9, paddingVertical: 5, borderWidth: 1, borderColor: a ? a.border : 'rgba(150,150,150,0.3)', backgroundColor: a ? a.bg : 'rgba(150,150,150,0.08)' }}>
+                  <Text style={{ fontSize: 12, fontFamily: F.sansBold, color: a ? a.color : C.dim }}>{badgeLabel}</Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      )}
+    </View>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function EnigmaGame() {
   const insets = useSafeAreaInsets();
@@ -7551,6 +7621,9 @@ export default function EnigmaGame() {
             </View>
           )}
 
+          {/* Review the round's questions & answers */}
+          <QAReview questions={dailyQuestions} accent="gold" />
+
           <TouchableOpacity style={S.btnGold} onPress={() => setScreen('modes')}>
             <Text style={S.btnGoldText}>Back to Home</Text>
           </TouchableOpacity>
@@ -8158,6 +8231,9 @@ export default function EnigmaGame() {
             ))}
           </View>
         )}
+
+        {/* Review the round's questions & answers */}
+        <QAReview questions={soloQuestions} accent="violet" />
 
         <TouchableOpacity style={S.btnGold} onPress={startSoloChallenge}>
           <Text style={S.btnGoldText}>Play Again →</Text>
@@ -9238,6 +9314,9 @@ export default function EnigmaGame() {
               );
             })}
           </View>
+
+          {/* Review the round's questions & answers — shared transcript, asker names shown */}
+          <QAReview questions={game.questions} accent="violet" showAsker />
 
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 16 }}>
             <TouchableOpacity style={[S.btnOutline, { flex: 1 }]} onPress={() => setScreen('scoreboard')}>
