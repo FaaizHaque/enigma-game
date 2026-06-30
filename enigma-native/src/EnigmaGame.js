@@ -5917,6 +5917,7 @@ export default function EnigmaGame() {
   const [soloCategory, setSoloCategory] = useState('random');
   const [soloTier, setSoloTier] = useState('senior');
   const [soloHintsUsed, setSoloHintsUsed] = useState(0);
+  const [soloStartTime, setSoloStartTime] = useState(null);
   const [dailyHintsUsed, setDailyHintsUsed] = useState(0);
   const [adModalVisible, setAdModalVisible] = useState(false);
   const [adCountdown, setAdCountdown] = useState(5);
@@ -6614,6 +6615,7 @@ export default function EnigmaGame() {
     setSoloSolveOpen(false);
     setSoloResult(null);
     setSoloHintsUsed(0);
+    setSoloStartTime(Date.now());
     setSoloLoading(false);
     setScreen('solo_game');
   };
@@ -6704,7 +6706,8 @@ export default function EnigmaGame() {
     if (!guess.trim() || !soloChallenge) return;
     const isCorrect = fuzzyMatch(guess.trim(), soloChallenge.secret) ||
       (soloChallenge.aliases || []).some(a => fuzzyMatch(guess.trim(), a));
-    setSoloResult({ solved: isCorrect, questionsUsed: soloQuestions.filter(qq => !qq.type).length });
+    const timeSeconds = soloStartTime ? Math.round((Date.now() - soloStartTime) / 1000) : 0;
+    setSoloResult({ solved: isCorrect, questionsUsed: soloQuestions.filter(qq => !qq.type).length, timeSeconds, hintsUsed: soloHintsUsed });
     setSoloSolveOpen(false);
     setScreen('solo_result');
     // Record as seen regardless of win/lose so it's not repeated
@@ -8218,7 +8221,19 @@ export default function EnigmaGame() {
 
   // ─── SOLO RESULT ──────────────────────────────────────────────────────────
   if (screen === 'solo_result' && soloResult && soloChallenge) {
-    const { solved, questionsUsed } = soloResult;
+    const { solved, questionsUsed, timeSeconds = 0, hintsUsed = 0 } = soloResult;
+    const rating = dailyStars(questionsUsed, solved);
+    const sMins = Math.floor(timeSeconds / 60);
+    const sSecs = timeSeconds % 60;
+    const soloTimeStr = sMins > 0 ? `${sMins}m ${sSecs}s` : `${sSecs}s`;
+    const qToSpare = 20 - questionsUsed;
+    const flourish = solved
+      ? (hintsUsed === 0 && qToSpare > 0
+          ? `Cracked with ${qToSpare} question${qToSpare !== 1 ? 's' : ''} to spare — no hints!`
+          : qToSpare > 0
+            ? `Cracked with ${qToSpare} question${qToSpare !== 1 ? 's' : ''} to spare`
+            : 'Down to the wire — solved on the last question!')
+      : null;
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
@@ -8233,9 +8248,18 @@ export default function EnigmaGame() {
           <Text style={[S.tH1, { color: solved ? C.gold : C.muted, letterSpacing: 2 }]}>
             {solved ? 'You Cracked It!' : 'Not This Time'}
           </Text>
-          <Text style={[S.tBodySm, { color: C.muted, marginTop: 8 }]}>
-            {solved ? `Solved in ${questionsUsed} question${questionsUsed !== 1 ? 's' : ''}` : `Used all ${questionsUsed} questions`}
-          </Text>
+          {/* Star rating badge */}
+          {solved && (
+            <View style={{ marginTop: 12, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(212,168,74,0.4)', backgroundColor: 'rgba(212,168,74,0.08)', paddingHorizontal: 18, paddingVertical: 8 }}>
+              <Text style={{ fontSize: 14, color: C.gold, fontFamily: F.sansBold, letterSpacing: 0.5 }}>{rating.label}</Text>
+            </View>
+          )}
+          {flourish && (
+            <Text style={[S.tBodySm, { color: C.muted, marginTop: 10, textAlign: 'center' }]}>{flourish}</Text>
+          )}
+          {!solved && (
+            <Text style={[S.tBodySm, { color: C.muted, marginTop: 8 }]}>{`Used all ${questionsUsed} questions`}</Text>
+          )}
         </View>
 
         {/* Secret reveal */}
@@ -8243,6 +8267,22 @@ export default function EnigmaGame() {
           <Text style={[S.tLabel, { color: C.dim, letterSpacing: 3, marginBottom: 8 }]}>The Secret Was</Text>
           <Text style={[S.tH1, { color: C.violet2, textAlign: 'center' }]}>{soloChallenge.secret}</Text>
           <Text style={[S.tCaption, { color: C.muted, marginTop: 6 }]}>{soloChallenge.categoryIcon} {soloChallenge.categoryLabel}</Text>
+        </View>
+
+        {/* Stat strip — questions / time / hints */}
+        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
+          <View style={[S.infoCard, { flex: 1, alignItems: 'center' }]}>
+            <Text style={{ fontSize: 24, fontFamily: 'Cinzel_700Bold', color: C.violet2 }}>{questionsUsed}</Text>
+            <Text style={[S.tLabel, { color: C.dim, letterSpacing: 1 }]}>Questions</Text>
+          </View>
+          <View style={[S.infoCard, { flex: 1, alignItems: 'center' }]}>
+            <Text style={{ fontSize: 24, fontFamily: 'Cinzel_700Bold', color: C.violet2 }}>{soloTimeStr}</Text>
+            <Text style={[S.tLabel, { color: C.dim, letterSpacing: 1 }]}>Time</Text>
+          </View>
+          <View style={[S.infoCard, { flex: 1, alignItems: 'center' }]}>
+            <Text style={{ fontSize: 24, fontFamily: 'Cinzel_700Bold', color: C.violet2 }}>{hintsUsed}</Text>
+            <Text style={[S.tLabel, { color: C.dim, letterSpacing: 1 }]}>{hintsUsed === 1 ? 'Hint' : 'Hints'}</Text>
+          </View>
         </View>
 
         {/* Educational data card */}
