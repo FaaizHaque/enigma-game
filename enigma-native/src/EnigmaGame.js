@@ -6377,6 +6377,10 @@ export default function EnigmaGame() {
   };
 
   const startSoloChallenge = async () => {
+    // TODO: AdMob — future placement: show an interstitial ad between solo rounds.
+    // When this is reached from the "Play Again" button (not the first round), show a
+    // preloaded InterstitialAd, then continue into the new round on close. Gate it
+    // (e.g. every 2nd or 3rd round) so it never interrupts the very first game.
     setSoloLoading(true);
     const libTier = soloTier === 'junior' ? 'junior' : 'scholar';
     let currentSeen = seenSecrets[libTier];
@@ -6405,6 +6409,10 @@ export default function EnigmaGame() {
     setScreen('solo_game');
   };
 
+  // TODO: AdMob — this simulated 5-second countdown stands in for a real rewarded ad.
+  // Once react-native-google-mobile-ads is wired up, this effect (and the two "Ad
+  // simulation modal" blocks in the solo/daily screens) can be removed entirely —
+  // the real ad's lifecycle events drive reward delivery and dismissal instead.
   useEffect(() => {
     if (!adModalVisible) return;
     setAdCountdown(5);
@@ -6429,11 +6437,18 @@ export default function EnigmaGame() {
   }, [screen]);
 
   const openAdForHint = (mode) => {
+    // TODO: AdMob — replace the simulated ad modal below with a real rewarded ad.
+    //   1. Preload a RewardedAd (react-native-google-mobile-ads) when the solo/daily game starts.
+    //   2. Here: if the ad is loaded, call rewarded.show(); otherwise fall back to granting the hint.
+    //   3. On the 'earned_reward' event, call collectHint(). On close, reload the next ad.
+    // Use Google TEST ad unit IDs during development; swap in live unit IDs before release.
     setPendingHintMode(mode);
     setAdModalVisible(true);
   };
 
   const collectHint = () => {
+    // TODO: AdMob — this is the reward callback. With a real rewarded ad it should be
+    // invoked by the ad SDK's 'earned_reward' event rather than the simulated modal's timer.
     setAdModalVisible(false);
     if (pendingHintMode === 'solo') {
       const nextHint = soloHintsUsed + 1;
@@ -6458,6 +6473,9 @@ export default function EnigmaGame() {
   const askSoloQuestion = async (question) => {
     const q = question.trim();
     const realQCount = soloQuestions.filter(qq => !qq.type).length;
+    // TODO: AdMob — future placement: when realQCount hits 20, offer a rewarded ad
+    // ("Watch a short ad for 5 bonus questions"). On reward, raise the cap to 25
+    // for this round instead of forcing the solve/game-over.
     if (!q || soloLoading || realQCount >= 20 || !soloChallenge) return;
     if (!isValidQuestion(q)) {
       showAnswerWarn('That doesn\'t look like a real question. Add a describing word — e.g. "alive", "a scientist", or "is it in Europe?". To guess the answer, use the Solve button.');
@@ -6520,6 +6538,8 @@ export default function EnigmaGame() {
   const askDailyQuestion = async (question) => {
     const q = question.trim();
     const realQCount = dailyQuestions.filter(qq => !qq.type).length;
+    // TODO: AdMob — future placement: same as solo, offer a rewarded ad for 5 bonus
+    // questions when the player exhausts the 20-question limit on the Daily Challenge.
     if (!q || dailyLoading || realQCount >= 20) return;
     if (!isValidQuestion(q)) {
       showAnswerWarn('That doesn\'t look like a real question. Add a describing word — e.g. "alive", "a scientist", or "is it in Europe?". To guess the answer, use the Solve button.');
