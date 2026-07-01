@@ -4380,6 +4380,22 @@ const JUNIOR_LIBRARY = {
         'Black bears, deer, and many other animals roam its forests, valleys, and meadows.',
       ],
     },
+    {
+      secret: 'Berlin Wall',
+      hint: 'The famous wall that split the city of Berlin in two for nearly 30 years during the Cold War',
+      infoFields: [
+        { icon: '📍', label: 'Location', value: 'Berlin, Germany' },
+        { icon: '🏛️', label: 'Type', value: 'Historic Border Wall' },
+        { icon: '📅', label: 'Built', value: '1961 (fell 1989)' },
+      ],
+      facts: [
+        'The Berlin Wall was a long, guarded wall that split the city of Berlin, in Germany, into two separate halves.',
+        'It was built in 1961 to stop people escaping from the communist eastern side of the city to the free west.',
+        'For nearly 30 years, families and friends were kept apart by the wall, which was guarded day and night.',
+        'In 1989 the borders were finally opened, and joyful crowds climbed onto the wall and began breaking it down.',
+        'Today only a few painted pieces of the wall remain, kept as a reminder of a time when the city was divided.',
+      ],
+    },
   ],
   movies_cartoons: [
     {
