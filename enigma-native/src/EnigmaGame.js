@@ -7104,6 +7104,37 @@ const resetSeenForExhaustion = async (playerId, tier) => {
   return keepSet;
 };
 
+// ─── Solo lifetime stats (local-only, AsyncStorage) ───────────────────────────
+const _SOLO_STATS_KEY = 'enigma_solo_stats_v1';
+const DEFAULT_SOLO_STATS = { gamesPlayed: 0, wins: 0, currentStreak: 0, bestStreak: 0, bestQuestions: null };
+
+const loadSoloStats = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(_SOLO_STATS_KEY);
+    if (raw) return { ...DEFAULT_SOLO_STATS, ...JSON.parse(raw) };
+  } catch {}
+  return { ...DEFAULT_SOLO_STATS };
+};
+
+// Pure reducer — returns the updated stats for one finished solo round.
+const nextSoloStats = (prev, solved, questionsUsed) => {
+  const s = { ...DEFAULT_SOLO_STATS, ...prev };
+  s.gamesPlayed += 1;
+  if (solved) {
+    s.wins += 1;
+    s.currentStreak += 1;
+    if (s.currentStreak > s.bestStreak) s.bestStreak = s.currentStreak;
+    if (s.bestQuestions == null || questionsUsed < s.bestQuestions) s.bestQuestions = questionsUsed;
+  } else {
+    s.currentStreak = 0;
+  }
+  return s;
+};
+
+const persistSoloStats = async (stats) => {
+  try { await AsyncStorage.setItem(_SOLO_STATS_KEY, JSON.stringify(stats)); } catch {}
+};
+
 const SERVER_URL = Constants.expoConfig?.extra?.serverUrl || 'https://enigma-game-production.up.railway.app';
 
 // Keeps Railway server warm — pings every 4 minutes so it never sleeps
@@ -8059,6 +8090,9 @@ export default function EnigmaGame() {
     });
   }, []);
 
+  // Load lifetime solo stats once on mount (local-only)
+  useEffect(() => { loadSoloStats().then(setSoloStats); }, []);
+
   // Keep Railway server warm — prevents cold-start errors
   useEffect(() => {
     pingServer();
@@ -8168,6 +8202,7 @@ export default function EnigmaGame() {
   const [soloTier, setSoloTier] = useState('senior');
   const [soloHintsUsed, setSoloHintsUsed] = useState(0);
   const [soloStartTime, setSoloStartTime] = useState(null);
+  const [soloStats, setSoloStats] = useState(DEFAULT_SOLO_STATS);
   const [dailyHintsUsed, setDailyHintsUsed] = useState(0);
   const [adModalVisible, setAdModalVisible] = useState(false);
   const [adCountdown, setAdCountdown] = useState(5);
@@ -8957,7 +8992,12 @@ export default function EnigmaGame() {
     const isCorrect = fuzzyMatch(guess.trim(), soloChallenge.secret) ||
       (soloChallenge.aliases || []).some(a => fuzzyMatch(guess.trim(), a));
     const timeSeconds = soloStartTime ? Math.round((Date.now() - soloStartTime) / 1000) : 0;
-    setSoloResult({ solved: isCorrect, questionsUsed: soloQuestions.filter(qq => !qq.type).length, timeSeconds, hintsUsed: soloHintsUsed });
+    const questionsUsed = soloQuestions.filter(qq => !qq.type).length;
+    setSoloResult({ solved: isCorrect, questionsUsed, timeSeconds, hintsUsed: soloHintsUsed });
+    // Update lifetime stats (local-only): games, wins, streak, personal best
+    const updatedStats = nextSoloStats(soloStats, isCorrect, questionsUsed);
+    setSoloStats(updatedStats);
+    persistSoloStats(updatedStats);
     setSoloSolveOpen(false);
     setScreen('solo_result');
     // Record as seen regardless of win/lose so it's not repeated
@@ -10473,6 +10513,7 @@ export default function EnigmaGame() {
   if (screen === 'solo_result' && soloResult && soloChallenge) {
     const { solved, questionsUsed, timeSeconds = 0, hintsUsed = 0 } = soloResult;
     const rating = dailyStars(questionsUsed, solved);
+    const winRate = soloStats.gamesPlayed > 0 ? Math.round((soloStats.wins / soloStats.gamesPlayed) * 100) : 0;
     const sMins = Math.floor(timeSeconds / 60);
     const sSecs = timeSeconds % 60;
     const soloTimeStr = sMins > 0 ? `${sMins}m ${sSecs}s` : `${sSecs}s`;
@@ -10533,6 +10574,33 @@ export default function EnigmaGame() {
             <Text style={{ fontSize: 24, fontFamily: 'Cinzel_700Bold', color: C.violet2 }}>{hintsUsed}</Text>
             <Text style={[S.tLabel, { color: C.dim, letterSpacing: 1 }]}>{hintsUsed === 1 ? 'Hint' : 'Hints'}</Text>
           </View>
+        </View>
+
+        {/* Your Record — lifetime solo stats (local-only) */}
+        <View style={[S.infoCard, { marginBottom: 16 }]}>
+          <Text style={[S.tOverline, { letterSpacing: 3, marginBottom: 14 }]}>📈 Your Record</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 22, marginBottom: 2 }}>🔥</Text>
+              <Text style={{ fontSize: 20, fontFamily: 'Cinzel_700Bold', color: C.gold }}>{soloStats.currentStreak}</Text>
+              <Text style={[S.tLabel, { color: C.dim, letterSpacing: 1 }]}>Streak</Text>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 22, marginBottom: 2 }}>🏅</Text>
+              <Text style={{ fontSize: 20, fontFamily: 'Cinzel_700Bold', color: C.gold }}>{soloStats.bestQuestions ?? '—'}</Text>
+              <Text style={[S.tLabel, { color: C.dim, letterSpacing: 1 }]}>Best (Q)</Text>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 22, marginBottom: 2 }}>🎯</Text>
+              <Text style={{ fontSize: 20, fontFamily: 'Cinzel_700Bold', color: C.gold }}>{winRate}%</Text>
+              <Text style={[S.tLabel, { color: C.dim, letterSpacing: 1 }]}>Win Rate</Text>
+            </View>
+          </View>
+          {soloStats.gamesPlayed > 0 && (
+            <Text style={[S.tCaption, { color: C.muted, textAlign: 'center', marginTop: 12 }]}>
+              Best streak: {soloStats.bestStreak} · {soloStats.wins}/{soloStats.gamesPlayed} solved
+            </Text>
+          )}
         </View>
 
         {/* Educational data card */}
