@@ -11343,8 +11343,8 @@ export default function EnigmaGame() {
                 )}
               </View>
               <View style={{ height: 200, backgroundColor: '#0d0d1f', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                <Text style={{ fontSize: 48 }}>🎮</Text>
-                <Text style={[S.tH3, { color: C.gold, letterSpacing: 1 }]}>20 Questions</Text>
+                <Image source={require('../assets/icon.png')} style={{ width: 72, height: 72 }} resizeMode="contain" />
+                <Text style={[S.tH3, { color: C.gold, letterSpacing: 1 }]}>20Q</Text>
                 <Text style={[S.tBodySm, { color: C.muted }]}>Challenge your friends today</Text>
               </View>
               <View style={{ padding: 20 }}>
@@ -11987,8 +11987,8 @@ export default function EnigmaGame() {
               </View>
               {/* Fake ad content */}
               <View style={{ height: 200, backgroundColor: '#0d0d1f', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                <Text style={{ fontSize: 48 }}>🎮</Text>
-                <Text style={[S.tH3, { color: C.gold, letterSpacing: 1 }]}>20 Questions</Text>
+                <Image source={require('../assets/icon.png')} style={{ width: 72, height: 72 }} resizeMode="contain" />
+                <Text style={[S.tH3, { color: C.gold, letterSpacing: 1 }]}>20Q</Text>
                 <Text style={[S.tBodySm, { color: C.muted }]}>Challenge your friends today</Text>
               </View>
               {/* Reward notice + button */}
