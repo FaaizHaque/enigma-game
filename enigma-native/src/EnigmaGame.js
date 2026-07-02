@@ -8175,6 +8175,53 @@ const persistSoloStats = async (stats) => {
   try { await AsyncStorage.setItem(_SOLO_STATS_KEY, JSON.stringify(stats)); } catch {}
 };
 
+// ─── Fact-card images (Wikipedia/Wikimedia, runtime, best-effort) ─────────────
+// Loads a thumbnail for the secret at result time. No manual sourcing or bundling;
+// Commons images are freely licensed. Returns null (→ no image, card unchanged)
+// whenever there's no clean match, a network error, or a sensitive subject.
+//
+// Sensitivity guard: never show images for prophets / key religious figures.
+// Matched case-insensitively; anything beginning with "Prophet " is also skipped.
+const NO_IMAGE_SECRETS = new Set([
+  'prophet muhammad', 'prophet adam', 'prophet noah', 'prophet abraham',
+  'prophet david', 'prophet solomon', 'prophet moses', 'prophet jesus',
+  'jesus', 'jesus christ', 'allah', 'kaaba', 'the kaaba',
+]);
+
+const _imageBlocked = (secret) => {
+  const s = (secret || '').trim().toLowerCase();
+  return s.startsWith('prophet ') || NO_IMAGE_SECRETS.has(s);
+};
+
+// "Petra (The Rose City)" → "Petra"; an explicit `wiki` override always wins.
+const _wikiTitle = (secret, override) => {
+  if (override) return override;
+  return (secret || '').replace(/\s*\([^)]*\)\s*/g, ' ').trim();
+};
+
+const fetchSecretImage = async (secret, override) => {
+  if (_imageBlocked(secret)) return null;
+  const title = _wikiTitle(secret, override);
+  if (!title) return null;
+  try {
+    const res = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}?redirect=true`,
+      { headers: {
+        Accept: 'application/json',
+        // Wikipedia asks API clients to identify themselves.
+        'Api-User-Agent': 'EnigmaGame/1.0 (20-questions party game; contact via app store listing)',
+      } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    // Disambiguation pages rarely have a relevant image — skip them.
+    if (data.type && String(data.type).includes('disambiguation')) return null;
+    return data.thumbnail?.source || null;
+  } catch {
+    return null;
+  }
+};
+
 const SERVER_URL = Constants.expoConfig?.extra?.serverUrl || 'https://enigma-game-production.up.railway.app';
 
 // Keeps Railway server warm — pings every 4 minutes so it never sleeps
@@ -9133,6 +9180,17 @@ export default function EnigmaGame() {
   // Load lifetime solo stats once on mount (local-only)
   useEffect(() => { loadSoloStats().then(setSoloStats); }, []);
 
+  // Best-effort fact-card image for the solo result (Wikipedia thumbnail).
+  useEffect(() => {
+    if (screen !== 'solo_result' || !soloChallenge) return;
+    let cancelled = false;
+    setFactImage(null);
+    fetchSecretImage(soloChallenge.secret, soloChallenge.wiki).then((url) => {
+      if (!cancelled) setFactImage(url);
+    });
+    return () => { cancelled = true; };
+  }, [screen, soloChallenge]);
+
   // Keep Railway server warm — prevents cold-start errors
   useEffect(() => {
     pingServer();
@@ -9243,6 +9301,7 @@ export default function EnigmaGame() {
   const [soloHintsUsed, setSoloHintsUsed] = useState(0);
   const [soloStartTime, setSoloStartTime] = useState(null);
   const [soloStats, setSoloStats] = useState(DEFAULT_SOLO_STATS);
+  const [factImage, setFactImage] = useState(null);
   const [dailyHintsUsed, setDailyHintsUsed] = useState(0);
   const [adModalVisible, setAdModalVisible] = useState(false);
   const [adCountdown, setAdCountdown] = useState(5);
@@ -11647,6 +11706,13 @@ export default function EnigmaGame() {
         {(soloChallenge.facts || []).length > 0 && (
           <View style={[S.infoCard, { marginBottom: 24 }]}>
             <Text style={[S.tOverline, { letterSpacing: 3, marginBottom: 14 }]}>📖 About This Secret</Text>
+            {/* Best-effort photo (Wikipedia). Absent when there's no match or subject is sensitive. */}
+            {factImage && (
+              <View style={{ marginBottom: 14, borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: C.border }}>
+                <Image source={{ uri: factImage }} style={{ width: '100%', height: 190 }} resizeMode="cover" />
+                <Text style={{ fontSize: 9, color: C.dim, textAlign: 'right', paddingHorizontal: 8, paddingVertical: 4, fontFamily: F.sans }}>Image: Wikipedia</Text>
+              </View>
+            )}
             {/* Info card row — rendered for all categories that have infoFields */}
             {(soloChallenge.infoFields || []).length > 0 && (
               <View style={{ backgroundColor: 'rgba(212,168,74,0.08)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.25)', borderRadius: 10, padding: 12, marginBottom: 16, gap: 6 }}>
