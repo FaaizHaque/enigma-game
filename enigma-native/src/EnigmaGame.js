@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, Alert, Modal, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Animated, Easing, Dimensions,
+  Share,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Defs, RadialGradient, LinearGradient as SvgLinearGradient, Stop, Circle, Ellipse, Rect, Path, G, Line } from 'react-native-svg';
@@ -8564,6 +8565,30 @@ const fetchSecretImage = async (secret, override) => {
 
 const SERVER_URL = Constants.expoConfig?.extra?.serverUrl || 'https://enigma-game-production.up.railway.app';
 
+// Appended to shared result text. Set to the App Store / TestFlight link when live.
+const SHARE_URL = Constants.expoConfig?.extra?.shareUrl || '';
+
+// Builds the SPOILER-FREE daily share text (Wordle-style): performance only,
+// never the secret or category. Date identifies the puzzle, like Wordle's number.
+const buildDailyShareText = ({ solved, questionsUsed, timeSeconds }) => {
+  const rating = dailyStars(questionsUsed, solved);
+  const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const stars = rating.stars > 0 ? ' ' + '✦'.repeat(rating.stars) : '';
+  const mins = Math.floor((timeSeconds || 0) / 60);
+  const secs = (timeSeconds || 0) % 60;
+  const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+  const line = solved
+    ? `Solved in ${questionsUsed} question${questionsUsed !== 1 ? 's' : ''}${stars} (${timeStr})`
+    : `Today's mystery got me — can you crack it?`;
+  return [
+    `🕵️ Enigma — Daily Challenge · ${dateStr}`,
+    line,
+    '',
+    "Can you beat today's mystery?",
+    SHARE_URL,
+  ].filter(Boolean).join('\n');
+};
+
 // Keeps Railway server warm — pings every 4 minutes so it never sleeps
 const pingServer = () => fetch(`${SERVER_URL}/api/ping`).catch(() => {});
 
@@ -10449,6 +10474,13 @@ export default function EnigmaGame() {
   };
 
   // ─── Daily Challenge helpers ──────────────────────────────────────────────
+  const shareDailyResult = async () => {
+    if (!dailyResult) return;
+    try {
+      await Share.share({ message: buildDailyShareText(dailyResult) });
+    } catch {}
+  };
+
   const startDailyChallenge = () => {
     const { theme, item, date } = getDailyChallenge();
     setDailyChallenge({
@@ -11396,8 +11428,12 @@ export default function EnigmaGame() {
           {/* Review the round's questions & answers */}
           <QAReview questions={dailyQuestions} accent="gold" />
 
-          <TouchableOpacity style={S.btnGold} onPress={() => setScreen('modes')}>
-            <Text style={S.btnGoldText}>Back to Home</Text>
+          {/* Spoiler-free share — brag performance, never the secret */}
+          <TouchableOpacity style={S.btnGold} onPress={shareDailyResult} activeOpacity={0.85}>
+            <Text style={S.btnGoldText}>📤 Share Result</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[S.btnOutline, { marginTop: 10 }]} onPress={() => setScreen('modes')}>
+            <Text style={S.btnOutlineText}>Back to Home</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[S.btnOutline, { marginTop: 10 }]} onPress={() => setScreen('multi_home')}>
             <Text style={S.btnOutlineText}>👥 Play Multiplayer</Text>
