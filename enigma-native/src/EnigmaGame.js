@@ -8881,16 +8881,15 @@ const buildDailyShareText = ({ solved, questionsUsed, timeSeconds }) => {
   const mins = Math.floor((timeSeconds || 0) / 60);
   const secs = (timeSeconds || 0) % 60;
   const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-  const line = solved
-    ? `Solved in ${questionsUsed} question${questionsUsed !== 1 ? 's' : ''}${stars} (${timeStr})`
-    : `Today's mystery got me — can you crack it?`;
-  return [
-    `🕵️ Enigma — Daily Challenge · ${dateStr}`,
-    line,
-    '',
-    "Can you beat today's mystery?",
-    SHARE_URL,
-  ].filter(Boolean).join('\n');
+  const lines = [`🕵️ 20Q — Daily Challenge · ${dateStr}`];
+  if (solved) {
+    lines.push(`Solved in ${questionsUsed} question${questionsUsed !== 1 ? 's' : ''}${stars} (${timeStr})`);
+    lines.push('', "Can you beat today's mystery?");
+  } else {
+    lines.push("Today's mystery got me — can you crack it?");
+  }
+  if (SHARE_URL) lines.push('', SHARE_URL);
+  return lines.join('\n');
 };
 
 // Keeps Railway server warm — pings every 4 minutes so it never sleeps
