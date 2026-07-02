@@ -9176,6 +9176,37 @@ const persistSoloStats = async (stats) => {
   try { await AsyncStorage.setItem(_SOLO_STATS_KEY, JSON.stringify(stats)); } catch {}
 };
 
+// ─── Daily streak (local-only) — consecutive days the daily was played ─────────
+const _DAILY_STREAK_KEY = 'enigma_daily_streak_v1';
+const DEFAULT_DAILY_STREAK = { current: 0, best: 0, lastPlayedDate: null };
+
+const loadDailyStreak = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(_DAILY_STREAK_KEY);
+    if (raw) return { ...DEFAULT_DAILY_STREAK, ...JSON.parse(raw) };
+  } catch {}
+  return { ...DEFAULT_DAILY_STREAK };
+};
+
+// Pure reducer. todayKey is 'YYYY-MM-DD' (same format as getDailyDateKey()).
+// Increments if yesterday was the last play; resets to 1 if a day was missed;
+// no-op if already counted today.
+const nextDailyStreak = (prev, todayKey) => {
+  const s = { ...DEFAULT_DAILY_STREAK, ...prev };
+  if (s.lastPlayedDate === todayKey) return s;
+  const y = new Date(todayKey + 'T00:00:00');
+  y.setDate(y.getDate() - 1);
+  const yKey = `${y.getFullYear()}-${String(y.getMonth() + 1).padStart(2, '0')}-${String(y.getDate()).padStart(2, '0')}`;
+  s.current = s.lastPlayedDate === yKey ? s.current + 1 : 1;
+  if (s.current > s.best) s.best = s.current;
+  s.lastPlayedDate = todayKey;
+  return s;
+};
+
+const persistDailyStreak = async (s) => {
+  try { await AsyncStorage.setItem(_DAILY_STREAK_KEY, JSON.stringify(s)); } catch {}
+};
+
 // ─── Fact-card images (Wikipedia/Wikimedia, runtime, best-effort) ─────────────
 // Loads a thumbnail for the secret at result time. No manual sourcing or bundling;
 // Commons images are freely licensed. Returns null (→ no image, card unchanged)
@@ -9230,7 +9261,7 @@ const SHARE_URL = Constants.expoConfig?.extra?.shareUrl || '';
 
 // Builds the SPOILER-FREE daily share text (Wordle-style): performance only,
 // never the secret or category. Date identifies the puzzle, like Wordle's number.
-const buildDailyShareText = ({ solved, questionsUsed, timeSeconds }) => {
+const buildDailyShareText = ({ solved, questionsUsed, timeSeconds, streak = 0 }) => {
   const rating = dailyStars(questionsUsed, solved);
   const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   const stars = rating.stars > 0 ? ' ' + '✦'.repeat(rating.stars) : '';
@@ -9240,10 +9271,11 @@ const buildDailyShareText = ({ solved, questionsUsed, timeSeconds }) => {
   const lines = [`🕵️ 20Q — Daily Challenge · ${dateStr}`];
   if (solved) {
     lines.push(`Solved in ${questionsUsed} question${questionsUsed !== 1 ? 's' : ''}${stars} (${timeStr})`);
-    lines.push('', "Can you beat today's mystery?");
   } else {
     lines.push("Today's mystery got me — can you crack it?");
   }
+  if (streak >= 2) lines.push(`🔥 ${streak}-day streak`);
+  if (solved) lines.push('', "Can you beat today's mystery?");
   if (SHARE_URL) lines.push('', SHARE_URL);
   return lines.join('\n');
 };
@@ -10204,6 +10236,9 @@ export default function EnigmaGame() {
   // Load lifetime solo stats once on mount (local-only)
   useEffect(() => { loadSoloStats().then(setSoloStats); }, []);
 
+  // Load daily streak once on mount (local-only)
+  useEffect(() => { loadDailyStreak().then(setDailyStreak); }, []);
+
   // Best-effort fact-card image for the solo result (Wikipedia thumbnail).
   useEffect(() => {
     if (screen !== 'solo_result' || !soloChallenge) return;
@@ -10304,6 +10339,7 @@ export default function EnigmaGame() {
   const [dailySolveOpen, setDailySolveOpen] = useState(false);
   const [dailySolveInput, setDailySolveInput] = useState('');
   const [dailyResult, setDailyResult] = useState(null);
+  const [dailyStreak, setDailyStreak] = useState(DEFAULT_DAILY_STREAK);
   const [dailyLeaderboard, setDailyLeaderboard] = useState([]);
   const [dailyLoadingBoard, setDailyLoadingBoard] = useState(false);
 
@@ -11193,7 +11229,11 @@ export default function EnigmaGame() {
       (dailyChallenge.aliases || []).some(a => fuzzyMatch(guess.trim(), a));
     const timeSeconds = Math.round((Date.now() - dailyStartTime) / 1000);
     const questionsUsed = dailyQuestions.filter(qq => !qq.type).length;
-    setDailyResult({ solved: isCorrect, questionsUsed, timeSeconds });
+    // Bump the daily play-streak (local-only), counted once per calendar day
+    const updatedStreak = nextDailyStreak(dailyStreak, getDailyDateKey());
+    setDailyStreak(updatedStreak);
+    persistDailyStreak(updatedStreak);
+    setDailyResult({ solved: isCorrect, questionsUsed, timeSeconds, streak: updatedStreak.current });
     setDailySolveOpen(false);
     setScreen('daily_result');
     // Mark today's daily secret as seen so solo never replays it
@@ -12029,6 +12069,15 @@ export default function EnigmaGame() {
             <Text style={[S.tBodySm, { color: C.muted, marginTop: 8 }]}>
               {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
             </Text>
+            {/* Daily play-streak badge */}
+            {dailyStreak.current >= 1 && (
+              <View style={{ marginTop: 12, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(240,160,48,0.45)', backgroundColor: 'rgba(240,160,48,0.10)', paddingHorizontal: 16, paddingVertical: 7, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={{ fontSize: 14 }}>🔥</Text>
+                <Text style={{ fontSize: 14, color: C.warn, fontFamily: F.sansBold, letterSpacing: 0.3 }}>
+                  {dailyStreak.current}-day streak{dailyStreak.best > dailyStreak.current ? `  ·  best ${dailyStreak.best}` : ''}
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Secret reveal */}
