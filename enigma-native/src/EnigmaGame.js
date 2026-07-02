@@ -5843,6 +5843,22 @@ const JUNIOR_LIBRARY = {
         'WALL-E won the Academy Award for Best Animated Feature and is praised for its message about looking after our planet.',
       ],
     },
+    {
+      secret: 'The Wizard of Oz',
+      hint: 'The classic musical film about a girl swept away by a tornado to the magical land of Oz',
+      infoFields: [
+        { icon: '📅', label: 'Released', value: '1939' },
+        { icon: '🎬', label: 'Type', value: 'Live-Action / Musical Film' },
+        { icon: '🏢', label: 'Studio', value: 'MGM' },
+      ],
+      facts: [
+        'The Wizard of Oz (1939) is a much-loved classic film about a girl named Dorothy from Kansas.',
+        'A powerful tornado carries Dorothy and her little dog Toto away to the strange and magical land of Oz.',
+        'To find her way home, she follows a yellow brick road to ask a mysterious wizard for help.',
+        'Along the way she makes three friends: a Scarecrow, a Tin Man, and a Cowardly Lion.',
+        'The film was one of the first to switch from black-and-white to glorious colour, amazing audiences at the time.',
+      ],
+    },
   ],
   animals: [
     {
