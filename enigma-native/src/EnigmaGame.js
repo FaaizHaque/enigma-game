@@ -10692,7 +10692,7 @@ const askWithRetry = async (payload, maxWaitMs = 5 * 60 * 1000) => {
       });
       clearTimeout(timer);
       const data = await res.json();
-      if (data.answer && ['YES', 'NO', 'PARTLY'].includes(data.answer)) return data.answer;
+      if (data.answer && ['YES', 'NO', 'PARTLY', 'UNCLEAR'].includes(data.answer)) return data.answer;
     } catch {
       // swallow and retry
     }
@@ -10770,6 +10770,11 @@ const isValidQuestion = (text) => {
   // Accept if at least one real, meaningful (non-filler, word-like) token exists.
   return words.some((w) => !STOPWORDS.has(w) && looksLikeWord(w));
 };
+
+// Shown when a typed input isn't a usable yes/no question — either rejected by
+// the client gate above, or flagged UNCLEAR by the AI host. Such inputs never
+// count as one of the player's questions.
+const UNCLEAR_MSG = 'Unclear question. Please ask a clear yes/no question — this one won\'t count against you.';
 
 const dailyStars = (questions, solved) => {
   if (!solved) return { stars: 0, label: 'Better luck tomorrow!' };
@@ -12222,7 +12227,7 @@ export default function EnigmaGame() {
   const submitQuestion = async () => {
     if (!questionInput.trim() || !isMyTurn || pendingQ) return;
     if (!isValidQuestion(questionInput)) {
-      showAnswerWarn('That doesn\'t look like a real question. Add a describing word — e.g. "alive", "a scientist", or "is it in Europe?". To guess the answer, use the Solve button.');
+      showAnswerWarn(UNCLEAR_MSG);
       return;
     }
     const q = {
@@ -12525,7 +12530,7 @@ export default function EnigmaGame() {
     // for this round instead of forcing the solve/game-over.
     if (!q || soloLoading || realQCount >= 20 || !soloChallenge) return;
     if (!isValidQuestion(q)) {
-      showAnswerWarn('That doesn\'t look like a real question. Add a describing word — e.g. "alive", "a scientist", or "is it in Europe?". To guess the answer, use the Solve button.');
+      showAnswerWarn(UNCLEAR_MSG);
       return;
     }
     const entry = { id: Date.now(), text: q, answer: null };
@@ -12533,7 +12538,13 @@ export default function EnigmaGame() {
     setSoloInput('');
     setSoloLoading(true);
     const answer = await askWithRetry({ secret: soloChallenge.secret, facts: soloChallenge.facts, category: soloChallenge.categoryLabel, question: q });
-    setSoloQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer } : qq));
+    if (answer === 'UNCLEAR') {
+      setSoloQuestions(prev => prev.filter(qq => qq.id !== entry.id));
+      setSoloInput(q);
+      showAnswerWarn(UNCLEAR_MSG);
+    } else {
+      setSoloQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer } : qq));
+    }
     setSoloLoading(false);
   };
 
@@ -12602,7 +12613,7 @@ export default function EnigmaGame() {
     // questions when the player exhausts the 20-question limit on the Daily Challenge.
     if (!q || dailyLoading || realQCount >= 20) return;
     if (!isValidQuestion(q)) {
-      showAnswerWarn('That doesn\'t look like a real question. Add a describing word — e.g. "alive", "a scientist", or "is it in Europe?". To guess the answer, use the Solve button.');
+      showAnswerWarn(UNCLEAR_MSG);
       return;
     }
     const entry = { id: Date.now(), text: q, answer: null };
@@ -12610,7 +12621,13 @@ export default function EnigmaGame() {
     setDailyInput('');
     setDailyLoading(true);
     const answer = await askWithRetry({ secret: dailyChallenge.secret, facts: dailyChallenge.facts, category: dailyChallenge.categoryLabel, question: q });
-    setDailyQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer } : qq));
+    if (answer === 'UNCLEAR') {
+      setDailyQuestions(prev => prev.filter(qq => qq.id !== entry.id));
+      setDailyInput(q);
+      showAnswerWarn(UNCLEAR_MSG);
+    } else {
+      setDailyQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer } : qq));
+    }
     setDailyLoading(false);
   };
 

@@ -226,8 +226,8 @@ app.post("/api/ask", async (req, res) => {
 Reference facts: ${facts.join("; ")}.
 
 CRITICAL RULES — follow these exactly:
-1. Reply with ONLY one word: YES, NO, or PARTLY — nothing else, no explanation.
-2. If the question is a sentence fragment, incomplete, or nonsensical (e.g. "Is it", "As", fewer than 3 words, no discernible predicate), answer NO immediately.
+1. Reply with ONLY one word: YES, NO, PARTLY, or UNCLEAR — nothing else, no explanation.
+2. If the input is not a well-formed yes/no question — e.g. a single word or letter, a sentence fragment, an open-ended question ("why", "what is this", "can you tell me"), or gibberish with no discernible yes/no predicate — answer UNCLEAR immediately. UNCLEAR is ONLY for malformed input: a complete, answerable yes/no question must always get YES, NO, or PARTLY, even if it is hard.
 3. Be STRICTLY and LITERALLY accurate. Do NOT make loose associations or stretch connections. If the link is indirect, tenuous, or figurative, answer NO.
 4. "Inventor" means a person who invented something technological or scientific. An object being crafted, commissioned, or built does NOT make it "related to an inventor." The Peacock Throne was built by craftsmen for a king — that is NOT related to an inventor.
 5. "Related to X" means a DIRECT, CORE connection — not a distant or trivial one.
@@ -247,7 +247,7 @@ CRITICAL RULES — follow these exactly:
         contents: prompt,
       });
       const raw = response.text.trim().toUpperCase().split(/\s+/)[0];
-      const answer = ["YES", "NO", "PARTLY"].includes(raw) ? raw : "NO";
+      const answer = ["YES", "NO", "PARTLY", "UNCLEAR"].includes(raw) ? raw : "NO";
       answerCache.set(key, answer); // cache for future identical questions
       return res.json({ answer });
     } catch (e) {
