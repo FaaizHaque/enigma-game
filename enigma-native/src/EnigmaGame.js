@@ -86,7 +86,7 @@ const T = {
 const THEMES = [
   { id: 'personality', label: 'Famous Personality', icon: '👤', desc: 'A real person known worldwide',               color: '#c084fc' },
   { id: 'event',       label: 'Historical Event',   icon: '📜', desc: 'A pivotal moment that shaped history',        color: '#fb923c' },
-  { id: 'object',      label: 'Legendary Object',   icon: '🏺', desc: 'An iconic object of great significance',      color: '#fbbf24' },
+  { id: 'object',      label: 'Iconic Object',      icon: '🏺', desc: 'A famous object, real or legendary',          color: '#fbbf24' },
   { id: 'place',       label: 'Famous Place',       icon: '🗺️',  desc: 'A landmark or renowned location',            color: '#34d399' },
   { id: 'invention',   label: 'Great Invention',    icon: '💡', desc: 'A discovery that changed the world',          color: '#60a5fa' },
   { id: 'character',   label: 'Fictional Character',icon: '🎭', desc: 'A beloved character from books, film or legend', color: '#f472b6' },
