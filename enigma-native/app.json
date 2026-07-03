@@ -12,7 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#06060f"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.enigmagame.app",
@@ -30,7 +32,10 @@
         "backgroundColor": "#06060f"
       },
       "package": "com.enigmagame.app",
-      "versionCode": 4
+      "versionCode": 4,
+      "permissions": [
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "plugins": [
       [
@@ -44,7 +49,11 @@
     "extra": {
       "supabaseUrl": "https://sygwugvxuntykwfuulfq.supabase.co",
       "supabaseAnonKey": "sb_publishable_lQ7oBxB3KfBMFteiK5FGyQ_SMT1iEyc",
-      "serverUrl": "https://enigma-game-production.up.railway.app"
-    }
+      "serverUrl": "https://enigma-game-production.up.railway.app",
+      "eas": {
+        "projectId": "422e1b20-fbdf-4154-b10c-b4fd30f899bd"
+      }
+    },
+    "owner": "faaizhaque"
   }
 }
