@@ -44,10 +44,7 @@
     "extra": {
       "supabaseUrl": "https://sygwugvxuntykwfuulfq.supabase.co",
       "supabaseAnonKey": "sb_publishable_lQ7oBxB3KfBMFteiK5FGyQ_SMT1iEyc",
-      "serverUrl": "https://enigma-game-production.up.railway.app",
-      "eas": {
-        "projectId": "36474895-baa2-4659-9f17-dc1b5ada3501"
-      }
+      "serverUrl": "https://enigma-game-production.up.railway.app"
     }
   }
 }
