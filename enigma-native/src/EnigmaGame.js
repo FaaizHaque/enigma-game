@@ -11887,7 +11887,7 @@ function QACard({ num, text, answer, accent = 'violet' }) {
             <View style={{ width: 27, height: 27, borderRadius: 9, backgroundColor: badgeBg, borderWidth: 1, borderColor: badgeRing, alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
               <Text style={{ fontSize: 11, color: badgeText, fontFamily: F.sansBold }}>{num}</Text>
             </View>
-            <Text style={[S.tBody, { flex: 1, color: C.text, fontFamily: F.sansMed }]}>{text}</Text>
+            <Text style={[S.tBody, { flex: 1, color: C.text, fontFamily: F.sansMed, fontSize: 17, lineHeight: 23 }]}>{text}</Text>
           </View>
           {/* Answer */}
           <View style={{ marginLeft: 38, marginTop: 9 }}>
@@ -11897,8 +11897,8 @@ function QACard({ num, text, answer, accent = 'violet' }) {
                 <Text style={S.tCaption}>AI is thinking…</Text>
               </View>
             ) : (
-              <View style={{ alignSelf: 'flex-start', borderRadius: 9, paddingHorizontal: 11, paddingVertical: 6, borderWidth: 1, borderColor: a.border, backgroundColor: a.bg }}>
-                <Text style={{ fontSize: 13, fontFamily: F.sansBold, color: a.color }}>{a.label}</Text>
+              <View style={{ alignSelf: 'flex-start', borderRadius: 9, paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1, borderColor: a.border, backgroundColor: a.bg }}>
+                <Text style={{ fontSize: 15, fontFamily: F.sansBold, color: a.color }}>{a.label}</Text>
               </View>
             )}
           </View>
@@ -12588,6 +12588,14 @@ export default function EnigmaGame() {
     await syncGame(newGame);
   };
 
+  // Host stepping back from secret selection to re-pick the category.
+  const backToTheme = async () => {
+    const newGame = { ...game, status: 'theme_select' };
+    setGame(newGame);
+    setScreen('theme');
+    await syncGame(newGame);
+  };
+
   const lockSecret = async (secretOverride, hintOverride, factsOverride) => {
     const secret = (secretOverride ?? secretInput).trim();
     const hint = (hintOverride ?? hintInput).trim();
@@ -12951,6 +12959,25 @@ export default function EnigmaGame() {
     }));
   };
 
+  // Give up — end the round unsolved and reveal the answer on the result screen.
+  const giveUpSolo = () => {
+    if (!soloChallenge) return;
+    const timeSeconds = soloStartTime ? Math.round((Date.now() - soloStartTime) / 1000) : 0;
+    const questionsUsed = soloQuestions.filter(qq => !qq.type).length;
+    setSoloResult({ solved: false, questionsUsed, timeSeconds, hintsUsed: soloHintsUsed });
+    const updatedStats = nextSoloStats(soloStats, false, questionsUsed);
+    setSoloStats(updatedStats);
+    persistSoloStats(updatedStats);
+    setSoloSolveOpen(false);
+    setScreen('solo_result');
+    const libTier = soloTier === 'junior' ? 'junior' : 'scholar';
+    markSecretSeen(playerId, soloChallenge.secret, libTier);
+    setSeenSecrets(prev => ({
+      ...prev,
+      [libTier]: new Set([...prev[libTier], soloChallenge.secret]),
+    }));
+  };
+
   // ─── Daily Challenge helpers ──────────────────────────────────────────────
   const shareDailyResult = async () => {
     if (!dailyResult) return;
@@ -13143,10 +13170,12 @@ export default function EnigmaGame() {
                 <View style={{ backgroundColor: 'rgba(34,197,94,0.07)', borderWidth: 1, borderColor: 'rgba(34,197,94,0.3)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
                   <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold', fontSize: 15, marginBottom: 8 }}>🤖 Solo Mode</Text>
                   <Text style={S.bodyText}>Play alone against the AI. Choose a category or go fully random. You get <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> to identify the secret.</Text>
-                  <Text style={[S.bodyText, { marginTop: 8 }]}>Pick your difficulty tier:</Text>
-                  <Text style={[S.bodyText, { marginTop: 4 }]}>
-                    {'🟢 '}<Text style={{ color: '#ff6b35', fontFamily: 'Outfit_700Bold' }}>Junior</Text>{' — Fun categories, easy clues and up to 3 free hints. Great for younger players and beginners.\n'}
-                    {'🟣 '}<Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold' }}>Scholar</Text>{' — Deep trivia, tougher secrets and 2 ad-unlocked hints. For seasoned players.'}
+                  <Text style={[S.bodyText, { marginTop: 8 }]}>Pick your difficulty tier — each has six categories:</Text>
+                  <Text style={[S.bodyText, { marginTop: 6 }]}>
+                    {'🟢 '}<Text style={{ color: '#ff6b35', fontFamily: 'Outfit_700Bold' }}>Junior</Text>{' — easy clues and up to 3 free hints, great for younger players. Categories: '}<Text style={{ color: C.text }}>Famous People, Famous Places, Movies & Cartoons, Animals, Sports & Games, and Science & Inventions.</Text>
+                  </Text>
+                  <Text style={[S.bodyText, { marginTop: 6 }]}>
+                    {'🟣 '}<Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold' }}>Scholar</Text>{' — deep trivia, tougher secrets and 2 ad-unlocked hints, for seasoned players. Categories: '}<Text style={{ color: C.text }}>Famous Personality, Historical Event, Legendary Object, Famous Place, Great Invention, and Fictional Character.</Text>
                   </Text>
                   <Text style={[S.bodyText, { marginTop: 8 }]}>Ask yes/no questions, then tap <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold' }}>💡 I Know the Answer</Text> when you're ready to guess. Play as many rounds as you like — a new secret is picked every time.</Text>
                   <Text style={[S.bodyText, { marginTop: 6 }]}>After each round, the <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>About This Secret</Text> card teaches you fascinating facts about what you were guessing.</Text>
@@ -13258,14 +13287,21 @@ export default function EnigmaGame() {
           </View>
         </View>
 
-        <View style={{ alignItems: 'center', marginBottom: 16 }}>
+        <View style={{ alignItems: 'center', marginBottom: 18 }}>
           <Image
             source={require('../assets/icon.png')}
-            style={{ width: 80, height: 80 }}
+            style={{ width: 80, height: 80, marginBottom: 12 }}
             resizeMode="contain"
           />
+          <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 26, color: C.gold, letterSpacing: 1, textAlign: 'center', textShadowColor: 'rgba(212,168,74,0.45)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 10 }}>Choose Your Mode</Text>
+          {/* Decorative divider */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', width: 180, marginTop: 8, marginBottom: 6 }}>
+            <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.30)' }} />
+            <Text style={{ marginHorizontal: 8, fontSize: 12, color: C.goldDim }}>✦</Text>
+            <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.30)' }} />
+          </View>
+          <Text style={{ fontFamily: F.sansMed, fontSize: 13, color: C.muted, letterSpacing: 0.3, textAlign: 'center' }}>Three ways to test your wits</Text>
         </View>
-        <Text style={{ fontFamily: F.sansMed, fontSize: 15, color: C.muted, marginBottom: 22, paddingHorizontal: 24, letterSpacing: 0.2 }}>Choose a game mode to play.</Text>
 
         {/* Three cards — glass morphism (thicker rims, larger type) */}
         <View style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-evenly' }}>
@@ -13805,7 +13841,7 @@ export default function EnigmaGame() {
                   accent={C.gold}
                   containerStyle={{ flex: 1 }}
                   style={{ fontSize: 16, paddingVertical: 17 }}
-                  placeholder={canAsk ? 'e.g. Is it a person?' : dailyLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
+                  placeholder={canAsk ? 'Type a yes/no question…' : dailyLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
                   placeholderTextColor={C.dim}
                   value={dailyInput}
                   onChangeText={setDailyInput}
@@ -14445,7 +14481,7 @@ export default function EnigmaGame() {
                     accent={C.violet}
                     containerStyle={{ flex: 1 }}
                     style={{ fontSize: 16, paddingVertical: 17 }}
-                    placeholder={canAsk ? 'e.g. Is it a person?' : soloLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
+                    placeholder={canAsk ? 'Type a yes/no question…' : soloLoading ? 'Waiting for AI…' : 'Wait for the answer…'}
                     placeholderTextColor={C.dim}
                     value={soloInput} onChangeText={setSoloInput}
                     editable={canAsk} returnKeyType="send"
@@ -14475,6 +14511,17 @@ export default function EnigmaGame() {
           {/* Solve button — fixed at very bottom, bold gold */}
           <View style={{ backgroundColor: C.surface, borderTopWidth: 1, borderTopColor: C.border2, padding: 14, paddingBottom: insets.bottom + 14 }}>
             <SolveButton onPress={() => { setSoloSolveInput(''); setSoloSolveOpen(true); }} />
+            {limitReached && (
+              <TouchableOpacity
+                style={{ marginTop: 10, paddingVertical: 13, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(248,81,73,0.35)', backgroundColor: 'rgba(248,81,73,0.06)', alignItems: 'center' }}
+                onPress={() => Alert.alert('Give up?', 'This ends the round and reveals the answer.', [
+                  { text: 'Keep trying', style: 'cancel' },
+                  { text: 'Reveal answer', style: 'destructive', onPress: giveUpSolo },
+                ])}
+              >
+                <Text style={{ color: C.danger, fontFamily: F.sansBold, fontSize: 15 }}>🏳️ Give Up — Reveal Answer</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -14501,8 +14548,14 @@ export default function EnigmaGame() {
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
       <ScrollView style={S.flex} contentContainerStyle={[S.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 32 }]}>
-        <View style={S.screenHeader}>
-          <TouchableOpacity onPress={() => setScreen('modes')}><Text style={S.backBtn}>← Modes</Text></TouchableOpacity>
+        <View style={[S.screenHeader, { marginBottom: 4 }]}>
+          <TouchableOpacity
+            onPress={() => setScreen('modes')}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 9, paddingHorizontal: 16, borderRadius: 12, borderWidth: 1, borderColor: C.goldDim, backgroundColor: 'rgba(212,168,74,0.08)' }}
+          >
+            <Text style={{ fontSize: 16, color: C.gold, fontFamily: F.sansBold }}>←</Text>
+            <Text style={{ fontSize: 15, color: C.gold, fontFamily: F.sansBold, letterSpacing: 0.3 }}>Modes</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Result hero */}
@@ -14618,8 +14671,8 @@ export default function EnigmaGame() {
         <TouchableOpacity style={[S.btnOutline, { marginTop: 10 }]} onPress={() => setScreen('solo_setup')}>
           <Text style={S.btnOutlineText}>Change Category</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{ marginTop: 10, alignItems: 'center', padding: 10 }} onPress={() => setScreen('modes')}>
-          <Text style={[S.tBodySm, { color: C.dim }]}>← Back to Modes</Text>
+        <TouchableOpacity style={[S.btnOutline, { marginTop: 10 }]} onPress={() => setScreen('modes')}>
+          <Text style={S.btnOutlineText}>← Back to Modes</Text>
         </TouchableOpacity>
       </ScrollView>
       </View>
@@ -15058,7 +15111,16 @@ export default function EnigmaGame() {
 
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <SimBar />
-          <View style={S.screenHeader}>
+          <View style={[S.screenHeader, { flexDirection: 'row', alignItems: 'center', gap: 10 }]}>
+            {viewerIsHost && (
+              <TouchableOpacity
+                onPress={backToTheme}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 11, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)' }}
+              >
+                <Text style={{ fontSize: 15, color: C.muted, fontFamily: F.sansBold }}>←</Text>
+                <Text style={{ fontSize: 14, color: C.muted, fontFamily: F.sansSemi }}>Category</Text>
+              </TouchableOpacity>
+            )}
             <Chip label={`${game.theme?.icon} ${game.theme?.label}`} style="violet" />
           </View>
 

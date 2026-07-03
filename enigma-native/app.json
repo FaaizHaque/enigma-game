@@ -21,6 +21,7 @@
       "buildNumber": "4",
       "requireFullScreen": true,
       "infoPlist": {
+        "CFBundleDisplayName": "20Q",
         "UIStatusBarStyle": "UIStatusBarStyleLightContent",
         "UIRequiresFullScreen": true,
         "NSFaceIDUsageDescription": "Used for secure authentication"
