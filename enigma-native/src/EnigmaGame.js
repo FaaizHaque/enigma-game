@@ -12949,6 +12949,19 @@ export default function EnigmaGame() {
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [solveModalOpen, setSolveModalOpen] = useState(false);
   const [howToPlayOpen, setHowToPlayOpen] = useState(false);
+  // Feedback / "Help Improve 20Q"
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackTab, setFeedbackTab] = useState('suggest'); // 'suggest' | 'report'
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [feedbackThanks, setFeedbackThanks] = useState(false);
+  const [suggestCategory, setSuggestCategory] = useState(null); // {tier,id,label,icon}
+  const [suggestSecret, setSuggestSecret] = useState('');
+  const [suggestNote, setSuggestNote] = useState('');
+  const [reportSecret, setReportSecret] = useState('');
+  const [reportQuestion, setReportQuestion] = useState('');
+  const [reportAnswer, setReportAnswer] = useState('');
+  const [reportReason, setReportReason] = useState(null); // yes|no|unclear|misunderstood
+  const [reportComments, setReportComments] = useState('');
   const [partlyMode, setPartlyMode] = useState(false);
   const [partlyNote, setPartlyNote] = useState('');
   const [selectedAvatarIdx, setSelectedAvatarIdx] = useState(0);
@@ -13830,6 +13843,54 @@ export default function EnigmaGame() {
     }));
   };
 
+  // ─── Feedback ("Help Improve 20Q") ─────────────────────────────────────────
+  const openFeedback = () => {
+    setFeedbackThanks(false);
+    setFeedbackTab('suggest');
+    setFeedbackOpen(true);
+  };
+
+  const resetFeedbackForms = () => {
+    setSuggestCategory(null); setSuggestSecret(''); setSuggestNote('');
+    setReportSecret(''); setReportQuestion(''); setReportAnswer(''); setReportReason(null); setReportComments('');
+  };
+
+  const submitSuggestion = async () => {
+    if (!suggestCategory || !suggestSecret.trim() || feedbackSubmitting) return;
+    setFeedbackSubmitting(true);
+    try {
+      await supabase.from('secret_suggestions').insert({
+        player_id: playerId,
+        tier: suggestCategory.tier,
+        category_id: suggestCategory.id,
+        category_label: suggestCategory.label,
+        secret: suggestSecret.trim(),
+        note: suggestNote.trim() || null,
+      });
+    } catch {}
+    setFeedbackSubmitting(false);
+    resetFeedbackForms();
+    setFeedbackThanks(true);
+  };
+
+  const submitReport = async () => {
+    if (!reportQuestion.trim() || !reportReason || feedbackSubmitting) return;
+    setFeedbackSubmitting(true);
+    try {
+      await supabase.from('ai_answer_reports').insert({
+        player_id: playerId,
+        secret: reportSecret.trim() || null,
+        question: reportQuestion.trim(),
+        ai_answer: reportAnswer.trim() || null,
+        reason: reportReason,
+        comments: reportComments.trim() || null,
+      });
+    } catch {}
+    setFeedbackSubmitting(false);
+    resetFeedbackForms();
+    setFeedbackThanks(true);
+  };
+
   // ─── Daily Challenge helpers ──────────────────────────────────────────────
   const shareDailyResult = async () => {
     if (!dailyResult) return;
@@ -14058,6 +14119,108 @@ export default function EnigmaGame() {
           </View>
         </Modal>
 
+        {/* Help Improve 20Q — feedback modal */}
+        <Modal visible={feedbackOpen} animationType="slide" transparent onRequestClose={() => setFeedbackOpen(false)}>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+            <View style={S.overlay}>
+              <View style={[S.modal, { maxHeight: '90%' }]}>
+                <View style={S.modalHandle} />
+                {feedbackThanks ? (
+                  <View style={{ alignItems: 'center', paddingVertical: 28 }}>
+                    <Text style={{ fontSize: 46, marginBottom: 12 }}>🙏</Text>
+                    <Text style={[S.modalTitle, { marginBottom: 8 }]}>Thank You!</Text>
+                    <Text style={[S.bodyText, { textAlign: 'center', marginBottom: 24 }]}>We review every submission to make 20Q better.</Text>
+                    <TouchableOpacity style={[S.btnGold, { alignSelf: 'stretch' }]} onPress={() => setFeedbackOpen(false)}>
+                      <Text style={S.btnGoldText}>Done</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <>
+                    <Text style={[S.modalTitle, { marginBottom: 8 }]}>💡 Help Improve 20Q</Text>
+                    {/* Tabs */}
+                    <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+                      {[{ id: 'suggest', label: 'Suggest a Secret' }, { id: 'report', label: 'Report an Answer' }].map((t) => {
+                        const on = feedbackTab === t.id;
+                        return (
+                          <TouchableOpacity key={t.id} style={{ flex: 1 }} onPress={() => setFeedbackTab(t.id)}>
+                            <View style={{ borderRadius: 11, borderWidth: 1, borderColor: on ? C.violet2 : C.border2, backgroundColor: on ? 'rgba(124,58,237,0.14)' : C.card, paddingVertical: 11, alignItems: 'center' }}>
+                              <Text style={{ fontSize: 13, fontFamily: on ? F.sansBold : F.sansSemi, color: on ? C.violet2 : C.muted }}>{t.label}</Text>
+                            </View>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+
+                    <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" style={{ marginBottom: 12 }}>
+                      {feedbackTab === 'suggest' ? (
+                        <>
+                          <Text style={[S.bodyText, { marginBottom: 14 }]}>Know a great secret we're missing? Pick a category and suggest it — every idea is reviewed before it's added.</Text>
+                          {[{ tier: 'scholar', label: '🟣 Scholar', list: THEMES }, { tier: 'junior', label: '🟢 Junior', list: JUNIOR_THEMES }].map((group) => (
+                            <View key={group.tier} style={{ marginBottom: 14 }}>
+                              <Text style={[S.fieldLabel, { marginBottom: 8 }]}>{group.label}</Text>
+                              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                                {group.list.map((c) => {
+                                  const on = suggestCategory?.tier === group.tier && suggestCategory?.id === c.id;
+                                  return (
+                                    <TouchableOpacity key={c.id} onPress={() => setSuggestCategory({ tier: group.tier, id: c.id, label: c.label, icon: c.icon })}>
+                                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 11, borderRadius: 10, borderWidth: 1, borderColor: on ? C.violet2 : C.border2, backgroundColor: on ? 'rgba(124,58,237,0.16)' : C.card }}>
+                                        <Text style={{ fontSize: 13 }}>{c.icon}</Text>
+                                        <Text style={{ fontSize: 12, color: on ? C.violet2 : C.muted, fontFamily: on ? F.sansBold : F.sansMed }}>{c.label}</Text>
+                                      </View>
+                                    </TouchableOpacity>
+                                  );
+                                })}
+                              </View>
+                            </View>
+                          ))}
+                          <Text style={S.fieldLabel}>Secret</Text>
+                          <GlassInput accent={C.violet} placeholder="e.g. Marie Curie, The Colosseum…" placeholderTextColor={C.dim} value={suggestSecret} onChangeText={setSuggestSecret} maxLength={80} containerStyle={{ marginBottom: 10 }} />
+                          <Text style={S.fieldLabel}>Note (optional)</Text>
+                          <GlassInput accent={C.violet} placeholder="Anything that helps us add it…" placeholderTextColor={C.dim} value={suggestNote} onChangeText={setSuggestNote} maxLength={200} multiline style={{ minHeight: 58, textAlignVertical: 'top' }} containerStyle={{ marginBottom: 16 }} />
+                          <TouchableOpacity style={[S.btnGold, (!suggestCategory || !suggestSecret.trim()) && { opacity: 0.4 }]} disabled={!suggestCategory || !suggestSecret.trim() || feedbackSubmitting} onPress={submitSuggestion}>
+                            <Text style={S.btnGoldText}>{feedbackSubmitting ? 'Submitting…' : 'Submit Suggestion'}</Text>
+                          </TouchableOpacity>
+                        </>
+                      ) : (
+                        <>
+                          <Text style={[S.bodyText, { marginBottom: 14 }]}>Think the AI got an answer wrong? Tell us so we can make it better.</Text>
+                          <Text style={S.fieldLabel}>The secret (if you remember it)</Text>
+                          <GlassInput accent={C.violet} placeholder="e.g. Eagle" placeholderTextColor={C.dim} value={reportSecret} onChangeText={setReportSecret} maxLength={80} containerStyle={{ marginBottom: 10 }} />
+                          <Text style={S.fieldLabel}>Your question</Text>
+                          <GlassInput accent={C.violet} placeholder="e.g. Can it fly?" placeholderTextColor={C.dim} value={reportQuestion} onChangeText={setReportQuestion} maxLength={140} containerStyle={{ marginBottom: 10 }} />
+                          <Text style={S.fieldLabel}>The AI's answer</Text>
+                          <GlassInput accent={C.violet} placeholder="e.g. Partly" placeholderTextColor={C.dim} value={reportAnswer} onChangeText={setReportAnswer} maxLength={40} containerStyle={{ marginBottom: 14 }} />
+                          <Text style={[S.fieldLabel, { marginBottom: 8 }]}>What was wrong?</Text>
+                          {[{ id: 'yes', label: 'Should have been Yes' }, { id: 'no', label: 'Should have been No' }, { id: 'unclear', label: 'Explanation was unclear' }, { id: 'misunderstood', label: 'AI misunderstood my question' }].map((opt) => {
+                            const on = reportReason === opt.id;
+                            return (
+                              <TouchableOpacity key={opt.id} onPress={() => setReportReason(opt.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 11, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: on ? C.violet2 : C.border2, backgroundColor: on ? 'rgba(124,58,237,0.12)' : 'transparent', marginBottom: 8 }}>
+                                <View style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: on ? C.violet2 : C.dim, alignItems: 'center', justifyContent: 'center' }}>
+                                  {on ? <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: C.violet2 }} /> : null}
+                                </View>
+                                <Text style={{ fontSize: 14, color: on ? C.text : C.muted, fontFamily: on ? F.sansSemi : F.sansMed, flex: 1 }}>{opt.label}</Text>
+                              </TouchableOpacity>
+                            );
+                          })}
+                          <Text style={[S.fieldLabel, { marginTop: 6 }]}>Additional comments (optional)</Text>
+                          <GlassInput accent={C.violet} placeholder="Tell us more…" placeholderTextColor={C.dim} value={reportComments} onChangeText={setReportComments} maxLength={300} multiline style={{ minHeight: 58, textAlignVertical: 'top' }} containerStyle={{ marginBottom: 16 }} />
+                          <TouchableOpacity style={[S.btnGold, (!reportQuestion.trim() || !reportReason) && { opacity: 0.4 }]} disabled={!reportQuestion.trim() || !reportReason || feedbackSubmitting} onPress={submitReport}>
+                            <Text style={S.btnGoldText}>{feedbackSubmitting ? 'Submitting…' : 'Submit Report'}</Text>
+                          </TouchableOpacity>
+                        </>
+                      )}
+                    </ScrollView>
+
+                    <TouchableOpacity style={{ alignItems: 'center', paddingVertical: 10 }} onPress={() => setFeedbackOpen(false)}>
+                      <Text style={{ color: C.dim, fontFamily: F.sansSemi, fontSize: 14 }}>Cancel</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </Modal>
+
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 32, paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
           {/* Game Logo — 20Q icon */}
           <View style={{ alignItems: 'center', marginBottom: 36 }}>
@@ -14117,6 +14280,16 @@ export default function EnigmaGame() {
             onPress={() => setHowToPlayOpen(true)}>
             <Text style={{ fontSize: 16 }}>📖</Text>
             <Text style={{ color: C.gold, fontSize: 14, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>How to Play</Text>
+          </TouchableOpacity>
+
+          <View style={{ height: 12 }} />
+
+          {/* Help Improve 20Q */}
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(167,139,250,0.28)', backgroundColor: 'rgba(124,58,237,0.06)' }}
+            onPress={openFeedback}>
+            <Text style={{ fontSize: 16 }}>💡</Text>
+            <Text style={{ color: C.violet2, fontSize: 14, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>Help Improve 20Q</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
