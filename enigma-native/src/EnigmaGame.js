@@ -7935,7 +7935,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Reptile (Constrictor Snake)' },
         { icon: '🌿', label: 'Habitat', value: 'Amazon rainforests & rivers, South America' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'The green anaconda is the heaviest snake in the world, weighing up to 250 kg and growing to over 8 metres long — about the length of a school bus.',
@@ -7951,7 +7951,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Bird of Prey' },
         { icon: '🌿', label: 'Habitat', value: 'North America' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern (recovered)' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern (recovered)' },
       ],
       facts: [
         'The bald eagle is the national bird of the United States and appears on the country\'s official seal and many symbols.',
@@ -7967,7 +7967,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Marine Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'All oceans worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Endangered' },
+        { icon: '⚠️', label: 'Conservation', value: 'Endangered' },
       ],
       facts: [
         'The blue whale is the largest animal known to have ever existed on Earth, reaching lengths of up to 30 metres and weights of up to 200 tonnes.',
@@ -7983,7 +7983,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Camelid)' },
         { icon: '🌿', label: 'Habitat', value: 'Deserts of Africa & Asia' },
-        { icon: '⚠️', label: 'Status', value: 'Domesticated (wild Bactrian: Critically Endangered)' },
+        { icon: '⚠️', label: 'Conservation', value: 'Domesticated (wild Bactrian: Critically Endangered)' },
       ],
       facts: [
         'A camel\'s humps do not store water — they store fat, which the camel can break down for energy when food is scarce; this also means the hump shrinks when the camel hasn\'t eaten.',
@@ -7999,7 +7999,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Big Cat (Mammal)' },
         { icon: '🌿', label: 'Habitat', value: 'African savannah & grasslands' },
-        { icon: '⚠️', label: 'Status', value: 'Vulnerable' },
+        { icon: '⚠️', label: 'Conservation', value: 'Vulnerable' },
       ],
       facts: [
         'The cheetah is the fastest land animal, reaching speeds of up to 112 km/h during short chases after prey.',
@@ -8015,7 +8015,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Reptile (Venomous Snake)' },
         { icon: '🌿', label: 'Habitat', value: 'Africa & Asia (forests, grasslands & farmland)' },
-        { icon: '⚠️', label: 'Status', value: 'Varies by species' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies by species' },
       ],
       facts: [
         'Cobras are famous for their hood — a flattened, widened section of neck created by spreading their ribs — used to appear larger and more threatening when in danger.',
@@ -8031,7 +8031,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Crustacean' },
         { icon: '🌿', label: 'Habitat', value: 'Oceans, beaches & freshwater worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Varies by species' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies by species' },
       ],
       facts: [
         'Crabs have ten legs — the front two are claws (called chelae) used for defence, grabbing food, and communicating with other crabs.',
@@ -8047,7 +8047,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Reptile' },
         { icon: '🌿', label: 'Habitat', value: 'Tropical rivers, lakes & swamps' },
-        { icon: '⚠️', label: 'Status', value: 'Varies by species (some endangered)' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies by species (some endangered)' },
       ],
       facts: [
         'Crocodiles have been on Earth for about 200 million years — they are among the few creatures that survived the asteroid impact that wiped out the dinosaurs.',
@@ -8063,7 +8063,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Marine Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'Oceans & rivers worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Varies by species' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies by species' },
       ],
       facts: [
         'Dolphins are highly intelligent marine mammals; they use a system of clicks, whistles and body language to communicate with each other.',
@@ -8079,7 +8079,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Amphibian' },
         { icon: '🌿', label: 'Habitat', value: 'Freshwater habitats & damp areas worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Many species threatened' },
+        { icon: '⚠️', label: 'Conservation', value: 'Many species threatened' },
       ],
       facts: [
         'Frogs begin life as eggs in water, hatch into tadpoles with tails and gills, then gradually transform into air-breathing, leg-sprouting frogs — a process called metamorphosis.',
@@ -8095,7 +8095,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Bear (Mammal)' },
         { icon: '🌿', label: 'Habitat', value: 'Central China mountain forests' },
-        { icon: '⚠️', label: 'Status', value: 'Vulnerable' },
+        { icon: '⚠️', label: 'Conservation', value: 'Vulnerable' },
       ],
       facts: [
         'Giant pandas live in the mountain forests of central China and are famous for their distinctive black-and-white colouring.',
@@ -8111,7 +8111,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Great Ape (Mammal)' },
         { icon: '🌿', label: 'Habitat', value: 'Central African rainforests & mountains' },
-        { icon: '⚠️', label: 'Status', value: 'Endangered (mountain gorilla: Critically Endangered)' },
+        { icon: '⚠️', label: 'Conservation', value: 'Endangered (mountain gorilla: Critically Endangered)' },
       ],
       facts: [
         'Gorillas share about 98.3% of their DNA with humans — making them our closest relatives alongside chimpanzees and bonobos.',
@@ -8127,7 +8127,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Rodent (Mammal)' },
         { icon: '🌿', label: 'Habitat', value: 'Dry regions of Europe & Asia (wild)' },
-        { icon: '⚠️', label: 'Status', value: 'Some species endangered' },
+        { icon: '⚠️', label: 'Conservation', value: 'Some species endangered' },
       ],
       facts: [
         'Hamsters have stretchy cheek pouches that extend all the way back to their shoulders — they use them to carry food back to their burrow, and can stuff in almost as much as their own body weight.',
@@ -8143,7 +8143,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'Sub-Saharan African rivers & lakes' },
-        { icon: '⚠️', label: 'Status', value: 'Vulnerable' },
+        { icon: '⚠️', label: 'Conservation', value: 'Vulnerable' },
       ],
       facts: [
         'Hippopotamuses are the third-largest land animals on Earth, after elephants and white rhinos, weighing up to 4,500 kg.',
@@ -8159,7 +8159,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Marsupial' },
         { icon: '🌿', label: 'Habitat', value: 'Australia (grasslands, scrubland & forests)' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Kangaroos are the largest marsupials in the world and can stand over 2 metres tall; they are found only in Australia and New Guinea.',
@@ -8175,7 +8175,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Marsupial' },
         { icon: '🌿', label: 'Habitat', value: 'Eastern Australia (eucalyptus forests)' },
-        { icon: '⚠️', label: 'Status', value: 'Vulnerable' },
+        { icon: '⚠️', label: 'Conservation', value: 'Vulnerable' },
       ],
       facts: [
         'Koalas are marsupials, not bears — they carry their tiny babies (called joeys) in a pouch for around six months after birth.',
@@ -8191,7 +8191,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Reptile' },
         { icon: '🌿', label: 'Habitat', value: 'Warm regions on every continent (except Antarctica)' },
-        { icon: '⚠️', label: 'Status', value: 'Varies by species' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies by species' },
       ],
       facts: [
         'Many lizards can detach their own tail when grabbed by a predator — the tail continues to wriggle, distracting the attacker while the lizard escapes, and a new tail gradually grows back.',
@@ -8207,7 +8207,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Insect' },
         { icon: '🌿', label: 'Habitat', value: 'North America & Mexico' },
-        { icon: '⚠️', label: 'Status', value: 'Endangered' },
+        { icon: '⚠️', label: 'Conservation', value: 'Endangered' },
       ],
       facts: [
         'Monarch butterflies are famous for their incredible annual migration: millions of them travel up to 4,500 kilometres from Canada and the United States to spend winter in Mexico.',
@@ -8223,7 +8223,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Insect' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (except polar regions)' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Mosquitoes are the deadliest animals on Earth — not because of their bite itself, but because they spread diseases like malaria, dengue fever and Zika virus, killing over 700,000 people every year.',
@@ -8239,7 +8239,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Marine Invertebrate (Cephalopod)' },
         { icon: '🌿', label: 'Habitat', value: 'Oceans worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'An octopus has three hearts: two pump blood to its gills and one pumps it to the rest of the body — and its blood is blue because it contains copper instead of iron.',
@@ -8255,7 +8255,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Bird of Prey (Nocturnal)' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (forests, deserts & grasslands)' },
-        { icon: '⚠️', label: 'Status', value: 'Varies by species' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies by species' },
       ],
       facts: [
         'Owls can rotate their heads up to 270 degrees — nearly all the way around — because their eyes are fixed in their sockets and cannot move like human eyes.',
@@ -8271,7 +8271,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Bird' },
         { icon: '🌿', label: 'Habitat', value: 'Tropical & subtropical forests worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Many species endangered' },
+        { icon: '⚠️', label: 'Conservation', value: 'Many species endangered' },
       ],
       facts: [
         'Parrots are among the most intelligent birds on Earth — they can mimic human speech, solve puzzles, use simple tools, and even understand the meaning of some words.',
@@ -8287,7 +8287,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Bird (Peafowl)' },
         { icon: '🌿', label: 'Habitat', value: 'South & Southeast Asian forests' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         '"Peacock" is actually the name for the male; females are called peahens and chicks are peachicks — together they are known as peafowl.',
@@ -8303,7 +8303,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Flightless Seabird' },
         { icon: '🌿', label: 'Habitat', value: 'Southern Hemisphere (Antarctica & coasts)' },
-        { icon: '⚠️', label: 'Status', value: 'Varies by species (several endangered)' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies by species (several endangered)' },
       ],
       facts: [
         'There are 18 species of penguin and all of them live in the Southern Hemisphere — despite popular belief, penguins do not live in the Arctic with polar bears.',
@@ -8319,7 +8319,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Bird (Columbidae)' },
         { icon: '🌿', label: 'Habitat', value: 'Cities, towns & wild areas worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Pigeons have been living alongside humans for over 5,000 years — they were probably the first bird ever domesticated, used for food, messages, and company.',
@@ -8335,7 +8335,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'Arctic Circle' },
-        { icon: '⚠️', label: 'Status', value: 'Vulnerable' },
+        { icon: '⚠️', label: 'Conservation', value: 'Vulnerable' },
       ],
       facts: [
         'Polar bears are the world\'s largest land carnivores; males can weigh over 700 kg and stand nearly 3 metres tall on their hind legs.',
@@ -8351,7 +8351,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Lagomorph)' },
         { icon: '🌿', label: 'Habitat', value: 'Grasslands, forests & meadows worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Varies by species' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies by species' },
       ],
       facts: [
         'Rabbits live in underground tunnel networks called warrens, which can house large family groups and include separate chambers for sleeping and giving birth.',
@@ -8367,7 +8367,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Cartilaginous Fish' },
         { icon: '🌿', label: 'Habitat', value: 'Oceans worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Many species endangered or vulnerable' },
+        { icon: '⚠️', label: 'Conservation', value: 'Many species endangered or vulnerable' },
       ],
       facts: [
         'Sharks have existed for over 450 million years — they are older than the dinosaurs, older than trees, and have survived five mass extinctions.',
@@ -8383,7 +8383,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Rodent (Mammal)' },
         { icon: '🌿', label: 'Habitat', value: 'Forests & urban areas worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Squirrels are responsible for planting millions of trees every year — they bury acorns and nuts to eat in winter, then forget where many of them are, allowing the seeds to sprout into trees.',
@@ -8399,7 +8399,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Marine Invertebrate (Echinoderm)' },
         { icon: '🌿', label: 'Habitat', value: 'Oceans worldwide (sea floors & coral reefs)' },
-        { icon: '⚠️', label: 'Status', value: 'Varies by species' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies by species' },
       ],
       facts: [
         'Starfish (now often called "sea stars" by scientists) are not fish at all — they have no gills, no scales, and no fins.',
@@ -8415,7 +8415,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Reptile' },
         { icon: '🌿', label: 'Habitat', value: 'Oceans & freshwater worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Many species endangered' },
+        { icon: '⚠️', label: 'Conservation', value: 'Many species endangered' },
       ],
       facts: [
         'Turtles have existed for over 220 million years, making them one of the oldest reptile groups alive today — they coexisted with dinosaurs.',
@@ -8431,7 +8431,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Theropod Dinosaur' },
         { icon: '🌿', label: 'Habitat', value: 'North America (prehistoric)' },
-        { icon: '⚠️', label: 'Status', value: 'Extinct (~66 million years ago)' },
+        { icon: '⚠️', label: 'Conservation', value: 'Extinct (~66 million years ago)' },
       ],
       facts: [
         'Tyrannosaurus Rex lived about 66–68 million years ago and was one of the largest meat-eating dinosaurs ever to walk the Earth.',
@@ -8447,7 +8447,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Canine)' },
         { icon: '🌿', label: 'Habitat', value: 'Forests, tundra & grasslands across Northern Hemisphere' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern (some populations endangered)' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern (some populations endangered)' },
       ],
       facts: [
         'All domestic dogs — from Chihuahuas to Great Danes — are descendants of grey wolves that were first domesticated by humans around 15,000 years ago.',
@@ -8463,7 +8463,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Equine)' },
         { icon: '🌿', label: 'Habitat', value: 'African savannah & grasslands' },
-        { icon: '⚠️', label: 'Status', value: 'Varies by species' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies by species' },
       ],
       facts: [
         'Every zebra has a unique stripe pattern — just like human fingerprints, no two zebras have exactly the same stripes.',
@@ -8479,7 +8479,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Insect' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (except Antarctica)' },
-        { icon: '⚠️', label: 'Status', value: 'Some species declining' },
+        { icon: '⚠️', label: 'Conservation', value: 'Some species declining' },
       ],
       facts: [
         'Honeybees live together in huge families of up to 60,000, all working together inside a hive.',
@@ -8495,7 +8495,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Feline)' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (domesticated)' },
-        { icon: '⚠️', label: 'Status', value: 'Domesticated' },
+        { icon: '⚠️', label: 'Conservation', value: 'Domesticated' },
       ],
       facts: [
         'Pet cats were tamed thousands of years ago and were especially loved in ancient Egypt, where they were treated as sacred.',
@@ -8511,7 +8511,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Reptile (Lizard)' },
         { icon: '🌿', label: 'Habitat', value: 'Forests of Africa & Madagascar' },
-        { icon: '⚠️', label: 'Status', value: 'Varies (some threatened)' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies (some threatened)' },
       ],
       facts: [
         'Chameleons are famous for changing the colour of their skin, which they do to hide, to warm up, and to show their mood.',
@@ -8527,7 +8527,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Fish' },
         { icon: '🌿', label: 'Habitat', value: 'Coral reefs of warm oceans' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'The clownfish became famous around the world as the star of the film "Finding Nemo."',
@@ -8543,7 +8543,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Canine)' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (domesticated)' },
-        { icon: '⚠️', label: 'Status', value: 'Domesticated' },
+        { icon: '⚠️', label: 'Conservation', value: 'Domesticated' },
       ],
       facts: [
         'Dogs were the very first animals to be tamed by humans, more than 15,000 years ago, all from wild wolves.',
@@ -8559,7 +8559,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Largest on Land)' },
         { icon: '🌿', label: 'Habitat', value: 'Africa & Asia' },
-        { icon: '⚠️', label: 'Status', value: 'Endangered' },
+        { icon: '⚠️', label: 'Conservation', value: 'Endangered' },
       ],
       facts: [
         'Elephants are the largest land animals on Earth, and a big male African elephant can weigh as much as six cars.',
@@ -8575,7 +8575,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Bird (Wading Bird)' },
         { icon: '🌿', label: 'Habitat', value: 'Lakes & lagoons (Americas, Africa, Asia, Europe)' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Flamingos are famous for their bright pink feathers and for often standing on just one leg.',
@@ -8591,7 +8591,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Canine)' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (forests, cities & more)' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Foxes are members of the dog family, but they have some cat-like habits, such as hunting alone and pouncing on prey.',
@@ -8607,7 +8607,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Tallest on Land)' },
         { icon: '🌿', label: 'Habitat', value: 'Savannas of Africa' },
-        { icon: '⚠️', label: 'Status', value: 'Vulnerable' },
+        { icon: '⚠️', label: 'Conservation', value: 'Vulnerable' },
       ],
       facts: [
         'The giraffe is the tallest animal in the world, growing up to about 5.5 metres — tall enough to peek into an upstairs window.',
@@ -8623,7 +8623,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Hoofed)' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (domesticated)' },
-        { icon: '⚠️', label: 'Status', value: 'Domesticated' },
+        { icon: '⚠️', label: 'Conservation', value: 'Domesticated' },
       ],
       facts: [
         'Horses have been friends and helpers to humans for over 5,000 years, used for riding, farming, and pulling carts.',
@@ -8639,7 +8639,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Invertebrate (Cnidarian)' },
         { icon: '🌿', label: 'Habitat', value: 'Oceans worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Jellyfish are not fish at all — they are soft, jelly-like creatures with no bones, no brain, and no heart.',
@@ -8655,7 +8655,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Big Cat (Mammal)' },
         { icon: '🌿', label: 'Habitat', value: 'Grasslands & savannas of Africa' },
-        { icon: '⚠️', label: 'Status', value: 'Vulnerable' },
+        { icon: '⚠️', label: 'Conservation', value: 'Vulnerable' },
       ],
       facts: [
         'Lions are the only big cats that live together in family groups, called prides, which can have up to 30 members.',
@@ -8671,7 +8671,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Mongoose family)' },
         { icon: '🌿', label: 'Habitat', value: 'Deserts of southern Africa' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Meerkats are small animals from the deserts of southern Africa, and are members of the mongoose family.',
@@ -8687,7 +8687,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Marine Mammal (Dolphin family)' },
         { icon: '🌿', label: 'Habitat', value: 'All oceans worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Data Deficient' },
+        { icon: '⚠️', label: 'Conservation', value: 'Data Deficient' },
       ],
       facts: [
         'Despite its other name "killer whale," the orca is actually the largest kind of dolphin in the world.',
@@ -8703,7 +8703,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Bird (Flightless)' },
         { icon: '🌿', label: 'Habitat', value: 'Savannas & deserts of Africa' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'The ostrich is the largest and heaviest bird in the world, growing up to about 2.7 metres tall.',
@@ -8719,7 +8719,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Herbivore)' },
         { icon: '🌿', label: 'Habitat', value: 'Africa & Asia' },
-        { icon: '⚠️', label: 'Status', value: 'Endangered' },
+        { icon: '⚠️', label: 'Conservation', value: 'Endangered' },
       ],
       facts: [
         'Rhinos are among the largest land animals, and a big white rhino can weigh over 2 tonnes — as much as a small truck.',
@@ -8735,7 +8735,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Fish' },
         { icon: '🌿', label: 'Habitat', value: 'Warm, shallow seas worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Vulnerable' },
+        { icon: '⚠️', label: 'Conservation', value: 'Vulnerable' },
       ],
       facts: [
         'The seahorse is a real fish, even though it has a head like a tiny horse and swims upright instead of flat.',
@@ -8751,7 +8751,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'Rainforests of Central & South America' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Sloths are the slowest mammals on Earth, moving so slowly that green algae actually grows on their fur.',
@@ -8767,7 +8767,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Arachnid (Eight Legs)' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (nearly everywhere)' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Spiders are not insects — they are arachnids, with eight legs and usually eight eyes, and no wings or antennae.',
@@ -8783,7 +8783,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Big Cat (Mammal)' },
         { icon: '🌿', label: 'Habitat', value: 'Forests of Asia' },
-        { icon: '⚠️', label: 'Status', value: 'Endangered' },
+        { icon: '⚠️', label: 'Conservation', value: 'Endangered' },
       ],
       facts: [
         'The tiger is the biggest cat in the world, with some males weighing over 300 kg — heavier than three grown-up people.',
@@ -8799,7 +8799,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Insect' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (except Antarctica)' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Ants are amazingly strong for their size and can lift and carry objects many times heavier than their own bodies.',
@@ -8815,7 +8815,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Bird (Poultry)' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (domesticated)' },
-        { icon: '⚠️', label: 'Status', value: 'Domesticated' },
+        { icon: '⚠️', label: 'Conservation', value: 'Domesticated' },
       ],
       facts: [
         'The chicken is the most common bird in the world, with more chickens than any other bird on the planet.',
@@ -8831,7 +8831,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Cattle)' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (domesticated)' },
-        { icon: '⚠️', label: 'Status', value: 'Domesticated' },
+        { icon: '⚠️', label: 'Conservation', value: 'Domesticated' },
       ],
       facts: [
         'Cows are farm animals kept all over the world, mainly for their milk and for making dairy foods like cheese and butter.',
@@ -8847,7 +8847,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Bird (Waterfowl)' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (ponds, lakes & rivers)' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Ducks are water birds with webbed feet that work like paddles, making them excellent swimmers.',
@@ -8863,7 +8863,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Bear)' },
         { icon: '🌿', label: 'Habitat', value: 'Forests & mountains of North America' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'The grizzly bear is a large type of brown bear that lives in the forests and mountains of North America.',
@@ -8879,7 +8879,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'Europe, Asia & Africa' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Hedgehogs are small animals covered in thousands of sharp spines, which protect them from predators.',
@@ -8895,7 +8895,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Insect (Beetle)' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (gardens & fields)' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'The ladybird is a small, round beetle, usually bright red with black spots — though some are yellow or orange.',
@@ -8911,7 +8911,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Big Cat (Mammal)' },
         { icon: '🌿', label: 'Habitat', value: 'Africa & Asia' },
-        { icon: '⚠️', label: 'Status', value: 'Vulnerable' },
+        { icon: '⚠️', label: 'Conservation', value: 'Vulnerable' },
       ],
       facts: [
         'The leopard is a big cat with a beautiful golden coat covered in dark, rose-shaped spots called "rosettes."',
@@ -8927,7 +8927,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Crustacean' },
         { icon: '🌿', label: 'Habitat', value: 'Ocean floors worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Lobsters are sea creatures with a hard outer shell and two large, powerful front claws.',
@@ -8943,7 +8943,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Primate)' },
         { icon: '🌿', label: 'Habitat', value: 'Forests of Africa, Asia & the Americas' },
-        { icon: '⚠️', label: 'Status', value: 'Varies by species' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies by species' },
       ],
       facts: [
         'Monkeys are clever, playful animals that belong to the same big family as apes and humans, called primates.',
@@ -8959,7 +8959,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Marine Mammal (Whale)' },
         { icon: '🌿', label: 'Habitat', value: 'Arctic Ocean' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'The narwhal is a small Arctic whale famous for the long, straight, spiral tusk that pokes out of its head.',
@@ -8975,7 +8975,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'Rivers & coasts worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Varies (some threatened)' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies (some threatened)' },
       ],
       facts: [
         'Otters are playful, furry animals that are brilliant swimmers, with webbed feet and a long, strong tail.',
@@ -8991,7 +8991,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (domesticated)' },
-        { icon: '⚠️', label: 'Status', value: 'Domesticated' },
+        { icon: '⚠️', label: 'Conservation', value: 'Domesticated' },
       ],
       facts: [
         'Pigs are farm animals with a flat, round snout that they use to sniff out and dig up food.',
@@ -9007,7 +9007,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Marine Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'Cold seas & coasts worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Seals are sea mammals with smooth, streamlined bodies and flippers that make them wonderful swimmers.',
@@ -9023,7 +9023,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (domesticated)' },
-        { icon: '⚠️', label: 'Status', value: 'Domesticated' },
+        { icon: '⚠️', label: 'Conservation', value: 'Domesticated' },
       ],
       facts: [
         'Sheep are farm animals covered in a thick, woolly coat called a fleece, which is shaved off to make wool for clothes.',
@@ -9039,7 +9039,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mollusc (Gastropod)' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (gardens, ponds & seas)' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'A snail is a soft-bodied creature that carries its own spiral shell on its back, hiding inside when in danger.',
@@ -9055,7 +9055,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Dinosaur (Extinct)' },
         { icon: '🌿', label: 'Habitat', value: 'Prehistoric North America' },
-        { icon: '⚠️', label: 'Status', value: 'Extinct' },
+        { icon: '⚠️', label: 'Conservation', value: 'Extinct' },
       ],
       facts: [
         'Stegosaurus was a large plant-eating dinosaur that lived around 150 million years ago.',
@@ -9071,7 +9071,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Bird (Waterfowl)' },
         { icon: '🌿', label: 'Habitat', value: 'Lakes & rivers worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Swans are large, elegant water birds famous for their pure white feathers and long, graceful necks.',
@@ -9087,7 +9087,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Dinosaur (Extinct)' },
         { icon: '🌿', label: 'Habitat', value: 'Prehistoric North America' },
-        { icon: '⚠️', label: 'Status', value: 'Extinct' },
+        { icon: '⚠️', label: 'Conservation', value: 'Extinct' },
       ],
       facts: [
         'Triceratops was a huge plant-eating dinosaur whose name means "three-horned face."',
@@ -9103,7 +9103,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Prehistoric Mammal (Extinct)' },
         { icon: '🌿', label: 'Habitat', value: 'Ice Age grasslands of the north' },
-        { icon: '⚠️', label: 'Status', value: 'Extinct' },
+        { icon: '⚠️', label: 'Conservation', value: 'Extinct' },
       ],
       facts: [
         'The woolly mammoth was a giant, elephant-like animal that roamed the cold lands during the last Ice Age.',
@@ -9119,7 +9119,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Flying)' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (except polar regions)' },
-        { icon: '⚠️', label: 'Status', value: 'Varies (some threatened)' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies (some threatened)' },
       ],
       facts: [
         'Bats are the only mammals in the world that can truly fly, using wings made of thin skin stretched over their long finger bones.',
@@ -9135,7 +9135,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Rodent)' },
         { icon: '🌿', label: 'Habitat', value: 'Rivers & lakes of North America & Europe' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Beavers are large rodents famous for building dams across rivers and streams using logs, sticks, and mud.',
@@ -9151,7 +9151,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Dinosaur (Extinct)' },
         { icon: '🌿', label: 'Habitat', value: 'Prehistoric North America' },
-        { icon: '⚠️', label: 'Status', value: 'Extinct' },
+        { icon: '⚠️', label: 'Conservation', value: 'Extinct' },
       ],
       facts: [
         'Brachiosaurus was one of the tallest dinosaurs, with an incredibly long neck for reaching leaves high in the treetops.',
@@ -9167,7 +9167,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Great Ape)' },
         { icon: '🌿', label: 'Habitat', value: 'Forests of central Africa' },
-        { icon: '⚠️', label: 'Status', value: 'Endangered' },
+        { icon: '⚠️', label: 'Conservation', value: 'Endangered' },
       ],
       facts: [
         'Chimpanzees are great apes and are among the closest animal relatives to humans, sharing almost all of our genes.',
@@ -9183,7 +9183,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (forests & grasslands)' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Deer are gentle, fast-running animals found in forests and grasslands across much of the world.',
@@ -9199,7 +9199,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Equine)' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (domesticated)' },
-        { icon: '⚠️', label: 'Status', value: 'Domesticated' },
+        { icon: '⚠️', label: 'Conservation', value: 'Domesticated' },
       ],
       facts: [
         'Donkeys are strong, hard-working animals related to horses, but with longer ears and a louder call.',
@@ -9215,7 +9215,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Insect' },
         { icon: '🌿', label: 'Habitat', value: 'Near ponds & rivers worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Dragonflies are fast-flying insects with long, slender bodies and four large, see-through wings.',
@@ -9231,7 +9231,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (domesticated)' },
-        { icon: '⚠️', label: 'Status', value: 'Domesticated' },
+        { icon: '⚠️', label: 'Conservation', value: 'Domesticated' },
       ],
       facts: [
         'Goats are farm animals kept all over the world for their milk, and they were among the very first animals humans ever tamed.',
@@ -9247,7 +9247,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Fish' },
         { icon: '🌿', label: 'Habitat', value: 'Worldwide (ponds & aquariums)' },
-        { icon: '⚠️', label: 'Status', value: 'Domesticated' },
+        { icon: '⚠️', label: 'Conservation', value: 'Domesticated' },
       ],
       facts: [
         'The goldfish is one of the most popular pet fish in the world, famous for its bright orange colour.',
@@ -9263,7 +9263,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Insect' },
         { icon: '🌿', label: 'Habitat', value: 'Grasslands & fields worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Grasshoppers are insects with big, powerful back legs that let them leap amazing distances.',
@@ -9279,7 +9279,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Marine Mammal (Whale)' },
         { icon: '🌿', label: 'Habitat', value: 'All oceans worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'The humpback whale is a huge ocean giant, growing up to about 16 metres long — longer than a bus.',
@@ -9295,7 +9295,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Bird (Smallest)' },
         { icon: '🌿', label: 'Habitat', value: 'The Americas' },
-        { icon: '⚠️', label: 'Status', value: 'Varies (some threatened)' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies (some threatened)' },
       ],
       facts: [
         'Hummingbirds are the smallest birds in the world, and the tiny bee hummingbird is barely bigger than a bumblebee.',
@@ -9311,7 +9311,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal (Monotreme)' },
         { icon: '🌿', label: 'Habitat', value: 'Rivers of eastern Australia' },
-        { icon: '⚠️', label: 'Status', value: 'Near Threatened' },
+        { icon: '⚠️', label: 'Conservation', value: 'Near Threatened' },
       ],
       facts: [
         'The platypus is one of the strangest animals in the world, with a bill like a duck, a tail like a beaver, and webbed feet.',
@@ -9327,7 +9327,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Fish' },
         { icon: '🌿', label: 'Habitat', value: 'Warm seas worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'The pufferfish gets its name because it can puff itself up into a big, round ball when it is scared.',
@@ -9343,7 +9343,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'North America (forests & cities)' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Raccoons are easy to spot thanks to the black "mask" of fur around their eyes and their bushy, ringed tails.',
@@ -9359,7 +9359,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Mollusc (Cephalopod)' },
         { icon: '🌿', label: 'Habitat', value: 'Oceans worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'Squid are ocean animals with a soft body, eight arms, and two extra-long tentacles for grabbing food.',
@@ -9375,7 +9375,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Fish (Cartilaginous)' },
         { icon: '🌿', label: 'Habitat', value: 'Warm seas & rivers worldwide' },
-        { icon: '⚠️', label: 'Status', value: 'Varies (some threatened)' },
+        { icon: '⚠️', label: 'Conservation', value: 'Varies (some threatened)' },
       ],
       facts: [
         'Stingrays are flat, disc-shaped fish that seem to "fly" through the water by flapping their wide, wing-like fins.',
@@ -9391,7 +9391,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Bird' },
         { icon: '🌿', label: 'Habitat', value: 'Rainforests of Central & South America' },
-        { icon: '⚠️', label: 'Status', value: 'Least Concern' },
+        { icon: '⚠️', label: 'Conservation', value: 'Least Concern' },
       ],
       facts: [
         'The toucan is a rainforest bird best known for its enormous, brightly coloured beak.',
@@ -9407,7 +9407,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Dinosaur (Extinct)' },
         { icon: '🌿', label: 'Habitat', value: 'Prehistoric Asia' },
-        { icon: '⚠️', label: 'Status', value: 'Extinct' },
+        { icon: '⚠️', label: 'Conservation', value: 'Extinct' },
       ],
       facts: [
         'Velociraptor was a small but fierce meat-eating dinosaur that lived around 75 million years ago.',
@@ -9423,7 +9423,7 @@ const JUNIOR_LIBRARY = {
       infoFields: [
         { icon: '🐾', label: 'Animal Type', value: 'Marine Mammal' },
         { icon: '🌿', label: 'Habitat', value: 'Arctic seas' },
-        { icon: '⚠️', label: 'Status', value: 'Vulnerable' },
+        { icon: '⚠️', label: 'Conservation', value: 'Vulnerable' },
       ],
       facts: [
         'The walrus is a big Arctic sea mammal, easy to recognise by its long white tusks and bushy, whiskery moustache.',
@@ -14646,7 +14646,7 @@ export default function EnigmaGame() {
               <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: 'rgba(212,168,74,0.50)', marginHorizontal: 10 }} />
               <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.25)' }} />
             </View>
-            <Text style={{ fontSize: 10, color: C.muted, letterSpacing: 3, textTransform: 'uppercase', fontFamily: 'Outfit_400Regular' }}>The Art of Deduction</Text>
+            <Text style={{ fontSize: 13, color: C.muted, letterSpacing: 3, textTransform: 'uppercase', fontFamily: 'Outfit_500Medium' }}>The Art of Deduction</Text>
             <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 6, letterSpacing: 1 }}>
               v{Constants.expoConfig?.version || '1.2.0'}
             </Text>
@@ -14737,7 +14737,7 @@ export default function EnigmaGame() {
             <Text style={{ marginHorizontal: 8, fontSize: 12, color: C.goldDim }}>✦</Text>
             <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.30)' }} />
           </View>
-          <Text style={{ fontFamily: F.sansMed, fontSize: 13, color: C.muted, letterSpacing: 0.3, textAlign: 'center' }}>Three ways to test your wits</Text>
+          <Text style={{ fontFamily: F.sansSemi, fontSize: 15, color: C.muted, letterSpacing: 0.3, textAlign: 'center' }}>Three ways to test your wits</Text>
         </View>
 
         {/* Three cards — glass morphism (thicker rims, larger type) */}
@@ -14986,7 +14986,6 @@ export default function EnigmaGame() {
               </View>
               <View style={{ height: 200, backgroundColor: '#0d0d1f', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
                 <Image source={require('../assets/icon.png')} style={{ width: 72, height: 72 }} resizeMode="contain" />
-                <Text style={[S.tH3, { color: C.gold, letterSpacing: 1 }]}>20Q</Text>
                 <Text style={[S.tBodySm, { color: C.muted }]}>Challenge your friends today</Text>
               </View>
               <View style={{ padding: 20 }}>
@@ -15358,7 +15357,7 @@ export default function EnigmaGame() {
                   <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(109,40,217,0.18)', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
                     <Text style={{ fontSize: 11, color: C.violet2, fontFamily: 'Outfit_700Bold' }}>{i + 1}</Text>
                   </View>
-                  <Text style={[S.tBodySm, { flex: 1, color: C.text, lineHeight: 20 }]}>{fact}</Text>
+                  <Text style={[S.tBodySm, { flex: 1, color: C.text, fontSize: 15, lineHeight: 22 }]}>{fact}</Text>
                 </View>
               ))}
             </View>
@@ -15639,7 +15638,6 @@ export default function EnigmaGame() {
               {/* Fake ad content */}
               <View style={{ height: 200, backgroundColor: '#0d0d1f', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
                 <Image source={require('../assets/icon.png')} style={{ width: 72, height: 72 }} resizeMode="contain" />
-                <Text style={[S.tH3, { color: C.gold, letterSpacing: 1 }]}>20Q</Text>
                 <Text style={[S.tBodySm, { color: C.muted }]}>Challenge your friends today</Text>
               </View>
               {/* Reward notice + button */}
@@ -16082,8 +16080,8 @@ export default function EnigmaGame() {
                 {soloChallenge.infoFields.map((f, i) => (
                   <View key={i} style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
                     <Text style={{ fontSize: 13 }}>{f.icon}</Text>
-                    <Text style={[S.tBodySm, { color: C.gold, fontFamily: 'Outfit_600SemiBold' }]}>{f.label}: </Text>
-                    <Text style={[S.tBodySm, { color: C.text, flex: 1 }]}>{f.value}</Text>
+                    <Text style={[S.tBodySm, { color: C.gold, fontFamily: 'Outfit_600SemiBold', fontSize: 15 }]}>{f.label}: </Text>
+                    <Text style={[S.tBodySm, { color: C.text, flex: 1, fontSize: 15 }]}>{f.value}</Text>
                   </View>
                 ))}
               </View>
@@ -16093,7 +16091,7 @@ export default function EnigmaGame() {
                 <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(109,40,217,0.18)', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
                   <Text style={{ fontSize: 11, color: C.violet2, fontFamily: 'Outfit_700Bold' }}>{i + 1}</Text>
                 </View>
-                <Text style={[S.tBodySm, { flex: 1, color: C.text, lineHeight: 20 }]}>{fact}</Text>
+                <Text style={[S.tBodySm, { flex: 1, color: C.text, fontSize: 15, lineHeight: 22 }]}>{fact}</Text>
               </View>
             ))}
           </View>
@@ -16321,10 +16319,18 @@ export default function EnigmaGame() {
       <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 90 }]}>
           <View style={S.screenHeader}>
-            <Chip label="Lobby" />
-            <Text style={[S.tCaption, { color: C.dim }]}>
-              {game.players.length} player{game.players.length !== 1 ? 's' : ''}
-            </Text>
+            <TouchableOpacity
+              onPress={() => Alert.alert('Leave lobby?', 'Return to the home screen?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Leave', style: 'destructive', onPress: goHome }])}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 11, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)' }}
+            >
+              <Text style={{ fontSize: 14, color: C.muted, fontFamily: F.sansSemi }}>← Leave</Text>
+            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Chip label="Lobby" />
+              <Text style={[S.tCaption, { color: C.dim }]}>
+                {game.players.length} player{game.players.length !== 1 ? 's' : ''}
+              </Text>
+            </View>
           </View>
 
           {/* Room code + QR */}
@@ -16433,8 +16439,16 @@ export default function EnigmaGame() {
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <SimBar />
           <View style={S.screenHeader}>
-            <Chip label={`Round ${game.round}`} />
-            <Text style={[S.tCaption, { color: C.muted }]}>Host: {host?.name}</Text>
+            <TouchableOpacity
+              onPress={() => Alert.alert('Leave game?', 'Return to the home screen?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Leave', style: 'destructive', onPress: goHome }])}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 11, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)' }}
+            >
+              <Text style={{ fontSize: 14, color: C.muted, fontFamily: F.sansSemi }}>← Leave</Text>
+            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Chip label={`Round ${game.round}`} />
+              <Text style={[S.tCaption, { color: C.muted }]}>Host: {host?.name}</Text>
+            </View>
           </View>
 
           {viewerIsHost ? (
@@ -16559,6 +16573,13 @@ export default function EnigmaGame() {
               </TouchableOpacity>
             )}
             <Chip label={`${game.theme?.icon} ${game.theme?.label}`} style="violet" />
+            <View style={{ flex: 1 }} />
+            <TouchableOpacity
+              onPress={() => Alert.alert('Leave game?', 'Return to the home screen?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Leave', style: 'destructive', onPress: goHome }])}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 11, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)' }}
+            >
+              <Text style={{ fontSize: 14, color: C.muted, fontFamily: F.sansSemi }}>Leave</Text>
+            </TouchableOpacity>
           </View>
 
           {viewerIsHost ? (
