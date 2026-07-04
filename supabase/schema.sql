@@ -116,3 +116,9 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON player_seen_secrets TO anon, authenticat
 -- Enable pg_cron extension first in Supabase Dashboard → Database → Extensions
 -- SELECT cron.schedule('delete-old-sessions', '0 * * * *',
 --   $$DELETE FROM sessions WHERE created_at < NOW() - INTERVAL '24 hours'$$);
+
+-- ─── Validation Knowledge Layer (VKL) ────────────────────────────────────────
+-- Phase 0, Step 1 (passive capture of multiplayer host answers) lives in its
+-- own idempotent file so it can be applied without re-running this whole schema:
+--   supabase/vkl_phase0.sql   ← run that in the SQL Editor to enable capture.
+-- It is purely additive/observation-only and changes no game behavior.
