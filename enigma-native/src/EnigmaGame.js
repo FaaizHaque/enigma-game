@@ -12639,18 +12639,18 @@ function QACard({ num, text, answer, accent = 'violet' }) {
             <View style={{ width: 27, height: 27, borderRadius: 9, backgroundColor: badgeBg, borderWidth: 1, borderColor: badgeRing, alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
               <Text style={{ fontSize: 11, color: badgeText, fontFamily: F.sansBold }}>{num}</Text>
             </View>
-            <Text style={[S.tBody, { flex: 1, color: C.text, fontFamily: F.sansMed, fontSize: 17, lineHeight: 23 }]}>{text}</Text>
+            <Text style={[S.tBody, { flex: 1, color: C.text, fontFamily: F.sansMed, fontSize: 18, lineHeight: 25 }]}>{text}</Text>
           </View>
           {/* Answer */}
           <View style={{ marginLeft: 38, marginTop: 9 }}>
             {answer === null ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <ActivityIndicator size="small" color={isGold ? C.gold : C.violet2} />
-                <Text style={S.tCaption}>AI is thinking…</Text>
+                <Text style={[S.tCaption, { fontSize: 14 }]}>Thinking…</Text>
               </View>
             ) : (
               <View style={{ alignSelf: 'flex-start', borderRadius: 9, paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1, borderColor: a.border, backgroundColor: a.bg }}>
-                <Text style={{ fontSize: 15, fontFamily: F.sansBold, color: a.color }}>{a.label}</Text>
+                <Text style={{ fontSize: 16, fontFamily: F.sansBold, color: a.color }}>{a.label}</Text>
               </View>
             )}
           </View>
