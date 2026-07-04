@@ -13108,8 +13108,9 @@ function QACard({ num, text, answer, accent = 'violet' }) {
 // state so it can drop into any result screen without touching parent hooks.
 // `questions` accepts solo/daily entries ({ text, answer } + hint rows) and
 // multiplayer entries ({ text, answer, askerName, note }).
-function QAReview({ questions, accent = 'violet', showAsker = false }) {
+function QAReview({ questions, accent = 'violet', showAsker = false, secret, onReport }) {
   const [open, setOpen] = useState(false);
+  const [reported, setReported] = useState(new Set());
   if (!questions || questions.length === 0) return null;
   const isGold = accent === 'gold';
   const tint = isGold ? C.gold : C.violet2;
@@ -13162,8 +13163,22 @@ function QAReview({ questions, accent = 'violet', showAsker = false }) {
                     <Text style={{ fontSize: 11, color: C.warn, fontFamily: F.sans, marginTop: 3, fontStyle: 'italic' }}>"{q.note}"</Text>
                   ) : null}
                 </View>
-                <View style={{ alignSelf: 'flex-start', borderRadius: 8, paddingHorizontal: 9, paddingVertical: 5, borderWidth: 1, borderColor: a ? a.border : 'rgba(150,150,150,0.3)', backgroundColor: a ? a.bg : 'rgba(150,150,150,0.08)' }}>
-                  <Text style={{ fontSize: 12, fontFamily: F.sansBold, color: a ? a.color : C.dim }}>{badgeLabel}</Text>
+                <View style={{ alignItems: 'flex-end', gap: 6 }}>
+                  <View style={{ borderRadius: 8, paddingHorizontal: 9, paddingVertical: 5, borderWidth: 1, borderColor: a ? a.border : 'rgba(150,150,150,0.3)', backgroundColor: a ? a.bg : 'rgba(150,150,150,0.08)' }}>
+                    <Text style={{ fontSize: 12, fontFamily: F.sansBold, color: a ? a.color : C.dim }}>{badgeLabel}</Text>
+                  </View>
+                  {onReport && a ? (
+                    reported.has(q.id) ? (
+                      <Text style={{ fontSize: 10, color: C.dim, fontFamily: F.sansMed }}>⚑ Reported</Text>
+                    ) : (
+                      <TouchableOpacity
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        onPress={() => { onReport({ question: q.text, answer: q.answer, secret }); setReported((prev) => new Set(prev).add(q.id)); }}
+                      >
+                        <Text style={{ fontSize: 10, color: C.warn, fontFamily: F.sansSemi }}>⚑ Report</Text>
+                      </TouchableOpacity>
+                    )
+                  ) : null}
                 </View>
               </View>
             );
@@ -14233,6 +14248,19 @@ export default function EnigmaGame() {
     setFeedbackSubmitting(false);
     resetFeedbackForms();
     setFeedbackThanks(true);
+  };
+
+  // One-tap flag from the Q&A review — records that an AI answer looked wrong,
+  // no detail asked (reason 'flagged'). Fire-and-forget.
+  const reportAnswerFromReview = ({ question, answer, secret }) => {
+    supabase.from('ai_answer_reports').insert({
+      player_id: playerId,
+      secret: secret || null,
+      question,
+      ai_answer: answer || null,
+      reason: 'flagged',
+      comments: null,
+    }).then(() => {}, () => {});
   };
 
   // ─── Daily Challenge helpers ──────────────────────────────────────────────
@@ -15328,7 +15356,7 @@ export default function EnigmaGame() {
           )}
 
           {/* Review the round's questions & answers */}
-          <QAReview questions={dailyQuestions} accent="gold" />
+          <QAReview questions={dailyQuestions} accent="gold" secret={dailyChallenge?.secret} onReport={reportAnswerFromReview} />
 
           {/* Spoiler-free share — brag performance, never the secret */}
           <TouchableOpacity style={S.btnGold} onPress={shareDailyResult} activeOpacity={0.85}>
@@ -16032,7 +16060,7 @@ export default function EnigmaGame() {
         )}
 
         {/* Review the round's questions & answers */}
-        <QAReview questions={soloQuestions} accent="violet" />
+        <QAReview questions={soloQuestions} accent="violet" secret={soloChallenge?.secret} onReport={reportAnswerFromReview} />
 
         <TouchableOpacity style={S.btnGold} onPress={startSoloChallenge}>
           <Text style={S.btnGoldText}>Play Again →</Text>
