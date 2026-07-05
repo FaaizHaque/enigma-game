@@ -2,7 +2,7 @@
   "expo": {
     "name": "20Q",
     "slug": "enigma-game",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#06060f",
@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.enigmagame.app",
-      "buildNumber": "4",
+      "buildNumber": "5",
       "requireFullScreen": true,
       "infoPlist": {
         "CFBundleDisplayName": "20Q",
@@ -33,7 +33,7 @@
         "backgroundColor": "#06060f"
       },
       "package": "com.enigmagame.app",
-      "versionCode": 4,
+      "versionCode": 5,
       "permissions": [
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
