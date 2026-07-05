@@ -13234,6 +13234,26 @@ const persistDailyStreak = async (s) => {
   try { await AsyncStorage.setItem(_DAILY_STREAK_KEY, JSON.stringify(s)); } catch {}
 };
 
+// ─── Coins (Junior hint economy, local-only) ──────────────────────────────────
+const _COINS_KEY = 'enigma_coins_v1';
+const COIN_START = 30;      // new players
+const COIN_HINT_COST = 10;  // one Junior hint
+const COIN_DAILY_BONUS = 10; // first play of a new day
+const DEFAULT_WALLET = { coins: COIN_START, lastDailyBonus: null };
+
+const persistWallet = async (w) => {
+  try { await AsyncStorage.setItem(_COINS_KEY, JSON.stringify(w)); } catch {}
+};
+
+// Coins awarded for finishing a Junior game, tiered by the star rating.
+const coinsForSolve = (solved, questionsUsed) => {
+  if (!solved) return 0;
+  if (questionsUsed <= 5) return 20;
+  if (questionsUsed <= 10) return 15;
+  if (questionsUsed <= 15) return 10;
+  return 5;
+};
+
 // ─── Fact-card images (Wikipedia/Wikimedia, runtime, best-effort) ─────────────
 // Loads a thumbnail for the secret at result time. No manual sourcing or bundling;
 // Commons images are freely licensed. Returns null (→ no image, card unchanged)
@@ -13945,12 +13965,14 @@ function HintCard({ hintNum, text, total = 2 }) {
 
 // Reveal-hint CTA — inviting gold glass button that encourages a tap; an "AD"
 // badge sets the watch-an-ad expectation, with a chevron affordance.
-function HintButton({ nextHint, total = 2, onPress, free = false }) {
+function HintButton({ nextHint, total = 2, onPress, free = false, cost, affordable = true }) {
+  const useCost = cost != null;
   return (
     <TouchableOpacity
       activeOpacity={0.85} onPress={onPress}
+      disabled={useCost && !affordable}
       style={{
-        marginTop: 10, borderRadius: 16,
+        marginTop: 10, borderRadius: 16, opacity: useCost && !affordable ? 0.5 : 1,
         shadowColor: C.gold, shadowOffset: { width: 0, height: 5 },
         shadowOpacity: 0.40, shadowRadius: 13, elevation: 8,
       }}
@@ -13975,7 +13997,15 @@ function HintButton({ nextHint, total = 2, onPress, free = false }) {
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 15, color: C.gold2, fontFamily: 'Outfit_700Bold', letterSpacing: 0.3 }}>Reveal Hint {nextHint} of {total}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                {free ? (
+                {useCost ? (
+                  <>
+                    <View style={{ backgroundColor: 'rgba(255,224,140,0.15)', borderWidth: 1, borderColor: 'rgba(255,224,140,0.35)', borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1.5, flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                      <Text style={{ fontSize: 10 }}>🪙</Text>
+                      <Text style={{ fontSize: 10, color: 'rgba(255,215,130,0.95)', fontFamily: 'Outfit_700Bold' }}>{cost}</Text>
+                    </View>
+                    <Text style={{ fontSize: 12, color: 'rgba(220,195,140,0.78)', fontFamily: 'Outfit_400Regular' }}>{affordable ? 'Tap to reveal a clue' : 'Not enough coins'}</Text>
+                  </>
+                ) : free ? (
                   <>
                     <View style={{ backgroundColor: 'rgba(120,220,140,0.18)', borderWidth: 1, borderColor: 'rgba(120,220,140,0.4)', borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1.5 }}>
                       <Text style={{ fontSize: 9, color: 'rgba(150,235,170,0.95)', fontFamily: 'Outfit_700Bold', letterSpacing: 1 }}>FREE</Text>
@@ -14286,6 +14316,30 @@ export default function EnigmaGame() {
   // Load daily streak once on mount (local-only)
   useEffect(() => { loadDailyStreak().then(setDailyStreak); }, []);
 
+  // Load coin wallet once on mount; grant the daily return bonus (first play of
+  // a new day). Brand-new players start at COIN_START with no same-day bonus.
+  useEffect(() => {
+    (async () => {
+      const today = getDailyDateKey();
+      let raw = null;
+      try { raw = await AsyncStorage.getItem(_COINS_KEY); } catch {}
+      if (!raw) {
+        const nw = { coins: COIN_START, lastDailyBonus: today };
+        setWallet(nw); persistWallet(nw);
+        return;
+      }
+      let w;
+      try { w = { ...DEFAULT_WALLET, ...JSON.parse(raw) }; } catch { w = { ...DEFAULT_WALLET }; }
+      if (w.lastDailyBonus !== today) {
+        w = { ...w, coins: w.coins + COIN_DAILY_BONUS, lastDailyBonus: today };
+        persistWallet(w);
+        setCoinBonusNote(COIN_DAILY_BONUS);
+        setTimeout(() => setCoinBonusNote(0), 4000);
+      }
+      setWallet(w);
+    })();
+  }, []);
+
   // Best-effort fact-card image for the solo result (Wikipedia thumbnail).
   useEffect(() => {
     if (screen !== 'solo_result' || !soloChallenge) return;
@@ -14423,6 +14477,8 @@ export default function EnigmaGame() {
   const [soloHintsUsed, setSoloHintsUsed] = useState(0);
   const [soloStartTime, setSoloStartTime] = useState(null);
   const [soloStats, setSoloStats] = useState(DEFAULT_SOLO_STATS);
+  const [wallet, setWallet] = useState(DEFAULT_WALLET);
+  const [coinBonusNote, setCoinBonusNote] = useState(0);
   const [factImage, setFactImage] = useState(null);
   const [dailyHintsUsed, setDailyHintsUsed] = useState(0);
   const [adModalVisible, setAdModalVisible] = useState(false);
@@ -15190,6 +15246,12 @@ export default function EnigmaGame() {
   const useSoloHint = () => {
     const maxHints = soloTier === 'junior' ? 3 : 2;
     if (soloHintsUsed >= maxHints || !soloChallenge) return;
+    // Junior hints cost coins.
+    if (soloTier === 'junior') {
+      if (wallet.coins < COIN_HINT_COST) return;
+      const nw = { ...wallet, coins: wallet.coins - COIN_HINT_COST };
+      setWallet(nw); persistWallet(nw);
+    }
     const nextHint = soloHintsUsed + 1;
     setSoloQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(soloChallenge.secret, nextHint, soloChallenge.hint) }]);
     setSoloHintsUsed(nextHint);
@@ -15228,7 +15290,10 @@ export default function EnigmaGame() {
       (soloChallenge.aliases || []).some(a => fuzzyMatch(guess.trim(), a));
     const timeSeconds = soloStartTime ? Math.round((Date.now() - soloStartTime) / 1000) : 0;
     const questionsUsed = soloQuestions.filter(qq => !qq.type).length;
-    setSoloResult({ solved: isCorrect, questionsUsed, timeSeconds, hintsUsed: soloHintsUsed });
+    // Junior earns coins for solving, tiered by performance.
+    const coinsEarned = soloTier === 'junior' ? coinsForSolve(isCorrect, questionsUsed) : 0;
+    if (coinsEarned > 0) { const nw = { ...wallet, coins: wallet.coins + coinsEarned }; setWallet(nw); persistWallet(nw); }
+    setSoloResult({ solved: isCorrect, questionsUsed, timeSeconds, hintsUsed: soloHintsUsed, coinsEarned });
     // Update lifetime stats (local-only): games, wins, streak, personal best
     const updatedStats = nextSoloStats(soloStats, isCorrect, questionsUsed);
     setSoloStats(updatedStats);
@@ -15249,7 +15314,7 @@ export default function EnigmaGame() {
     if (!soloChallenge) return;
     const timeSeconds = soloStartTime ? Math.round((Date.now() - soloStartTime) / 1000) : 0;
     const questionsUsed = soloQuestions.filter(qq => !qq.type).length;
-    setSoloResult({ solved: false, questionsUsed, timeSeconds, hintsUsed: soloHintsUsed });
+    setSoloResult({ solved: false, questionsUsed, timeSeconds, hintsUsed: soloHintsUsed, coinsEarned: 0 });
     const updatedStats = nextSoloStats(soloStats, false, questionsUsed);
     setSoloStats(updatedStats);
     persistSoloStats(updatedStats);
@@ -15534,7 +15599,7 @@ export default function EnigmaGame() {
                   <Text style={S.bodyText}>Play alone against the AI. Choose a category or go fully random. You get <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> to identify the secret.</Text>
                   <Text style={[S.bodyText, { marginTop: 8 }]}>Pick your difficulty tier — each has six categories:</Text>
                   <Text style={[S.bodyText, { marginTop: 6 }]}>
-                    {'🟢 '}<Text style={{ color: '#ff6b35', fontFamily: 'Outfit_700Bold' }}>Junior</Text>{' — easy clues and up to 3 free hints, great for younger players. Categories: '}<Text style={{ color: C.text }}>Famous People, Famous Places, Movies & Cartoons, Animals, Sports & Games, and Science & Inventions.</Text>
+                    {'🟢 '}<Text style={{ color: '#ff6b35', fontFamily: 'Outfit_700Bold' }}>Junior</Text>{' — easy clues, great for younger players. You start with '}<Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>30 🪙 coins</Text>{'; each hint costs 10, you earn coins for solving (more for fewer questions), and get +10 each day you come back. Categories: '}<Text style={{ color: C.text }}>Famous People, Famous Places, Movies & Cartoons, Animals, Sports & Games, and Science & Inventions.</Text>
                   </Text>
                   <Text style={[S.bodyText, { marginTop: 6 }]}>
                     {'🟣 '}<Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold' }}>Scholar</Text>{' — deep trivia, tougher secrets and 2 ad-unlocked hints, for seasoned players. Categories: '}<Text style={{ color: C.text }}>Famous Personality, Historical Event, Legendary Object, Famous Place, Great Invention, and Fictional Character.</Text>
@@ -15693,6 +15758,18 @@ export default function EnigmaGame() {
         </Modal>
 
         <ScrollView contentContainerStyle={[S.screen, { flexGrow: 1, paddingTop: insets.top + 32, paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
+          {/* Coin balance + daily bonus note */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginBottom: 8 }}>
+            {coinBonusNote > 0 && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(120,220,140,0.14)', borderWidth: 1, borderColor: 'rgba(120,220,140,0.4)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 }}>
+                <Text style={{ fontSize: 11, color: 'rgba(150,235,170,0.95)', fontFamily: F.sansBold }}>+{coinBonusNote} · Welcome back!</Text>
+              </View>
+            )}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,224,140,0.10)', borderWidth: 1, borderColor: 'rgba(255,224,140,0.3)', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5 }}>
+              <Text style={{ fontSize: 13 }}>🪙</Text>
+              <Text style={{ fontSize: 14, color: C.gold, fontFamily: F.sansBold }}>{wallet.coins}</Text>
+            </View>
+          </View>
           {/* Game Logo — 20Q icon */}
           <View style={{ alignItems: 'center', marginBottom: 36 }}>
             <Image
@@ -16762,6 +16839,15 @@ export default function EnigmaGame() {
             <Text style={[S.tH3, { color: C.text, letterSpacing: 1 }]}>Solo Mode</Text>
             <ProgressCounter count={qCount} limit={qLimit} />
           </View>
+          {soloTier === 'junior' && (
+            <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 10 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,224,140,0.10)', borderWidth: 1, borderColor: 'rgba(255,224,140,0.3)', borderRadius: 20, paddingHorizontal: 13, paddingVertical: 5 }}>
+                <Text style={{ fontSize: 13 }}>🪙</Text>
+                <Text style={{ fontSize: 14, color: C.gold, fontFamily: F.sansBold }}>{wallet.coins}</Text>
+                <Text style={{ fontSize: 11, color: C.goldDim, fontFamily: F.sansMed }}>coins</Text>
+              </View>
+            </View>
+          )}
           {/* Category panel — royal purple glass morphism */}
           <View style={{
             borderRadius: 22,
@@ -16997,7 +17083,8 @@ export default function EnigmaGame() {
               <HintButton
                 nextHint={soloHintsUsed + 1}
                 total={soloTier === 'junior' ? 3 : 2}
-                free={soloTier === 'junior'}
+                cost={soloTier === 'junior' ? COIN_HINT_COST : undefined}
+                affordable={soloTier !== 'junior' || wallet.coins >= COIN_HINT_COST}
                 onPress={soloTier === 'junior' ? useSoloHint : () => openAdForHint('solo')}
               />
             )}
@@ -17025,7 +17112,7 @@ export default function EnigmaGame() {
 
   // ─── SOLO RESULT ──────────────────────────────────────────────────────────
   if (screen === 'solo_result' && soloResult && soloChallenge) {
-    const { solved, questionsUsed, timeSeconds = 0, hintsUsed = 0 } = soloResult;
+    const { solved, questionsUsed, timeSeconds = 0, hintsUsed = 0, coinsEarned = 0 } = soloResult;
     const rating = dailyStars(questionsUsed, solved);
     const winRate = soloStats.gamesPlayed > 0 ? Math.round((soloStats.wins / soloStats.gamesPlayed) * 100) : 0;
     const sMins = Math.floor(timeSeconds / 60);
@@ -17070,6 +17157,16 @@ export default function EnigmaGame() {
           )}
           {!solved && (
             <Text style={[S.tBodySm, { color: C.muted, marginTop: 8 }]}>{`Used all ${questionsUsed} questions`}</Text>
+          )}
+          {/* Coins earned (Junior) */}
+          {soloTier === 'junior' && (
+            <View style={{ marginTop: 14, flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,224,140,0.4)', backgroundColor: 'rgba(255,224,140,0.08)', paddingHorizontal: 16, paddingVertical: 8 }}>
+              <Text style={{ fontSize: 15 }}>🪙</Text>
+              <Text style={{ fontSize: 14, color: C.gold, fontFamily: F.sansBold }}>
+                {coinsEarned > 0 ? `+${coinsEarned} coins` : 'No coins this time'}
+              </Text>
+              <Text style={{ fontSize: 12, color: C.goldDim, fontFamily: F.sansMed }}>· {wallet.coins} total</Text>
+            </View>
           )}
         </View>
 
