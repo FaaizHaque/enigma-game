@@ -2,6 +2,10 @@ node_modules/
 .expo/
 dist/
 web-build/
+# Native projects are generated from app.json by prebuild — never keep them,
+# or a stale ios/ overrides app.json's icon & name during eas build --local.
+/ios
+/android
 npm-debug.*
 *.jks
 *.p8
