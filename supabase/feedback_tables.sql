@@ -44,3 +44,19 @@ create policy "anon insert suggestions"
 drop policy if exists "anon insert reports" on public.ai_answer_reports;
 create policy "anon insert reports"
   on public.ai_answer_reports for insert to anon with check (true);
+
+-- ─── General feedback (bugs / ideas / other) ──────────────────────────────────
+create table if not exists public.general_feedback (
+  id          uuid primary key default gen_random_uuid(),
+  player_id   uuid,
+  kind        text not null,                    -- 'bug' | 'idea' | 'other'
+  message     text not null,
+  status      text not null default 'new',      -- new | reviewed | actioned | dismissed
+  created_at  timestamptz not null default now()
+);
+
+alter table public.general_feedback enable row level security;
+
+drop policy if exists "anon insert general feedback" on public.general_feedback;
+create policy "anon insert general feedback"
+  on public.general_feedback for insert to anon with check (true);

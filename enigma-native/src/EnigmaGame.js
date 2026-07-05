@@ -14380,6 +14380,8 @@ export default function EnigmaGame() {
   const [reportAnswer, setReportAnswer] = useState('');
   const [reportReason, setReportReason] = useState(null); // yes|no|unclear|misunderstood
   const [reportComments, setReportComments] = useState('');
+  const [bugKind, setBugKind] = useState('bug'); // bug|idea|other
+  const [bugMessage, setBugMessage] = useState('');
   const [partlyMode, setPartlyMode] = useState(false);
   const [partlyNote, setPartlyNote] = useState('');
   const [selectedAvatarIdx, setSelectedAvatarIdx] = useState(0);
@@ -15271,6 +15273,7 @@ export default function EnigmaGame() {
   const resetFeedbackForms = () => {
     setSuggestCategory(null); setSuggestSecret(''); setSuggestNote('');
     setReportSecret(''); setReportQuestion(''); setReportAnswer(''); setReportReason(null); setReportComments('');
+    setBugKind('bug'); setBugMessage('');
   };
 
   const submitSuggestion = async () => {
@@ -15302,6 +15305,21 @@ export default function EnigmaGame() {
         ai_answer: reportAnswer.trim() || null,
         reason: reportReason,
         comments: reportComments.trim() || null,
+      });
+    } catch {}
+    setFeedbackSubmitting(false);
+    resetFeedbackForms();
+    setFeedbackThanks(true);
+  };
+
+  const submitBug = async () => {
+    if (!bugMessage.trim() || feedbackSubmitting) return;
+    setFeedbackSubmitting(true);
+    try {
+      await supabase.from('general_feedback').insert({
+        player_id: playerId,
+        kind: bugKind,
+        message: bugMessage.trim(),
       });
     } catch {}
     setFeedbackSubmitting(false);
@@ -15569,13 +15587,13 @@ export default function EnigmaGame() {
                   <>
                     <Text style={[S.modalTitle, { marginBottom: 8 }]}>💡 Help Improve 20Q</Text>
                     {/* Tabs */}
-                    <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
-                      {[{ id: 'suggest', label: 'Suggest a Secret' }, { id: 'report', label: 'Report an Answer' }].map((t) => {
+                    <View style={{ flexDirection: 'row', gap: 6, marginBottom: 16 }}>
+                      {[{ id: 'suggest', label: 'Suggest\nSecret' }, { id: 'report', label: 'AI\nAnswer' }, { id: 'bug', label: 'Bug /\nIdea' }].map((t) => {
                         const on = feedbackTab === t.id;
                         return (
                           <TouchableOpacity key={t.id} style={{ flex: 1 }} onPress={() => setFeedbackTab(t.id)}>
-                            <View style={{ borderRadius: 11, borderWidth: 1, borderColor: on ? C.violet2 : C.border2, backgroundColor: on ? 'rgba(124,58,237,0.14)' : C.card, paddingVertical: 11, alignItems: 'center' }}>
-                              <Text style={{ fontSize: 13, fontFamily: on ? F.sansBold : F.sansSemi, color: on ? C.violet2 : C.muted }}>{t.label}</Text>
+                            <View style={{ borderRadius: 11, borderWidth: 1, borderColor: on ? C.violet2 : C.border2, backgroundColor: on ? 'rgba(124,58,237,0.14)' : C.card, paddingVertical: 9, alignItems: 'center' }}>
+                              <Text style={{ fontSize: 12, fontFamily: on ? F.sansBold : F.sansSemi, color: on ? C.violet2 : C.muted, textAlign: 'center', lineHeight: 15 }}>{t.label}</Text>
                             </View>
                           </TouchableOpacity>
                         );
@@ -15612,7 +15630,7 @@ export default function EnigmaGame() {
                             <Text style={S.btnGoldText}>{feedbackSubmitting ? 'Submitting…' : 'Submit Suggestion'}</Text>
                           </TouchableOpacity>
                         </>
-                      ) : (
+                      ) : feedbackTab === 'report' ? (
                         <>
                           <Text style={[S.bodyText, { marginBottom: 14 }]}>Think the AI got an answer wrong? Tell us so we can make it better.</Text>
                           <Text style={S.fieldLabel}>The secret (if you remember it)</Text>
@@ -15639,6 +15657,28 @@ export default function EnigmaGame() {
                             <Text style={S.btnGoldText}>{feedbackSubmitting ? 'Submitting…' : 'Submit Report'}</Text>
                           </TouchableOpacity>
                         </>
+                      ) : (
+                        <>
+                          <Text style={[S.bodyText, { marginBottom: 14 }]}>Found a bug, or have an idea to make 20Q better? Tell us here.</Text>
+                          <Text style={[S.fieldLabel, { marginBottom: 8 }]}>Type</Text>
+                          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 14 }}>
+                            {[{ id: 'bug', label: '🐛 Bug' }, { id: 'idea', label: '💡 Idea' }, { id: 'other', label: '💬 Other' }].map((k) => {
+                              const on = bugKind === k.id;
+                              return (
+                                <TouchableOpacity key={k.id} style={{ flex: 1 }} onPress={() => setBugKind(k.id)}>
+                                  <View style={{ borderRadius: 10, borderWidth: 1, borderColor: on ? C.violet2 : C.border2, backgroundColor: on ? 'rgba(124,58,237,0.14)' : C.card, paddingVertical: 10, alignItems: 'center' }}>
+                                    <Text style={{ fontSize: 12, color: on ? C.violet2 : C.muted, fontFamily: on ? F.sansBold : F.sansMed }}>{k.label}</Text>
+                                  </View>
+                                </TouchableOpacity>
+                              );
+                            })}
+                          </View>
+                          <Text style={S.fieldLabel}>Describe it</Text>
+                          <GlassInput accent={C.violet} placeholder="What happened, or what would make the game better…" placeholderTextColor={C.dim} value={bugMessage} onChangeText={setBugMessage} maxLength={500} multiline style={{ minHeight: 100, textAlignVertical: 'top' }} containerStyle={{ marginBottom: 16 }} />
+                          <TouchableOpacity style={[S.btnGold, !bugMessage.trim() && { opacity: 0.4 }]} disabled={!bugMessage.trim() || feedbackSubmitting} onPress={submitBug}>
+                            <Text style={S.btnGoldText}>{feedbackSubmitting ? 'Submitting…' : 'Submit'}</Text>
+                          </TouchableOpacity>
+                        </>
                       )}
                     </ScrollView>
 
@@ -15652,7 +15692,7 @@ export default function EnigmaGame() {
           </KeyboardAvoidingView>
         </Modal>
 
-        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 32, paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={[S.screen, { flexGrow: 1, paddingTop: insets.top + 32, paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
           {/* Game Logo — 20Q icon */}
           <View style={{ alignItems: 'center', marginBottom: 36 }}>
             <Image
@@ -15688,22 +15728,23 @@ export default function EnigmaGame() {
 
           <View style={{ height: 16 }} />
 
-          {/* Play */}
+          {/* Play — primary, prominent */}
           <TouchableOpacity
             disabled={!nameInput.trim()}
             onPress={() => setScreen('modes')}
             activeOpacity={0.85}
             style={!nameInput.trim() ? { opacity: 0.4 } : {}}
           >
-            <View style={{ borderRadius: 16, shadowColor: C.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 18, elevation: 10 }}>
-              <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 16, paddingVertical: 17, paddingHorizontal: 28, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 }}>
-                <Text style={{ fontFamily: F.sansBold, fontSize: 16, color: '#1a0f00', letterSpacing: 0.5 }}>Play</Text>
-                <Text style={{ fontFamily: F.serifBold, fontSize: 18, color: '#1a0f00' }}>→</Text>
+            <View style={{ borderRadius: 18, shadowColor: C.gold, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.48, shadowRadius: 22, elevation: 12 }}>
+              <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 18, paddingVertical: 22, paddingHorizontal: 28, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 10 }}>
+                <Text style={{ fontFamily: F.sansBold, fontSize: 20, color: '#1a0f00', letterSpacing: 0.5 }}>Play</Text>
+                <Text style={{ fontFamily: F.serifBold, fontSize: 22, color: '#1a0f00' }}>→</Text>
               </LinearGradient>
             </View>
           </TouchableOpacity>
 
-          <View style={{ height: 12 }} />
+          {/* Spacer pushes the secondary buttons to the bottom */}
+          <View style={{ flex: 1, minHeight: 24 }} />
 
           {/* How to Play */}
           <TouchableOpacity
@@ -17258,13 +17299,19 @@ export default function EnigmaGame() {
           <Text style={S.h2}>Public Rooms</Text>
           <Text style={[S.muted, { marginBottom: 18 }]}>Jump into a room that's waiting for players.</Text>
 
-          <Text style={S.fieldLabel}>Your Name</Text>
-          <GlassInput
-            containerStyle={{ marginBottom: 8 }}
-            placeholder="Enter your name..." placeholderTextColor={C.dim}
-            value={nameInput} onChangeText={setNameInput} maxLength={20}
-          />
-          <AvatarPicker selected={selectedAvatarIdx} onSelect={setSelectedAvatarIdx} />
+          {/* Playing as — reuse the name + avatar already chosen on the home screen */}
+          <View style={{ borderRadius: 16, marginBottom: 22 }}>
+            <LinearGradient colors={['rgba(124,58,237,0.24)', 'rgba(60,30,130,0.14)', 'rgba(28,14,80,0.20)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderWidth: 1, borderColor: 'rgba(167,139,250,0.32)', borderRadius: 16 }}>
+              <PlayerAvatar p={{ avatarIdx: selectedAvatarIdx }} size={52} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 10, color: C.violet2, letterSpacing: 2, textTransform: 'uppercase', fontFamily: F.sansBold }}>Playing as</Text>
+                <Text style={{ fontSize: 19, color: C.text, fontFamily: F.sansBold, marginTop: 2 }}>{nameInput.trim() || 'Player'}</Text>
+              </View>
+              <TouchableOpacity onPress={() => setScreen('home')} style={{ paddingVertical: 8, paddingHorizontal: 13, borderRadius: 10, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)' }}>
+                <Text style={{ fontSize: 12, color: C.muted, fontFamily: F.sansSemi }}>Change</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+          </View>
 
           {loadingRooms && publicRooms.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
@@ -17272,12 +17319,14 @@ export default function EnigmaGame() {
               <Text style={S.muted}>Looking for open rooms…</Text>
             </View>
           ) : publicRooms.length === 0 ? (
-            <View style={[S.card, { alignItems: 'center', paddingVertical: 28 }]}>
-              <Text style={{ fontSize: 38, marginBottom: 10 }}>🪐</Text>
-              <Text style={[S.h2, { textAlign: 'center', fontSize: 16, marginBottom: 6 }]}>No open rooms right now</Text>
-              <Text style={[S.muted, { textAlign: 'center', marginBottom: 14 }]}>Be the first — create a public room and friends can join from here.</Text>
-              <TouchableOpacity style={S.btnOutlineSm} onPress={() => createGame(true)}>
-                <Text style={S.btnOutlineSmText}>+ Create Public Room</Text>
+            <View style={[S.card, { alignItems: 'center', paddingVertical: 32, paddingHorizontal: 20 }]}>
+              <Text style={{ fontSize: 42, marginBottom: 12 }}>🪐</Text>
+              <Text style={[S.h2, { textAlign: 'center', fontSize: 17, marginBottom: 8 }]}>No open rooms right now</Text>
+              <Text style={[S.muted, { textAlign: 'center', marginBottom: 20, lineHeight: 20 }]}>Be the first — create a public room and friends can join from here.</Text>
+              <TouchableOpacity onPress={() => createGame(true)} activeOpacity={0.85} style={{ alignSelf: 'stretch' }}>
+                <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 14, paddingVertical: 15, alignItems: 'center' }}>
+                  <Text style={{ fontFamily: F.sansBold, fontSize: 15, color: '#1a0f00', letterSpacing: 0.3 }}>+ Create Public Room</Text>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           ) : (
