@@ -18484,7 +18484,7 @@ const S = StyleSheet.create({
   // ── Shared text roles (derived from the system) ──
   h2: { ...T.h2, marginBottom: 6 },
   muted: { ...T.bodySm },
-  bodyText: { ...T.bodySm },
+  bodyText: { ...T.bodySm, fontSize: 15, lineHeight: 23 },
   sectionLabel: { ...T.overline, color: C.gold, marginBottom: 8 },
   infoCard: { backgroundColor: C.card2, borderRadius: 10, padding: 14, borderWidth: 1, borderColor: C.border },
 
@@ -18509,7 +18509,7 @@ const S = StyleSheet.create({
 
   // Input
   input: { backgroundColor: C.card, borderWidth: 1, borderColor: C.border2, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, color: C.text, fontSize: 16, fontFamily: 'Outfit_400Regular', marginBottom: 8 },
-  fieldLabel: { ...T.label, marginBottom: 8 },
+  fieldLabel: { ...T.label, fontSize: 12, marginBottom: 8 },
 
   // Card
   card: { backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: 16, padding: 18, marginBottom: 12 },
