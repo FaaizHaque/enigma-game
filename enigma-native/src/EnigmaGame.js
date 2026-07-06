@@ -15906,6 +15906,7 @@ const _COINS_KEY = 'enigma_coins_v1';
 const COIN_START = 30;      // new players
 const COIN_HINT_COST = 10;  // one Junior hint
 const COIN_DAILY_BONUS = 10; // first play of a new day
+const COIN_BONUS_COST = 15; // Junior: +2 bonus questions
 const DEFAULT_WALLET = { coins: COIN_START, lastDailyBonus: null };
 
 const persistWallet = async (w) => {
@@ -17151,6 +17152,7 @@ export default function EnigmaGame() {
   const [soloTier, setSoloTier] = useState('senior');
   const [soloHintsUsed, setSoloHintsUsed] = useState(0);
   const [soloStartTime, setSoloStartTime] = useState(null);
+  const [soloBonusUsed, setSoloBonusUsed] = useState(false); // one +2 grant per game
   const [soloStats, setSoloStats] = useState(DEFAULT_SOLO_STATS);
   const [wallet, setWallet] = useState(DEFAULT_WALLET);
   const [coinBonusNote, setCoinBonusNote] = useState(0);
@@ -17865,6 +17867,7 @@ export default function EnigmaGame() {
     setSoloSolveOpen(false);
     setSoloResult(null);
     setSoloHintsUsed(0);
+    setSoloBonusUsed(false);
     setSoloStartTime(Date.now());
     setSoloLoading(false);
     setScreen('solo_game');
@@ -17919,8 +17922,24 @@ export default function EnigmaGame() {
       const nextHint = dailyHintsUsed + 1;
       setDailyQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(dailyChallenge.secret, nextHint) }]);
       setDailyHintsUsed(nextHint);
+    } else if (pendingHintMode === 'solo_bonus') {
+      setSoloBonusUsed(true); // raises the solo cap 20 → 22
     }
     setPendingHintMode(null);
+  };
+
+  // Scholar: watch the (simulated) ad for +2 questions. Junior can't show ads.
+  const openAdForBonus = () => {
+    setPendingHintMode('solo_bonus');
+    setAdModalVisible(true);
+  };
+
+  // Junior: spend coins for the same +2 questions.
+  const buyBonusWithCoins = () => {
+    if (soloBonusUsed || wallet.coins < COIN_BONUS_COST) return;
+    const nw = { ...wallet, coins: wallet.coins - COIN_BONUS_COST };
+    setWallet(nw); persistWallet(nw);
+    setSoloBonusUsed(true);
   };
 
   const useSoloHint = () => {
@@ -17940,10 +17959,9 @@ export default function EnigmaGame() {
   const askSoloQuestion = async (question) => {
     const q = question.trim();
     const realQCount = soloQuestions.filter(qq => !qq.type).length;
-    // TODO: AdMob — future placement: when realQCount hits 20, offer a rewarded ad
-    // ("Watch a short ad for 5 bonus questions"). On reward, raise the cap to 25
-    // for this round instead of forcing the solve/game-over.
-    if (!q || soloLoading || realQCount >= 20 || !soloChallenge) return;
+    // 20 questions, extended to 22 once the player takes the one-time +2 bonus.
+    const soloQLimit = 20 + (soloBonusUsed ? 2 : 0);
+    if (!q || soloLoading || realQCount >= soloQLimit || !soloChallenge) return;
     if (!isValidQuestion(q)) {
       showAnswerWarn(UNCLEAR_MSG);
       return;
@@ -18809,7 +18827,7 @@ export default function EnigmaGame() {
                   <Text style={{ fontSize: 20 }}>💡</Text>
                   <View>
                     <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_400Regular' }}>You will receive</Text>
-                    <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_700Bold' }}>Hint {(pendingHintMode === 'solo' ? soloHintsUsed : dailyHintsUsed) + 1} of 2</Text>
+                    <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_700Bold' }}>{pendingHintMode === 'solo_bonus' ? '2 Bonus Questions' : `Hint ${(pendingHintMode === 'solo' ? soloHintsUsed : dailyHintsUsed) + 1} of 2`}</Text>
                   </View>
                 </View>
                 <TouchableOpacity
@@ -18817,7 +18835,7 @@ export default function EnigmaGame() {
                   onPress={collectHint}
                   disabled={!adReady}
                 >
-                  <Text style={S.btnGoldText}>{adReady ? '✓ Collect Hint' : `Please wait… ${adCountdown}s`}</Text>
+                  <Text style={S.btnGoldText}>{adReady ? '✓ Collect' : `Please wait… ${adCountdown}s`}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -19429,7 +19447,7 @@ export default function EnigmaGame() {
   // ─── SOLO GAME ────────────────────────────────────────────────────────────
   if (screen === 'solo_game' && soloChallenge) {
     const qCount = soloQuestions.filter(q => !q.type).length;
-    const qLimit = 20;
+    const qLimit = 20 + (soloBonusUsed ? 2 : 0);
     const limitReached = qCount >= qLimit;
     const lastEntry = soloQuestions[soloQuestions.length - 1];
     const lastAnswered = !lastEntry || lastEntry.type === 'hint' || lastEntry.answer !== null;
@@ -19462,7 +19480,7 @@ export default function EnigmaGame() {
                   <Text style={{ fontSize: 20 }}>💡</Text>
                   <View>
                     <Text style={{ fontSize: 11, color: C.dim, fontFamily: 'Outfit_400Regular' }}>You will receive</Text>
-                    <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_700Bold' }}>Hint {(pendingHintMode === 'solo' ? soloHintsUsed : dailyHintsUsed) + 1} of 2</Text>
+                    <Text style={{ fontSize: 14, color: C.gold, fontFamily: 'Outfit_700Bold' }}>{pendingHintMode === 'solo_bonus' ? '2 Bonus Questions' : `Hint ${(pendingHintMode === 'solo' ? soloHintsUsed : dailyHintsUsed) + 1} of 2`}</Text>
                   </View>
                 </View>
                 <TouchableOpacity
@@ -19470,7 +19488,7 @@ export default function EnigmaGame() {
                   onPress={collectHint}
                   disabled={!adReady}
                 >
-                  <Text style={S.btnGoldText}>{adReady ? '✓ Collect Hint' : `Please wait… ${adCountdown}s`}</Text>
+                  <Text style={S.btnGoldText}>{adReady ? '✓ Collect' : `Please wait… ${adCountdown}s`}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -19723,8 +19741,34 @@ export default function EnigmaGame() {
 
             {limitReached && (
               <View style={{ backgroundColor: 'rgba(248,81,73,0.08)', borderWidth: 1, borderColor: 'rgba(248,81,73,0.3)', borderRadius: 10, padding: 14, marginBottom: 12 }}>
-                <Text style={{ color: C.danger, fontFamily: 'Outfit_600SemiBold', fontSize: 14, textAlign: 'center' }}>20 questions used — time to make your guess!</Text>
+                <Text style={{ color: C.danger, fontFamily: 'Outfit_600SemiBold', fontSize: 14, textAlign: 'center' }}>
+                  {soloBonusUsed ? '22 questions used — time to make your guess!' : '20 questions used — time to make your guess!'}
+                </Text>
               </View>
+            )}
+
+            {/* One-time +2 bonus questions — Scholar watches an ad, Junior spends coins */}
+            {limitReached && !soloBonusUsed && (
+              soloTier === 'junior' ? (
+                <TouchableOpacity
+                  onPress={buyBonusWithCoins}
+                  disabled={wallet.coins < COIN_BONUS_COST}
+                  style={{ opacity: wallet.coins < COIN_BONUS_COST ? 0.5 : 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,224,140,0.4)', backgroundColor: 'rgba(255,224,140,0.08)', marginBottom: 12 }}
+                >
+                  <Text style={{ fontSize: 15 }}>🪙</Text>
+                  <Text style={{ color: C.gold, fontFamily: F.sansBold, fontSize: 15 }}>
+                    {wallet.coins < COIN_BONUS_COST ? `Need ${COIN_BONUS_COST} coins for +2 questions` : `Spend ${COIN_BONUS_COST} coins for +2 questions`}
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={openAdForBonus}
+                  style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,224,140,0.4)', backgroundColor: 'rgba(255,224,140,0.08)', marginBottom: 12 }}
+                >
+                  <Text style={{ fontSize: 15 }}>📺</Text>
+                  <Text style={{ color: C.gold, fontFamily: F.sansBold, fontSize: 15 }}>Watch an ad for +2 questions</Text>
+                </TouchableOpacity>
+              )
             )}
 
             {/* Question composer — clearly delineated input zone */}
