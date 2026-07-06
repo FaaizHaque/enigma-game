@@ -14015,8 +14015,11 @@ const buildDailyShareText = ({ solved, questionsUsed, timeSeconds, streak = 0 })
     lines.push("Today's mystery got me — can you crack it?");
   }
   if (streak >= 2) lines.push(`🔥 ${streak}-day streak`);
-  if (solved) lines.push('', "Can you beat today's mystery?");
-  if (SHARE_URL) lines.push('', SHARE_URL);
+  // What it is — for friends who haven't played before
+  lines.push('', '20Q is a daily guessing game: one secret, the same for everyone, cracked in 20 yes/no questions.');
+  if (solved) lines.push("Can you beat today's?");
+  // Download call-to-action (SHARE_URL from app.json extra.shareUrl once the app is live)
+  lines.push('', `📲 Get 20Q: ${SHARE_URL || 'search "20Q" on the App Store & Google Play'}`);
   return lines.join('\n');
 };
 
