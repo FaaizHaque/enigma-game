@@ -6,6 +6,7 @@
  */
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ─── WAV buffer generator ─────────────────────────────────────────────────────
 function buildWAV(sampleRate, samples) {
@@ -126,11 +127,27 @@ const SOUND_DEFS = {
     { samples: triWave(330, 0.15), offset: 0.15 },
     { samples: triWave(220, 0.25), offset: 0.3 }
   )),
+  lose: () => buildWAV(22050, mixSamples(22050,
+    { samples: sineWave(392, 0.16), offset: 0 },
+    { samples: sineWave(330, 0.16), offset: 0.14 },
+    { samples: sineWave(262, 0.30), offset: 0.28 }
+  )),
+  hint: () => buildWAV(22050, mixSamples(22050,
+    { samples: sineWave(880, 0.07), offset: 0 },
+    { samples: sineWave(1047, 0.07), offset: 0.06 },
+    { samples: sineWave(1319, 0.16), offset: 0.12 }
+  )),
+  coin: () => buildWAV(22050, mixSamples(22050,
+    { samples: sineWave(988, 0.05), offset: 0 },
+    { samples: sineWave(1319, 0.14), offset: 0.05 }
+  )),
 };
 
 // ─── Sound player ─────────────────────────────────────────────────────────────
 let audioReady = false;
+let muted = false;
 const uriCache = {};
+const MUTE_KEY = 'enigma_muted_v1';
 
 export async function initAudio() {
   try {
@@ -144,8 +161,20 @@ export async function initAudio() {
   }
 }
 
+// Load the saved mute preference (call once on mount). Returns the value.
+export async function loadMuted() {
+  try { muted = (await AsyncStorage.getItem(MUTE_KEY)) === '1'; } catch {}
+  return muted;
+}
+export function isMuted() { return muted; }
+export async function setMuted(m) {
+  muted = !!m;
+  try { await AsyncStorage.setItem(MUTE_KEY, muted ? '1' : '0'); } catch {}
+  return muted;
+}
+
 async function playSound(name) {
-  if (!audioReady) return;
+  if (!audioReady || muted) return;
   try {
     if (!uriCache[name]) {
       const base64 = SOUND_DEFS[name]();
@@ -172,6 +201,9 @@ export const sounds = {
   partly: () => playSound('partly'),
   solve: () => playSound('solve'),
   win: () => playSound('win'),
+  lose: () => playSound('lose'),
+  hint: () => playSound('hint'),
+  coin: () => playSound('coin'),
   hostWin: () => playSound('hostWin'),
   eliminated: () => playSound('eliminated'),
 };

@@ -16,7 +16,7 @@ import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './config/supabase';
 import { genCode, getInitials, fuzzyMatch } from './utils/helpers';
-import { sounds } from './utils/sounds';
+import { sounds, initAudio, loadMuted, setMuted } from './utils/sounds';
 
 
 const getDailyDateKey = () => {
@@ -17012,6 +17012,15 @@ export default function EnigmaGame() {
   // Load daily streak once on mount (local-only)
   useEffect(() => { loadDailyStreak().then(setDailyStreak); }, []);
 
+  // Initialise audio + load the saved mute preference once on mount
+  useEffect(() => { initAudio(); loadMuted().then(setMutedState); }, []);
+
+  const toggleMute = async () => {
+    const m = await setMuted(!muted);
+    setMutedState(m);
+    if (!m) sounds.question(); // little confirmation blip when unmuting
+  };
+
   // Load coin wallet once on mount; grant the daily return bonus (first play of
   // a new day). Brand-new players start at COIN_START with no same-day bonus.
   useEffect(() => {
@@ -17176,6 +17185,7 @@ export default function EnigmaGame() {
   const [soloStats, setSoloStats] = useState(DEFAULT_SOLO_STATS);
   const [wallet, setWallet] = useState(DEFAULT_WALLET);
   const [coinBonusNote, setCoinBonusNote] = useState(0);
+  const [muted, setMutedState] = useState(false);
   const [factImage, setFactImage] = useState(null);
   const [dailyHintsUsed, setDailyHintsUsed] = useState(0);
   const [adModalVisible, setAdModalVisible] = useState(false);
@@ -17938,12 +17948,15 @@ export default function EnigmaGame() {
       const nextHint = soloHintsUsed + 1;
       setSoloQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(soloChallenge.secret, nextHint, soloChallenge.hint) }]);
       setSoloHintsUsed(nextHint);
+      sounds.hint();
     } else if (pendingHintMode === 'daily') {
       const nextHint = dailyHintsUsed + 1;
       setDailyQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(dailyChallenge.secret, nextHint) }]);
       setDailyHintsUsed(nextHint);
+      sounds.hint();
     } else if (pendingHintMode === 'solo_bonus') {
       setSoloBonusUsed(true); // raises the solo cap 20 → 22
+      sounds.coin();
     }
     setPendingHintMode(null);
   };
@@ -17960,6 +17973,7 @@ export default function EnigmaGame() {
     const nw = { ...wallet, coins: wallet.coins - COIN_BONUS_COST };
     setWallet(nw); persistWallet(nw);
     setSoloBonusUsed(true);
+    sounds.coin();
   };
 
   const useSoloHint = () => {
@@ -17974,6 +17988,7 @@ export default function EnigmaGame() {
     const nextHint = soloHintsUsed + 1;
     setSoloQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(soloChallenge.secret, nextHint, soloChallenge.hint) }]);
     setSoloHintsUsed(nextHint);
+    sounds.hint();
   };
 
   const askSoloQuestion = async (question) => {
@@ -17990,6 +18005,7 @@ export default function EnigmaGame() {
     setSoloQuestions(prev => [...prev, entry]);
     setSoloInput('');
     setSoloLoading(true);
+    sounds.question();
     const answer = await askWithRetry({ secret: soloChallenge.secret, facts: soloChallenge.facts, category: soloChallenge.categoryLabel, question: q });
     if (answer === 'UNCLEAR') {
       setSoloQuestions(prev => prev.filter(qq => qq.id !== entry.id));
@@ -17997,6 +18013,7 @@ export default function EnigmaGame() {
       showAnswerWarn(UNCLEAR_MSG);
     } else {
       setSoloQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer } : qq));
+      if (answer === 'YES') sounds.yes(); else if (answer === 'NO') sounds.no(); else sounds.partly();
     }
     setSoloLoading(false);
   };
@@ -18011,6 +18028,7 @@ export default function EnigmaGame() {
     // Junior earns coins for solving, tiered by performance.
     const coinsEarned = soloTier === 'junior' ? coinsForSolve(isCorrect, questionsUsed) : 0;
     if (coinsEarned > 0) { const nw = { ...wallet, coins: wallet.coins + coinsEarned }; setWallet(nw); persistWallet(nw); }
+    if (isCorrect) { sounds.win(); if (coinsEarned > 0) setTimeout(() => sounds.coin(), 550); } else sounds.lose();
     setSoloResult({ solved: isCorrect, questionsUsed, timeSeconds, hintsUsed: soloHintsUsed, coinsEarned });
     // Update lifetime stats (local-only): games, wins, streak, personal best
     const updatedStats = nextSoloStats(soloStats, isCorrect, questionsUsed);
@@ -18030,6 +18048,7 @@ export default function EnigmaGame() {
   // Give up — end the round unsolved and reveal the answer on the result screen.
   const giveUpSolo = () => {
     if (!soloChallenge) return;
+    sounds.lose();
     const timeSeconds = soloStartTime ? Math.round((Date.now() - soloStartTime) / 1000) : 0;
     const questionsUsed = soloQuestions.filter(qq => !qq.type).length;
     setSoloResult({ solved: false, questionsUsed, timeSeconds, hintsUsed: soloHintsUsed, coinsEarned: 0 });
@@ -18156,6 +18175,7 @@ export default function EnigmaGame() {
     const nextHint = dailyHintsUsed + 1;
     setDailyQuestions(prev => [...prev, { id: Date.now(), type: 'hint', hintNum: nextHint, text: computeHint(dailyChallenge.secret, nextHint) }]);
     setDailyHintsUsed(nextHint);
+    sounds.hint();
   };
 
   const askDailyQuestion = async (question) => {
@@ -18172,6 +18192,7 @@ export default function EnigmaGame() {
     setDailyQuestions(prev => [...prev, entry]);
     setDailyInput('');
     setDailyLoading(true);
+    sounds.question();
     const answer = await askWithRetry({ secret: dailyChallenge.secret, facts: dailyChallenge.facts, category: dailyChallenge.categoryLabel, question: q });
     if (answer === 'UNCLEAR') {
       setDailyQuestions(prev => prev.filter(qq => qq.id !== entry.id));
@@ -18179,6 +18200,7 @@ export default function EnigmaGame() {
       showAnswerWarn(UNCLEAR_MSG);
     } else {
       setDailyQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer } : qq));
+      if (answer === 'YES') sounds.yes(); else if (answer === 'NO') sounds.no(); else sounds.partly();
     }
     setDailyLoading(false);
   };
@@ -18188,6 +18210,7 @@ export default function EnigmaGame() {
     if (!guess.trim() || !dailyChallenge) return;
     const isCorrect = fuzzyMatch(guess.trim(), dailyChallenge.secret) ||
       (dailyChallenge.aliases || []).some(a => fuzzyMatch(guess.trim(), a));
+    if (isCorrect) sounds.win(); else sounds.lose();
     const timeSeconds = Math.round((Date.now() - dailyStartTime) / 1000);
     const questionsUsed = dailyQuestions.filter(qq => !qq.type).length;
     // Bump the daily play-streak (local-only), counted once per calendar day
@@ -18476,16 +18499,24 @@ export default function EnigmaGame() {
         </Modal>
 
         <ScrollView contentContainerStyle={[S.screen, { flexGrow: 1, paddingTop: insets.top + 32, paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
-          {/* Coin balance + daily bonus note */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginBottom: 8 }}>
-            {coinBonusNote > 0 && (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(120,220,140,0.14)', borderWidth: 1, borderColor: 'rgba(120,220,140,0.4)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 }}>
-                <Text style={{ fontSize: 11, color: 'rgba(150,235,170,0.95)', fontFamily: F.sansBold }}>+{coinBonusNote} · Welcome back!</Text>
+          {/* Top bar — mute toggle (left), coins + bonus (right) */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <TouchableOpacity
+              onPress={toggleMute}
+              style={{ width: 38, height: 38, borderRadius: 19, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Text style={{ fontSize: 17 }}>{muted ? '🔇' : '🔊'}</Text>
+            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              {coinBonusNote > 0 && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(120,220,140,0.14)', borderWidth: 1, borderColor: 'rgba(120,220,140,0.4)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 }}>
+                  <Text style={{ fontSize: 11, color: 'rgba(150,235,170,0.95)', fontFamily: F.sansBold }}>+{coinBonusNote} · Welcome back!</Text>
+                </View>
+              )}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,224,140,0.10)', borderWidth: 1, borderColor: 'rgba(255,224,140,0.3)', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5 }}>
+                <Text style={{ fontSize: 13 }}>🪙</Text>
+                <Text style={{ fontSize: 14, color: C.gold, fontFamily: F.sansBold }}>{wallet.coins}</Text>
               </View>
-            )}
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,224,140,0.10)', borderWidth: 1, borderColor: 'rgba(255,224,140,0.3)', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5 }}>
-              <Text style={{ fontSize: 13 }}>🪙</Text>
-              <Text style={{ fontSize: 14, color: C.gold, fontFamily: F.sansBold }}>{wallet.coins}</Text>
             </View>
           </View>
           {/* Game Logo — 20Q icon */}
