@@ -15202,7 +15202,7 @@ export default function EnigmaGame() {
   const showAnswerWarn = (msg) => {
     setAnswerWarn(msg);
     if (answerWarnTimer.current) clearTimeout(answerWarnTimer.current);
-    answerWarnTimer.current = setTimeout(() => setAnswerWarn(null), 3600);
+    answerWarnTimer.current = setTimeout(() => setAnswerWarn(null), 7000);
   };
 
   // Animated values for smooth timer bars (avoid 1s jump steps)
@@ -15432,10 +15432,15 @@ export default function EnigmaGame() {
   };
 
   // Floating amber glass banner shown when a typed question is rejected.
-  const AnswerWarnBanner = () => {
+  const AnswerWarnBanner = ({ inline = false }) => {
     if (!answerWarn) return null;
     return (
-      <View style={{ position: 'absolute', top: insets.top + 10, left: 14, right: 14, zIndex: 1000 }} pointerEvents="box-none">
+      <View
+        style={inline
+          ? { marginBottom: 12 }
+          : { position: 'absolute', top: insets.top + 10, left: 14, right: 14, zIndex: 1000 }}
+        pointerEvents="box-none"
+      >
         <View style={{ borderRadius: 16, shadowColor: C.warn, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 12 }}>
           <LinearGradient colors={['rgba(245,170,60,0.95)', 'rgba(220,130,30,0.55)', 'rgba(150,80,15,0.70)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.5 }}>
             <LinearGradient colors={['rgba(40,28,8,0.97)', 'rgba(28,18,6,0.98)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14.5, overflow: 'hidden', paddingVertical: 13, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -16809,7 +16814,6 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
-        <AnswerWarnBanner />
         {/* Ad simulation modal */}
         <Modal visible={adModalVisible} animationType="fade" transparent onRequestClose={() => {}}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
@@ -17104,6 +17108,7 @@ export default function EnigmaGame() {
           {/* Question composer — clearly delineated input zone */}
           {!limitReached && (
             <View style={{ marginTop: 20 }}>
+              <AnswerWarnBanner inline />
               {/* Eyebrow label with dividers, so the input never gets lost in the feed */}
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 11 }}>
                 <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.22)' }} />
@@ -17459,7 +17464,6 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
-        <AnswerWarnBanner />
         {/* Ad simulation modal */}
         <Modal visible={adModalVisible} animationType="fade" transparent onRequestClose={() => {}}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
@@ -17752,6 +17756,7 @@ export default function EnigmaGame() {
             {/* Question composer — clearly delineated input zone */}
             {!limitReached && (
               <View style={{ marginTop: 20 }}>
+                <AnswerWarnBanner inline />
                 {/* Eyebrow label with dividers, so the input never gets lost in the feed */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 11 }}>
                   <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(167,139,250,0.22)' }} />
@@ -18552,7 +18557,6 @@ export default function EnigmaGame() {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
         <PremiumBackground />
-        <AnswerWarnBanner />
 
         {/* Host Info Card Modal */}
         {viewerIsHost && (
@@ -18952,6 +18956,7 @@ export default function EnigmaGame() {
             ) : !viewerIsHost ? (
               canAsk ? (
                 <View>
+                  <AnswerWarnBanner inline />
                   <View style={{ marginBottom: 8 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
                       <Text style={{ fontSize: 11, color: guesserSecsLeft <= 10 ? C.danger : C.gold, fontFamily: 'Outfit_400Regular' }}>⏱ Your turn</Text>
