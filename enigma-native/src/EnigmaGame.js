@@ -19516,8 +19516,20 @@ export default function EnigmaGame() {
                 <TouchableOpacity style={[S.btnGold, !soloSolveInput.trim() && S.btnDisabled]} onPress={() => finishSoloChallenge(soloSolveInput)} disabled={!soloSolveInput.trim()}>
                   <Text style={S.btnGoldText}>Submit Answer</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[S.btnOutline, { marginTop: 10 }]} onPress={() => setSoloSolveOpen(false)}>
-                  <Text style={S.btnOutlineText}>Ask More Questions First</Text>
+                {!limitReached && (
+                  <TouchableOpacity style={[S.btnOutline, { marginTop: 10 }]} onPress={() => setSoloSolveOpen(false)}>
+                    <Text style={S.btnOutlineText}>Ask More Questions First</Text>
+                  </TouchableOpacity>
+                )}
+                {/* Give up — reveal the answer instead of guessing */}
+                <TouchableOpacity
+                  style={{ marginTop: 12, paddingVertical: 12, alignItems: 'center' }}
+                  onPress={() => Alert.alert('Give up?', 'This ends the round and reveals the answer.', [
+                    { text: 'Keep trying', style: 'cancel' },
+                    { text: 'Reveal answer', style: 'destructive', onPress: giveUpSolo },
+                  ])}
+                >
+                  <Text style={{ color: C.danger, fontFamily: F.sansSemi, fontSize: 14 }}>🏳️ Don't know? Give up & reveal the answer</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -19814,20 +19826,9 @@ export default function EnigmaGame() {
             )}
           </ScrollView>
 
-          {/* Solve button — fixed at very bottom, bold gold */}
+          {/* Single button → opens the guess screen where you solve OR give up */}
           <View style={{ backgroundColor: C.surface, borderTopWidth: 1, borderTopColor: C.border2, padding: 14, paddingBottom: insets.bottom + 14 }}>
-            <SolveButton onPress={() => { setSoloSolveInput(''); setSoloSolveOpen(true); }} />
-            {limitReached && (
-              <TouchableOpacity
-                style={{ marginTop: 10, paddingVertical: 13, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(248,81,73,0.35)', backgroundColor: 'rgba(248,81,73,0.06)', alignItems: 'center' }}
-                onPress={() => Alert.alert('Give up?', 'This ends the round and reveals the answer.', [
-                  { text: 'Keep trying', style: 'cancel' },
-                  { text: 'Reveal answer', style: 'destructive', onPress: giveUpSolo },
-                ])}
-              >
-                <Text style={{ color: C.danger, fontFamily: F.sansBold, fontSize: 15 }}>🏳️ Give Up — Reveal Answer</Text>
-              </TouchableOpacity>
-            )}
+            <SolveButton label="✓ Solve  or  🏳️ Give Up" onPress={() => { setSoloSolveInput(''); setSoloSolveOpen(true); }} />
           </View>
         </KeyboardAvoidingView>
       </View>
