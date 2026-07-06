@@ -14097,6 +14097,8 @@ const SHORT_WORDS = new Set([
   'sac','sad','sag','sap','saw','sax','sea','see','set','sin','sip','sir','sit','six','ski','sky','sly','sob','sod','son','sow','soy','spa','spy','sub','sum','sun',
   'tab','tag','tan','tap','tar','tax','tea','ten','tie','tin','tip','toe','ton','top','toy','try','tub','tug','two',
   'urn','use','van','vat','vet','via','vow','wad','wag','war','wax','way','web','wed','wig','win','wit','woe','wok','won','yak','yam','yen','yew','zap','zip','zoo',
+  // common abbreviations & country/region codes players use as shorthand
+  'uk','us','usa','uae','eu','un','ussr','uk','usa','pc','tv','ai','dj','fbi','cia','nasa','ufo','dna','war',
 ]);
 
 const VOWELS = new Set(['a','e','i','o','u','y']);
