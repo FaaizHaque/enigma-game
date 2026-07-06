@@ -152,7 +152,7 @@ const MUTE_KEY = 'enigma_muted_v1';
 export async function initAudio() {
   try {
     await Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
+      playsInSilentModeIOS: false, // respect the phone's silent/mute switch
       staysActiveInBackground: false,
     });
     audioReady = true;
