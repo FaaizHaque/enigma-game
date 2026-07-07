@@ -261,17 +261,40 @@ CRITICAL RULES — follow these exactly:
 
 // ─── Daily Challenge — save result ────────────────────────────────────────────
 app.post("/api/daily-result", async (req, res) => {
-  const { playerName, challengeDate, solved, questionsUsed, timeSeconds, secret } = req.body;
+  const { playerName, playerId = null, tier: rawTier, challengeDate, solved, questionsUsed, timeSeconds, secret } = req.body;
   if (!playerName || !challengeDate) return res.status(400).json({ error: "Missing fields" });
+  const tier = rawTier === "junior" ? "junior" : "scholar";
+  // Server-side sanity bounds — never store client figures verbatim.
+  const questions = Math.max(0, Math.min(25, Number(questionsUsed) || 0));
+  const seconds = Math.max(0, Math.min(86400, Number(timeSeconds) || 0));
   try {
-    await supabase.from("daily_results").insert({
+    // One authoritative result per player/tier/day — the first attempt counts.
+    // (Legacy submissions without a playerId are not deduped, as before.)
+    if (playerId) {
+      const { data: existing } = await supabase
+        .from("daily_results")
+        .select("id")
+        .eq("player_id", playerId)
+        .eq("tier", tier)
+        .eq("challenge_date", challengeDate)
+        .maybeSingle();
+      if (existing) return res.json({ success: true, deduped: true });
+    }
+    const { error } = await supabase.from("daily_results").insert({
       player_name: playerName,
+      player_id: playerId,
+      tier,
       challenge_date: challengeDate,
       solved: !!solved,
-      questions_used: questionsUsed || 0,
-      time_seconds: timeSeconds || 0,
+      questions_used: questions,
+      time_seconds: seconds,
       secret: secret || "",
     });
+    if (error) {
+      // A unique-index race (same player/tier/day inserted twice) is not an error.
+      if (error.code === "23505") return res.json({ success: true, deduped: true });
+      return res.status(500).json({ error: error.message });
+    }
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -280,11 +303,15 @@ app.post("/api/daily-result", async (req, res) => {
 
 // ─── Daily Challenge — leaderboard ────────────────────────────────────────────
 app.get("/api/daily-leaderboard/:date", async (req, res) => {
+  // Optional ?tier=junior|scholar. Defaults to scholar so existing clients (and
+  // legacy rows, which backfill to tier='scholar') keep working unchanged.
+  const tier = req.query.tier === "junior" ? "junior" : "scholar";
   try {
     const { data } = await supabase
       .from("daily_results")
       .select("player_name, solved, questions_used, time_seconds")
       .eq("challenge_date", req.params.date)
+      .eq("tier", tier)
       .order("solved", { ascending: false })
       .order("questions_used", { ascending: true })
       .order("time_seconds", { ascending: true })
