@@ -16422,34 +16422,49 @@ const _seededShuffle = (arr, seed) => {
   return a;
 };
 
-let _dailyFlatCache = null;
+// A distinct seed so Junior's daily rotation order differs from Scholar's.
+const JUNIOR_DAILY_SEED = 0x5EED42;
+
+const _buildDailyFlat = (library, seed) =>
+  _seededShuffle(
+    Object.keys(library).flatMap(id => library[id].map(item => ({ themeId: id, item }))),
+    seed
+  );
+
+let _dailyFlatCache = null;        // Scholar
+let _juniorDailyFlatCache = null;  // Junior
 const _getDailyFlat = () => {
-  if (!_dailyFlatCache) {
-    const flat = Object.keys(CONTENT_LIBRARY).flatMap(id =>
-      CONTENT_LIBRARY[id].map(item => ({ themeId: id, item }))
-    );
-    _dailyFlatCache = _seededShuffle(flat, DAILY_SEED);
-  }
+  if (!_dailyFlatCache) _dailyFlatCache = _buildDailyFlat(CONTENT_LIBRARY, DAILY_SEED);
   return _dailyFlatCache;
 };
+const _getJuniorDailyFlat = () => {
+  if (!_juniorDailyFlatCache) _juniorDailyFlatCache = _buildDailyFlat(JUNIOR_LIBRARY, JUNIOR_DAILY_SEED);
+  return _juniorDailyFlatCache;
+};
+
+// Flat pool + theme list for a tier's daily rotation.
+const _dailyForTier = (tier) => (tier === 'junior'
+  ? { flat: _getJuniorDailyFlat(), themes: JUNIOR_THEMES }
+  : { flat: _getDailyFlat(), themes: THEMES });
 
 const _dayNumber = (dateStr) =>
   Math.floor((new Date(dateStr).getTime() - new Date(DAILY_EPOCH).getTime()) / 86400000);
 
-const getDailyChallenge = () => {
+// The daily secret is deterministic per UTC day and identical for every player
+// in the tier (fixed seed), cycling through that tier's shuffled pool.
+const getDailyChallenge = (tier = 'scholar') => {
   const today = getTodayUTC();
-  const flat = _getDailyFlat();
+  const { flat, themes } = _dailyForTier(tier);
   const picked = flat[_dayNumber(today) % flat.length];
-  const theme = THEMES.find((t) => t.id === picked.themeId) || THEMES[0];
-  return { theme, item: picked.item, date: today };
+  const theme = themes.find((t) => t.id === picked.themeId) || themes[0];
+  return { theme, item: picked.item, date: today, tier: tier === 'junior' ? 'junior' : 'scholar' };
 };
 
-// Returns the Set of secret strings scheduled as daily challenges for the
-// next `days` days (including today). Used to keep solo from spoiling them.
-const getUpcomingDailySecrets = (days = 14) => {
-  const flat = _getDailyFlat();
-  const today = getTodayUTC();
-  const base = _dayNumber(today);
+// Returns the Set of secret strings scheduled as daily challenges for the next
+// `days` days (including today) in a tier. Used to keep solo from spoiling them.
+const getUpcomingDailySecrets = (days = 14, tier = 'scholar') => {
+  const { flat } = _dailyForTier(tier);
+  const base = _dayNumber(getTodayUTC());
   const out = new Set();
   for (let i = 0; i < days; i++) out.add(flat[(base + i) % flat.length].item.secret);
   return out;
@@ -18596,7 +18611,7 @@ export default function EnigmaGame() {
     const themes  = tier === 'junior' ? JUNIOR_THEMES  : THEMES;
     const libTier = tier === 'junior' ? 'junior' : 'scholar';
     const themeIds = categoryId === 'random' ? Object.keys(library) : [categoryId];
-    const dailyExclude = libTier === 'scholar' ? getUpcomingDailySecrets(14) : new Set();
+    const dailyExclude = getUpcomingDailySecrets(14, libTier);
     const allPool = themeIds.flatMap(id => (library[id] || []).map(item => ({ themeId: id, item })));
     const filtered = allPool.filter(({ item }) =>
       !seen.has(item.secret) && !dailyExclude.has(item.secret)
@@ -18635,7 +18650,7 @@ export default function EnigmaGame() {
     // Check if pool would be exhausted for the chosen category
     const library = tier === 'junior' ? JUNIOR_LIBRARY : CONTENT_LIBRARY;
     const themeIds = soloCategory === 'random' ? Object.keys(library) : [soloCategory];
-    const dailyExclude = libTier === 'scholar' ? getUpcomingDailySecrets(14) : new Set();
+    const dailyExclude = getUpcomingDailySecrets(14, libTier);
     const available = themeIds
       .flatMap(id => (library[id] || []).map(i => i.secret))
       .filter(s => !currentSeen.has(s) && !dailyExclude.has(s));
@@ -18906,14 +18921,16 @@ export default function EnigmaGame() {
   };
 
   const startDailyChallenge = () => {
-    const { theme, item, date } = getDailyChallenge();
+    const { theme, item, date, tier: dailyTier } = getDailyChallenge(tier);
     setDailyChallenge({
       secret: item.secret,
       hint: item.hint,
       facts: item.facts,
+      aliases: item.aliases || [],
       categoryLabel: theme.label,
       categoryIcon: theme.icon,
       date,
+      tier: dailyTier,
     });
     setDailyQuestions([]);
     setDailyInput('');
@@ -18975,20 +18992,21 @@ export default function EnigmaGame() {
     setDailyResult({ solved: isCorrect, questionsUsed, timeSeconds, streak: updatedStreak.current });
     setDailySolveOpen(false);
     setScreen('daily_result');
-    // Mark today's daily secret as seen so solo never replays it
-    markSecretSeen(playerId, dailyChallenge.secret, 'scholar');
+    // Mark today's daily secret as seen so solo never replays it (per tier)
+    const dTier = dailyChallenge.tier === 'junior' ? 'junior' : 'scholar';
+    markSecretSeen(playerId, dailyChallenge.secret, dTier);
     setSeenSecrets(prev => ({
       ...prev,
-      scholar: new Set([...prev.scholar, dailyChallenge.secret]),
+      [dTier]: new Set([...prev[dTier], dailyChallenge.secret]),
     }));
     try {
       await fetch(`${SERVER_URL}/api/daily-result`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerName: nameInput.trim() || 'Anonymous', challengeDate: getDailyDateKey(), solved: isCorrect, questionsUsed, timeSeconds, secret: dailyChallenge.secret }),
+        body: JSON.stringify({ playerName: nameInput.trim() || 'Anonymous', playerId, tier: dTier, challengeDate: getDailyDateKey(), solved: isCorrect, questionsUsed, timeSeconds, secret: dailyChallenge.secret }),
       });
     } catch {}
     try {
-      const res = await fetch(`${SERVER_URL}/api/daily-leaderboard/${getDailyDateKey()}`);
+      const res = await fetch(`${SERVER_URL}/api/daily-leaderboard/${getDailyDateKey()}?tier=${dTier}`);
       setDailyLeaderboard(await res.json());
     } catch {}
   };
@@ -19406,8 +19424,8 @@ export default function EnigmaGame() {
 
   // ─── MODES ────────────────────────────────────────────────────────────────
   if (screen === 'modes') {
-    // Junior Daily & Multiplayer aren't tier-aware yet (Phases 2 & 3) — gate them
-    // so a Junior player never lands on Scholar content in the meantime.
+    // Multiplayer isn't tier-aware yet (Phase 3) — gate it for Junior so a Junior
+    // player never lands on a Scholar room in the meantime. (Daily is tier-aware.)
     const juniorLocked = tier === 'junior';
     return (
       <View style={[S.flex, { backgroundColor: '#05050f', paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
@@ -19448,13 +19466,8 @@ export default function EnigmaGame() {
         <View style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-evenly' }}>
 
           {/* Daily Challenge — gold glass */}
-          <TouchableOpacity disabled={juniorLocked} onPress={() => setScreen('daily_setup')} activeOpacity={0.85} style={juniorLocked ? { opacity: 0.5 } : undefined}>
+          <TouchableOpacity onPress={() => setScreen('daily_setup')} activeOpacity={0.85}>
             <View style={{ borderRadius: 22, shadowColor: C.gold, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.42, shadowRadius: 22, elevation: 12 }}>
-              {juniorLocked && (
-                <View style={{ position: 'absolute', top: 10, right: 10, zIndex: 5, backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4 }}>
-                  <Text style={{ color: '#ffe08c', fontSize: 11, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>Coming soon</Text>
-                </View>
-              )}
               <LinearGradient colors={['rgba(255,236,170,0.92)', 'rgba(212,168,74,0.55)', 'rgba(150,98,22,0.70)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 3 }}>
                 <LinearGradient colors={['rgba(212,168,74,0.26)', 'rgba(120,80,15,0.15)', 'rgba(50,30,5,0.30)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 19.5, overflow: 'hidden', padding: 20 }}>
                   <LinearGradient colors={['rgba(255,232,160,0.30)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 56 }} />
