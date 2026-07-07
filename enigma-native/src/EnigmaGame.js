@@ -15982,6 +15982,46 @@ const coinsForSolve = (solved, questionsUsed) => {
   return 5;
 };
 
+// ─── Tier (app-wide Junior/Scholar choice, persisted) ─────────────────────────
+const _TIER_KEY = 'enigma_tier_v1';
+// Collapse any stored/legacy value to the two canonical tiers. Anything that
+// isn't explicitly 'junior' is treated as Scholar (matches every read site,
+// which only ever tests `=== 'junior'`), so the retired 'senior' string is safe.
+const normalizeTier = (t) => (t === 'junior' ? 'junior' : 'scholar');
+
+const loadTier = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(_TIER_KEY);
+    if (raw === 'junior' || raw === 'scholar') return raw;
+  } catch {}
+  return null; // null → never chosen → show the chooser on first Play
+};
+
+const persistTier = async (t) => {
+  try { await AsyncStorage.setItem(_TIER_KEY, normalizeTier(t)); } catch {}
+};
+
+// ─── Player profile (name + avatar, persisted so shared devices don't retype) ──
+const _PROFILE_KEY = 'enigma_profile_v1';
+
+const loadProfile = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(_PROFILE_KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      return {
+        name: typeof p.name === 'string' ? p.name : '',
+        avatarIdx: Number.isInteger(p.avatarIdx) ? p.avatarIdx : 0,
+      };
+    }
+  } catch {}
+  return { name: '', avatarIdx: 0 };
+};
+
+const persistProfile = async (name, avatarIdx) => {
+  try { await AsyncStorage.setItem(_PROFILE_KEY, JSON.stringify({ name, avatarIdx })); } catch {}
+};
+
 // ─── Fact-card images (Wikipedia/Wikimedia, runtime, best-effort) ─────────────
 // Loads a thumbnail for the secret at result time. No manual sourcing or bundling;
 // Commons images are freely licensed. Returns null (→ no image, card unchanged)
@@ -17052,6 +17092,13 @@ export default function EnigmaGame() {
   // Load daily streak once on mount (local-only)
   useEffect(() => { loadDailyStreak().then(setDailyStreak); }, []);
 
+  // Load the persisted app-wide tier (Junior/Scholar). null → never chosen, so
+  // the first Play routes through the tier chooser instead of straight to modes.
+  useEffect(() => { loadTier().then(t => { if (t) { setTier(t); setTierChosen(true); } }); }, []);
+
+  // Load the saved name + avatar so a shared device doesn't retype every launch.
+  useEffect(() => { loadProfile().then(p => { setNameInput(p.name); setSelectedAvatarIdx(p.avatarIdx); }); }, []);
+
   // Initialise audio + load the saved mute preference once on mount
   useEffect(() => { initAudio(); loadMuted().then(setMutedState); }, []);
 
@@ -17059,6 +17106,23 @@ export default function EnigmaGame() {
     const m = await setMuted(!muted);
     setMutedState(m);
     if (!m) sounds.question(); // little confirmation blip when unmuting
+  };
+
+  // Set the app-wide tier, persist it, and continue to the mode menu.
+  const chooseTier = (t) => {
+    const nt = normalizeTier(t);
+    setTier(nt);
+    setTierChosen(true);
+    persistTier(nt);
+    setSoloCategory('random'); // categories differ per tier — reset to a safe default
+    setScreen('modes');
+  };
+
+  // Home "Play": save the profile, then go to the tier chooser (first run) or
+  // straight to the modes menu once a tier has been chosen.
+  const handlePlay = () => {
+    persistProfile(nameInput.trim(), selectedAvatarIdx);
+    setScreen(tierChosen ? 'modes' : 'tier_select');
   };
 
   // Load coin wallet once on mount; grant the daily return bonus (first play of
@@ -17218,7 +17282,8 @@ export default function EnigmaGame() {
   const [soloLoading, setSoloLoading] = useState(false);
   const [soloResult, setSoloResult] = useState(null);
   const [soloCategory, setSoloCategory] = useState('random');
-  const [soloTier, setSoloTier] = useState('senior');
+  const [tier, setTier] = useState('scholar');        // app-wide Junior/Scholar (persisted)
+  const [tierChosen, setTierChosen] = useState(false); // false until a tier is picked or loaded
   const [soloHintsUsed, setSoloHintsUsed] = useState(0);
   const [soloStartTime, setSoloStartTime] = useState(null);
   const [soloBonusUsed, setSoloBonusUsed] = useState(false); // one +2 grant per game
@@ -17914,11 +17979,11 @@ export default function EnigmaGame() {
     // preloaded InterstitialAd, then continue into the new round on close. Gate it
     // (e.g. every 2nd or 3rd round) so it never interrupts the very first game.
     setSoloLoading(true);
-    const libTier = soloTier === 'junior' ? 'junior' : 'scholar';
+    const libTier = tier === 'junior' ? 'junior' : 'scholar';
     let currentSeen = seenSecrets[libTier];
 
     // Check if pool would be exhausted for the chosen category
-    const library = soloTier === 'junior' ? JUNIOR_LIBRARY : CONTENT_LIBRARY;
+    const library = tier === 'junior' ? JUNIOR_LIBRARY : CONTENT_LIBRARY;
     const themeIds = soloCategory === 'random' ? Object.keys(library) : [soloCategory];
     const dailyExclude = libTier === 'scholar' ? getUpcomingDailySecrets(14) : new Set();
     const available = themeIds
@@ -17930,7 +17995,7 @@ export default function EnigmaGame() {
       setSeenSecrets(prev => ({ ...prev, [libTier]: currentSeen }));
     }
 
-    setSoloChallenge(_pickChallenge(soloCategory, soloTier, currentSeen));
+    setSoloChallenge(_pickChallenge(soloCategory, tier, currentSeen));
     setSoloQuestions([]);
     setSoloInput('');
     setSoloSolveInput('');
@@ -18017,10 +18082,10 @@ export default function EnigmaGame() {
   };
 
   const useSoloHint = () => {
-    const maxHints = soloTier === 'junior' ? 3 : 2;
+    const maxHints = tier === 'junior' ? 3 : 2;
     if (soloHintsUsed >= maxHints || !soloChallenge) return;
     // Junior hints cost coins.
-    if (soloTier === 'junior') {
+    if (tier === 'junior') {
       if (wallet.coins < COIN_HINT_COST) return;
       const nw = { ...wallet, coins: wallet.coins - COIN_HINT_COST };
       setWallet(nw); persistWallet(nw);
@@ -18066,7 +18131,7 @@ export default function EnigmaGame() {
     const timeSeconds = soloStartTime ? Math.round((Date.now() - soloStartTime) / 1000) : 0;
     const questionsUsed = soloQuestions.filter(qq => !qq.type).length;
     // Junior earns coins for solving, tiered by performance.
-    const coinsEarned = soloTier === 'junior' ? coinsForSolve(isCorrect, questionsUsed) : 0;
+    const coinsEarned = tier === 'junior' ? coinsForSolve(isCorrect, questionsUsed) : 0;
     if (coinsEarned > 0) { const nw = { ...wallet, coins: wallet.coins + coinsEarned }; setWallet(nw); persistWallet(nw); }
     if (isCorrect) { sounds.win(); if (coinsEarned > 0) setTimeout(() => sounds.coin(), 550); } else sounds.lose();
     setSoloResult({ solved: isCorrect, questionsUsed, timeSeconds, hintsUsed: soloHintsUsed, coinsEarned });
@@ -18077,7 +18142,7 @@ export default function EnigmaGame() {
     setSoloSolveOpen(false);
     setScreen('solo_result');
     // Record as seen regardless of win/lose so it's not repeated
-    const libTier = soloTier === 'junior' ? 'junior' : 'scholar';
+    const libTier = tier === 'junior' ? 'junior' : 'scholar';
     markSecretSeen(playerId, soloChallenge.secret, libTier);
     setSeenSecrets(prev => ({
       ...prev,
@@ -18097,7 +18162,7 @@ export default function EnigmaGame() {
     persistSoloStats(updatedStats);
     setSoloSolveOpen(false);
     setScreen('solo_result');
-    const libTier = soloTier === 'junior' ? 'junior' : 'scholar';
+    const libTier = tier === 'junior' ? 'junior' : 'scholar';
     markSecretSeen(playerId, soloChallenge.secret, libTier);
     setSeenSecrets(prev => ({
       ...prev,
@@ -18597,7 +18662,7 @@ export default function EnigmaGame() {
           {/* Play — primary, prominent */}
           <TouchableOpacity
             disabled={!nameInput.trim()}
-            onPress={() => setScreen('modes')}
+            onPress={handlePlay}
             activeOpacity={0.85}
             style={!nameInput.trim() ? { opacity: 0.4 } : {}}
           >
@@ -18634,8 +18699,66 @@ export default function EnigmaGame() {
     );
   }
 
+  // ─── TIER SELECT (Junior / Scholar — top-level choice, switchable anytime) ──
+  if (screen === 'tier_select') {
+    return (
+      <View style={[S.flex, { backgroundColor: '#05050f', paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24, paddingHorizontal: 24 }]}>
+        <PremiumBackground />
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+          <TouchableOpacity onPress={() => setScreen('home')}><Text style={S.backBtn}>← Back</Text></TouchableOpacity>
+        </View>
+        <View style={{ alignItems: 'center', marginBottom: 26, marginTop: 8 }}>
+          <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 25, color: C.gold, letterSpacing: 1, textAlign: 'center', textShadowColor: 'rgba(212,168,74,0.45)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 10 }}>Choose Your Level</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', width: 180, marginTop: 8, marginBottom: 6 }}>
+            <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.30)' }} />
+            <Text style={{ marginHorizontal: 8, fontSize: 12, color: C.goldDim }}>✦</Text>
+            <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.30)' }} />
+          </View>
+          <Text style={{ fontFamily: F.sans, fontSize: 14, color: C.muted, textAlign: 'center', lineHeight: 20 }}>Pick who's playing. You can switch anytime.</Text>
+        </View>
+
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          {/* Junior */}
+          <TouchableOpacity activeOpacity={0.9} onPress={() => chooseTier('junior')} style={{ marginBottom: 18 }}>
+            <View style={{ borderRadius: 22, shadowColor: '#ff6b35', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 10 }}>
+              <LinearGradient colors={['rgba(255,200,130,0.75)', 'rgba(255,107,53,0.35)', 'rgba(180,60,20,0.50)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 2 }}>
+                <View style={{ borderRadius: 20, backgroundColor: 'rgba(12,10,20,0.82)', padding: 22, flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                  <Text style={{ fontSize: 44 }}>🌟</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: F.serifBold, fontSize: 22, color: '#ff6b35', marginBottom: 4 }}>Junior</Text>
+                    <Text style={{ fontFamily: F.sans, fontSize: 14, color: C.muted, lineHeight: 20 }}>Fun categories, easy clues, and coins to spend on hints. Great for kids and families.</Text>
+                  </View>
+                  <Text style={{ color: '#ff6b35', fontSize: 26 }}>›</Text>
+                </View>
+              </LinearGradient>
+            </View>
+          </TouchableOpacity>
+
+          {/* Scholar */}
+          <TouchableOpacity activeOpacity={0.9} onPress={() => chooseTier('scholar')}>
+            <View style={{ borderRadius: 22, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 10 }}>
+              <LinearGradient colors={['rgba(216,180,254,0.75)', 'rgba(124,58,237,0.35)', 'rgba(60,20,120,0.50)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 2 }}>
+                <View style={{ borderRadius: 20, backgroundColor: 'rgba(12,10,20,0.82)', padding: 22, flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                  <Text style={{ fontSize: 44 }}>📚</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: F.serifBold, fontSize: 22, color: C.violet2, marginBottom: 4 }}>Scholar</Text>
+                    <Text style={{ fontFamily: F.sans, fontSize: 14, color: C.muted, lineHeight: 20 }}>Deeper trivia and tougher secrets, plus the Daily Challenge and leaderboards. For seasoned players.</Text>
+                  </View>
+                  <Text style={{ color: C.violet2, fontSize: 26 }}>›</Text>
+                </View>
+              </LinearGradient>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   // ─── MODES ────────────────────────────────────────────────────────────────
   if (screen === 'modes') {
+    // Junior Daily & Multiplayer aren't tier-aware yet (Phases 2 & 3) — gate them
+    // so a Junior player never lands on Scholar content in the meantime.
+    const juniorLocked = tier === 'junior';
     return (
       <View style={[S.flex, { backgroundColor: '#05050f', paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
       <PremiumBackground />
@@ -18644,7 +18767,12 @@ export default function EnigmaGame() {
           <TouchableOpacity onPress={() => setScreen('home')} style={{ marginRight: 12 }}>
             <Text style={S.backBtn}>← Back</Text>
           </TouchableOpacity>
-          <View style={{ flex: 1, alignItems: 'flex-end', flexDirection: 'row', justifyContent: 'flex-end', gap: 8 }}>
+          <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row', justifyContent: 'flex-end', gap: 8 }}>
+            <TouchableOpacity onPress={() => setScreen('tier_select')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: tier === 'junior' ? 'rgba(255,107,53,0.12)' : 'rgba(124,58,237,0.14)', borderWidth: 1, borderColor: tier === 'junior' ? 'rgba(255,107,53,0.4)' : 'rgba(167,139,250,0.4)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 }}>
+              <Text style={{ fontSize: 12 }}>{tier === 'junior' ? '🌟' : '📚'}</Text>
+              <Text style={{ fontSize: 12, color: tier === 'junior' ? '#ff6b35' : C.violet2, fontFamily: F.sansSemi }}>{tier === 'junior' ? 'Junior' : 'Scholar'}</Text>
+              <Text style={{ fontSize: 10, color: C.dim }}>⇄</Text>
+            </TouchableOpacity>
             <PlayerAvatar p={{ avatarIdx: selectedAvatarIdx }} size={28} />
             <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_500Medium' }}>{nameInput.trim()}</Text>
           </View>
@@ -18670,8 +18798,13 @@ export default function EnigmaGame() {
         <View style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-evenly' }}>
 
           {/* Daily Challenge — gold glass */}
-          <TouchableOpacity onPress={() => setScreen('daily_setup')} activeOpacity={0.85}>
+          <TouchableOpacity disabled={juniorLocked} onPress={() => setScreen('daily_setup')} activeOpacity={0.85} style={juniorLocked ? { opacity: 0.5 } : undefined}>
             <View style={{ borderRadius: 22, shadowColor: C.gold, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.42, shadowRadius: 22, elevation: 12 }}>
+              {juniorLocked && (
+                <View style={{ position: 'absolute', top: 10, right: 10, zIndex: 5, backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4 }}>
+                  <Text style={{ color: '#ffe08c', fontSize: 11, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>Coming soon</Text>
+                </View>
+              )}
               <LinearGradient colors={['rgba(255,236,170,0.92)', 'rgba(212,168,74,0.55)', 'rgba(150,98,22,0.70)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 3 }}>
                 <LinearGradient colors={['rgba(212,168,74,0.26)', 'rgba(120,80,15,0.15)', 'rgba(50,30,5,0.30)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 19.5, overflow: 'hidden', padding: 20 }}>
                   <LinearGradient colors={['rgba(255,232,160,0.30)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 56 }} />
@@ -18702,8 +18835,13 @@ export default function EnigmaGame() {
           </TouchableOpacity>
 
           {/* Multiplayer — violet glass */}
-          <TouchableOpacity onPress={() => setScreen('multi_home')} activeOpacity={0.85}>
+          <TouchableOpacity disabled={juniorLocked} onPress={() => setScreen('multi_home')} activeOpacity={0.85} style={juniorLocked ? { opacity: 0.5 } : undefined}>
             <View style={{ borderRadius: 20, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 18, elevation: 10 }}>
+              {juniorLocked && (
+                <View style={{ position: 'absolute', top: 10, right: 10, zIndex: 5, backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4 }}>
+                  <Text style={{ color: '#c9b3ff', fontSize: 11, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>Coming soon</Text>
+                </View>
+              )}
               <LinearGradient colors={['rgba(190,155,255,0.90)', 'rgba(124,58,237,0.52)', 'rgba(76,24,170,0.68)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 3 }}>
                 <LinearGradient colors={['rgba(124,58,237,0.22)', 'rgba(80,30,180,0.14)', 'rgba(40,10,90,0.28)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 17.5, overflow: 'hidden', padding: 20 }}>
                   <LinearGradient colors={['rgba(200,160,255,0.24)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 50 }} />
@@ -19340,7 +19478,7 @@ export default function EnigmaGame() {
 
   // ─── SOLO SETUP ──────────────────────────────────────────────────────────
   if (screen === 'solo_setup') {
-    const isJunior = soloTier === 'junior';
+    const isJunior = tier === 'junior';
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
@@ -19356,60 +19494,10 @@ export default function EnigmaGame() {
           </Text>
         </View>
 
-        {/* ── Tier Picker ── */}
-        <Text style={[S.sectionLabel, { marginTop: 4, marginBottom: 12 }]}>Choose Your Level</Text>
-        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
-          {/* Junior tile */}
-          <TouchableOpacity
-            style={{ flex: 1 }}
-            onPress={() => { setSoloTier('junior'); setSoloCategory('random'); }}
-          >
-            {isJunior ? (
-              <LinearGradient
-                colors={['rgba(255,200,130,0.72)', 'rgba(255,107,53,0.35)', 'rgba(180,60,20,0.50)']}
-                start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                style={{ borderRadius: 16, padding: 1.5 }}
-              >
-                <View style={{ borderRadius: 14.5, backgroundColor: 'rgba(255,107,53,0.14)', padding: 16, alignItems: 'center', gap: 6 }}>
-                  <Text style={{ fontSize: 28 }}>🌟</Text>
-                  <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: '#ff6b35', textAlign: 'center' }}>Junior</Text>
-                  <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, textAlign: 'center', lineHeight: 16 }}>Fun categories{'\n'}Easy clues · Learn as you play</Text>
-                </View>
-              </LinearGradient>
-            ) : (
-              <View style={{ borderRadius: 16, borderWidth: 1.5, borderColor: C.border2, backgroundColor: C.card, padding: 16, alignItems: 'center', gap: 6, opacity: 0.6 }}>
-                <Text style={{ fontSize: 28 }}>🌟</Text>
-                <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: C.muted, textAlign: 'center' }}>Junior</Text>
-                <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.dim, textAlign: 'center', lineHeight: 16 }}>Fun categories{'\n'}Easy clues · Learn as you play</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-
-          {/* Scholar tile */}
-          <TouchableOpacity
-            style={{ flex: 1 }}
-            onPress={() => { setSoloTier('senior'); setSoloCategory('random'); }}
-          >
-            {!isJunior ? (
-              <LinearGradient
-                colors={['rgba(216,180,254,0.72)', 'rgba(124,58,237,0.35)', 'rgba(60,20,120,0.50)']}
-                start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                style={{ borderRadius: 16, padding: 1.5 }}
-              >
-                <View style={{ borderRadius: 14.5, backgroundColor: 'rgba(124,58,237,0.14)', padding: 16, alignItems: 'center', gap: 6 }}>
-                  <Text style={{ fontSize: 28 }}>📚</Text>
-                  <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: C.violet2, textAlign: 'center' }}>Scholar</Text>
-                  <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, textAlign: 'center', lineHeight: 16 }}>Deep trivia · Tougher secrets{'\n'}For seasoned players</Text>
-                </View>
-              </LinearGradient>
-            ) : (
-              <View style={{ borderRadius: 16, borderWidth: 1.5, borderColor: C.border2, backgroundColor: C.card, padding: 16, alignItems: 'center', gap: 6, opacity: 0.6 }}>
-                <Text style={{ fontSize: 28 }}>📚</Text>
-                <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: C.muted, textAlign: 'center' }}>Scholar</Text>
-                <Text style={{ fontFamily: F.sans, fontSize: 11, color: C.dim, textAlign: 'center', lineHeight: 16 }}>Deep trivia · Tougher secrets{'\n'}For seasoned players</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+        {/* ── Active level (chosen on the tier screen / mode menu — read-only here) ── */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 22, paddingVertical: 8, borderRadius: 12, borderWidth: 1, borderColor: isJunior ? 'rgba(255,107,53,0.35)' : 'rgba(167,139,250,0.35)', backgroundColor: isJunior ? 'rgba(255,107,53,0.10)' : 'rgba(124,58,237,0.10)' }}>
+          <Text style={{ fontSize: 15 }}>{isJunior ? '🌟' : '📚'}</Text>
+          <Text style={{ fontFamily: F.sansSemi, fontSize: 13, color: isJunior ? '#ff6b35' : C.violet2, letterSpacing: 0.3 }}>{isJunior ? 'Junior' : 'Scholar'} Level</Text>
         </View>
 
         <Text style={[S.sectionLabel, { marginTop: 0, marginBottom: 12 }]}>Choose a Category</Text>
@@ -19639,7 +19727,7 @@ export default function EnigmaGame() {
             <Text style={[S.tH3, { color: C.text, letterSpacing: 1 }]}>Solo Mode</Text>
             <ProgressCounter count={qCount} limit={qLimit} />
           </View>
-          {soloTier === 'junior' && (
+          {tier === 'junior' && (
             <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 10 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,224,140,0.10)', borderWidth: 1, borderColor: 'rgba(255,224,140,0.3)', borderRadius: 20, paddingHorizontal: 13, paddingVertical: 5 }}>
                 <Text style={{ fontSize: 13 }}>🪙</Text>
@@ -19836,7 +19924,7 @@ export default function EnigmaGame() {
             {/* Q&A entries */}
             {soloQuestions.map((q, idx) => {
               if (q.type === 'hint') {
-                return <HintCard key={q.id} hintNum={q.hintNum} text={q.text} total={soloTier === 'junior' ? 3 : 2} />;
+                return <HintCard key={q.id} hintNum={q.hintNum} text={q.text} total={tier === 'junior' ? 3 : 2} />;
               }
               const qNum = soloQuestions.slice(0, idx + 1).filter(x => !x.type).length;
               return <QACard key={q.id} num={qNum} text={q.text} answer={q.answer} accent="violet" />;
@@ -19852,7 +19940,7 @@ export default function EnigmaGame() {
 
             {/* One-time +2 bonus questions — Scholar watches an ad, Junior spends coins */}
             {limitReached && !soloBonusUsed && (
-              soloTier === 'junior' ? (
+              tier === 'junior' ? (
                 <TouchableOpacity
                   onPress={buyBonusWithCoins}
                   disabled={wallet.coins < COIN_BONUS_COST}
@@ -19906,13 +19994,13 @@ export default function EnigmaGame() {
             )}
 
             {/* Hint button — below input */}
-            {soloHintsUsed < (soloTier === 'junior' ? 3 : 2) && (
+            {soloHintsUsed < (tier === 'junior' ? 3 : 2) && (
               <HintButton
                 nextHint={soloHintsUsed + 1}
-                total={soloTier === 'junior' ? 3 : 2}
-                cost={soloTier === 'junior' ? COIN_HINT_COST : undefined}
-                affordable={soloTier !== 'junior' || wallet.coins >= COIN_HINT_COST}
-                onPress={soloTier === 'junior' ? useSoloHint : () => openAdForHint('solo')}
+                total={tier === 'junior' ? 3 : 2}
+                cost={tier === 'junior' ? COIN_HINT_COST : undefined}
+                affordable={tier !== 'junior' || wallet.coins >= COIN_HINT_COST}
+                onPress={tier === 'junior' ? useSoloHint : () => openAdForHint('solo')}
               />
             )}
           </ScrollView>
@@ -19975,7 +20063,7 @@ export default function EnigmaGame() {
             <Text style={[S.tBodySm, { color: C.muted, marginTop: 8 }]}>{`Used all ${questionsUsed} questions`}</Text>
           )}
           {/* Coins earned (Junior) */}
-          {soloTier === 'junior' && (
+          {tier === 'junior' && (
             <View style={{ marginTop: 14, flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,224,140,0.4)', backgroundColor: 'rgba(255,224,140,0.08)', paddingHorizontal: 16, paddingVertical: 8 }}>
               <Text style={{ fontSize: 15 }}>🪙</Text>
               <Text style={{ fontSize: 14, color: C.gold, fontFamily: F.sansBold }}>
