@@ -17973,6 +17973,48 @@ const persistSoloStats = async (stats) => {
   try { await AsyncStorage.setItem(_SOLO_STATS_KEY, JSON.stringify(stats)); } catch {}
 };
 
+// ─── My Discoveries (local-only) ──────────────────────────────────────────────
+// A durable collection of the "About This Secret" fact cards for every secret the
+// player has FINISHED a round on (solved OR revealed), per tier. Distinct from
+// `player_seen_secrets` (which is pick-rotation state and gets pruned on pool
+// exhaustion) — a discovery, once earned, is never removed. We snapshot the full
+// card at round-end so it stays intact even if the library later changes.
+const _DISCOVERIES_KEY = 'enigma_discoveries_v1';
+const DEFAULT_DISCOVERIES = { scholar: [], junior: [] };
+
+const loadDiscoveries = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(_DISCOVERIES_KEY);
+    if (raw) return { ...DEFAULT_DISCOVERIES, ...JSON.parse(raw) };
+  } catch {}
+  return { scholar: [], junior: [] };
+};
+
+const persistDiscoveries = async (d) => {
+  try { await AsyncStorage.setItem(_DISCOVERIES_KEY, JSON.stringify(d)); } catch {}
+};
+
+// Pure reducer — records (or upgrades) one finished secret. If the player replays
+// a secret they'd only revealed before and now solves it, the ✓ sticks; the
+// original discovery date is preserved. `at` is passed in (Date.now()) by the
+// caller so this stays pure.
+const addDiscovery = (prev, tier, entry) => {
+  const key = tier === 'junior' ? 'junior' : 'scholar';
+  const list = Array.isArray(prev[key]) ? [...prev[key]] : [];
+  const idx = list.findIndex(d => d.secret === entry.secret);
+  if (idx >= 0) {
+    list[idx] = {
+      ...list[idx],
+      ...entry,
+      solved: list[idx].solved || entry.solved,
+      at: list[idx].at || entry.at,
+    };
+  } else {
+    list.push(entry);
+  }
+  return { ...prev, [key]: list };
+};
+
 // ─── Daily streak (local-only) — consecutive days the daily was played ─────────
 const _DAILY_STREAK_KEY = 'enigma_daily_streak_v1';
 const DEFAULT_DAILY_STREAK = { current: 0, best: 0, lastPlayedDate: null };
@@ -19132,6 +19174,9 @@ export default function EnigmaGame() {
   // Load lifetime solo stats once on mount (local-only)
   useEffect(() => { loadSoloStats().then(setSoloStats); }, []);
 
+  // Load the "My Discoveries" collection once on mount (local-only)
+  useEffect(() => { loadDiscoveries().then(setDiscoveries); }, []);
+
   // Load daily streak once on mount (local-only)
   useEffect(() => { loadDailyStreak().then(setDailyStreak); }, []);
 
@@ -19342,6 +19387,10 @@ export default function EnigmaGame() {
   const [soloStartTime, setSoloStartTime] = useState(null);
   const [soloBonusUsed, setSoloBonusUsed] = useState(false); // one +2 grant per game
   const [soloStats, setSoloStats] = useState(DEFAULT_SOLO_STATS);
+  // My Discoveries — collected fact cards per tier; `discoveryDetail` = the card
+  // currently open in the detail modal (null = closed).
+  const [discoveries, setDiscoveries] = useState(DEFAULT_DISCOVERIES);
+  const [discoveryDetail, setDiscoveryDetail] = useState(null);
   const [wallet, setWallet] = useState(DEFAULT_WALLET);
   const [coinBonusNote, setCoinBonusNote] = useState(0);
   const [muted, setMutedState] = useState(false);
@@ -20178,6 +20227,26 @@ export default function EnigmaGame() {
   };
 
 
+  // Snapshot a finished round's fact card into "My Discoveries" (local-only).
+  // Safe to call for both solo and daily; `ch` is the challenge object.
+  const recordDiscovery = (libTier, ch, solved) => {
+    if (!ch || !ch.secret) return;
+    const entry = {
+      secret: ch.secret,
+      categoryLabel: ch.categoryLabel || '',
+      categoryIcon: ch.categoryIcon || '📖',
+      facts: ch.facts || [],
+      infoFields: ch.infoFields || [],
+      solved: !!solved,
+      at: Date.now(),
+    };
+    setDiscoveries(prev => {
+      const next = addDiscovery(prev, libTier, entry);
+      persistDiscoveries(next);
+      return next;
+    });
+  };
+
   const finishSoloChallenge = (guess) => {
     if (!guess.trim() || !soloChallenge) return;
     const isCorrect = fuzzyMatch(guess.trim(), soloChallenge.secret) ||
@@ -20202,6 +20271,7 @@ export default function EnigmaGame() {
       ...prev,
       [libTier]: new Set([...prev[libTier], soloChallenge.secret]),
     }));
+    recordDiscovery(libTier, soloChallenge, isCorrect);
   };
 
   // Give up — end the round unsolved and reveal the answer on the result screen.
@@ -20222,6 +20292,7 @@ export default function EnigmaGame() {
       ...prev,
       [libTier]: new Set([...prev[libTier], soloChallenge.secret]),
     }));
+    recordDiscovery(libTier, soloChallenge, false);
   };
 
   // ─── Feedback ("Help Improve 20Q") ─────────────────────────────────────────
@@ -20388,6 +20459,7 @@ export default function EnigmaGame() {
       ...prev,
       [dTier]: new Set([...prev[dTier], dailyChallenge.secret]),
     }));
+    recordDiscovery(dTier, dailyChallenge, isCorrect);
     try {
       await fetch(`${SERVER_URL}/api/daily-result`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -20933,7 +21005,146 @@ export default function EnigmaGame() {
             </View>
           </TouchableOpacity>
 
+          {/* My Discoveries — slim pill; tier-aware collection of fact cards */}
+          {(() => {
+            const dTier = tier === 'junior' ? 'junior' : 'scholar';
+            const count = (discoveries[dTier] || []).length;
+            const accent = tier === 'junior' ? '#ff6b35' : C.violet2;
+            const rim = tier === 'junior' ? 'rgba(255,107,53,0.38)' : 'rgba(167,139,250,0.38)';
+            const fill = tier === 'junior' ? 'rgba(255,107,53,0.10)' : 'rgba(124,58,237,0.10)';
+            return (
+              <TouchableOpacity onPress={() => setScreen('discoveries')} activeOpacity={0.85}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 16, borderWidth: 1, borderColor: rim, backgroundColor: fill, paddingHorizontal: 18, paddingVertical: 14 }}>
+                  <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: fill, borderWidth: 1, borderColor: rim, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 22 }}>🧠</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: F.serifBold, fontSize: 17, color: accent, letterSpacing: 0.4 }}>My Discoveries</Text>
+                    <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, marginTop: 2 }}>
+                      {count > 0 ? `${count} secret${count === 1 ? '' : 's'} discovered — tap to browse` : 'Fact cards you unlock will collect here'}
+                    </Text>
+                  </View>
+                  <Text style={{ color: accent, fontSize: 22 }}>›</Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })()}
+
         </View>
+      </View>
+    );
+  }
+
+  // ─── MY DISCOVERIES ───────────────────────────────────────────────────────
+  if (screen === 'discoveries') {
+    const dTier = tier === 'junior' ? 'junior' : 'scholar';
+    const accent = tier === 'junior' ? '#ff6b35' : C.violet2;
+    const rim = tier === 'junior' ? 'rgba(255,107,53,0.38)' : 'rgba(167,139,250,0.38)';
+    const list = (discoveries[dTier] || []).slice().sort((a, b) => (b.at || 0) - (a.at || 0));
+    const solvedCount = list.filter(d => d.solved).length;
+    // Group by category for a tidy, scannable layout
+    const groups = [];
+    const byCat = {};
+    list.forEach(d => {
+      const label = d.categoryLabel || 'Other';
+      if (!byCat[label]) { byCat[label] = { label, icon: d.categoryIcon || '📖', items: [] }; groups.push(byCat[label]); }
+      byCat[label].items.push(d);
+    });
+    return (
+      <View style={[S.flex, { backgroundColor: '#05050f' }]}>
+        <PremiumBackground />
+        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 32 }]}>
+          <View style={S.screenHeader}>
+            <TouchableOpacity onPress={() => setScreen('modes')}><Text style={S.backBtn}>← Back</Text></TouchableOpacity>
+          </View>
+
+          <View style={{ alignItems: 'center', marginBottom: 18 }}>
+            <Text style={{ fontSize: 40, marginBottom: 8 }}>🧠</Text>
+            <Text style={[S.tH1, { color: accent, letterSpacing: 1 }]}>My Discoveries</Text>
+            <Text style={[S.tBodySm, { color: C.muted, marginTop: 8, textAlign: 'center' }]}>
+              {tier === 'junior' ? 'Junior' : 'Scholar'} · {list.length} discovered{list.length > 0 ? ` · ${solvedCount} solved` : ''}
+            </Text>
+          </View>
+
+          {list.length === 0 ? (
+            <View style={[S.infoCard, { alignItems: 'center', paddingVertical: 36, paddingHorizontal: 22 }]}>
+              <Text style={{ fontSize: 42, marginBottom: 12 }}>🔎</Text>
+              <Text style={[S.tH2, { textAlign: 'center', fontSize: 17, marginBottom: 8 }]}>No discoveries yet</Text>
+              <Text style={[S.tBodySm, { color: C.muted, textAlign: 'center', lineHeight: 20 }]}>
+                Finish a round in Solo or the Daily Challenge and the “About This Secret” card is saved here for you to revisit.
+              </Text>
+            </View>
+          ) : (
+            groups.map((g, gi) => (
+              <View key={gi} style={{ marginBottom: 20 }}>
+                <Text style={[S.sectionLabel, { marginBottom: 10 }]}>{g.icon} {g.label}  ·  {g.items.length}</Text>
+                {g.items.map((d, i) => (
+                  <TouchableOpacity key={i} activeOpacity={0.85} onPress={() => setDiscoveryDetail(d)}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 12, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.03)', paddingHorizontal: 14, paddingVertical: 12, marginBottom: 8 }}>
+                    <View style={{ width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: d.solved ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: d.solved ? 'rgba(34,197,94,0.5)' : C.border2 }}>
+                      <Text style={{ fontSize: 14 }}>{d.solved ? '✓' : '👁'}</Text>
+                    </View>
+                    <Text style={{ flex: 1, fontFamily: F.sansSemi, fontSize: 15, color: C.text }}>{d.secret}</Text>
+                    <Text style={{ color: C.dim, fontSize: 20 }}>›</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ))
+          )}
+        </ScrollView>
+
+        {/* Detail modal — the full "About This Secret" card for one discovery */}
+        <Modal visible={!!discoveryDetail} animationType="slide" transparent onRequestClose={() => setDiscoveryDetail(null)}>
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.72)', justifyContent: 'flex-end' }}>
+            <View style={{ backgroundColor: '#0b0b1a', borderTopLeftRadius: 22, borderTopRightRadius: 22, borderWidth: 1, borderColor: C.border2, maxHeight: '86%', paddingTop: 10 }}>
+              <View style={{ alignItems: 'center', paddingVertical: 6 }}>
+                <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: C.border2 }} />
+              </View>
+              <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: insets.bottom + 24 }}>
+                {discoveryDetail && (
+                  <>
+                    <View style={{ alignItems: 'center', marginBottom: 16 }}>
+                      <View style={{ borderRadius: 20, borderWidth: 1, borderColor: discoveryDetail.solved ? 'rgba(34,197,94,0.5)' : C.border2, backgroundColor: discoveryDetail.solved ? 'rgba(34,197,94,0.12)' : 'rgba(255,255,255,0.05)', paddingHorizontal: 12, paddingVertical: 4, marginBottom: 12 }}>
+                        <Text style={{ fontSize: 12, color: discoveryDetail.solved ? C.success : C.muted, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>
+                          {discoveryDetail.solved ? '✓ Solved' : '👁 Revealed'}
+                        </Text>
+                      </View>
+                      <Text style={[S.tH1, { color: accent, textAlign: 'center' }]}>{discoveryDetail.secret}</Text>
+                      <Text style={[S.tCaption, { color: C.muted, marginTop: 6 }]}>{discoveryDetail.categoryIcon} {discoveryDetail.categoryLabel}</Text>
+                    </View>
+
+                    <View style={[S.infoCard, { marginBottom: 8 }]}>
+                      <Text style={[S.tOverline, { letterSpacing: 3, marginBottom: 14 }]}>📖 About This Secret</Text>
+                      {(discoveryDetail.infoFields || []).length > 0 && (
+                        <View style={{ backgroundColor: 'rgba(212,168,74,0.08)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.25)', borderRadius: 10, padding: 12, marginBottom: 16, gap: 6 }}>
+                          {discoveryDetail.infoFields.map((f, i) => (
+                            <View key={i} style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                              <Text style={{ fontSize: 13 }}>{f.icon}</Text>
+                              <Text style={[S.tBodySm, { color: C.gold, fontFamily: 'Outfit_600SemiBold', fontSize: 15 }]}>{f.label}: </Text>
+                              <Text style={[S.tBodySm, { color: C.text, flex: 1, fontSize: 15 }]}>{f.value}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                      {(discoveryDetail.facts || []).map((fact, i) => (
+                        <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 12, paddingBottom: 12, borderBottomWidth: i < discoveryDetail.facts.length - 1 ? 1 : 0, borderBottomColor: C.border }}>
+                          <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(109,40,217,0.18)', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                            <Text style={{ fontSize: 11, color: C.violet2, fontFamily: 'Outfit_700Bold' }}>{i + 1}</Text>
+                          </View>
+                          <Text style={[S.tBodySm, { flex: 1, color: C.text, fontSize: 15, lineHeight: 22 }]}>{fact}</Text>
+                        </View>
+                      ))}
+                    </View>
+
+                    <TouchableOpacity style={[S.btnOutline, { marginTop: 12 }]} onPress={() => setDiscoveryDetail(null)}>
+                      <Text style={S.btnOutlineText}>Close</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   }
@@ -22215,6 +22426,13 @@ export default function EnigmaGame() {
             ))}
           </View>
         )}
+
+        {/* Saved into the collection — jump straight to it */}
+        <TouchableOpacity onPress={() => setScreen('discoveries')} activeOpacity={0.8}
+          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 20, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(167,139,250,0.35)', backgroundColor: 'rgba(124,58,237,0.08)' }}>
+          <Text style={{ fontSize: 15 }}>🧠</Text>
+          <Text style={{ fontFamily: F.sansSemi, fontSize: 14, color: C.violet2, letterSpacing: 0.3 }}>Saved to My Discoveries — view all ›</Text>
+        </TouchableOpacity>
 
         {/* Review the round's questions & answers */}
         <QAReview questions={soloQuestions} accent="violet" secret={soloChallenge?.secret} onReport={reportAnswerFromReview} />
