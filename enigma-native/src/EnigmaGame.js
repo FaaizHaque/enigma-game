@@ -19148,6 +19148,17 @@ export default function EnigmaGame() {
     setScreen(tierChosen ? 'modes' : 'tier_select');
   };
 
+  // Compact mute toggle for in-game headers (so players can mute mid-play).
+  const miniMute = (extraStyle) => (
+    <TouchableOpacity
+      onPress={toggleMute}
+      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      style={[{ width: 34, height: 34, borderRadius: 17, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)', alignItems: 'center', justifyContent: 'center' }, extraStyle]}
+    >
+      <Text style={{ fontSize: 15 }}>{muted ? '🔇' : '🔊'}</Text>
+    </TouchableOpacity>
+  );
+
   // Load coin wallet once on mount; grant the daily return bonus (first play of
   // a new day). Brand-new players start at COIN_START with no same-day bonus.
   useEffect(() => {
@@ -21141,7 +21152,10 @@ export default function EnigmaGame() {
             <Text style={S.backBtn}>← Home</Text>
           </TouchableOpacity>
           <Text style={[S.tH3, { color: C.gold }]}>Daily Challenge</Text>
-          <ProgressCounter count={qCount} limit={qLimit} />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            {miniMute()}
+            <ProgressCounter count={qCount} limit={qLimit} />
+          </View>
         </View>
 
         {/* Category banner — premium gold glass morphism panel */}
@@ -21746,7 +21760,10 @@ export default function EnigmaGame() {
               <Text style={S.backBtn}>← Modes</Text>
             </TouchableOpacity>
             <Text style={[S.tH3, { color: C.text, letterSpacing: 1 }]}>Solo Mode</Text>
-            <ProgressCounter count={qCount} limit={qLimit} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              {miniMute()}
+              <ProgressCounter count={qCount} limit={qLimit} />
+            </View>
           </View>
           {tier === 'junior' && (
             <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 10 }}>
@@ -22981,6 +22998,7 @@ export default function EnigmaGame() {
             >
               <Text style={{ fontSize: 20 }}>🏠</Text>
             </TouchableOpacity>
+            {miniMute({ width: 44, height: 44, borderRadius: 12 })}
             <View style={{ flex: 1, borderRadius: 16, shadowColor: C.violet, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.30, shadowRadius: 12, elevation: 7 }}>
               <LinearGradient colors={['rgba(180,140,255,0.55)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.5 }}>
                 <LinearGradient colors={['rgba(124,58,237,0.18)', 'rgba(70,25,150,0.12)', 'rgba(30,8,80,0.24)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 14.5, overflow: 'hidden', paddingVertical: 13, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
