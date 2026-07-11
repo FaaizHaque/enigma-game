@@ -20773,20 +20773,28 @@ export default function EnigmaGame() {
               </View>
             </View>
           </View>
-          {/* Game Logo — 20Q icon */}
-          <View style={{ alignItems: 'center', marginBottom: 36 }}>
-            <Image
-              source={require('../assets/icon.png')}
-              style={{ width: 140, height: 140 }}
-              resizeMode="contain"
-            />
-            <View style={{ flexDirection: 'row', alignItems: 'center', width: '80%', marginTop: 16, marginBottom: 8 }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.25)' }} />
-              <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: 'rgba(212,168,74,0.50)', marginHorizontal: 10 }} />
-              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.25)' }} />
+          {/* Game Logo — 20Q icon with layered aura */}
+          <View style={{ alignItems: 'center', marginBottom: 34 }}>
+            <View style={{ alignItems: 'center', justifyContent: 'center', height: 210, width: 210 }}>
+              {/* Soft concentric glows lift the mark off the background */}
+              <View style={{ position: 'absolute', width: 210, height: 210, borderRadius: 105, backgroundColor: 'rgba(124,58,237,0.09)' }} />
+              <View style={{ position: 'absolute', width: 168, height: 168, borderRadius: 84, backgroundColor: 'rgba(124,58,237,0.11)' }} />
+              <View style={{ position: 'absolute', width: 128, height: 128, borderRadius: 64, backgroundColor: 'rgba(147,90,255,0.13)' }} />
+              <View style={{ shadowColor: C.violet, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.6, shadowRadius: 26, elevation: 16 }}>
+                <Image
+                  source={require('../assets/icon.png')}
+                  style={{ width: 150, height: 150 }}
+                  resizeMode="contain"
+                />
+              </View>
             </View>
-            <Text style={{ fontSize: 13, color: C.muted, letterSpacing: 3, textTransform: 'uppercase', fontFamily: 'Outfit_500Medium' }}>The Art of Deduction</Text>
-            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 6, letterSpacing: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', width: '76%', marginTop: 14, marginBottom: 10 }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.28)' }} />
+              <Text style={{ marginHorizontal: 10, fontSize: 11, color: C.goldDim }}>✦</Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.28)' }} />
+            </View>
+            <Text style={{ fontSize: 14, color: C.gold, letterSpacing: 4, textTransform: 'uppercase', fontFamily: 'Outfit_600SemiBold', textShadowColor: 'rgba(212,168,74,0.40)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 9 }}>The Art of Deduction</Text>
+            <Text style={{ fontSize: 10, color: C.dim, fontFamily: 'Outfit_400Regular', marginTop: 8, letterSpacing: 1 }}>
               v{Constants.expoConfig?.version || '1.2.0'}
             </Text>
           </View>
@@ -20911,19 +20919,21 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f', paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
       <PremiumBackground />
-        {/* Back + greeting */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, paddingHorizontal: 24 }}>
-          <TouchableOpacity onPress={() => setScreen('home')} style={{ marginRight: 12 }}>
-            <Text style={S.backBtn}>← Back</Text>
+        {/* Back + identity — enlarged for visibility */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, paddingHorizontal: 20 }}>
+          <TouchableOpacity onPress={() => setScreen('home')} activeOpacity={0.8}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.05)' }}>
+            <Text style={{ fontSize: 17, color: C.text, marginTop: -1 }}>←</Text>
+            <Text style={{ fontSize: 14, color: C.text, fontFamily: F.sansSemi }}>Back</Text>
           </TouchableOpacity>
-          <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row', justifyContent: 'flex-end', gap: 8 }}>
-            <TouchableOpacity onPress={() => setScreen('tier_select')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: tier === 'junior' ? 'rgba(255,107,53,0.12)' : 'rgba(124,58,237,0.14)', borderWidth: 1, borderColor: tier === 'junior' ? 'rgba(255,107,53,0.4)' : 'rgba(167,139,250,0.4)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 }}>
-              <Text style={{ fontSize: 12 }}>{tier === 'junior' ? '🌟' : '📚'}</Text>
-              <Text style={{ fontSize: 12, color: tier === 'junior' ? '#ff6b35' : C.violet2, fontFamily: F.sansSemi }}>{tier === 'junior' ? 'Junior' : 'Scholar'}</Text>
-              <Text style={{ fontSize: 10, color: C.dim }}>⇄</Text>
+          <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row', justifyContent: 'flex-end', gap: 10 }}>
+            <TouchableOpacity onPress={() => setScreen('tier_select')} activeOpacity={0.85} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: tier === 'junior' ? 'rgba(255,107,53,0.16)' : 'rgba(124,58,237,0.18)', borderWidth: 1.5, borderColor: tier === 'junior' ? 'rgba(255,107,53,0.55)' : 'rgba(167,139,250,0.55)', borderRadius: 22, paddingHorizontal: 13, paddingVertical: 8 }}>
+              <Text style={{ fontSize: 15 }}>{tier === 'junior' ? '🌟' : '📚'}</Text>
+              <Text style={{ fontSize: 14, color: tier === 'junior' ? '#ff6b35' : C.violet2, fontFamily: F.sansBold }}>{tier === 'junior' ? 'Junior' : 'Scholar'}</Text>
+              <Text style={{ fontSize: 12, color: tier === 'junior' ? '#ff6b35' : C.violet2 }}>⇄</Text>
             </TouchableOpacity>
-            <PlayerAvatar p={{ avatarIdx: selectedAvatarIdx }} size={28} />
-            <Text style={{ fontSize: 13, color: C.muted, fontFamily: 'Outfit_500Medium' }}>{nameInput.trim()}</Text>
+            <PlayerAvatar p={{ avatarIdx: selectedAvatarIdx }} size={38} />
+            <Text style={{ fontSize: 15, color: C.text, fontFamily: F.sansSemi, maxWidth: 92 }} numberOfLines={1}>{nameInput.trim()}</Text>
           </View>
         </View>
 
