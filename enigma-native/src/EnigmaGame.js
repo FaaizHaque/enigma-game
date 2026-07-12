@@ -19385,6 +19385,9 @@ export default function EnigmaGame() {
   const [questionInput, setQuestionInput] = useState('');
   const [secretInput, setSecretInput] = useState('');
   const [hintInput, setHintInput] = useState('');
+  // Multiplayer secret dealing — random cards the host chooses from (max 3), so
+  // the host never browses the full library (which would spoil Solo/Daily).
+  const [dealtSecrets, setDealtSecrets] = useState([]);
   const [solveInput, setSolveInput] = useState('');
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [solveModalOpen, setSolveModalOpen] = useState(false);
@@ -19408,7 +19411,6 @@ export default function EnigmaGame() {
   const [partlyNote, setPartlyNote] = useState('');
   const [selectedAvatarIdx, setSelectedAvatarIdx] = useState(0);
   const [secretSource, setSecretSource] = useState('library');
-  const [libraryBriefing, setLibraryBriefing] = useState(null);
   const [hostCardOpen, setHostCardOpen] = useState(false);
   const [isPublicRoom, setIsPublicRoom] = useState(false);
   const [publicRooms, setPublicRooms] = useState([]);
@@ -19900,11 +19902,30 @@ export default function EnigmaGame() {
     await syncGame(newGame);
   };
 
+  const MP_DEAL_CAP = 3; // max secrets a host is dealt to choose from
+
+  // Deal one more random secret (with its facts) from the chosen category,
+  // avoiding duplicates and stopping at the cap. Used for both the first auto-deal
+  // and the "Deal another" button.
+  const dealSecret = () => {
+    const lib = CONTENT_LIBRARY[game?.theme?.id] || [];
+    setDealtSecrets((prev) => {
+      if (prev.length >= MP_DEAL_CAP) return prev;
+      const taken = new Set(prev.map((d) => d.secret));
+      const pool = lib.filter((it) => !taken.has(it.secret));
+      if (!pool.length) return prev;
+      return [...prev, pool[Math.floor(Math.random() * pool.length)]];
+    });
+  };
+
   const confirmTheme = async () => {
     if (!selectedTheme) return;
     const newGame = { ...game, theme: selectedTheme, status: 'secret_entry' };
     setGame(newGame);
     setSecretSource('library');
+    // Auto-deal the first secret so the host lands on a ready-to-use card.
+    const lib = CONTENT_LIBRARY[selectedTheme.id] || [];
+    setDealtSecrets(lib.length ? [lib[Math.floor(Math.random() * lib.length)]] : []);
     setScreen('secret');
     await syncGame(newGame);
   };
@@ -19913,6 +19934,7 @@ export default function EnigmaGame() {
   const backToTheme = async () => {
     const newGame = { ...game, status: 'theme_select' };
     setGame(newGame);
+    setDealtSecrets([]);
     setScreen('theme');
     await syncGame(newGame);
   };
@@ -19929,7 +19951,14 @@ export default function EnigmaGame() {
     setGame(newGame);
     setSecretInput('');
     setHintInput('');
+    setDealtSecrets([]);
     setScreen('game');
+    // A dealt library secret is now "burned" for the host — keep it out of their
+    // own Solo/Daily so hosting never spoils those modes. (Multiplayer = Scholar.)
+    if (factsOverride) {
+      markSecretSeen(playerId, secret, 'scholar');
+      setSeenSecrets((prev) => ({ ...prev, scholar: new Set([...prev.scholar, secret]) }));
+    }
     await syncGame(newGame);
   };
 
@@ -22937,43 +22966,10 @@ export default function EnigmaGame() {
 
   // ─── SECRET ENTRY ─────────────────────────────────────────────────────────
   if (screen === 'secret') {
-    const themeLibrary = CONTENT_LIBRARY[game.theme?.id] || [];
 
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
         <PremiumBackground />
-
-        {/* Host Briefing Modal — private facts revealed after picking a library secret */}
-        <Modal visible={!!libraryBriefing} transparent animationType="slide" onRequestClose={() => setLibraryBriefing(null)}>
-          <View style={S.overlay}>
-            <View style={[S.modal, { maxHeight: '85%' }]}>
-              <View style={S.modalHandle} />
-              <View style={{ backgroundColor: 'rgba(200,168,74,0.08)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 10, padding: 10, marginBottom: 14, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={{ fontSize: 13 }}>🔒</Text>
-                <Text style={{ fontSize: 11, color: C.goldDim, fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>PRIVATE — HOST EYES ONLY</Text>
-              </View>
-              <Text style={[S.modalTitle, { fontSize: 22, marginBottom: 2 }]}>{libraryBriefing?.secret}</Text>
-              <Text style={[S.modalSub, { marginBottom: 14 }]}>Read these facts so you can answer questions confidently.</Text>
-              <ScrollView showsVerticalScrollIndicator={false} style={{ marginBottom: 14 }}>
-                {(libraryBriefing?.facts || []).map((f, i) => (
-                  <View key={i} style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
-                    <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold', fontSize: 14, marginTop: 1 }}>•</Text>
-                    <Text style={[S.tBodySm, { flex: 1, color: C.muted, lineHeight: 20 }]}>{f}</Text>
-                  </View>
-                ))}
-              </ScrollView>
-              <TouchableOpacity
-                style={S.btnGold}
-                onPress={() => { const item = libraryBriefing; setLibraryBriefing(null); lockSecret(item.secret, '', item.facts); }}
-              >
-                <Text style={S.btnGoldText}>I'm Ready — Start Round →</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={{ marginTop: 12, alignItems: 'center', paddingVertical: 13, borderRadius: 12, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)' }} onPress={() => setLibraryBriefing(null)}>
-                <Text style={{ fontFamily: F.sansSemi, fontSize: 15, color: C.muted, letterSpacing: 0.3 }}>← Pick another from Library</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
 
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <SimBar />
@@ -23005,7 +23001,7 @@ export default function EnigmaGame() {
               {/* Source tabs — segmented glass */}
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
                 {[
-                  { id: 'library', label: '📚 From Library' },
+                  { id: 'library', label: '🎲 Deal Me One' },
                   { id: 'manual', label: '✏️ Write My Own' },
                 ].map((tab) => {
                   const on = secretSource === tab.id;
@@ -23029,25 +23025,50 @@ export default function EnigmaGame() {
 
               {secretSource === 'library' ? (
                 <>
-                  <Text style={[S.muted, { marginBottom: 14 }]}>Pick a secret — you'll get private facts to help you answer questions confidently.</Text>
-                  {themeLibrary.map((item, i) => (
-                    <TouchableOpacity key={i} activeOpacity={0.85} onPress={() => setLibraryBriefing(item)} style={{ marginBottom: 11 }}>
+                  <Text style={[S.muted, { marginBottom: 14 }]}>We deal you a random secret with private facts — guessers never see the library. Don't know one well? Deal another (up to {MP_DEAL_CAP}), then host the one you know best.</Text>
+                  {dealtSecrets.map((item, i) => (
+                    <View key={i} style={{ marginBottom: 12 }}>
                       <View style={{ borderRadius: 16, shadowColor: C.gold, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.18, shadowRadius: 10, elevation: 5 }}>
                         <LinearGradient colors={['rgba(255,232,160,0.40)', 'rgba(212,168,74,0.16)', 'rgba(140,90,18,0.28)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.2 }}>
-                          <LinearGradient colors={['rgba(212,168,74,0.13)', 'rgba(60,40,10,0.10)', 'rgba(30,20,5,0.20)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 14.8, overflow: 'hidden', padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                          <LinearGradient colors={['rgba(212,168,74,0.13)', 'rgba(60,40,10,0.10)', 'rgba(30,20,5,0.20)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 14.8, overflow: 'hidden', padding: 16 }}>
                             <LinearGradient colors={['rgba(255,232,160,0.16)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 36 }} />
-                            <View style={{ flex: 1 }}>
-                              <Text style={{ fontFamily: F.serifBold, fontSize: 15, color: C.text, marginBottom: 3, letterSpacing: 0.3 }}>{item.secret}</Text>
-                              <Text style={[S.tCaption, { color: 'rgba(255,220,140,0.70)' }]}>{item.hint}</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                              <View style={{ backgroundColor: 'rgba(212,168,74,0.18)', borderWidth: 1, borderColor: 'rgba(255,220,140,0.40)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 }}>
+                                <Text style={{ fontSize: 10, color: C.gold, fontFamily: F.sansBold, letterSpacing: 0.5 }}>SECRET {i + 1}</Text>
+                              </View>
                             </View>
-                            <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(212,168,74,0.16)', borderWidth: 1, borderColor: 'rgba(255,220,140,0.40)', alignItems: 'center', justifyContent: 'center' }}>
-                              <Text style={{ color: C.gold, fontSize: 18 }}>›</Text>
-                            </View>
+                            <Text style={{ fontFamily: F.serifBold, fontSize: 19, color: C.text, marginBottom: 4, letterSpacing: 0.3 }}>{item.secret}</Text>
+                            <Text style={[S.tCaption, { color: 'rgba(255,220,140,0.75)', marginBottom: 12 }]}>{item.hint}</Text>
+                            {(item.facts || []).length > 0 && (
+                              <View style={{ backgroundColor: 'rgba(0,0,0,0.18)', borderRadius: 10, padding: 12, marginBottom: 14 }}>
+                                <Text style={{ fontSize: 10, color: C.goldDim, fontFamily: F.sansBold, letterSpacing: 1.5, marginBottom: 8 }}>YOUR PRIVATE FACTS</Text>
+                                {item.facts.map((f, fi) => (
+                                  <View key={fi} style={{ flexDirection: 'row', gap: 8, marginBottom: fi < item.facts.length - 1 ? 7 : 0 }}>
+                                    <Text style={{ color: C.gold, fontSize: 13 }}>•</Text>
+                                    <Text style={{ flex: 1, color: 'rgba(255,244,220,0.92)', fontSize: 13, lineHeight: 19, fontFamily: F.sans }}>{f}</Text>
+                                  </View>
+                                ))}
+                              </View>
+                            )}
+                            <TouchableOpacity onPress={() => lockSecret(item.secret, '', item.facts)} activeOpacity={0.85}>
+                              <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 11, paddingVertical: 13, alignItems: 'center' }}>
+                                <Text style={{ color: '#1a0f00', fontSize: 14, fontFamily: F.sansBold, letterSpacing: 0.3 }}>Host this secret → Start Round</Text>
+                              </LinearGradient>
+                            </TouchableOpacity>
                           </LinearGradient>
                         </LinearGradient>
                       </View>
-                    </TouchableOpacity>
+                    </View>
                   ))}
+                  {dealtSecrets.length < MP_DEAL_CAP ? (
+                    <TouchableOpacity onPress={dealSecret} activeOpacity={0.85}
+                      style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(212,168,74,0.35)', backgroundColor: 'rgba(212,168,74,0.06)', marginBottom: 4 }}>
+                      <Text style={{ fontSize: 16 }}>🎲</Text>
+                      <Text style={{ color: C.gold, fontSize: 14, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>Deal another  ·  {MP_DEAL_CAP - dealtSecrets.length} left</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <Text style={[S.tCaption, { color: C.dim, textAlign: 'center', paddingVertical: 8 }]}>That's all {MP_DEAL_CAP} — host the secret you know best, or switch to “Write My Own”.</Text>
+                  )}
                 </>
               ) : (
                 <>
