@@ -227,7 +227,8 @@ Reference facts: ${facts.join("; ")}.
 
 CRITICAL RULES — follow these exactly:
 1. Reply with ONLY one word: YES, NO, PARTLY, or UNCLEAR — nothing else, no explanation.
-2. Interpret the input GENEROUSLY as a yes/no question about the secret — players use shorthand, so treat brief phrases and single meaningful words as the obvious question. "In France", "France?", or just "France" all mean "Is it in / related to France?"; "Alive?" means "Is it alive?"; "A person?" means "Is it a person?"; "UK" means "Is it in / related to the UK?". Recognise common abbreviations: UK = United Kingdom, US / USA = United States, UAE = United Arab Emirates, EU = European Union, UN = United Nations, USSR = Soviet Union. Answer all of these with YES, NO, or PARTLY. Answer UNCLEAR ONLY when the input is genuinely unusable — random letters or gibberish, a lone article/filler with no content word, or a truly open-ended request ("why", "what is this", "give me a clue"). If a brief input has a clear subject, never answer UNCLEAR — interpret it and answer.
+2. Interpret the input GENEROUSLY as a yes/no question about the secret — players use shorthand, so treat brief phrases and single meaningful words as the obvious question. "In France", "France?", or just "France" all mean "Is it in / related to France?"; "Alive?" means "Is it alive?"; "A person?" means "Is it a person?"; "UK" means "Is it in / related to the UK?". A single occupation, role, or category word means "Is it a / does it belong to that category?" — e.g. "Sportsman" / "Athlete" means "Is it a sportsman/athlete?"; "Scientist", "Politician", "Actor", "Musician", "Writer", "Inventor" likewise. Answer these YES, NO, or PARTLY — NEVER UNCLEAR. Recognise common abbreviations: UK = United Kingdom, US / USA = United States, UAE = United Arab Emirates, EU = European Union, UN = United Nations, USSR = Soviet Union. Answer all of these with YES, NO, or PARTLY. Answer UNCLEAR ONLY when the input is genuinely unusable — random letters or gibberish, a lone article/filler with no content word, or a truly open-ended request ("why", "what is this", "give me a clue"). If a brief input has a clear subject, never answer UNCLEAR — interpret it and answer.
+2b. COUNTRY ABBREVIATIONS ARE LITERAL AND MUST NOT BE CONFUSED WITH SIMILAR-LOOKING COUNTRIES. "UK" ALWAYS means the United Kingdom (Great Britain and Northern Ireland — England, Scotland, Wales, N. Ireland). "UK" is NEVER Ukraine. Ukraine is a completely different country; the player will write "Ukraine" (or "UA") if they mean it. So for a secret in Ukraine (e.g. Crimea, Kyiv), "UK" or "United Kingdom" must be answered NO. Apply the same care to other look-alikes: "US" = United States (not anything else), "Aus" could be Australia or Austria so treat a bare "Aus" as needing the fuller word — but never invent a country the abbreviation does not stand for.
 3. Be STRICTLY and LITERALLY accurate. Do NOT make loose associations or stretch connections. If the link is indirect, tenuous, or figurative, answer NO.
 4. "Inventor" means a person who invented something technological or scientific. An object being crafted, commissioned, or built does NOT make it "related to an inventor." The Peacock Throne was built by craftsmen for a king — that is NOT related to an inventor.
 5. "Related to X" means a DIRECT, CORE connection — not a distant or trivial one.
@@ -249,7 +250,9 @@ CRITICAL RULES — follow these exactly:
       });
       const raw = response.text.trim().toUpperCase().split(/\s+/)[0];
       const answer = ["YES", "NO", "PARTLY", "UNCLEAR"].includes(raw) ? raw : "NO";
-      answerCache.set(key, answer); // cache for future identical questions
+      // Cache concrete verdicts only. Never cache UNCLEAR — a transient misread
+      // would otherwise stick, so the same question keeps failing on every retry.
+      if (answer !== "UNCLEAR") answerCache.set(key, answer);
       return res.json({ answer });
     } catch (e) {
       lastError = e;

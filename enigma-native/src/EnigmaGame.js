@@ -18404,8 +18404,11 @@ const looksLikeWord = (w) => {
   if (/[0-9]/.test(w)) return true;             // years/numbers are meaningful ("1900s")
   if (w.length <= 3) return SHORT_WORDS.has(w);  // short → must be a known word
   if (![...w].some((c) => VOWELS.has(c))) return false;  // longer words need a vowel
-  let run = 0;                                   // reject 4+ consonants in a row
-  for (const c of w) { if (VOWELS.has(c)) run = 0; else if (++run >= 4) return false; }
+  // Reject only long consonant runs (5+) — real words like "sportsman" (r-t-s-m)
+  // and "birthplace" (r-t-h-p) have 4, so 4 wrongly blocked them. The AI is the
+  // real arbiter of clarity, so lean permissive here.
+  let run = 0;
+  for (const c of w) { if (VOWELS.has(c)) run = 0; else if (++run >= 5) return false; }
   return true;
 };
 
@@ -18420,7 +18423,7 @@ const isValidQuestion = (text) => {
 // Shown when a typed input isn't a usable yes/no question — either rejected by
 // the client gate above, or flagged UNCLEAR by the AI host. Such inputs never
 // count as one of the player's questions.
-const UNCLEAR_MSG = 'Unclear question. Please ask a clear yes/no question — this one won\'t count against you.';
+const UNCLEAR_MSG = "Hmm, that wasn't a clear yes/no question. Try rephrasing. It won't count against you.";
 
 const dailyStars = (questions, solved) => {
   if (!solved) return { stars: 0, label: 'Better luck tomorrow!' };
@@ -19952,27 +19955,27 @@ export default function EnigmaGame() {
     );
   };
 
-  // Floating amber glass banner shown when a typed question is rejected.
-  const AnswerWarnBanner = ({ inline = false }) => {
+  // Prominent, centred amber toast shown when a typed question is rejected.
+  // Rendered once at each play screen's root (outside the scroll) so it can't be
+  // missed or scroll away. Tap to dismiss; also auto-hides.
+  const AnswerWarnBanner = () => {
     if (!answerWarn) return null;
     return (
-      <View
-        style={inline
-          ? { marginBottom: 12 }
-          : { position: 'absolute', top: insets.top + 10, left: 14, right: 14, zIndex: 1000 }}
-        pointerEvents="box-none"
-      >
-        <View style={{ borderRadius: 16, shadowColor: C.warn, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 12 }}>
-          <LinearGradient colors={['rgba(245,170,60,0.95)', 'rgba(220,130,30,0.55)', 'rgba(150,80,15,0.70)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.5 }}>
-            <LinearGradient colors={['rgba(40,28,8,0.97)', 'rgba(28,18,6,0.98)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14.5, overflow: 'hidden', paddingVertical: 13, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <LinearGradient colors={['rgba(245,170,60,0.20)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 30 }} />
-              <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(245,170,60,0.18)', borderWidth: 1, borderColor: 'rgba(245,170,60,0.5)', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Text style={{ fontSize: 18 }}>💡</Text>
-              </View>
-              <Text style={{ flex: 1, color: '#ffe6b8', fontFamily: F.sansSemi, fontSize: 13.5, lineHeight: 19 }}>{answerWarn}</Text>
+      <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center', zIndex: 2000 }} pointerEvents="box-none">
+        <TouchableOpacity activeOpacity={0.9} onPress={() => setAnswerWarn(null)} style={{ marginHorizontal: 28 }}>
+          <View style={{ borderRadius: 20, shadowColor: C.warn, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.55, shadowRadius: 24, elevation: 18 }}>
+            <LinearGradient colors={['rgba(245,170,60,0.98)', 'rgba(220,130,30,0.6)', 'rgba(150,80,15,0.78)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 1.6 }}>
+              <LinearGradient colors={['rgba(40,28,8,0.98)', 'rgba(26,17,5,0.99)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 18.4, overflow: 'hidden', paddingVertical: 20, paddingHorizontal: 22, alignItems: 'center', gap: 10 }}>
+                <LinearGradient colors={['rgba(245,170,60,0.22)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 40 }} />
+                <View style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: 'rgba(245,170,60,0.18)', borderWidth: 1, borderColor: 'rgba(245,170,60,0.5)', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ fontSize: 24 }}>🤔</Text>
+                </View>
+                <Text style={{ color: '#ffe6b8', fontFamily: F.sansBold, fontSize: 15, textAlign: 'center', lineHeight: 21 }}>{answerWarn}</Text>
+                <Text style={{ color: 'rgba(255,230,184,0.55)', fontFamily: F.sans, fontSize: 12 }}>Tap to dismiss</Text>
+              </LinearGradient>
             </LinearGradient>
-          </LinearGradient>
-        </View>
+          </View>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -21793,6 +21796,7 @@ export default function EnigmaGame() {
         </Modal>
 
         {tipModal}
+        <AnswerWarnBanner />
         {/* Header */}
         <View style={{
           backgroundColor: C.surface, borderBottomWidth: 1, borderBottomColor: C.border2,
@@ -22024,7 +22028,7 @@ export default function EnigmaGame() {
           {/* Question composer, clearly delineated input zone */}
           {!limitReached && (
             <View style={{ marginTop: 20 }}>
-              <AnswerWarnBanner inline />
+              {/* rejection warning renders as a centred overlay at the screen root */}
               {/* Eyebrow label with dividers, so the input never gets lost in the feed */}
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 11 }}>
                 <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.22)' }} />
@@ -22411,6 +22415,7 @@ export default function EnigmaGame() {
         </Modal>
 
         {tipModal}
+        <AnswerWarnBanner />
         {/* Header */}
         <View style={{ backgroundColor: C.surface, borderBottomWidth: 1, borderBottomColor: C.border2, paddingHorizontal: 16, paddingTop: insets.top + 10, paddingBottom: 14 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -22668,7 +22673,7 @@ export default function EnigmaGame() {
             {/* Question composer, clearly delineated input zone */}
             {!limitReached && (
               <View style={{ marginTop: 20 }}>
-                <AnswerWarnBanner inline />
+                {/* rejection warning renders as a centred overlay at the screen root */}
                 {/* Eyebrow label with dividers, so the input never gets lost in the feed */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 11 }}>
                   <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(167,139,250,0.22)' }} />
@@ -23460,6 +23465,7 @@ export default function EnigmaGame() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
         <PremiumBackground />
         {tipModal}
+        <AnswerWarnBanner />
 
         {/* Host Info Card Modal */}
         {viewerIsHost && (
@@ -23866,7 +23872,7 @@ export default function EnigmaGame() {
             ) : !viewerIsHost ? (
               canAsk ? (
                 <View>
-                  <AnswerWarnBanner inline />
+                  {/* rejection warning renders as a centred overlay at the screen root */}
                   <View style={{ marginBottom: 8 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
                       <Text style={{ fontSize: 11, color: guesserSecsLeft <= 10 ? C.danger : C.gold, fontFamily: 'Outfit_400Regular' }}>⏱ Your turn</Text>
