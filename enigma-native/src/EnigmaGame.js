@@ -18566,8 +18566,28 @@ function CalendarGlyph({ size = 30 }) {
 const AEllipse = Animated.createAnimatedComponent(Ellipse);
 const ACircle = Animated.createAnimatedComponent(Circle);
 
-function MascotIcon({ size = 72, uid = 'm', pulse = true }) {
+// Host moods drive the eye colour + mouth shape (and a one-shot reaction motion).
+const MOOD_STYLES = {
+  idle:     { eye: ['#eafffe', '#7df0ff', '#2bb9e6', '#0e7fb8'], mouth: 'smile' },
+  thinking: { eye: ['#ffffff', '#c9b6ff', '#a78bfa', '#7c3aed'], mouth: 'o' },
+  yes:      { eye: ['#eafff0', '#86efac', '#34d058', '#15803d'], mouth: 'grin' },
+  no:       { eye: ['#fff0f0', '#fca5a5', '#f85149', '#b91c1c'], mouth: 'frown' },
+  partly:   { eye: ['#fffaf0', '#fcd34d', '#f0a030', '#b45309'], mouth: 'flat' },
+};
+const MOUTH_PATHS = {
+  smile: 'M43 63 Q50 67.5 57 63',
+  grin:  'M42 62 Q50 71 58 62',
+  frown: 'M43 66 Q50 60.5 57 66',
+  flat:  'M44 64 L56 64',
+};
+
+function MascotIcon({ size = 72, uid = 'm', pulse = true, mood = 'idle', reactKey = 0 }) {
   const blink = useRef(new Animated.Value(1)).current;   // eye-glow pulse
+  const bounce = useRef(new Animated.Value(0)).current;  // YES hop
+  const shake = useRef(new Animated.Value(0)).current;   // NO head-shake
+  const tilt = useRef(new Animated.Value(0)).current;    // PARTLY tilt
+  const ms = MOOD_STYLES[mood] || MOOD_STYLES.idle;
+
   useEffect(() => {
     if (!pulse) return;
     const loop = Animated.loop(
@@ -18580,8 +18600,40 @@ function MascotIcon({ size = 72, uid = 'm', pulse = true }) {
     return () => loop.stop();
   }, [pulse]);
 
+  // One-shot reaction whenever the mood (or reactKey) changes.
+  useEffect(() => {
+    if (mood === 'yes') {
+      bounce.setValue(0);
+      Animated.sequence([
+        Animated.spring(bounce, { toValue: 1, useNativeDriver: true, friction: 3, tension: 160 }),
+        Animated.spring(bounce, { toValue: 0, useNativeDriver: true, friction: 4 }),
+      ]).start();
+    } else if (mood === 'no') {
+      shake.setValue(0);
+      Animated.sequence([
+        Animated.timing(shake, { toValue: 1, duration: 70, useNativeDriver: true }),
+        Animated.timing(shake, { toValue: -1, duration: 130, useNativeDriver: true }),
+        Animated.timing(shake, { toValue: 1, duration: 130, useNativeDriver: true }),
+        Animated.timing(shake, { toValue: 0, duration: 70, useNativeDriver: true }),
+      ]).start();
+    } else if (mood === 'partly') {
+      tilt.setValue(0);
+      Animated.sequence([
+        Animated.timing(tilt, { toValue: 1, duration: 170, useNativeDriver: true }),
+        Animated.timing(tilt, { toValue: -1, duration: 260, useNativeDriver: true }),
+        Animated.timing(tilt, { toValue: 0, duration: 170, useNativeDriver: true }),
+      ]).start();
+    }
+  }, [mood, reactKey]);
+
+  const transform = [
+    { translateY: bounce.interpolate({ inputRange: [0, 1], outputRange: [0, -size * 0.16] }) },
+    { translateX: shake.interpolate({ inputRange: [-1, 0, 1], outputRange: [-size * 0.09, 0, size * 0.09] }) },
+    { rotate: tilt.interpolate({ inputRange: [-1, 0, 1], outputRange: ['-9deg', '0deg', '9deg'] }) },
+  ];
+
   return (
-    <View style={{ width: size, height: size }}>
+    <Animated.View style={{ width: size, height: size, transform }}>
       <Svg width={size} height={size} viewBox="0 0 100 100">
         <Defs>
           {/* Polished 3D body shading — light from upper-left */}
@@ -18602,12 +18654,12 @@ function MascotIcon({ size = 72, uid = 'm', pulse = true }) {
             <Stop offset="0%" stopColor="#1a0b3e" />
             <Stop offset="100%" stopColor="#0a0420" />
           </SvgLinearGradient>
-          {/* Glowing cyan eyes */}
+          {/* Glowing eyes — colour follows the host's mood */}
           <RadialGradient id={`${uid}-eye`} cx="50%" cy="42%" r="65%">
-            <Stop offset="0%" stopColor="#eafffe" />
-            <Stop offset="35%" stopColor="#7df0ff" />
-            <Stop offset="75%" stopColor="#2bb9e6" />
-            <Stop offset="100%" stopColor="#0e7fb8" />
+            <Stop offset="0%" stopColor={ms.eye[0]} />
+            <Stop offset="35%" stopColor={ms.eye[1]} />
+            <Stop offset="75%" stopColor={ms.eye[2]} />
+            <Stop offset="100%" stopColor={ms.eye[3]} />
           </RadialGradient>
           {/* Antenna tip glow */}
           <RadialGradient id={`${uid}-tip`} cx="50%" cy="50%" r="50%">
@@ -18648,9 +18700,25 @@ function MascotIcon({ size = 72, uid = 'm', pulse = true }) {
           <Circle cx="57.3" cy="50.2" r="1.7" fill="#ffffff" opacity="0.95" />
         </G>
 
-        {/* Friendly subtle smile */}
-        <Path d="M43 63 Q50 67.5 57 63" stroke="#7df0ff" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.8" />
+        {/* Mouth — shape follows the host's mood */}
+        {ms.mouth === 'o' ? (
+          <Circle cx="50" cy="64" r="3" fill="none" stroke={ms.eye[1]} strokeWidth="2" />
+        ) : (
+          <Path d={MOUTH_PATHS[ms.mouth]} stroke={ms.eye[1]} strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.85" />
+        )}
       </Svg>
+    </Animated.View>
+  );
+}
+
+// ─── Host speech strip — the animated mascot + a speech bubble in play screens ──
+function HostStrip({ mood, line, reactKey, accent = '#a78bfa' }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10, paddingHorizontal: 16, marginTop: 10, marginBottom: 4 }}>
+      <MascotIcon size={56} uid="host-live" pulse mood={mood} reactKey={reactKey} />
+      <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: `${accent}55`, borderRadius: 16, borderBottomLeftRadius: 4, paddingHorizontal: 14, paddingVertical: 11, marginBottom: 8 }}>
+        <Text style={{ fontFamily: F.sansSemi, fontSize: 14, color: C.text, lineHeight: 20 }}>{line}</Text>
+      </View>
     </View>
   );
 }
@@ -19530,6 +19598,10 @@ export default function EnigmaGame() {
   // "Useful Tip" — which categories' tips have auto-shown, and the currently open card
   const [tipsSeen, setTipsSeen] = useState(new Set());
   const [tipCard, setTipCard] = useState(null);
+  // Animated host (Solo/Daily) — mood drives the mascot; line is the speech bubble.
+  const [hostMood, setHostMood] = useState('idle');
+  const [hostLine, setHostLine] = useState('');
+  const [hostReactKey, setHostReactKey] = useState(0);
   const [wallet, setWallet] = useState(DEFAULT_WALLET);
   const [coinBonusNote, setCoinBonusNote] = useState(0);
   const [muted, setMutedState] = useState(false);
@@ -19755,6 +19827,29 @@ export default function EnigmaGame() {
   const isMyTurn = currentQuestioner?.id === viewerId;
   const pendingQ = game?.questions.find((q) => q.answer === null);
   const answeredQs = game?.questions.filter((q) => q.answer !== null && q.answer !== 'SKIP').length || 0;
+
+  // ─── Animated host (Iris) — speech + mood for Solo / Daily ──────────────────
+  const HOST_NAME = 'Iris';
+  const hostWelcome = () => {
+    setHostMood('idle');
+    setHostLine(`Hi! I'm ${HOST_NAME}. I've hidden a secret — ask me yes/no questions!`);
+    setHostReactKey((k) => k + 1);
+  };
+  const hostThinking = () => { setHostMood('thinking'); setHostLine('Hmm, let me think…'); };
+  const hostUnclear = () => {
+    setHostMood('idle');
+    setHostLine("Hmm, I didn't catch that — try rephrasing?");
+    setHostReactKey((k) => k + 1);
+  };
+  const hostSay = (answer, idx) => {
+    const YES = ['Yes!', "That's right!", 'Correct!', 'Indeed!'];
+    const NO = ['Nope!', 'Not quite…', 'Afraid not.', 'No, sorry!'];
+    const PARTLY = ['Sort of…', 'Partly!', 'In a way…', 'Kind of!'];
+    if (answer === 'YES') { setHostMood('yes'); setHostLine(YES[idx % YES.length]); }
+    else if (answer === 'NO') { setHostMood('no'); setHostLine(NO[idx % NO.length]); }
+    else { setHostMood('partly'); setHostLine(PARTLY[idx % PARTLY.length]); }
+    setHostReactKey((k) => k + 1);
+  };
 
   // Build + open a category's "Useful Tip" card (used by the 💡 button and auto-show).
   const openTips = (catId) => {
@@ -20350,6 +20445,7 @@ export default function EnigmaGame() {
     setSoloBonusUsed(false);
     setSoloStartTime(Date.now());
     setSoloLoading(false);
+    hostWelcome();
     setScreen('solo_game');
   };
 
@@ -20456,14 +20552,17 @@ export default function EnigmaGame() {
     setSoloInput('');
     setSoloLoading(true);
     sounds.question();
+    hostThinking();
     const answer = await askWithRetry({ secret: soloChallenge.secret, facts: soloChallenge.facts, category: soloChallenge.categoryLabel, question: q });
     if (answer === 'UNCLEAR') {
       setSoloQuestions(prev => prev.filter(qq => qq.id !== entry.id));
       setSoloInput(q);
       showAnswerWarn(UNCLEAR_MSG);
+      hostUnclear();
     } else {
       setSoloQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer } : qq));
       if (answer === 'YES') sounds.yes(); else if (answer === 'NO') sounds.no(); else sounds.partly();
+      hostSay(answer, realQCount);
     }
     setSoloLoading(false);
   };
@@ -20642,6 +20741,7 @@ export default function EnigmaGame() {
     setDailyResult(null);
     setDailyHintsUsed(0);
     setDailyStartTime(Date.now());
+    hostWelcome();
     setScreen('daily_game');
   };
 
@@ -20668,14 +20768,17 @@ export default function EnigmaGame() {
     setDailyInput('');
     setDailyLoading(true);
     sounds.question();
+    hostThinking();
     const answer = await askWithRetry({ secret: dailyChallenge.secret, facts: dailyChallenge.facts, category: dailyChallenge.categoryLabel, question: q });
     if (answer === 'UNCLEAR') {
       setDailyQuestions(prev => prev.filter(qq => qq.id !== entry.id));
       setDailyInput(q);
       showAnswerWarn(UNCLEAR_MSG);
+      hostUnclear();
     } else {
       setDailyQuestions(prev => prev.map(qq => qq.id === entry.id ? { ...qq, answer } : qq));
       if (answer === 'YES') sounds.yes(); else if (answer === 'NO') sounds.no(); else sounds.partly();
+      hostSay(answer, realQCount);
     }
     setDailyLoading(false);
   };
@@ -21766,6 +21869,9 @@ export default function EnigmaGame() {
           </View>
         </View>
 
+        {/* Animated host — reacts to each answer once questioning starts */}
+        {qCount > 0 && <HostStrip mood={hostMood} line={hostLine} reactKey={hostReactKey} accent="#d4a84a" />}
+
         {/* Q&A feed + input */}
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView
@@ -22379,6 +22485,9 @@ export default function EnigmaGame() {
           </View>
         </View>
 
+        {/* Animated host — reacts to each answer once questioning starts */}
+        {qCount > 0 && <HostStrip mood={hostMood} line={hostLine} reactKey={hostReactKey} accent="#a78bfa" />}
+
         {/* Q&A feed + input (input lives in scroll so it sits right below the card) */}
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
           <ScrollView ref={feedScrollRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 16 }} onContentSizeChange={() => feedScrollRef.current?.scrollToEnd({ animated: true })} keyboardShouldPersistTaps="handled">
@@ -22427,7 +22536,7 @@ export default function EnigmaGame() {
                           shadowColor: '#7c3aed', shadowRadius: 6, shadowOpacity: 1, elevation: 3,
                         }} />
                         <Text style={{ fontSize: 10, color: 'rgba(200,175,255,0.72)', fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase' }}>
-                          AI · Game Host
+                          Iris · Your Host
                         </Text>
                       </View>
 
