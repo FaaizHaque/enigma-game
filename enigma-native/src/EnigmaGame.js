@@ -19759,8 +19759,9 @@ export default function EnigmaGame() {
         .gte('created_at', cutoff)
         .order('created_at', { ascending: false })
         .limit(20);
+      const myTier = tier === 'junior' ? 'junior' : 'scholar';
       const rows = (data || [])
-        .filter((r) => r.data?.status === 'lobby')
+        .filter((r) => r.data?.status === 'lobby' && (r.data?.tier || 'scholar') === myTier)
         .map((r) => {
           const hostP = r.data.players?.find((p) => p.isHost);
           return {
@@ -19822,6 +19823,9 @@ export default function EnigmaGame() {
   // ─── Actions ──────────────────────────────────────────────────────────────
   const createGame = async (isPublic = isPublicRoom) => {
     if (!nameInput.trim()) return;
+    const roomTier = tier === 'junior' ? 'junior' : 'scholar';
+    // Junior multiplayer is private-only — never expose a Junior room publicly.
+    if (roomTier === 'junior') isPublic = false;
     // Generate the code locally (random 6-char; collisions are astronomically
     // unlikely) so we don't wait on a DB uniqueness check.
     const roomCode = genCode();
@@ -19832,7 +19836,7 @@ export default function EnigmaGame() {
       round: 1, theme: null, secretAnswer: '', hostHint: '',
       questions: [], currentQuestionerIndex: 0, status: 'lobby',
       pendingSolve: null, roundWinnerId: null, hostConsecutiveMisses: 0,
-      isPublic, createdAt: new Date().toISOString(),
+      tier: roomTier, isPublic, createdAt: new Date().toISOString(),
     };
     // Navigate to the lobby immediately — persist to Supabase in the background
     // so there's no network lag on the screen transition.
@@ -19864,6 +19868,13 @@ export default function EnigmaGame() {
       const session = row.data;
       if (session.status !== 'lobby') throw new Error('Game already in progress');
       if (session.players.length >= 5) throw new Error('Room is full (max 5 players)');
+      // Keep tiers separate — a Junior player must never land in a Scholar room
+      // (or vice versa). Legacy rooms with no tier are treated as Scholar.
+      const roomTier = session.tier || 'scholar';
+      const myTier = tier === 'junior' ? 'junior' : 'scholar';
+      if (roomTier !== myTier) {
+        throw new Error(`This is a ${roomTier === 'junior' ? 'Junior' : 'Scholar'} room. Switch your level to ${roomTier === 'junior' ? 'Junior' : 'Scholar'} to join it.`);
+      }
       const existingIds = new Set(session.players.map((p) => p.id));
       let nextNum = session.players.length + 1;
       let playerId = `p${nextNum}`;
@@ -19908,7 +19919,8 @@ export default function EnigmaGame() {
   // avoiding duplicates and stopping at the cap. Used for both the first auto-deal
   // and the "Deal another" button.
   const dealSecret = () => {
-    const lib = CONTENT_LIBRARY[game?.theme?.id] || [];
+    const library = tier === 'junior' ? JUNIOR_LIBRARY : CONTENT_LIBRARY;
+    const lib = library[game?.theme?.id] || [];
     setDealtSecrets((prev) => {
       if (prev.length >= MP_DEAL_CAP) return prev;
       const taken = new Set(prev.map((d) => d.secret));
@@ -19924,7 +19936,8 @@ export default function EnigmaGame() {
     setGame(newGame);
     setSecretSource('library');
     // Auto-deal the first secret so the host lands on a ready-to-use card.
-    const lib = CONTENT_LIBRARY[selectedTheme.id] || [];
+    const library = tier === 'junior' ? JUNIOR_LIBRARY : CONTENT_LIBRARY;
+    const lib = library[selectedTheme.id] || [];
     setDealtSecrets(lib.length ? [lib[Math.floor(Math.random() * lib.length)]] : []);
     setScreen('secret');
     await syncGame(newGame);
@@ -19954,10 +19967,11 @@ export default function EnigmaGame() {
     setDealtSecrets([]);
     setScreen('game');
     // A dealt library secret is now "burned" for the host — keep it out of their
-    // own Solo/Daily so hosting never spoils those modes. (Multiplayer = Scholar.)
+    // own Solo/Daily so hosting never spoils those modes.
     if (factsOverride) {
-      markSecretSeen(playerId, secret, 'scholar');
-      setSeenSecrets((prev) => ({ ...prev, scholar: new Set([...prev.scholar, secret]) }));
+      const libTier = tier === 'junior' ? 'junior' : 'scholar';
+      markSecretSeen(playerId, secret, libTier);
+      setSeenSecrets((prev) => ({ ...prev, [libTier]: new Set([...prev[libTier], secret]) }));
     }
     await syncGame(newGame);
   };
@@ -20982,9 +20996,9 @@ export default function EnigmaGame() {
 
   // ─── MODES ────────────────────────────────────────────────────────────────
   if (screen === 'modes') {
-    // Multiplayer isn't tier-aware yet (Phase 3) — gate it for Junior so a Junior
-    // player never lands on a Scholar room in the meantime. (Daily is tier-aware.)
-    const juniorLocked = tier === 'junior';
+    // Multiplayer is tier-aware: the host's tier fixes the room's content, and
+    // Junior is private-only (no public lobby, and cross-tier joins are blocked)
+    // so a Junior player can never land in a Scholar room.
     return (
       <View style={[S.flex, { backgroundColor: '#05050f', paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
       <PremiumBackground />
@@ -21058,13 +21072,8 @@ export default function EnigmaGame() {
           </TouchableOpacity>
 
           {/* Multiplayer — violet glass */}
-          <TouchableOpacity disabled={juniorLocked} onPress={() => setScreen('multi_home')} activeOpacity={0.85} style={juniorLocked ? { opacity: 0.5 } : undefined}>
+          <TouchableOpacity onPress={() => setScreen('multi_home')} activeOpacity={0.85}>
             <View style={{ borderRadius: 20, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 18, elevation: 10 }}>
-              {juniorLocked && (
-                <View style={{ position: 'absolute', top: 10, right: 10, zIndex: 5, backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4 }}>
-                  <Text style={{ color: '#c9b3ff', fontSize: 11, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>Coming soon</Text>
-                </View>
-              )}
               <LinearGradient colors={['rgba(190,155,255,0.90)', 'rgba(124,58,237,0.52)', 'rgba(76,24,170,0.68)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 3 }}>
                 <LinearGradient colors={['rgba(124,58,237,0.22)', 'rgba(80,30,180,0.14)', 'rgba(40,10,90,0.28)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 17.5, overflow: 'hidden', padding: 20 }}>
                   <LinearGradient colors={['rgba(200,160,255,0.24)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 50 }} />
@@ -21075,7 +21084,7 @@ export default function EnigmaGame() {
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={{ fontFamily: F.serifBold, fontSize: 21, color: C.violet2, letterSpacing: 0.5, marginBottom: 5 }}>Multiplayer</Text>
-                      <Text style={{ fontFamily: F.sans, fontSize: 15, color: C.muted, lineHeight: 21 }}>Public or private room. One host sets the secret, everyone guesses.</Text>
+                      <Text style={{ fontFamily: F.sans, fontSize: 15, color: C.muted, lineHeight: 21 }}>{tier === 'junior' ? 'Private room with family & friends. One host sets the secret, everyone guesses.' : 'Public or private room. One host sets the secret, everyone guesses.'}</Text>
                     </View>
                     <Text style={{ color: C.violet2, fontSize: 24 }}>›</Text>
                   </View>
@@ -21289,7 +21298,7 @@ export default function EnigmaGame() {
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={{ fontFamily: F.serifBold, fontSize: 17, color: C.gold, letterSpacing: 0.5, marginBottom: 3 }}>Create New Game</Text>
-                      <Text style={{ fontFamily: F.sans, fontSize: 13, color: 'rgba(255,220,140,0.65)', lineHeight: 18 }}>Start a private or public room as host</Text>
+                      <Text style={{ fontFamily: F.sans, fontSize: 13, color: 'rgba(255,220,140,0.65)', lineHeight: 18 }}>{tier === 'junior' ? 'Start a private room for family & friends' : 'Start a private or public room as host'}</Text>
                     </View>
                     <Text style={{ color: C.gold, fontSize: 22 }}>›</Text>
                   </View>
@@ -21327,11 +21336,19 @@ export default function EnigmaGame() {
             </View>
           </TouchableOpacity>
 
-          {/* Browse public rooms link */}
-          <TouchableOpacity onPress={() => setScreen('rooms')} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 16, marginTop: 6 }}>
-            <Text style={{ fontFamily: F.sansMed, fontSize: 13, color: C.dim }}>🌐</Text>
-            <Text style={{ fontFamily: F.sansMed, fontSize: 13, color: C.dim, letterSpacing: 0.3 }}>Browse public rooms</Text>
-          </TouchableOpacity>
+          {/* Browse public rooms link — Scholar only (Junior is private-only) */}
+          {tier !== 'junior' && (
+            <TouchableOpacity onPress={() => setScreen('rooms')} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 16, marginTop: 6 }}>
+              <Text style={{ fontFamily: F.sansMed, fontSize: 13, color: C.dim }}>🌐</Text>
+              <Text style={{ fontFamily: F.sansMed, fontSize: 13, color: C.dim, letterSpacing: 0.3 }}>Browse public rooms</Text>
+            </TouchableOpacity>
+          )}
+          {tier === 'junior' && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 16, marginTop: 6 }}>
+              <Text style={{ fontSize: 13 }}>🔒</Text>
+              <Text style={{ fontFamily: F.sansMed, fontSize: 12, color: C.dim, letterSpacing: 0.3 }}>Junior games are private — play with family & friends</Text>
+            </View>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     );
@@ -22562,7 +22579,7 @@ export default function EnigmaGame() {
             </TouchableOpacity>
           </View>
           <Text style={S.h2}>Create Game</Text>
-          <Text style={[S.muted, { marginBottom: 28 }]}>Choose a room type — you'll be the first host this round.</Text>
+          <Text style={[S.muted, { marginBottom: 28 }]}>{tier === 'junior' ? "You'll be the first host this round." : "Choose a room type — you'll be the first host this round."}</Text>
 
           {/* Private — big gold box */}
           <TouchableOpacity onPress={() => createGame(false)} activeOpacity={0.85} style={{ marginBottom: 16 }}>
@@ -22586,7 +22603,8 @@ export default function EnigmaGame() {
             </View>
           </TouchableOpacity>
 
-          {/* Public — big violet box */}
+          {/* Public — big violet box (Scholar only; Junior is private-only) */}
+          {tier !== 'junior' && (
           <TouchableOpacity onPress={() => createGame(true)} activeOpacity={0.85}>
             <View style={{ borderRadius: 20, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 16, elevation: 10 }}>
               <LinearGradient colors={['rgba(190,155,255,0.90)', 'rgba(124,58,237,0.50)', 'rgba(76,24,170,0.68)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 3 }}>
@@ -22607,6 +22625,7 @@ export default function EnigmaGame() {
               </LinearGradient>
             </View>
           </TouchableOpacity>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     );
@@ -22900,7 +22919,7 @@ export default function EnigmaGame() {
               <Text style={[S.h2, { letterSpacing: 0.5 }]}>Choose a Theme</Text>
               <Text style={[S.muted, { marginBottom: 20 }]}>Your secret must fit within this category.</Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
-                {THEMES.map((t) => {
+                {(tier === 'junior' ? JUNIOR_THEMES : THEMES).map((t) => {
                   const sel = selectedTheme?.id === t.id;
                   return (
                     <TouchableOpacity key={t.id} onPress={() => setSelectedTheme(t)} activeOpacity={0.85} style={{ width: '47%' }}>
