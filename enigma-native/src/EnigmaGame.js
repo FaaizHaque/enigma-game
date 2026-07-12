@@ -2289,6 +2289,26 @@ const JUNIOR_THEMES = [
   { id: 'science_inventions', label: 'Science & Inventions', icon: '🔬', desc: 'Discoveries that changed the world',     color: '#c77dff' },
 ];
 
+// ─── "Useful Tip" cards — a few keyword nudges per category on how to question ──
+// Deliberately terse: point players at the big branches to disambiguate first,
+// without handing them full questions (the fun is inventing those themselves).
+const CATEGORY_TIPS = {
+  // Scholar
+  personality: { tagline: 'First, pin down:', tags: ['Gender', 'Era (alive or historical)', 'Field'] },
+  event:       { tagline: 'First, pin down:', tags: ['Century', 'Type (war / discovery / disaster)', 'Region'] },
+  object:      { tagline: 'First, pin down:', tags: ['Real or mythical', 'Material', 'Purpose'] },
+  place:       { tagline: 'First, pin down:', tags: ['Natural or man-made', 'Continent', 'City or landmark'] },
+  invention:   { tagline: 'First, pin down:', tags: ['Field (transport, medicine, comms…)', 'Era (before/after 1900)', 'Device or method'] },
+  character:   { tagline: 'First, pin down:', tags: ['Human / animal / creature', 'Book, film or game', 'Male or female'] },
+  // Junior
+  famous_people:      { tagline: 'First, find out:', tags: ['Man or woman', 'Country', 'Famous for what'] },
+  famous_places:      { tagline: 'First, find out:', tags: ['Nature or building', 'Country or continent', 'Old or new'] },
+  movies_cartoons:    { tagline: 'First, find out:', tags: ['Cartoon or real people', 'Funny or adventure', 'New or a classic'] },
+  animals:            { tagline: 'First, find out:', tags: ['Land, water or air', 'Pet or wild', 'Big or small'] },
+  sports_games:       { tagline: 'First, find out:', tags: ['On a screen or in real life', 'Team or alone', 'Indoors or outdoors'] },
+  science_inventions: { tagline: 'First, find out:', tags: ['What it\'s for', 'Where it came from', 'Old or new'] },
+};
+
 const JUNIOR_LIBRARY = {
   famous_people: [
     {
@@ -18033,6 +18053,16 @@ const persistSoloStats = async (stats) => {
   try { await AsyncStorage.setItem(_SOLO_STATS_KEY, JSON.stringify(stats)); } catch {}
 };
 
+// ─── "Useful Tip" seen-tracking (local-only) — auto-show a category's tip once ──
+const _TIPS_SEEN_KEY = 'enigma_tips_seen_v1';
+const loadTipsSeen = async () => {
+  try { const raw = await AsyncStorage.getItem(_TIPS_SEEN_KEY); if (raw) return new Set(JSON.parse(raw)); } catch {}
+  return new Set();
+};
+const persistTipsSeen = async (set) => {
+  try { await AsyncStorage.setItem(_TIPS_SEEN_KEY, JSON.stringify([...set])); } catch {}
+};
+
 // ─── My Discoveries (local-only) ──────────────────────────────────────────────
 // A durable collection of the "About This Secret" fact cards for every secret the
 // player has FINISHED a round on (solved OR revealed), per tier. Distinct from
@@ -19237,6 +19267,9 @@ export default function EnigmaGame() {
   // Load the "My Discoveries" collection once on mount (local-only)
   useEffect(() => { loadDiscoveries().then(setDiscoveries); }, []);
 
+  // Load which category tips have already auto-shown (local-only)
+  useEffect(() => { loadTipsSeen().then(setTipsSeen); }, []);
+
   // Load daily streak once on mount (local-only)
   useEffect(() => { loadDailyStreak().then(setDailyStreak); }, []);
 
@@ -19453,6 +19486,9 @@ export default function EnigmaGame() {
   // currently open in the detail modal (null = closed).
   const [discoveries, setDiscoveries] = useState(DEFAULT_DISCOVERIES);
   const [discoveryDetail, setDiscoveryDetail] = useState(null);
+  // "Useful Tip" — which categories' tips have auto-shown, and the currently open card
+  const [tipsSeen, setTipsSeen] = useState(new Set());
+  const [tipCard, setTipCard] = useState(null);
   const [wallet, setWallet] = useState(DEFAULT_WALLET);
   const [coinBonusNote, setCoinBonusNote] = useState(0);
   const [muted, setMutedState] = useState(false);
@@ -19678,6 +19714,68 @@ export default function EnigmaGame() {
   const isMyTurn = currentQuestioner?.id === viewerId;
   const pendingQ = game?.questions.find((q) => q.answer === null);
   const answeredQs = game?.questions.filter((q) => q.answer !== null && q.answer !== 'SKIP').length || 0;
+
+  // Build + open a category's "Useful Tip" card (used by the 💡 button and auto-show).
+  const openTips = (catId) => {
+    const tip = CATEGORY_TIPS[catId];
+    if (!tip) return;
+    const theme = [...THEMES, ...JUNIOR_THEMES].find((t) => t.id === catId);
+    setTipCard({ id: catId, label: theme?.label || 'Tips', icon: theme?.icon || '💡', tagline: tip.tagline, tags: tip.tags });
+  };
+
+  // Auto-show a category's tip the first time a player reaches its play screen
+  // (once ever per category; the 💡 Tips button reopens it anytime after).
+  useEffect(() => {
+    const catId = screen === 'solo_game' ? soloChallenge?.categoryId
+      : screen === 'daily_game' ? dailyChallenge?.categoryId
+      : (screen === 'game' && !viewerIsHost) ? game?.theme?.id
+      : null;
+    if (catId && CATEGORY_TIPS[catId] && !tipsSeen.has(catId)) {
+      openTips(catId);
+      const next = new Set(tipsSeen); next.add(catId);
+      setTipsSeen(next);
+      persistTipsSeen(next);
+    }
+  }, [screen, soloChallenge?.categoryId, dailyChallenge?.categoryId, game?.theme?.id, viewerIsHost, tipsSeen]);
+
+  // Shared "Useful Tip" modal — dropped into each play screen; only the active one mounts.
+  const tipModal = (
+    <Modal visible={!!tipCard} transparent animationType="fade" onRequestClose={() => setTipCard(null)}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.72)', justifyContent: 'center', paddingHorizontal: 28 }}>
+        <View style={{ backgroundColor: '#0b0b1a', borderRadius: 22, borderWidth: 1, borderColor: C.border2, padding: 24 }}>
+          <View style={{ alignItems: 'center', marginBottom: 16 }}>
+            <Text style={{ fontSize: 38, marginBottom: 6 }}>💡</Text>
+            <Text style={{ fontSize: 11, color: C.gold, letterSpacing: 2, fontFamily: F.sansBold, textTransform: 'uppercase' }}>Useful Tip</Text>
+            <Text style={{ fontFamily: F.serifBold, fontSize: 20, color: C.text, marginTop: 6, textAlign: 'center' }}>{tipCard?.icon} {tipCard?.label}</Text>
+          </View>
+          <Text style={{ fontFamily: F.sansSemi, fontSize: 15, color: C.muted, textAlign: 'center', marginBottom: 16 }}>{tipCard?.tagline}</Text>
+          <View style={{ gap: 10, marginBottom: 18 }}>
+            {(tipCard?.tags || []).map((t, i) => (
+              <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(212,168,74,0.30)', backgroundColor: 'rgba(212,168,74,0.07)', paddingVertical: 12, paddingHorizontal: 14 }}>
+                <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: 'rgba(212,168,74,0.18)', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ fontSize: 12, color: C.gold, fontFamily: F.sansBold }}>{i + 1}</Text>
+                </View>
+                <Text style={{ flex: 1, fontFamily: F.sansSemi, fontSize: 15, color: C.text }}>{t}</Text>
+              </View>
+            ))}
+          </View>
+          <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.dim, textAlign: 'center', marginBottom: 16 }}>Just a nudge — the clever questions are yours to invent.</Text>
+          <TouchableOpacity style={S.btnGold} onPress={() => setTipCard(null)}>
+            <Text style={S.btnGoldText}>Got it</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  // Small header pill that opens the current category's tip on demand.
+  const TipButton = ({ catId }) => (CATEGORY_TIPS[catId] ? (
+    <TouchableOpacity onPress={() => openTips(catId)} activeOpacity={0.8}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 11, borderWidth: 1, borderColor: 'rgba(212,168,74,0.38)', backgroundColor: 'rgba(212,168,74,0.08)' }}>
+      <Text style={{ fontSize: 14 }}>💡</Text>
+      <Text style={{ fontSize: 13, color: C.gold, fontFamily: F.sansSemi, letterSpacing: 0.2 }}>Tips</Text>
+    </TouchableOpacity>
+  ) : null);
 
   // Pass-and-play switcher: only active when demo players are present, so it
   // never appears (or pollutes shared state) in a real multiplayer game.
@@ -20162,7 +20260,7 @@ export default function EnigmaGame() {
     const pool = filtered.length ? filtered : allPool;
     const picked = pool[Math.floor(Math.random() * pool.length)];
     const theme = themes.find(t => t.id === picked.themeId) || themes[0];
-    return { secret: picked.item.secret, hint: picked.item.hint, infoFields: picked.item.infoFields || [], facts: picked.item.facts, categoryLabel: theme.label, categoryIcon: theme.icon };
+    return { secret: picked.item.secret, hint: picked.item.hint, infoFields: picked.item.infoFields || [], facts: picked.item.facts, categoryId: theme.id, categoryLabel: theme.label, categoryIcon: theme.icon };
   };
 
   const computeHint = (secret, hintNum, challengeHint = null) => {
@@ -20490,6 +20588,7 @@ export default function EnigmaGame() {
       hint: item.hint,
       facts: item.facts,
       aliases: item.aliases || [],
+      categoryId: theme.id,
       categoryLabel: theme.label,
       categoryIcon: theme.icon,
       date,
@@ -21499,6 +21598,7 @@ export default function EnigmaGame() {
           </KeyboardAvoidingView>
         </Modal>
 
+        {tipModal}
         {/* Header */}
         <View style={{
           backgroundColor: C.surface, borderBottomWidth: 1, borderBottomColor: C.border2,
@@ -21515,6 +21615,7 @@ export default function EnigmaGame() {
           </TouchableOpacity>
           <Text style={[S.tH3, { color: C.gold }]}>Daily Challenge</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <TipButton catId={dailyChallenge.categoryId} />
             {miniMute()}
             <ProgressCounter count={qCount} limit={qLimit} />
           </View>
@@ -22112,6 +22213,7 @@ export default function EnigmaGame() {
           </KeyboardAvoidingView>
         </Modal>
 
+        {tipModal}
         {/* Header */}
         <View style={{ backgroundColor: C.surface, borderBottomWidth: 1, borderBottomColor: C.border2, paddingHorizontal: 16, paddingTop: insets.top + 10, paddingBottom: 14 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -22123,6 +22225,7 @@ export default function EnigmaGame() {
             </TouchableOpacity>
             <Text style={[S.tH3, { color: C.text, letterSpacing: 1 }]}>Solo Mode</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <TipButton catId={soloChallenge.categoryId} />
               {miniMute()}
               <ProgressCounter count={qCount} limit={qLimit} />
             </View>
@@ -23156,6 +23259,7 @@ export default function EnigmaGame() {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
         <PremiumBackground />
+        {tipModal}
 
         {/* Host Info Card Modal */}
         {viewerIsHost && (
@@ -23362,6 +23466,12 @@ export default function EnigmaGame() {
               <Text style={{ fontSize: 20 }}>🏠</Text>
             </TouchableOpacity>
             {miniMute({ width: 44, height: 44, borderRadius: 12 })}
+            {!viewerIsHost && CATEGORY_TIPS[game.theme?.id] && (
+              <TouchableOpacity onPress={() => openTips(game.theme?.id)}
+                style={{ width: 44, height: 44, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(212,168,74,0.38)', backgroundColor: 'rgba(212,168,74,0.08)', alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontSize: 20 }}>💡</Text>
+              </TouchableOpacity>
+            )}
             <View style={{ flex: 1, borderRadius: 16, shadowColor: C.violet, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.30, shadowRadius: 12, elevation: 7 }}>
               <LinearGradient colors={['rgba(180,140,255,0.55)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.5 }}>
                 <LinearGradient colors={['rgba(124,58,237,0.18)', 'rgba(70,25,150,0.12)', 'rgba(30,8,80,0.24)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 14.5, overflow: 'hidden', paddingVertical: 13, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
