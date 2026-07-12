@@ -2309,6 +2309,46 @@ const CATEGORY_TIPS = {
   science_inventions: { tagline: 'First, find out:', tags: ['What it\'s for', 'Where it came from', 'Old or new'] },
 };
 
+// ─── "How to Play" — chunked, one section at a time (see the home-screen modal) ─
+const HOWTO = {
+  basics: {
+    label: 'Basics', icon: '🎯', accent: C.gold,
+    intro: 'Uncover a hidden secret with smart yes/no questions.',
+    steps: [
+      { icon: '🗂️', text: 'A secret is hidden inside a category.' },
+      { icon: '❓', text: 'Ask up to 20 yes/no questions to narrow it down.' },
+      { icon: '💡', text: "Make your guess when you're confident." },
+    ],
+  },
+  daily: {
+    label: 'Daily', icon: '📅', accent: C.gold,
+    intro: 'One secret a day — the same for everyone worldwide.',
+    steps: [
+      { icon: '❓', text: 'Ask up to 20 questions; the AI answers.' },
+      { icon: '💡', text: "Tap Solve when you're ready." },
+      { icon: '🏆', text: "Your result joins today's leaderboard." },
+    ],
+  },
+  solo: {
+    label: 'Solo', icon: '🤖', accent: C.success,
+    intro: 'Play anytime against the AI — pick a category or go random.',
+    steps: [
+      { icon: '🎚️', text: 'Choose your level and category.' },
+      { icon: '❓', text: 'Ask 20 yes/no questions.' },
+      { icon: '💡', text: 'Guess when ready — a new secret every round.' },
+    ],
+  },
+  multiplayer: {
+    label: 'Multiplayer', icon: '👥', accent: C.violet2,
+    intro: 'Play with friends — one host, everyone else guesses.',
+    steps: [
+      { icon: '👑', text: 'The host picks a secret.' },
+      { icon: '❓', text: 'Guessers share 20 questions; host answers Yes / No / Partly.' },
+      { icon: '🏅', text: 'The first correct guess wins the round.' },
+    ],
+  },
+};
+
 const JUNIOR_LIBRARY = {
   famous_people: [
     {
@@ -19425,6 +19465,7 @@ export default function EnigmaGame() {
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [solveModalOpen, setSolveModalOpen] = useState(false);
   const [howToPlayOpen, setHowToPlayOpen] = useState(false);
+  const [htpTab, setHtpTab] = useState('basics'); // How to Play — active section
   // Feedback / "Help Improve 20Q"
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackTab, setFeedbackTab] = useState('suggest'); // 'suggest' | 'report'
@@ -20760,48 +20801,87 @@ export default function EnigmaGame() {
             <View style={[S.modal, { maxHeight: '90%' }]}>
               <View style={S.modalHandle} />
               <ScrollView showsVerticalScrollIndicator={false}>
-                <Text style={[S.modalTitle, { marginBottom: 16 }]}>📖 How to Play</Text>
+                <Text style={[S.modalTitle, { marginBottom: 4 }]}>📖 How to Play</Text>
+                <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, marginBottom: 16 }}>Ask yes/no questions to uncover the secret in 20 tries.</Text>
 
-                {/* Daily Challenge */}
-                <View style={{ backgroundColor: 'rgba(212,168,74,0.07)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.3)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
-                  <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold', fontSize: 15, marginBottom: 8 }}>📅 Daily Challenge</Text>
-                  <Text style={S.bodyText}>One new secret every day, the same for all players worldwide. You get <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> answered by AI to crack it.</Text>
-                  <Text style={[S.bodyText, { marginTop: 6 }]}>{'⭐⭐⭐ '}<Text style={{ color: C.gold }}>Legendary</Text>{' — solved in 5 or fewer questions\n'}{'⭐⭐   '}<Text style={{ color: C.gold }}>Expert</Text>{' — solved in 10 or fewer\n'}{'⭐     '}<Text style={{ color: C.gold }}>Good</Text>{' — solved in 15 or fewer'}</Text>
-                  <Text style={[S.bodyText, { marginTop: 6 }]}>Your result goes on the <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>Daily Leaderboard</Text>. After the game, an educational card reveals key facts about the secret.</Text>
-                </View>
+                {/* Section tabs */}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, marginBottom: 18 }} contentContainerStyle={{ gap: 8, paddingBottom: 2 }}>
+                  {Object.entries(HOWTO).map(([id, t]) => {
+                    const on = htpTab === id;
+                    return (
+                      <TouchableOpacity key={id} onPress={() => setHtpTab(id)} activeOpacity={0.85}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 9, paddingHorizontal: 14, borderRadius: 20, borderWidth: 1, borderColor: on ? t.accent : C.border2, backgroundColor: on ? `${t.accent}22` : C.card }}>
+                        <Text style={{ fontSize: 14 }}>{t.icon}</Text>
+                        <Text style={{ fontSize: 13, fontFamily: on ? F.sansBold : F.sansSemi, color: on ? t.accent : C.muted }}>{t.label}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
 
-                {/* Solo Mode */}
-                <View style={{ backgroundColor: 'rgba(34,197,94,0.07)', borderWidth: 1, borderColor: 'rgba(34,197,94,0.3)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
-                  <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold', fontSize: 15, marginBottom: 8 }}>🤖 Solo Mode</Text>
-                  <Text style={S.bodyText}>Play alone against the AI. Choose a category or go fully random. You get <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> to identify the secret.</Text>
-                  <Text style={[S.bodyText, { marginTop: 8 }]}>Pick your difficulty tier — each has six categories:</Text>
-                  <Text style={[S.bodyText, { marginTop: 6 }]}>
-                    {'🟢 '}<Text style={{ color: '#ff6b35', fontFamily: 'Outfit_700Bold' }}>Junior</Text>{' — easy clues, great for younger players. You start with '}<Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>30 🪙 coins</Text>{'; each hint costs 10, you earn coins for solving (more for fewer questions), and get +10 each day you come back. Categories: '}<Text style={{ color: C.text }}>Famous People, Famous Places, Movies & Cartoons, Animals, Sports & Games, and Science & Inventions.</Text>
-                  </Text>
-                  <Text style={[S.bodyText, { marginTop: 6 }]}>
-                    {'🟣 '}<Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold' }}>Scholar</Text>{' — deep trivia, tougher secrets and 2 ad-unlocked hints, for seasoned players. Categories: '}<Text style={{ color: C.text }}>Famous Personality, Historical Event, Legendary Object, Famous Place, Great Invention, and Fictional Character.</Text>
-                  </Text>
-                  <Text style={[S.bodyText, { marginTop: 8 }]}>Ask yes/no questions, then tap <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold' }}>💡 I Know the Answer</Text> when you're ready to guess. Play as many rounds as you like — a new secret is picked every time.</Text>
-                  <Text style={[S.bodyText, { marginTop: 6 }]}>After each round, the <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>About This Secret</Text> card teaches you fascinating facts about what you were guessing.</Text>
-                </View>
+                {/* Active section */}
+                {(() => {
+                  const t = HOWTO[htpTab];
+                  return (
+                    <View>
+                      <Text style={{ fontFamily: F.sansSemi, fontSize: 15, color: C.text, lineHeight: 22, marginBottom: 16 }}>{t.intro}</Text>
+                      {t.steps.map((s, i) => (
+                        <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 11, marginBottom: 12 }}>
+                          <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: `${t.accent}22`, borderWidth: 1, borderColor: `${t.accent}66`, alignItems: 'center', justifyContent: 'center' }}>
+                            <Text style={{ fontSize: 13, color: t.accent, fontFamily: F.sansBold }}>{i + 1}</Text>
+                          </View>
+                          <Text style={{ fontSize: 15 }}>{s.icon}</Text>
+                          <Text style={{ flex: 1, fontFamily: F.sans, fontSize: 14, color: C.text, lineHeight: 20 }}>{s.text}</Text>
+                        </View>
+                      ))}
 
-                {/* Multiplayer */}
-                <View style={{ backgroundColor: 'rgba(124,58,237,0.07)', borderWidth: 1, borderColor: 'rgba(124,58,237,0.3)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
-                  <Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold', fontSize: 15, marginBottom: 8 }}>👥 Multiplayer</Text>
-                  <Text style={S.bodyText}>Create or join a room with friends. One player is the <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>Host</Text> who picks a secret; everyone else is a <Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold' }}>Guesser</Text>.</Text>
-                  <Text style={[S.bodyText, { marginTop: 8 }]}>Choose your room type when creating a game:</Text>
-                  <Text style={[S.bodyText, { marginTop: 4 }]}>
-                    {'🔒 '}<Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>Private Room</Text>{' — Share the room code with friends. Only players with the code can join.\n'}
-                    {'🌐 '}<Text style={{ color: C.violet2, fontFamily: 'Outfit_700Bold' }}>Public Room</Text>{' — Open to anyone. Great for meeting new players!'}
-                  </Text>
-                  <Text style={[S.bodyText, { marginTop: 8 }]}>The Host answers every question with <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold' }}>Yes</Text>, <Text style={{ color: C.danger, fontFamily: 'Outfit_700Bold' }}>No</Text>, or <Text style={{ color: C.warn, fontFamily: 'Outfit_700Bold' }}>Partly</Text>. There are <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text> shared among all guessers.</Text>
-                  <Text style={[S.bodyText, { marginTop: 6 }]}>
-                    {'• '}<Text style={{ color: C.success }}>Correct guess</Text>{' → Guesser wins, earns '}<Text style={{ color: C.gold }}>10 pts\n</Text>
-                    {'• '}<Text style={{ color: C.danger }}>Wrong guess</Text>{' → −5 pts, but you stay in the game\n'}
-                    {'• All questions used → '}<Text style={{ color: C.gold }}>Host wins, earns 5 pts</Text>
-                  </Text>
-                  <Text style={[S.bodyText, { marginTop: 6 }]}>After each round the Host role rotates automatically. Play as many rounds as you like!</Text>
-                </View>
+                      {/* Section-specific extras */}
+                      {htpTab === 'basics' && (
+                        <View style={{ marginTop: 6, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(212,168,74,0.30)', backgroundColor: 'rgba(212,168,74,0.06)', padding: 13 }}>
+                          <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, lineHeight: 20 }}>💡 New to a category? Tap <Text style={{ color: C.gold, fontFamily: F.sansBold }}>Tips</Text> during any game for a few smart questions to start with.</Text>
+                        </View>
+                      )}
+                      {htpTab === 'daily' && (
+                        <View style={{ marginTop: 6 }}>
+                          <Text style={{ fontFamily: F.sansBold, fontSize: 11, color: C.dim, letterSpacing: 1.5, marginBottom: 10 }}>STAR RATING</Text>
+                          {[['⭐⭐⭐', 'Solved in 5 questions or fewer'], ['⭐⭐', '10 or fewer'], ['⭐', '15 or fewer']].map(([st, txt], i) => (
+                            <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 7 }}>
+                              <Text style={{ fontSize: 13 }}>{st}</Text>
+                              <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted }}>{txt}</Text>
+                            </View>
+                          ))}
+                          <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.dim, marginTop: 8, lineHeight: 18 }}>A fact card reveals the secret's story afterwards.</Text>
+                        </View>
+                      )}
+                      {htpTab === 'solo' && (
+                        <View style={{ marginTop: 6, gap: 8 }}>
+                          <View style={{ borderRadius: 10, borderWidth: 1, borderColor: 'rgba(255,107,53,0.40)', backgroundColor: 'rgba(255,107,53,0.08)', padding: 11 }}>
+                            <Text style={{ fontFamily: F.sansBold, fontSize: 13, color: '#ff6b35' }}>🟢 Junior</Text>
+                            <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.muted, marginTop: 3, lineHeight: 18 }}>Easy clues for younger players. Start with 30 🪙, hints cost 10, and earn coins for solving.</Text>
+                          </View>
+                          <View style={{ borderRadius: 10, borderWidth: 1, borderColor: 'rgba(167,139,250,0.40)', backgroundColor: 'rgba(124,58,237,0.08)', padding: 11 }}>
+                            <Text style={{ fontFamily: F.sansBold, fontSize: 13, color: C.violet2 }}>🟣 Scholar</Text>
+                            <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.muted, marginTop: 3, lineHeight: 18 }}>Deep trivia and tougher secrets, with 2 hints per round.</Text>
+                          </View>
+                          <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.dim, marginTop: 2, lineHeight: 18 }}>Every finished secret is saved to 🧠 My Discoveries.</Text>
+                        </View>
+                      )}
+                      {htpTab === 'multiplayer' && (
+                        <View style={{ marginTop: 6 }}>
+                          <Text style={{ fontFamily: F.sansBold, fontSize: 11, color: C.dim, letterSpacing: 1.5, marginBottom: 10 }}>SCORING</Text>
+                          {[['✓', 'Correct guess', '+10', C.success], ['✗', 'Wrong guess', '−5', C.danger], ['⏳', 'Questions run out', 'Host +5', C.gold]].map(([ic, txt, pts, col], i) => (
+                            <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 7 }}>
+                              <Text style={{ fontSize: 13, color: col }}>{ic}</Text>
+                              <Text style={{ flex: 1, fontFamily: F.sans, fontSize: 13, color: C.muted }}>{txt}</Text>
+                              <Text style={{ fontFamily: F.sansBold, fontSize: 13, color: col }}>{pts}</Text>
+                            </View>
+                          ))}
+                          <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.dim, marginTop: 8, lineHeight: 18 }}>The host role rotates each round. Junior games are private-only.</Text>
+                        </View>
+                      )}
+                    </View>
+                  );
+                })()}
+
                 <TouchableOpacity style={[S.btnGold, { marginTop: 24, marginBottom: 8 }]} onPress={() => setHowToPlayOpen(false)}>
                   <Text style={S.btnGoldText}>Got it — Let's Play! ✦</Text>
                 </TouchableOpacity>
@@ -20827,7 +20907,7 @@ export default function EnigmaGame() {
                   </View>
                 ) : (
                   <>
-                    <Text style={[S.modalTitle, { marginBottom: 8 }]}>💡 Help Improve 20Q</Text>
+                    <Text style={[S.modalTitle, { marginBottom: 8 }]}>💬 Feedback</Text>
                     {/* Tabs */}
                     <View style={{ flexDirection: 'row', gap: 6, marginBottom: 16 }}>
                       {[{ id: 'suggest', label: 'Suggest\nSecret' }, { id: 'report', label: 'AI\nAnswer' }, { id: 'bug', label: 'Bug /\nIdea' }].map((t) => {
@@ -21019,19 +21099,19 @@ export default function EnigmaGame() {
           {/* How to Play */}
           <TouchableOpacity
             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(212,168,74,0.24)', backgroundColor: 'rgba(212,168,74,0.05)' }}
-            onPress={() => setHowToPlayOpen(true)}>
+            onPress={() => { setHtpTab('basics'); setHowToPlayOpen(true); }}>
             <Text style={{ fontSize: 16 }}>📖</Text>
             <Text style={{ color: C.gold, fontSize: 14, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>How to Play</Text>
           </TouchableOpacity>
 
           <View style={{ height: 12 }} />
 
-          {/* Help Improve 20Q */}
+          {/* Feedback */}
           <TouchableOpacity
             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(167,139,250,0.28)', backgroundColor: 'rgba(124,58,237,0.06)' }}
             onPress={openFeedback}>
-            <Text style={{ fontSize: 16 }}>💡</Text>
-            <Text style={{ color: C.violet2, fontSize: 14, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>Help Improve 20Q</Text>
+            <Text style={{ fontSize: 16 }}>💬</Text>
+            <Text style={{ color: C.violet2, fontSize: 14, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>Feedback</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
