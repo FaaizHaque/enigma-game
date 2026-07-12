@@ -20885,7 +20885,7 @@ export default function EnigmaGame() {
           alignItems: 'center', justifyContent: 'center',
         }}>
           <Image
-            source={require('../assets/icon.png')}
+            source={require('../assets/logo-2q.png')}
             style={{ width: 200, height: 200 }}
             resizeMode="contain"
           />
@@ -21147,7 +21147,7 @@ export default function EnigmaGame() {
               <View style={{ position: 'absolute', width: 128, height: 128, borderRadius: 64, backgroundColor: 'rgba(147,90,255,0.13)' }} />
               <View style={{ shadowColor: C.violet, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.6, shadowRadius: 26, elevation: 16 }}>
                 <Image
-                  source={require('../assets/icon.png')}
+                  source={require('../assets/logo-2q.png')}
                   style={{ width: 150, height: 150 }}
                   resizeMode="contain"
                 />
@@ -21304,7 +21304,7 @@ export default function EnigmaGame() {
 
         <View style={{ alignItems: 'center', marginBottom: 18 }}>
           <Image
-            source={require('../assets/icon.png')}
+            source={require('../assets/logo-2q.png')}
             style={{ width: 80, height: 80, marginBottom: 12 }}
             resizeMode="contain"
           />
@@ -21724,7 +21724,7 @@ export default function EnigmaGame() {
                 )}
               </View>
               <View style={{ height: 200, backgroundColor: '#0d0d1f', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                <Image source={require('../assets/icon.png')} style={{ width: 72, height: 72 }} resizeMode="contain" />
+                <Image source={require('../assets/logo-2q.png')} style={{ width: 72, height: 72 }} resizeMode="contain" />
                 <Text style={[S.tBodySm, { color: C.muted }]}>Challenge your friends today</Text>
               </View>
               <View style={{ padding: 20 }}>
@@ -22334,7 +22334,7 @@ export default function EnigmaGame() {
               </View>
               {/* Fake ad content */}
               <View style={{ height: 200, backgroundColor: '#0d0d1f', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                <Image source={require('../assets/icon.png')} style={{ width: 72, height: 72 }} resizeMode="contain" />
+                <Image source={require('../assets/logo-2q.png')} style={{ width: 72, height: 72 }} resizeMode="contain" />
                 <Text style={[S.tBodySm, { color: C.muted }]}>Challenge your friends today</Text>
               </View>
               {/* Reward notice + button */}
