@@ -2322,7 +2322,7 @@ const HOWTO = {
   },
   daily: {
     label: 'Daily', icon: '📅', accent: C.gold,
-    intro: 'One secret a day — the same for everyone worldwide.',
+    intro: 'One secret a day, the same for everyone worldwide.',
     steps: [
       { icon: '❓', text: 'Ask up to 20 questions; the AI answers.' },
       { icon: '💡', text: "Tap Solve when you're ready." },
@@ -2331,7 +2331,7 @@ const HOWTO = {
   },
   solo: {
     label: 'Solo', icon: '🤖', accent: C.success,
-    intro: 'Play anytime against the AI — pick a category or go random.',
+    intro: 'Play anytime against the AI. Pick a category or go random.',
     steps: [
       { icon: '🎚️', text: 'Choose your level and category.' },
       { icon: '❓', text: 'Ask 20 yes/no questions.' },
@@ -2340,7 +2340,7 @@ const HOWTO = {
   },
   multiplayer: {
     label: 'Multiplayer', icon: '👥', accent: C.violet2,
-    intro: 'Play with friends — one host, everyone else guesses.',
+    intro: 'Play with friends. One host, everyone else guesses.',
     steps: [
       { icon: '👑', text: 'The host picks a secret.' },
       { icon: '❓', text: 'Guessers share 20 questions; host answers Yes / No / Partly.' },
@@ -18475,7 +18475,7 @@ function AvatarPicker({ selected, onSelect }) {
       <Modal visible={pickerOpen} animationType="slide" transparent onRequestClose={() => setPickerOpen(false)}>
         <View style={S.overlay}>
           <View style={[S.modal, { maxHeight: '82%' }]}>
-            <View style={S.modalHandle} />
+            <ModalHandle onClose={() => setPickerOpen(false)} />
             <Text style={[S.modalTitle, { marginBottom: 4 }]}>Pick Your Avatar</Text>
             <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, textAlign: 'center', marginBottom: 20 }}>Tap any avatar to select it</Text>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -18533,7 +18533,7 @@ function Chip({ label, style = 'gold' }) {
 
 // ─── Generic Calendar Icon ──────────────────────────────────────────────────
 // A clean vector calendar (no specific date) so it reads the same on every
-// platform — the 📅 emoji renders a fixed "Jul 17" on Apple devices, which we
+// platform, the 📅 emoji renders a fixed "Jul 17" on Apple devices, which we
 // don't want. Pure SVG: gold binder rings, header band, and a small grid.
 function CalendarGlyph({ size = 30 }) {
   const w = size;
@@ -18636,7 +18636,7 @@ function MascotIcon({ size = 72, uid = 'm', pulse = true, mood = 'idle', reactKe
     <Animated.View style={{ width: size, height: size, transform }}>
       <Svg width={size} height={size} viewBox="0 0 100 100">
         <Defs>
-          {/* Polished 3D body shading — light from upper-left */}
+          {/* Polished 3D body shading, light from upper-left */}
           <RadialGradient id={`${uid}-body`} cx="38%" cy="32%" r="78%">
             <Stop offset="0%" stopColor="#b7a0ff" />
             <Stop offset="42%" stopColor="#7c4ddb" />
@@ -18654,7 +18654,7 @@ function MascotIcon({ size = 72, uid = 'm', pulse = true, mood = 'idle', reactKe
             <Stop offset="0%" stopColor="#1a0b3e" />
             <Stop offset="100%" stopColor="#0a0420" />
           </SvgLinearGradient>
-          {/* Glowing eyes — colour follows the host's mood */}
+          {/* Glowing eyes, colour follows the host's mood */}
           <RadialGradient id={`${uid}-eye`} cx="50%" cy="42%" r="65%">
             <Stop offset="0%" stopColor={ms.eye[0]} />
             <Stop offset="35%" stopColor={ms.eye[1]} />
@@ -18691,7 +18691,7 @@ function MascotIcon({ size = 72, uid = 'm', pulse = true, mood = 'idle', reactKe
         {/* Visor sheen */}
         <Ellipse cx="42" cy="46" rx="14" ry="5" fill="#ffffff" opacity="0.06" />
 
-        {/* Eyes — glowing, expressive */}
+        {/* Eyes, glowing, expressive */}
         <G>
           <AEllipse cx="41" cy="53" rx="5.4" ry="7" fill={`url(#${uid}-eye)`} opacity={pulse ? blink : 1} />
           <AEllipse cx="59" cy="53" rx="5.4" ry="7" fill={`url(#${uid}-eye)`} opacity={pulse ? blink : 1} />
@@ -18700,7 +18700,7 @@ function MascotIcon({ size = 72, uid = 'm', pulse = true, mood = 'idle', reactKe
           <Circle cx="57.3" cy="50.2" r="1.7" fill="#ffffff" opacity="0.95" />
         </G>
 
-        {/* Mouth — shape follows the host's mood */}
+        {/* Mouth, shape follows the host's mood */}
         {ms.mouth === 'o' ? (
           <Circle cx="50" cy="64" r="3" fill="none" stroke={ms.eye[1]} strokeWidth="2" />
         ) : (
@@ -18711,7 +18711,18 @@ function MascotIcon({ size = 72, uid = 'm', pulse = true, mood = 'idle', reactKe
   );
 }
 
-// ─── Host speech strip — the animated mascot + a speech bubble in play screens ──
+// Grabber at the top of a bottom-sheet modal. Tap it to dismiss (like other apps).
+function ModalHandle({ onClose }) {
+  if (!onClose) return <View style={S.modalHandle} />;
+  return (
+    <TouchableOpacity onPress={onClose} activeOpacity={0.5} hitSlop={{ top: 16, bottom: 16, left: 60, right: 60 }}
+      style={{ alignSelf: 'center', paddingVertical: 8, marginBottom: 12 }}>
+      <View style={{ width: 40, height: 5, backgroundColor: C.border2, borderRadius: 3 }} />
+    </TouchableOpacity>
+  );
+}
+
+// Host speech strip: the animated mascot + a speech bubble in play screens
 function HostStrip({ mood, line, reactKey, accent = '#a78bfa' }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10, paddingHorizontal: 16, marginTop: 10, marginBottom: 4 }}>
@@ -18759,7 +18770,7 @@ function PremiumBackground() {
         style={StyleSheet.absoluteFillObject}
       />
 
-      {/* Ambient violet glow — upper third */}
+      {/* Ambient violet glow, upper third */}
       <View style={{
         position: 'absolute', top: SCREEN_H * 0.06, left: SCREEN_W * 0.5 - 160,
         width: 320, height: 320, borderRadius: 160,
@@ -18771,30 +18782,30 @@ function PremiumBackground() {
         backgroundColor: 'rgba(75,30,140,0.10)',
       }} />
 
-      {/* Secondary deep-blue glow — lower area */}
+      {/* Secondary deep-blue glow, lower area */}
       <View style={{
         position: 'absolute', bottom: SCREEN_H * 0.08, left: SCREEN_W * 0.5 - 130,
         width: 260, height: 220, borderRadius: 130,
         backgroundColor: 'rgba(15,35,90,0.18)',
       }} />
 
-      {/* Vignette — top edge */}
+      {/* Vignette, top edge */}
       <LinearGradient
         colors={['rgba(3,3,12,0.85)', 'transparent']}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 140 }}
       />
-      {/* Vignette — bottom edge */}
+      {/* Vignette, bottom edge */}
       <LinearGradient
         colors={['transparent', 'rgba(3,3,12,0.85)']}
         style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 140 }}
       />
-      {/* Vignette — left edge */}
+      {/* Vignette, left edge */}
       <LinearGradient
         colors={['rgba(3,3,12,0.55)', 'transparent']}
         start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }}
         style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: 70 }}
       />
-      {/* Vignette — right edge */}
+      {/* Vignette, right edge */}
       <LinearGradient
         colors={['transparent', 'rgba(3,3,12,0.55)']}
         start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }}
@@ -18829,7 +18840,7 @@ function PremiumBackground() {
 // ─── Glass Input ──────────────────────────────────────────────────────────────
 // Premium glassmorphism text field: layered gradient body inside an accent
 // border ring that lights up on focus, soft shadow that lifts on focus, and a
-// faint top sheen for the "glass" read. Drop-in for <TextInput> — forwards all
+// faint top sheen for the "glass" read. Drop-in for <TextInput>, forwards all
 // props; put layout (flex, width) on `containerStyle`, text styling on `style`.
 function GlassInput({ accent = C.gold, containerStyle, style, onFocus, onBlur, editable = true, ...props }) {
   const [focused, setFocused] = useState(false);
@@ -18979,7 +18990,7 @@ function HintMedallion({ size = 40 }) {
   );
 }
 
-// Revealed hint — a dark-luxury gold glass card with accent rim, soft glow,
+// Revealed hint, a dark-luxury gold glass card with accent rim, soft glow,
 // left accent bar and refined typography.
 function HintCard({ hintNum, text, total = 2 }) {
   return (
@@ -19022,7 +19033,7 @@ function HintCard({ hintNum, text, total = 2 }) {
   );
 }
 
-// Reveal-hint CTA — inviting gold glass button that encourages a tap; an "AD"
+// Reveal-hint CTA, inviting gold glass button that encourages a tap; an "AD"
 // badge sets the watch-an-ad expectation, with a chevron affordance.
 function HintButton({ nextHint, total = 2, onPress, free = false, cost, affordable = true }) {
   const useCost = cost != null;
@@ -19144,14 +19155,14 @@ function ProgressCounter({ count, limit = 20 }) {
 // thickness; a bright bevel ring frames a polished multi-stop gold face; a top
 // gloss plus diagonal shine streaks read as reflected light; and the engraved
 // Cinzel serif label sits on a soft light shadow. Soft gold glow makes it pop.
-function SolveButton({ label = '✓ I Know the Answer — Solve!', onPress }) {
+function SolveButton({ label = '✓ I Know the Answer, Solve!', onPress }) {
   return (
     <View style={{
       borderRadius: 18,
       shadowColor: C.gold, shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.60, shadowRadius: 18, elevation: 14,
     }}>
-      {/* Dark-gold plinth — the button's 3D thickness */}
+      {/* Dark-gold plinth, the button's 3D thickness */}
       <LinearGradient colors={['#7a5a1e', '#4a3510']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={{ borderRadius: 18, paddingBottom: 3.5 }}>
         <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={{ borderRadius: 17 }}>
           {/* Bright bevel ring */}
@@ -19202,7 +19213,7 @@ const ANSWER_STYLES = {
   YES:     { color: C.success, border: 'rgba(34,197,94,0.42)',  bg: 'rgba(34,197,94,0.10)',  label: '✓  Yes' },
   NO:      { color: C.danger,  border: 'rgba(248,81,73,0.42)',  bg: 'rgba(248,81,73,0.10)',  label: '✗  No' },
   PARTLY:  { color: C.warn,    border: 'rgba(240,160,48,0.42)', bg: 'rgba(240,160,48,0.10)', label: '~  Partly' },
-  TIMEOUT: { color: C.danger,  border: 'rgba(248,81,73,0.42)',  bg: 'rgba(248,81,73,0.08)',  label: 'No connection — check internet' },
+  TIMEOUT: { color: C.danger,  border: 'rgba(248,81,73,0.42)',  bg: 'rgba(248,81,73,0.08)',  label: 'No connection, check internet' },
 };
 
 function QACard({ num, text, answer, accent = 'violet' }) {
@@ -19296,7 +19307,7 @@ function QAReview({ questions, accent = 'violet', showAsker = false, secret, onR
             }
             const qNum = questions.slice(0, i + 1).filter((x) => !x.type).length;
             const a = q.answer && ANSWER_STYLES[q.answer] ? ANSWER_STYLES[q.answer] : null;
-            const badgeLabel = a ? a.label : (q.answer === 'SKIP' ? '— Skipped' : '—');
+            const badgeLabel = a ? a.label : (q.answer === 'SKIP' ? 'Skipped' : '·');
             return (
               <View key={q.id || i} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10, backgroundColor: 'rgba(30,30,58,0.5)', borderWidth: 1, borderColor: 'rgba(120,120,185,0.12)' }}>
                 <View style={{ width: 22, height: 22, borderRadius: 7, backgroundColor: isGold ? 'rgba(212,168,74,0.16)' : 'rgba(124,58,237,0.2)', alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
@@ -19305,7 +19316,7 @@ function QAReview({ questions, accent = 'violet', showAsker = false, secret, onR
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 13, color: C.text, fontFamily: F.sansMed, lineHeight: 18 }}>{q.text}</Text>
                   {showAsker && q.askerName ? (
-                    <Text style={{ fontSize: 11, color: C.dim, fontFamily: F.sans, marginTop: 2 }}>— {q.askerName}</Text>
+                    <Text style={{ fontSize: 11, color: C.dim, fontFamily: F.sans, marginTop: 2 }}>{q.askerName}</Text>
                   ) : null}
                   {q.answer === 'PARTLY' && q.note ? (
                     <Text style={{ fontSize: 11, color: C.warn, fontFamily: F.sans, marginTop: 3, fontStyle: 'italic' }}>"{q.note}"</Text>
@@ -19403,7 +19414,7 @@ export default function EnigmaGame() {
     setTier(nt);
     setTierChosen(true);
     persistTier(nt);
-    setSoloCategory('random'); // categories differ per tier — reset to a safe default
+    setSoloCategory('random'); // categories differ per tier, reset to a safe default
     setScreen('modes');
   };
 
@@ -19460,7 +19471,7 @@ export default function EnigmaGame() {
     return () => { cancelled = true; };
   }, [screen, soloChallenge]);
 
-  // Keep Railway server warm — prevents cold-start errors
+  // Keep Railway server warm, prevents cold-start errors
   useEffect(() => {
     pingServer();
     const interval = setInterval(pingServer, 4 * 60 * 1000);
@@ -19470,7 +19481,7 @@ export default function EnigmaGame() {
   useEffect(() => {
     if (screen !== 'splash') return;
     if (!splashImgReady) return;
-    // Phase 1 — Haque Games logo: rAF-driven zoom over 3500ms
+    // Phase 1, Haque Games logo: rAF-driven zoom over 3500ms
     const ZOOM_MS = 3500;
     const startScale = 0.30;
     const endScale = 1.0;
@@ -19526,14 +19537,14 @@ export default function EnigmaGame() {
   const [questionInput, setQuestionInput] = useState('');
   const [secretInput, setSecretInput] = useState('');
   const [hintInput, setHintInput] = useState('');
-  // Multiplayer secret dealing — random cards the host chooses from (max 3), so
+  // Multiplayer secret dealing, random cards the host chooses from (max 3), so
   // the host never browses the full library (which would spoil Solo/Daily).
   const [dealtSecrets, setDealtSecrets] = useState([]);
   const [solveInput, setSolveInput] = useState('');
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [solveModalOpen, setSolveModalOpen] = useState(false);
   const [howToPlayOpen, setHowToPlayOpen] = useState(false);
-  const [htpTab, setHtpTab] = useState('basics'); // How to Play — active section
+  const [htpTab, setHtpTab] = useState('basics'); // How to Play, active section
   // Feedback / "Help Improve 20Q"
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackTab, setFeedbackTab] = useState('suggest'); // 'suggest' | 'report'
@@ -19591,14 +19602,14 @@ export default function EnigmaGame() {
   const [soloStartTime, setSoloStartTime] = useState(null);
   const [soloBonusUsed, setSoloBonusUsed] = useState(false); // one +2 grant per game
   const [soloStats, setSoloStats] = useState(DEFAULT_SOLO_STATS);
-  // My Discoveries — collected fact cards per tier; `discoveryDetail` = the card
+  // My Discoveries, collected fact cards per tier; `discoveryDetail` = the card
   // currently open in the detail modal (null = closed).
   const [discoveries, setDiscoveries] = useState(DEFAULT_DISCOVERIES);
   const [discoveryDetail, setDiscoveryDetail] = useState(null);
-  // "Useful Tip" — which categories' tips have auto-shown, and the currently open card
+  // "Useful Tip", which categories' tips have auto-shown, and the currently open card
   const [tipsSeen, setTipsSeen] = useState(new Set());
   const [tipCard, setTipCard] = useState(null);
-  // Animated host (Solo/Daily) — mood drives the mascot; line is the speech bubble.
+  // Animated host (Solo/Daily), mood drives the mascot; line is the speech bubble.
   const [hostMood, setHostMood] = useState('idle');
   const [hostLine, setHostLine] = useState('');
   const [hostReactKey, setHostReactKey] = useState(0);
@@ -19635,7 +19646,7 @@ export default function EnigmaGame() {
   const hostBarAnim = useRef(new Animated.Value(1)).current;
   const hostWarnBarAnim = useRef(new Animated.Value(1)).current;
 
-  // Smooth bar animations — each runs a 950ms tween on every 1s tick
+  // Smooth bar animations, each runs a 950ms tween on every 1s tick
   // so the bar glides continuously instead of jumping in 1s steps.
   useEffect(() => {
     Animated.timing(guesserBarAnim, { toValue: guesserSecsLeft / 60, duration: 950, useNativeDriver: false }).start();
@@ -19705,7 +19716,7 @@ export default function EnigmaGame() {
     return () => { supabase.removeChannel(channel); };
   }, [game?.roomCode, viewerId]);
 
-  // Auto game-over check — only the host triggers this to avoid race conditions
+  // Auto game-over check, only the host triggers this to avoid race conditions
   useEffect(() => {
     if (screen !== 'game' || !game || game.status !== 'playing') return;
     const isHost = game.players.find(p => p.id === viewerId)?.isHost;
@@ -19717,7 +19728,7 @@ export default function EnigmaGame() {
   // Keep gameRef in sync for use inside timer callbacks
   useEffect(() => { gameRef.current = game; }, [game]);
 
-  // Guesser: 60-second turn timer — derives all conditions from raw state, not component-level consts
+  // Guesser: 60-second turn timer, derives all conditions from raw state, not component-level consts
   useEffect(() => {
     if (!game || screen !== 'game') { setGuesserSecsLeft(60); return; }
     const vwr = game.players.find(p => p.id === viewerId);
@@ -19748,7 +19759,7 @@ export default function EnigmaGame() {
     return () => clearInterval(iv);
   }, [screen, game?.currentQuestionerIndex, viewerId]);
 
-  // Host primary timer: 60s — on expiry opens the 10s warning modal
+  // Host primary timer: 60s, on expiry opens the 10s warning modal
   useEffect(() => {
     if (!game || screen !== 'game') { setHostSecsLeft(60); setHostWarningData(null); return; }
     const vwr = game.players.find(p => p.id === viewerId);
@@ -19772,7 +19783,7 @@ export default function EnigmaGame() {
     return () => { clearInterval(iv); setHostWarningData(null); };
   }, [screen, game?.questions?.filter(q => q.answer === null).length, viewerId]);
 
-  // Host warning timer: 10s within the modal — handles miss/eliminate logic
+  // Host warning timer: 10s within the modal, handles miss/eliminate logic
   useEffect(() => {
     if (!hostWarningData) return;
     let secs = 10;
@@ -19790,7 +19801,7 @@ export default function EnigmaGame() {
           const ng = { ...g, questions, currentQuestionerIndex: g.currentQuestionerIndex + 1, hostConsecutiveMisses: 1 };
           setGame(ng);
           syncGame(ng);
-          setTimeoutToast('⚠️ Miss 1 of 2 — question skipped. Miss again and you lose the host role!');
+          setTimeoutToast('⚠️ Miss 1 of 2, question skipped. Miss again and you lose the host role!');
           setTimeout(() => setTimeoutToast(null), 6000);
         } else {
           const activeGuessers = g.players.filter(p => !p.isHost && !p.isEliminated);
@@ -19828,17 +19839,17 @@ export default function EnigmaGame() {
   const pendingQ = game?.questions.find((q) => q.answer === null);
   const answeredQs = game?.questions.filter((q) => q.answer !== null && q.answer !== 'SKIP').length || 0;
 
-  // ─── Animated host (Iris) — speech + mood for Solo / Daily ──────────────────
+  // ─── Animated host (Iris), speech + mood for Solo / Daily ──────────────────
   const HOST_NAME = 'Iris';
   const hostWelcome = () => {
     setHostMood('idle');
-    setHostLine(`Hi! I'm ${HOST_NAME}. I've hidden a secret — ask me yes/no questions!`);
+    setHostLine(`Hi! I'm ${HOST_NAME}. I've hidden a secret, ask me yes/no questions!`);
     setHostReactKey((k) => k + 1);
   };
   const hostThinking = () => { setHostMood('thinking'); setHostLine('Hmm, let me think…'); };
   const hostUnclear = () => {
     setHostMood('idle');
-    setHostLine("Hmm, I didn't catch that — try rephrasing?");
+    setHostLine("Hmm, I didn't catch that, try rephrasing?");
     setHostReactKey((k) => k + 1);
   };
   const hostSay = (answer, idx) => {
@@ -19874,7 +19885,7 @@ export default function EnigmaGame() {
     }
   }, [screen, soloChallenge?.categoryId, dailyChallenge?.categoryId, game?.theme?.id, viewerIsHost, tipsSeen]);
 
-  // Shared "Useful Tip" modal — dropped into each play screen; only the active one mounts.
+  // Shared "Useful Tip" modal, dropped into each play screen; only the active one mounts.
   const tipModal = (
     <Modal visible={!!tipCard} transparent animationType="fade" onRequestClose={() => setTipCard(null)}>
       <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.72)', justifyContent: 'center', paddingHorizontal: 28 }}>
@@ -19895,7 +19906,7 @@ export default function EnigmaGame() {
               </View>
             ))}
           </View>
-          <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.dim, textAlign: 'center', marginBottom: 16 }}>Just a nudge — the clever questions are yours to invent.</Text>
+          <Text style={{ fontFamily: F.sans, fontSize: 12, color: C.dim, textAlign: 'center', marginBottom: 16 }}>Just a nudge, the clever questions are yours to invent.</Text>
           <TouchableOpacity style={S.btnGold} onPress={() => setTipCard(null)}>
             <Text style={S.btnGoldText}>Got it</Text>
           </TouchableOpacity>
@@ -20058,7 +20069,7 @@ export default function EnigmaGame() {
   const createGame = async (isPublic = isPublicRoom) => {
     if (!nameInput.trim()) return;
     const roomTier = tier === 'junior' ? 'junior' : 'scholar';
-    // Junior multiplayer is private-only — never expose a Junior room publicly.
+    // Junior multiplayer is private-only, never expose a Junior room publicly.
     if (roomTier === 'junior') isPublic = false;
     // Generate the code locally (random 6-char; collisions are astronomically
     // unlikely) so we don't wait on a DB uniqueness check.
@@ -20072,7 +20083,7 @@ export default function EnigmaGame() {
       pendingSolve: null, roundWinnerId: null, hostConsecutiveMisses: 0,
       tier: roomTier, isPublic, createdAt: new Date().toISOString(),
     };
-    // Navigate to the lobby immediately — persist to Supabase in the background
+    // Navigate to the lobby immediately, persist to Supabase in the background
     // so there's no network lag on the screen transition.
     const prevCode = prevRoomCodeRef.current;
     prevRoomCodeRef.current = roomCode;
@@ -20084,7 +20095,7 @@ export default function EnigmaGame() {
         if (prevCode) { try { await supabase.from('sessions').delete().eq('room_code', prevCode); } catch {} }
         await supabase.from('sessions').upsert({ room_code: roomCode, data: session, is_public: isPublic });
       } catch {
-        Alert.alert('Connection issue', 'The room was created but could not be saved. Check your connection — others may not be able to join yet.');
+        Alert.alert('Connection issue', 'The room was created but could not be saved. Check your connection, others may not be able to join yet.');
       }
     })();
   };
@@ -20102,7 +20113,7 @@ export default function EnigmaGame() {
       const session = row.data;
       if (session.status !== 'lobby') throw new Error('Game already in progress');
       if (session.players.length >= 5) throw new Error('Room is full (max 5 players)');
-      // Keep tiers separate — a Junior player must never land in a Scholar room
+      // Keep tiers separate, a Junior player must never land in a Scholar room
       // (or vice versa). Legacy rooms with no tier are treated as Scholar.
       const roomTier = session.tier || 'scholar';
       const myTier = tier === 'junior' ? 'junior' : 'scholar';
@@ -20200,7 +20211,7 @@ export default function EnigmaGame() {
     setHintInput('');
     setDealtSecrets([]);
     setScreen('game');
-    // A dealt library secret is now "burned" for the host — keep it out of their
+    // A dealt library secret is now "burned" for the host, keep it out of their
     // own Solo/Daily so hosting never spoils those modes.
     if (factsOverride) {
       const libTier = tier === 'junior' ? 'junior' : 'scholar';
@@ -20282,7 +20293,7 @@ export default function EnigmaGame() {
   };
 
   const nextRound = async () => {
-    // If the previous host abandoned, they've already been promoted-away — keep current host.
+    // If the previous host abandoned, they've already been promoted-away, keep current host.
     // Otherwise rotate to the next player in order.
     let players;
     if (game.hostAbandoned) {
@@ -20320,7 +20331,7 @@ export default function EnigmaGame() {
     if (!me) return;
 
     try {
-      // Last player out — close the room
+      // Last player out, close the room
       if (remaining.length === 0) {
         await supabase.from('sessions').delete().eq('room_code', roomCode);
         return;
@@ -20379,7 +20390,7 @@ export default function EnigmaGame() {
   };
 
   // ─── Solo Mode helpers ────────────────────────────────────────────────────
-  // Pure synchronous pick — caller passes in the current seen set so this
+  // Pure synchronous pick, caller passes in the current seen set so this
   // remains testable and free of async side-effects.
   const _pickChallenge = (categoryId, tier, seen) => {
     const library = tier === 'junior' ? JUNIOR_LIBRARY : CONTENT_LIBRARY;
@@ -20405,7 +20416,7 @@ export default function EnigmaGame() {
     if (hintNum === 2) {
       const letter = words[0][0].toUpperCase();
       if (words[0].toLowerCase() === 'the' && words.length > 1) {
-        return `It starts with "The" — next word starts with "${words[1][0].toUpperCase()}"`;
+        return `It starts with "The", next word starts with "${words[1][0].toUpperCase()}"`;
       }
       return `It starts with the letter "${letter}"`;
     }
@@ -20414,7 +20425,7 @@ export default function EnigmaGame() {
   };
 
   const startSoloChallenge = async () => {
-    // TODO: AdMob — future placement: show an interstitial ad between solo rounds.
+    // TODO: AdMob, future placement: show an interstitial ad between solo rounds.
     // When this is reached from the "Play Again" button (not the first round), show a
     // preloaded InterstitialAd, then continue into the new round on close. Gate it
     // (e.g. every 2nd or 3rd round) so it never interrupts the very first game.
@@ -20449,7 +20460,7 @@ export default function EnigmaGame() {
     setScreen('solo_game');
   };
 
-  // TODO: AdMob — this simulated 5-second countdown stands in for a real rewarded ad.
+  // TODO: AdMob, this simulated 5-second countdown stands in for a real rewarded ad.
   // Once react-native-google-mobile-ads is wired up, this effect (and the two "Ad
   // simulation modal" blocks in the solo/daily screens) can be removed entirely —
   // the real ad's lifecycle events drive reward delivery and dismissal instead.
@@ -20468,7 +20479,7 @@ export default function EnigmaGame() {
 
   // Auto-load and poll public rooms every 10s while on the rooms screen.
   // Must live with the other hooks (before any screen early-return) so the
-  // hook order stays stable across renders — it self-guards on `screen`.
+  // hook order stays stable across renders, it self-guards on `screen`.
   useEffect(() => {
     if (screen !== 'rooms') return;
     loadPublicRooms();
@@ -20477,7 +20488,7 @@ export default function EnigmaGame() {
   }, [screen]);
 
   const openAdForHint = (mode) => {
-    // TODO: AdMob — replace the simulated ad modal below with a real rewarded ad.
+    // TODO: AdMob, replace the simulated ad modal below with a real rewarded ad.
     //   1. Preload a RewardedAd (react-native-google-mobile-ads) when the solo/daily game starts.
     //   2. Here: if the ad is loaded, call rewarded.show(); otherwise fall back to granting the hint.
     //   3. On the 'earned_reward' event, call collectHint(). On close, reload the next ad.
@@ -20487,7 +20498,7 @@ export default function EnigmaGame() {
   };
 
   const collectHint = () => {
-    // TODO: AdMob — this is the reward callback. With a real rewarded ad it should be
+    // TODO: AdMob, this is the reward callback. With a real rewarded ad it should be
     // invoked by the ad SDK's 'earned_reward' event rather than the simulated modal's timer.
     setAdModalVisible(false);
     if (pendingHintMode === 'solo') {
@@ -20615,7 +20626,7 @@ export default function EnigmaGame() {
     recordDiscovery(libTier, soloChallenge, isCorrect);
   };
 
-  // Give up — end the round unsolved and reveal the answer on the result screen.
+  // Give up, end the round unsolved and reveal the answer on the result screen.
   const giveUpSolo = () => {
     if (!soloChallenge) return;
     sounds.lose();
@@ -20700,7 +20711,7 @@ export default function EnigmaGame() {
     setFeedbackThanks(true);
   };
 
-  // One-tap flag from the Q&A review — records that an AI answer looked wrong,
+  // One-tap flag from the Q&A review, records that an AI answer looked wrong,
   // no detail asked (reason 'flagged'). Fire-and-forget.
   const reportAnswerFromReview = ({ question, answer, secret }) => {
     supabase.from('ai_answer_reports').insert({
@@ -20756,7 +20767,7 @@ export default function EnigmaGame() {
   const askDailyQuestion = async (question) => {
     const q = question.trim();
     const realQCount = dailyQuestions.filter(qq => !qq.type).length;
-    // TODO: AdMob — future placement: same as solo, offer a rewarded ad for 5 bonus
+    // TODO: AdMob, future placement: same as solo, offer a rewarded ad for 5 bonus
     // questions when the player exhausts the 20-question limit on the Daily Challenge.
     if (!q || dailyLoading || realQCount >= 20) return;
     if (!isValidQuestion(q)) {
@@ -20833,7 +20844,7 @@ export default function EnigmaGame() {
         onLayout={onSplashLayout}
         style={{ flex: 1, backgroundColor: '#06060f', alignItems: 'center', justifyContent: 'center' }}
       >
-        {/* Phase 1 — Haque Games logo with zoom + sweep */}
+        {/* Phase 1, Haque Games logo with zoom + sweep */}
         <Animated.View style={{ opacity: haqueOpacity, position: 'absolute', alignItems: 'center', justifyContent: 'center' }}>
           <View style={{
             width: LW,
@@ -20877,7 +20888,7 @@ export default function EnigmaGame() {
           </View>
         </Animated.View>
 
-        {/* Phase 2 — 20Q logo fades + springs in */}
+        {/* Phase 2, 20Q logo fades + springs in */}
         <Animated.View style={{
           opacity: logo20qOpacity,
           transform: [{ scale: logo20qScale }],
@@ -20894,7 +20905,7 @@ export default function EnigmaGame() {
     );
   }
 
-  // ─── HOME — personal landing ──────────────────────────────────────────────
+  // ─── HOME, personal landing ──────────────────────────────────────────────
   if (screen === 'home') {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
@@ -20902,24 +20913,24 @@ export default function EnigmaGame() {
         <Modal visible={howToPlayOpen} animationType="slide" transparent onRequestClose={() => setHowToPlayOpen(false)}>
           <View style={S.overlay}>
             <View style={[S.modal, { maxHeight: '90%' }]}>
-              <View style={S.modalHandle} />
+              <ModalHandle onClose={() => setHowToPlayOpen(false)} />
               <ScrollView showsVerticalScrollIndicator={false}>
                 <Text style={[S.modalTitle, { marginBottom: 4 }]}>📖 How to Play</Text>
                 <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, marginBottom: 16 }}>Ask yes/no questions to uncover the secret in 20 tries.</Text>
 
-                {/* Section tabs */}
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, marginBottom: 18 }} contentContainerStyle={{ gap: 8, paddingBottom: 2 }}>
+                {/* Section tabs, wrap so every tab stays fully visible */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
                   {Object.entries(HOWTO).map(([id, t]) => {
                     const on = htpTab === id;
                     return (
                       <TouchableOpacity key={id} onPress={() => setHtpTab(id)} activeOpacity={0.85}
-                        style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 9, paddingHorizontal: 14, borderRadius: 20, borderWidth: 1, borderColor: on ? t.accent : C.border2, backgroundColor: on ? `${t.accent}22` : C.card }}>
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 9, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: on ? t.accent : C.border2, backgroundColor: on ? `${t.accent}22` : C.card }}>
                         <Text style={{ fontSize: 14 }}>{t.icon}</Text>
                         <Text style={{ fontSize: 13, fontFamily: on ? F.sansBold : F.sansSemi, color: on ? t.accent : C.muted }}>{t.label}</Text>
                       </TouchableOpacity>
                     );
                   })}
-                </ScrollView>
+                </View>
 
                 {/* Active section */}
                 {(() => {
@@ -20986,19 +20997,19 @@ export default function EnigmaGame() {
                 })()}
 
                 <TouchableOpacity style={[S.btnGold, { marginTop: 24, marginBottom: 8 }]} onPress={() => setHowToPlayOpen(false)}>
-                  <Text style={S.btnGoldText}>Got it — Let's Play! ✦</Text>
+                  <Text style={S.btnGoldText}>Got it, Let's Play! ✦</Text>
                 </TouchableOpacity>
               </ScrollView>
             </View>
           </View>
         </Modal>
 
-        {/* Help Improve 20Q — feedback modal */}
+        {/* Help Improve 20Q, feedback modal */}
         <Modal visible={feedbackOpen} animationType="slide" transparent onRequestClose={() => setFeedbackOpen(false)}>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
             <View style={S.overlay}>
               <View style={[S.modal, { maxHeight: '90%' }]}>
-                <View style={S.modalHandle} />
+                <ModalHandle onClose={() => setFeedbackOpen(false)} />
                 {feedbackThanks ? (
                   <View style={{ alignItems: 'center', paddingVertical: 28 }}>
                     <Text style={{ fontSize: 46, marginBottom: 12 }}>🙏</Text>
@@ -21028,7 +21039,7 @@ export default function EnigmaGame() {
                     <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" style={{ marginBottom: 12 }}>
                       {feedbackTab === 'suggest' ? (
                         <>
-                          <Text style={[S.bodyText, { marginBottom: 14 }]}>Know a great secret we're missing? Pick a category and suggest it — every idea is reviewed before it's added.</Text>
+                          <Text style={[S.bodyText, { marginBottom: 14 }]}>Know a great secret we're missing? Pick a category and suggest it, every idea is reviewed before it's added.</Text>
                           {[{ tier: 'scholar', label: '🟣 Scholar', list: THEMES }, { tier: 'junior', label: '🟢 Junior', list: JUNIOR_THEMES }].map((group) => (
                             <View key={group.tier} style={{ marginBottom: 14 }}>
                               <Text style={[S.fieldLabel, { marginBottom: 8 }]}>{group.label}</Text>
@@ -21118,7 +21129,7 @@ export default function EnigmaGame() {
         </Modal>
 
         <ScrollView contentContainerStyle={[S.screen, { flexGrow: 1, paddingTop: insets.top + 32, paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
-          {/* Top bar — mute toggle (left), coins + bonus (right) */}
+          {/* Top bar, mute toggle (left), coins + bonus (right) */}
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <TouchableOpacity
               onPress={toggleMute}
@@ -21138,7 +21149,7 @@ export default function EnigmaGame() {
               </View>
             </View>
           </View>
-          {/* Game Logo — 20Q icon with layered aura */}
+          {/* Game Logo, 20Q icon with layered aura */}
           <View style={{ alignItems: 'center', marginBottom: 34 }}>
             <View style={{ alignItems: 'center', justifyContent: 'center', height: 210, width: 210 }}>
               {/* Soft concentric glows lift the mark off the background */}
@@ -21181,7 +21192,7 @@ export default function EnigmaGame() {
 
           <View style={{ height: 16 }} />
 
-          {/* Play — primary, prominent */}
+          {/* Play, primary, prominent */}
           <TouchableOpacity
             disabled={!nameInput.trim()}
             onPress={handlePlay}
@@ -21221,7 +21232,7 @@ export default function EnigmaGame() {
     );
   }
 
-  // ─── TIER SELECT (Junior / Scholar — top-level choice, switchable anytime) ──
+  // ─── TIER SELECT (Junior / Scholar, top-level choice, switchable anytime) ──
   if (screen === 'tier_select') {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f', paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24, paddingHorizontal: 24 }]}>
@@ -21284,7 +21295,7 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f', paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
       <PremiumBackground />
-        {/* Back + identity — enlarged for visibility */}
+        {/* Back + identity, enlarged for visibility */}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, paddingHorizontal: 20 }}>
           <TouchableOpacity onPress={() => setScreen('home')} activeOpacity={0.8}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.05)' }}>
@@ -21318,10 +21329,10 @@ export default function EnigmaGame() {
           <Text style={{ fontFamily: F.sansSemi, fontSize: 15, color: C.muted, letterSpacing: 0.3, textAlign: 'center' }}>Three ways to test your wits</Text>
         </View>
 
-        {/* Three cards — glass morphism (thicker rims, larger type) */}
+        {/* Three cards, glass morphism (thicker rims, larger type) */}
         <View style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-evenly' }}>
 
-          {/* Daily Challenge — gold glass */}
+          {/* Daily Challenge, gold glass */}
           <TouchableOpacity onPress={() => setScreen('daily_setup')} activeOpacity={0.85}>
             <View style={{ borderRadius: 22, shadowColor: C.gold, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.42, shadowRadius: 22, elevation: 12 }}>
               <LinearGradient colors={['rgba(255,236,170,0.92)', 'rgba(212,168,74,0.55)', 'rgba(150,98,22,0.70)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 3 }}>
@@ -21353,7 +21364,7 @@ export default function EnigmaGame() {
             </View>
           </TouchableOpacity>
 
-          {/* Multiplayer — violet glass */}
+          {/* Multiplayer, violet glass */}
           <TouchableOpacity onPress={() => setScreen('multi_home')} activeOpacity={0.85}>
             <View style={{ borderRadius: 20, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 18, elevation: 10 }}>
               <LinearGradient colors={['rgba(190,155,255,0.90)', 'rgba(124,58,237,0.52)', 'rgba(76,24,170,0.68)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 3 }}>
@@ -21375,7 +21386,7 @@ export default function EnigmaGame() {
             </View>
           </TouchableOpacity>
 
-          {/* Solo — emerald glass */}
+          {/* Solo, emerald glass */}
           <TouchableOpacity onPress={() => setScreen('solo_setup')} activeOpacity={0.85}>
             <View style={{ borderRadius: 20, shadowColor: C.success, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.38, shadowRadius: 16, elevation: 10 }}>
               <LinearGradient colors={['rgba(120,255,175,0.88)', 'rgba(34,197,94,0.50)', 'rgba(12,110,44,0.66)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 3 }}>
@@ -21395,7 +21406,7 @@ export default function EnigmaGame() {
             </View>
           </TouchableOpacity>
 
-          {/* My Discoveries — slim pill; tier-aware collection of fact cards */}
+          {/* My Discoveries, slim pill; tier-aware collection of fact cards */}
           {(() => {
             const dTier = tier === 'junior' ? 'junior' : 'scholar';
             const count = (discoveries[dTier] || []).length;
@@ -21411,7 +21422,7 @@ export default function EnigmaGame() {
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontFamily: F.serifBold, fontSize: 17, color: accent, letterSpacing: 0.4 }}>My Discoveries</Text>
                     <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, marginTop: 2 }}>
-                      {count > 0 ? `${count} secret${count === 1 ? '' : 's'} discovered — tap to browse` : 'Fact cards you unlock will collect here'}
+                      {count > 0 ? `${count} secret${count === 1 ? '' : 's'} discovered, tap to browse` : 'Fact cards you unlock will collect here'}
                     </Text>
                   </View>
                   <Text style={{ color: accent, fontSize: 22 }}>›</Text>
@@ -21483,7 +21494,7 @@ export default function EnigmaGame() {
           )}
         </ScrollView>
 
-        {/* Detail modal — the full "About This Secret" card for one discovery */}
+        {/* Detail modal, the full "About This Secret" card for one discovery */}
         <Modal visible={!!discoveryDetail} animationType="slide" transparent onRequestClose={() => setDiscoveryDetail(null)}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.72)', justifyContent: 'flex-end' }}>
             <View style={{ backgroundColor: '#0b0b1a', borderTopLeftRadius: 22, borderTopRightRadius: 22, borderWidth: 1, borderColor: C.border2, maxHeight: '86%', paddingTop: 10 }}>
@@ -21567,7 +21578,7 @@ export default function EnigmaGame() {
             </Text>
           </View>
 
-          {/* Create card — gold glass */}
+          {/* Create card, gold glass */}
           <TouchableOpacity onPress={() => setScreen('create')} activeOpacity={0.85} style={{ marginBottom: 14 }}>
             <View style={{ borderRadius: 20, shadowColor: C.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.30, shadowRadius: 18, elevation: 10 }}>
               <LinearGradient colors={['rgba(255,232,160,0.68)', 'rgba(212,168,74,0.28)', 'rgba(140,90,18,0.44)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 1.5 }}>
@@ -21596,7 +21607,7 @@ export default function EnigmaGame() {
             <View style={{ flex: 1, height: 1, backgroundColor: C.border }} />
           </View>
 
-          {/* Join card — violet glass */}
+          {/* Join card, violet glass */}
           <TouchableOpacity onPress={() => setScreen('join')} activeOpacity={0.85} style={{ marginTop: 14, marginBottom: 6 }}>
             <View style={{ borderRadius: 20, shadowColor: C.violet, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.28, shadowRadius: 14, elevation: 8 }}>
               <LinearGradient colors={['rgba(180,140,255,0.58)', 'rgba(124,58,237,0.24)', 'rgba(70,20,160,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 1.5 }}>
@@ -21618,7 +21629,7 @@ export default function EnigmaGame() {
             </View>
           </TouchableOpacity>
 
-          {/* Browse public rooms — Scholar only (Junior is private-only) */}
+          {/* Browse public rooms, Scholar only (Junior is private-only) */}
           {tier !== 'junior' && (
             <TouchableOpacity onPress={() => setScreen('rooms')} activeOpacity={0.85} style={{ marginTop: 14 }}>
               <View style={{ borderRadius: 18, shadowColor: C.violet, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.22, shadowRadius: 12, elevation: 6 }}>
@@ -21643,7 +21654,7 @@ export default function EnigmaGame() {
           {tier === 'junior' && (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 16, marginTop: 6 }}>
               <Text style={{ fontSize: 13 }}>🔒</Text>
-              <Text style={{ fontFamily: F.sansMed, fontSize: 12, color: C.dim, letterSpacing: 0.3 }}>Junior games are private — play with family & friends</Text>
+              <Text style={{ fontFamily: F.sansMed, fontSize: 12, color: C.dim, letterSpacing: 0.3 }}>Junior games are private, play with family & friends</Text>
             </View>
           )}
         </ScrollView>
@@ -21676,7 +21687,7 @@ export default function EnigmaGame() {
           <View style={[S.infoCard, { marginBottom: 24 }]}>
             <Text style={{ color: C.text, fontFamily: 'Outfit_600SemiBold', fontSize: 14, marginBottom: 8 }}>How it works</Text>
             <Text style={[S.bodyText, { lineHeight: 22 }]}>
-              {'• A secret is chosen for today — same for everyone worldwide.\n'}
+              {'• A secret is chosen for today, same for everyone worldwide.\n'}
               {'• You have '}
               <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text>
               {' to figure it out.\n'}
@@ -21752,7 +21763,7 @@ export default function EnigmaGame() {
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
           <View style={S.overlay}>
             <View style={S.modal}>
-              <View style={S.modalHandle} />
+              <ModalHandle onClose={() => setDailySolveOpen(false)} />
               <Text style={S.modalTitle}>💡 Make Your Guess</Text>
               <Text style={[S.modalSub, { marginBottom: 16 }]}>What is the secret? Type your answer below.</Text>
               <GlassInput
@@ -21804,7 +21815,7 @@ export default function EnigmaGame() {
           </View>
         </View>
 
-        {/* Category banner — premium gold glass morphism panel */}
+        {/* Category banner, premium gold glass morphism panel */}
         <View style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 }}>
           <View style={{
             borderRadius: 22,
@@ -21869,7 +21880,7 @@ export default function EnigmaGame() {
           </View>
         </View>
 
-        {/* Animated host — reacts to each answer once questioning starts */}
+        {/* Animated host, reacts to each answer once questioning starts */}
         {qCount > 0 && <HostStrip mood={hostMood} line={hostLine} reactKey={hostReactKey} accent="#d4a84a" />}
 
         {/* Q&A feed + input */}
@@ -21881,7 +21892,7 @@ export default function EnigmaGame() {
           onContentSizeChange={() => feedScrollRef.current?.scrollToEnd({ animated: true })}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Dialogue card — Daily Challenge host */}
+          {/* Dialogue card, Daily Challenge host */}
           {dailyQuestions.length === 0 && (
             <View style={{ marginBottom: 16 }}>
               <View style={{
@@ -21975,7 +21986,7 @@ export default function EnigmaGame() {
                       {/* Info row */}
                       <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', gap: 12 }}>
                         <Text style={{ flex: 1, fontSize: 13, color: 'rgba(220,195,140,0.82)', fontFamily: 'Outfit_400Regular', lineHeight: 20 }}>
-                          Ask yes/no questions — you have{' '}
+                          Ask yes/no questions, you have{' '}
                           <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text>{' '}
                           to crack the secret.
                         </Text>
@@ -22005,12 +22016,12 @@ export default function EnigmaGame() {
           {limitReached && (
             <View style={{ backgroundColor: 'rgba(248,81,73,0.08)', borderWidth: 1, borderColor: 'rgba(248,81,73,0.3)', borderRadius: 10, padding: 14, marginBottom: 12 }}>
               <Text style={{ color: C.danger, fontFamily: 'Outfit_600SemiBold', fontSize: 14, textAlign: 'center' }}>
-                20 questions used — time to make your guess!
+                20 questions used, time to make your guess!
               </Text>
             </View>
           )}
 
-          {/* Question composer — clearly delineated input zone */}
+          {/* Question composer, clearly delineated input zone */}
           {!limitReached && (
             <View style={{ marginTop: 20 }}>
               <AnswerWarnBanner inline />
@@ -22043,13 +22054,13 @@ export default function EnigmaGame() {
             </View>
           )}
 
-          {/* Hint button — below input */}
+          {/* Hint button, below input */}
           {dailyHintsUsed < 2 && (
             <HintButton nextHint={dailyHintsUsed + 1} onPress={() => openAdForHint('daily')} />
           )}
         </ScrollView>
 
-        {/* Solve button — fixed at very bottom, bold gold */}
+        {/* Solve button, fixed at very bottom, bold gold */}
         <View style={{ backgroundColor: C.surface, borderTopWidth: 1, borderTopColor: C.border2, padding: 14, paddingBottom: insets.bottom + 14 }}>
           <SolveButton onPress={() => { setDailySolveInput(''); setDailySolveOpen(true); }} />
         </View>
@@ -22145,7 +22156,7 @@ export default function EnigmaGame() {
           {/* Review the round's questions & answers */}
           <QAReview questions={dailyQuestions} accent="gold" secret={dailyChallenge?.secret} onReport={reportAnswerFromReview} />
 
-          {/* Spoiler-free share — brag performance, never the secret */}
+          {/* Spoiler-free share, brag performance, never the secret */}
           <TouchableOpacity style={S.btnGold} onPress={shareDailyResult} activeOpacity={0.85}>
             <Text style={S.btnGoldText}>📤 Share Result</Text>
           </TouchableOpacity>
@@ -22178,7 +22189,7 @@ export default function EnigmaGame() {
           </Text>
         </View>
 
-        {/* ── Active level (chosen on the tier screen / mode menu — read-only here) ── */}
+        {/* ── Active level (chosen on the tier screen / mode menu, read-only here) ── */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 22, paddingVertical: 8, borderRadius: 12, borderWidth: 1, borderColor: isJunior ? 'rgba(255,107,53,0.35)' : 'rgba(167,139,250,0.35)', backgroundColor: isJunior ? 'rgba(255,107,53,0.10)' : 'rgba(124,58,237,0.10)' }}>
           <Text style={{ fontSize: 15 }}>{isJunior ? '🌟' : '📚'}</Text>
           <Text style={{ fontFamily: F.sansSemi, fontSize: 13, color: isJunior ? '#ff6b35' : C.violet2, letterSpacing: 0.3 }}>{isJunior ? 'Junior' : 'Scholar'} Level</Text>
@@ -22188,13 +22199,13 @@ export default function EnigmaGame() {
 
         {isJunior ? (
           <>
-            {/* Random tile — Junior */}
+            {/* Random tile, Junior */}
             <TouchableOpacity
               onPress={() => setSoloCategory('random')}
               style={{ backgroundColor: soloCategory === 'random' ? 'rgba(255,107,53,0.10)' : C.card, borderWidth: 1.5, borderColor: soloCategory === 'random' ? '#ff6b35' : C.border2, borderRadius: 14, padding: 16, marginBottom: 14, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <Text style={{ fontSize: 28 }}>🎲</Text>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === 'random' ? '#ff6b35' : C.text }}>Random — Surprise Me 🎲</Text>
+                <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === 'random' ? '#ff6b35' : C.text }}>Random, Surprise Me 🎲</Text>
                 <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>Pick from all Junior categories</Text>
               </View>
               {soloCategory === 'random' && <Text style={{ color: '#ff6b35', fontSize: 18 }}>✓</Text>}
@@ -22237,13 +22248,13 @@ export default function EnigmaGame() {
           </>
         ) : (
           <>
-            {/* Random tile — Scholar */}
+            {/* Random tile, Scholar */}
             <TouchableOpacity
               onPress={() => setSoloCategory('random')}
               style={{ backgroundColor: soloCategory === 'random' ? 'rgba(212,168,74,0.10)' : C.card, borderWidth: 1.5, borderColor: soloCategory === 'random' ? C.gold : C.border2, borderRadius: 14, padding: 16, marginBottom: 14, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <Text style={{ fontSize: 28 }}>🎲</Text>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === 'random' ? C.gold : C.text }}>Random — Surprise Me 🎲</Text>
+                <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 15, color: soloCategory === 'random' ? C.gold : C.text }}>Random, Surprise Me 🎲</Text>
                 <Text style={[S.tCaption, { color: C.muted, marginTop: 2 }]}>Pick from all Scholar categories</Text>
               </View>
               {soloCategory === 'random' && <Text style={{ color: C.gold, fontSize: 18 }}>✓</Text>}
@@ -22363,7 +22374,7 @@ export default function EnigmaGame() {
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
             <View style={S.overlay}>
               <View style={S.modal}>
-                <View style={S.modalHandle} />
+                <ModalHandle onClose={() => setSoloSolveOpen(false)} />
                 <Text style={S.modalTitle}>💡 Make Your Guess</Text>
                 <Text style={[S.modalSub, { marginBottom: 16 }]}>What is the secret? Type your answer below.</Text>
                 <GlassInput
@@ -22384,7 +22395,7 @@ export default function EnigmaGame() {
                     <Text style={S.btnOutlineText}>Ask More Questions First</Text>
                   </TouchableOpacity>
                 )}
-                {/* Give up — reveal the answer instead of guessing */}
+                {/* Give up, reveal the answer instead of guessing */}
                 <TouchableOpacity
                   style={{ marginTop: 12, paddingVertical: 12, alignItems: 'center' }}
                   onPress={() => Alert.alert('Give up?', 'This ends the round and reveals the answer.', [
@@ -22425,7 +22436,7 @@ export default function EnigmaGame() {
               </View>
             </View>
           )}
-          {/* Category panel — royal purple glass morphism */}
+          {/* Category panel, royal purple glass morphism */}
           <View style={{
             borderRadius: 22,
             shadowColor: '#7c3aed',
@@ -22485,13 +22496,13 @@ export default function EnigmaGame() {
           </View>
         </View>
 
-        {/* Animated host — reacts to each answer once questioning starts */}
+        {/* Animated host, reacts to each answer once questioning starts */}
         {qCount > 0 && <HostStrip mood={hostMood} line={hostLine} reactKey={hostReactKey} accent="#a78bfa" />}
 
         {/* Q&A feed + input (input lives in scroll so it sits right below the card) */}
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
           <ScrollView ref={feedScrollRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 16 }} onContentSizeChange={() => feedScrollRef.current?.scrollToEnd({ animated: true })} keyboardShouldPersistTaps="handled">
-            {/* Dialogue card — premium AI game host */}
+            {/* Dialogue card, premium AI game host */}
             {qCount === 0 && (
               <View style={{ marginBottom: 16 }}>
                 {/* Outer glow wrapper */}
@@ -22625,12 +22636,12 @@ export default function EnigmaGame() {
             {limitReached && (
               <View style={{ backgroundColor: 'rgba(248,81,73,0.08)', borderWidth: 1, borderColor: 'rgba(248,81,73,0.3)', borderRadius: 10, padding: 14, marginBottom: 12 }}>
                 <Text style={{ color: C.danger, fontFamily: 'Outfit_600SemiBold', fontSize: 14, textAlign: 'center' }}>
-                  {soloBonusUsed ? '22 questions used — time to make your guess!' : '20 questions used — time to make your guess!'}
+                  {soloBonusUsed ? '22 questions used, time to make your guess!' : '20 questions used, time to make your guess!'}
                 </Text>
               </View>
             )}
 
-            {/* One-time +2 bonus questions — Scholar watches an ad, Junior spends coins */}
+            {/* One-time +2 bonus questions, Scholar watches an ad, Junior spends coins */}
             {limitReached && !soloBonusUsed && (
               tier === 'junior' ? (
                 <TouchableOpacity
@@ -22654,7 +22665,7 @@ export default function EnigmaGame() {
               )
             )}
 
-            {/* Question composer — clearly delineated input zone */}
+            {/* Question composer, clearly delineated input zone */}
             {!limitReached && (
               <View style={{ marginTop: 20 }}>
                 <AnswerWarnBanner inline />
@@ -22685,7 +22696,7 @@ export default function EnigmaGame() {
               </View>
             )}
 
-            {/* Hint button — below input */}
+            {/* Hint button, below input */}
             {soloHintsUsed < (tier === 'junior' ? 3 : 2) && (
               <HintButton
                 nextHint={soloHintsUsed + 1}
@@ -22717,10 +22728,10 @@ export default function EnigmaGame() {
     const qToSpare = 20 - questionsUsed;
     const flourish = solved
       ? (hintsUsed === 0 && qToSpare > 0
-          ? `Cracked with ${qToSpare} question${qToSpare !== 1 ? 's' : ''} to spare — no hints!`
+          ? `Cracked with ${qToSpare} question${qToSpare !== 1 ? 's' : ''} to spare, no hints!`
           : qToSpare > 0
             ? `Cracked with ${qToSpare} question${qToSpare !== 1 ? 's' : ''} to spare`
-            : 'Down to the wire — solved on the last question!')
+            : 'Down to the wire, solved on the last question!')
       : null;
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
@@ -22773,7 +22784,7 @@ export default function EnigmaGame() {
           <Text style={[S.tCaption, { color: C.muted, marginTop: 6 }]}>{soloChallenge.categoryIcon} {soloChallenge.categoryLabel}</Text>
         </View>
 
-        {/* Stat strip — questions / time / hints */}
+        {/* Stat strip, questions / time / hints */}
         <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
           <View style={[S.infoCard, { flex: 1, alignItems: 'center' }]}>
             <Text style={{ fontSize: 24, fontFamily: 'Cinzel_700Bold', color: C.violet2 }}>{questionsUsed}</Text>
@@ -22789,7 +22800,7 @@ export default function EnigmaGame() {
           </View>
         </View>
 
-        {/* Your Record — lifetime solo stats (local-only) */}
+        {/* Your Record, lifetime solo stats (local-only) */}
         <View style={[S.infoCard, { marginBottom: 16 }]}>
           <Text style={[S.tOverline, { letterSpacing: 3, marginBottom: 14 }]}>📈 Your Record</Text>
           <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
@@ -22800,7 +22811,7 @@ export default function EnigmaGame() {
             </View>
             <View style={{ alignItems: 'center' }}>
               <Text style={{ fontSize: 22, marginBottom: 2 }}>🏅</Text>
-              <Text style={{ fontSize: 20, fontFamily: 'Cinzel_700Bold', color: C.gold }}>{soloStats.bestQuestions ?? '—'}</Text>
+              <Text style={{ fontSize: 20, fontFamily: 'Cinzel_700Bold', color: C.gold }}>{soloStats.bestQuestions ?? '·'}</Text>
               <Text style={[S.tLabel, { color: C.dim, letterSpacing: 1 }]}>Best (Q)</Text>
             </View>
             <View style={{ alignItems: 'center' }}>
@@ -22827,7 +22838,7 @@ export default function EnigmaGame() {
                 <Text style={{ fontSize: 9, color: C.dim, textAlign: 'right', paddingHorizontal: 8, paddingVertical: 4, fontFamily: F.sans }}>Image: Wikipedia</Text>
               </View>
             )}
-            {/* Info card row — rendered for all categories that have infoFields */}
+            {/* Info card row, rendered for all categories that have infoFields */}
             {(soloChallenge.infoFields || []).length > 0 && (
               <View style={{ backgroundColor: 'rgba(212,168,74,0.08)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.25)', borderRadius: 10, padding: 12, marginBottom: 16, gap: 6 }}>
                 {soloChallenge.infoFields.map((f, i) => (
@@ -22850,11 +22861,11 @@ export default function EnigmaGame() {
           </View>
         )}
 
-        {/* Saved into the collection — jump straight to it */}
+        {/* Saved into the collection, jump straight to it */}
         <TouchableOpacity onPress={() => setScreen('discoveries')} activeOpacity={0.8}
           style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 20, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(167,139,250,0.35)', backgroundColor: 'rgba(124,58,237,0.08)' }}>
           <Text style={{ fontSize: 15 }}>🧠</Text>
-          <Text style={{ fontFamily: F.sansSemi, fontSize: 14, color: C.violet2, letterSpacing: 0.3 }}>Saved to My Discoveries — view all ›</Text>
+          <Text style={{ fontFamily: F.sansSemi, fontSize: 14, color: C.violet2, letterSpacing: 0.3 }}>Saved to My Discoveries, view all ›</Text>
         </TouchableOpacity>
 
         {/* Review the round's questions & answers */}
@@ -22886,9 +22897,9 @@ export default function EnigmaGame() {
             </TouchableOpacity>
           </View>
           <Text style={S.h2}>Create Game</Text>
-          <Text style={[S.muted, { marginBottom: 28 }]}>{tier === 'junior' ? "You'll be the first host this round." : "Choose a room type — you'll be the first host this round."}</Text>
+          <Text style={[S.muted, { marginBottom: 28 }]}>{tier === 'junior' ? "You'll be the first host this round." : "Choose a room type, you'll be the first host this round."}</Text>
 
-          {/* Private — big gold box */}
+          {/* Private, big gold box */}
           <TouchableOpacity onPress={() => createGame(false)} activeOpacity={0.85} style={{ marginBottom: 16 }}>
             <View style={{ borderRadius: 20, shadowColor: C.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.35, shadowRadius: 16, elevation: 10 }}>
               <LinearGradient colors={['rgba(255,236,170,0.90)', 'rgba(212,168,74,0.50)', 'rgba(150,98,22,0.68)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 3 }}>
@@ -22910,7 +22921,7 @@ export default function EnigmaGame() {
             </View>
           </TouchableOpacity>
 
-          {/* Public — big violet box (Scholar only; Junior is private-only) */}
+          {/* Public, big violet box (Scholar only; Junior is private-only) */}
           {tier !== 'junior' && (
           <TouchableOpacity onPress={() => createGame(true)} activeOpacity={0.85}>
             <View style={{ borderRadius: 20, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 16, elevation: 10 }}>
@@ -22962,7 +22973,7 @@ export default function EnigmaGame() {
             onSubmitEditing={joinGame} returnKeyType="go"
           />
 
-          {/* Joining as — read-only identity (set on the home screen) */}
+          {/* Joining as, read-only identity (set on the home screen) */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: C.border2, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 20 }}>
             <PlayerAvatar p={{ avatarIdx: selectedAvatarIdx }} size={44} />
             <View style={{ flex: 1 }}>
@@ -23001,7 +23012,7 @@ export default function EnigmaGame() {
           <Text style={S.h2}>Public Rooms</Text>
           <Text style={[S.muted, { marginBottom: 18 }]}>Jump into a room that's waiting for players.</Text>
 
-          {/* Playing as — reuse the name + avatar already chosen on the home screen */}
+          {/* Playing as, reuse the name + avatar already chosen on the home screen */}
           <View style={{ borderRadius: 16, marginBottom: 22 }}>
             <LinearGradient colors={['rgba(124,58,237,0.24)', 'rgba(60,30,130,0.14)', 'rgba(28,14,80,0.20)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderWidth: 1, borderColor: 'rgba(167,139,250,0.32)', borderRadius: 16 }}>
               <PlayerAvatar p={{ avatarIdx: selectedAvatarIdx }} size={52} />
@@ -23024,7 +23035,7 @@ export default function EnigmaGame() {
             <View style={[S.card, { alignItems: 'center', paddingVertical: 32, paddingHorizontal: 20 }]}>
               <Text style={{ fontSize: 42, marginBottom: 12 }}>🪐</Text>
               <Text style={[S.h2, { textAlign: 'center', fontSize: 17, marginBottom: 8 }]}>No open rooms right now</Text>
-              <Text style={[S.muted, { textAlign: 'center', marginBottom: 20, lineHeight: 20 }]}>Be the first — create a public room and friends can join from here.</Text>
+              <Text style={[S.muted, { textAlign: 'center', marginBottom: 20, lineHeight: 20 }]}>Be the first, create a public room and friends can join from here.</Text>
               <TouchableOpacity onPress={() => createGame(true)} activeOpacity={0.85} style={{ alignSelf: 'stretch' }}>
                 <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 14, paddingVertical: 15, alignItems: 'center' }}>
                   <Text style={{ fontFamily: F.sansBold, fontSize: 15, color: '#1a0f00', letterSpacing: 0.3 }}>+ Create Public Room</Text>
@@ -23269,7 +23280,7 @@ export default function EnigmaGame() {
               <Text style={[S.h2, { textAlign: 'center', marginBottom: 8 }]}>Host is choosing…</Text>
               <Text style={[S.muted, { textAlign: 'center', marginBottom: 28, maxWidth: 260 }]}>The host is selecting a theme. Prepare your mind.</Text>
 
-              {/* Host card — violet glass */}
+              {/* Host card, violet glass */}
               <View style={{ borderRadius: 18, shadowColor: C.violet, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.32, shadowRadius: 14, elevation: 8, alignSelf: 'stretch', marginHorizontal: 8 }}>
                 <LinearGradient colors={['rgba(180,140,255,0.58)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 18, padding: 1.5 }}>
                   <LinearGradient colors={['rgba(124,58,237,0.18)', 'rgba(70,25,150,0.12)', 'rgba(30,8,80,0.24)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 16.5, overflow: 'hidden', paddingVertical: 18, paddingHorizontal: 28, alignItems: 'center' }}>
@@ -23281,7 +23292,7 @@ export default function EnigmaGame() {
               </View>
 
               <Text style={{ fontSize: 11, color: C.dim, marginTop: 20, fontFamily: 'Outfit_400Regular', textAlign: 'center' }}>
-                Get ready — your questions are coming soon!
+                Get ready, your questions are coming soon!
               </Text>
             </View>
           )}
@@ -23324,7 +23335,7 @@ export default function EnigmaGame() {
               <Text style={[S.h2, { letterSpacing: 0.5 }]}>Choose Your Secret</Text>
               <Text style={[S.muted, { marginBottom: 18 }]}>Guessers will try to unravel it in 20 questions.</Text>
 
-              {/* Source tabs — segmented glass */}
+              {/* Source tabs, segmented glass */}
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
                 {[
                   { id: 'library', label: '🎲 Deal Me One' },
@@ -23351,7 +23362,7 @@ export default function EnigmaGame() {
 
               {secretSource === 'library' ? (
                 <>
-                  <Text style={[S.muted, { marginBottom: 14 }]}>We deal you a random secret with private facts — guessers never see the library. Don't know one well? Deal another (up to {MP_DEAL_CAP}), then host the one you know best.</Text>
+                  <Text style={[S.muted, { marginBottom: 14 }]}>We deal you a random secret with private facts, guessers never see the library. Don't know one well? Deal another (up to {MP_DEAL_CAP}), then host the one you know best.</Text>
                   {dealtSecrets.map((item, i) => (
                     <View key={i} style={{ marginBottom: 12 }}>
                       <View style={{ borderRadius: 16, shadowColor: C.gold, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.18, shadowRadius: 10, elevation: 5 }}>
@@ -23393,7 +23404,7 @@ export default function EnigmaGame() {
                       <Text style={{ color: C.gold, fontSize: 14, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>Deal another  ·  {MP_DEAL_CAP - dealtSecrets.length} left</Text>
                     </TouchableOpacity>
                   ) : (
-                    <Text style={[S.tCaption, { color: C.dim, textAlign: 'center', paddingVertical: 8 }]}>That's all {MP_DEAL_CAP} — host the secret you know best, or switch to “Write My Own”.</Text>
+                    <Text style={[S.tCaption, { color: C.dim, textAlign: 'center', paddingVertical: 8 }]}>That's all {MP_DEAL_CAP}, host the secret you know best, or switch to “Write My Own”.</Text>
                   )}
                 </>
               ) : (
@@ -23423,7 +23434,7 @@ export default function EnigmaGame() {
               <Text style={[S.h2, { textAlign: 'center', marginBottom: 8 }]}>Host is choosing their secret…</Text>
               <Text style={[S.muted, { textAlign: 'center', maxWidth: 260, marginBottom: 28 }]}>Stay sharp. The questioning begins soon.</Text>
 
-              {/* Host card — violet glass */}
+              {/* Host card, violet glass */}
               <View style={{ borderRadius: 18, shadowColor: C.violet, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.32, shadowRadius: 14, elevation: 8, alignSelf: 'stretch', marginHorizontal: 8 }}>
                 <LinearGradient colors={['rgba(180,140,255,0.58)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 18, padding: 1.5 }}>
                   <LinearGradient colors={['rgba(124,58,237,0.18)', 'rgba(70,25,150,0.12)', 'rgba(30,8,80,0.24)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 16.5, overflow: 'hidden', paddingVertical: 18, paddingHorizontal: 28, alignItems: 'center' }}>
@@ -23455,10 +23466,10 @@ export default function EnigmaGame() {
           <Modal visible={hostCardOpen} transparent animationType="slide" onRequestClose={() => setHostCardOpen(false)}>
             <View style={S.overlay}>
               <View style={[S.modal, { maxHeight: '85%' }]}>
-                <View style={S.modalHandle} />
+                <ModalHandle onClose={() => setHostCardOpen(false)} />
                 <View style={{ backgroundColor: 'rgba(200,168,74,0.08)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 10, padding: 10, marginBottom: 14, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                   <Text style={{ fontSize: 13 }}>🔒</Text>
-                  <Text style={{ fontSize: 11, color: C.goldDim, fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>PRIVATE — HOST EYES ONLY</Text>
+                  <Text style={{ fontSize: 11, color: C.goldDim, fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>PRIVATE, HOST EYES ONLY</Text>
                 </View>
                 <Text style={[S.modalTitle, { fontSize: 22, marginBottom: 14 }]}>{game.secretAnswer}</Text>
                 <ScrollView showsVerticalScrollIndicator={false} style={{ marginBottom: 14 }}>
@@ -23477,7 +23488,7 @@ export default function EnigmaGame() {
           </Modal>
         )}
 
-        {/* Timeout toast — centred */}
+        {/* Timeout toast, centred */}
         {timeoutToast && (
           <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center', zIndex: 999, pointerEvents: 'none' }}>
             <View style={{ marginHorizontal: 28, backgroundColor: 'rgba(8,8,24,0.97)', borderWidth: 2, borderColor: C.gold, borderRadius: 18, paddingVertical: 20, paddingHorizontal: 24, alignItems: 'center' }}>
@@ -23486,7 +23497,7 @@ export default function EnigmaGame() {
           </View>
         )}
 
-        {/* Host warning modal — appears when 15s expires, gives 10s to answer */}
+        {/* Host warning modal, appears when 15s expires, gives 10s to answer */}
         <Modal visible={!!hostWarningData && viewerIsHost} transparent animationType="fade" onRequestClose={() => {}}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <View style={{ width: '100%', borderRadius: 22, shadowColor: C.danger, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.45, shadowRadius: 22, elevation: 14 }}>
@@ -23496,8 +23507,8 @@ export default function EnigmaGame() {
                   <Text style={{ fontFamily: F.serifBold, fontSize: 20, color: C.danger, textAlign: 'center', marginBottom: 4, letterSpacing: 0.3 }}>⏰ Answer Now!</Text>
                   <Text style={[S.tCaption, { color: C.muted, textAlign: 'center', marginBottom: 16 }]}>
                     {(game?.hostConsecutiveMisses || 0) === 0
-                      ? 'Miss 1 of 2 — answer or the question will be skipped'
-                      : '⚠️ Miss 2 of 2 — answer or you will be eliminated as host!'}
+                      ? 'Miss 1 of 2, answer or the question will be skipped'
+                      : '⚠️ Miss 2 of 2, answer or you will be eliminated as host!'}
                   </Text>
                   <View style={{ alignItems: 'center', marginBottom: 14 }}>
                     <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 46, color: hostWarningSecsLeft <= 4 ? C.danger : C.warn }}>{hostWarningSecsLeft}</Text>
@@ -23533,7 +23544,7 @@ export default function EnigmaGame() {
               <View style={S.modalHandle} />
               <Text style={S.modalTitle}>Verify Guess</Text>
               <Text style={S.modalSub}>{game.pendingSolve?.playerName} thinks they cracked it!</Text>
-              {/* Their guess — gold glass */}
+              {/* Their guess, gold glass */}
               <View style={{ borderRadius: 14, marginBottom: 12, shadowColor: C.gold, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.22, shadowRadius: 10, elevation: 5 }}>
                 <LinearGradient colors={['rgba(255,232,160,0.50)', 'rgba(212,168,74,0.18)', 'rgba(140,90,18,0.34)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14, padding: 1.5 }}>
                   <LinearGradient colors={['rgba(212,168,74,0.14)', 'rgba(60,40,10,0.10)', 'rgba(30,20,5,0.20)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 12.5, overflow: 'hidden', padding: 16, alignItems: 'center' }}>
@@ -23545,7 +23556,7 @@ export default function EnigmaGame() {
                       return (
                         <View style={{ marginTop: 8, backgroundColor: looks ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)', borderRadius: 7, paddingHorizontal: 10, paddingVertical: 4 }}>
                           <Text style={{ fontSize: 11, color: looks ? C.success : C.danger, fontFamily: 'Outfit_500Medium' }}>
-                            {looks ? '🤖 Looks correct' : '🤖 Looks wrong'} — but you decide!
+                            {looks ? '🤖 Looks correct' : '🤖 Looks wrong'}, but you decide!
                           </Text>
                         </View>
                       );
@@ -23553,7 +23564,7 @@ export default function EnigmaGame() {
                   </LinearGradient>
                 </LinearGradient>
               </View>
-              {/* Actual secret — violet glass */}
+              {/* Actual secret, violet glass */}
               <View style={{ borderRadius: 14, marginBottom: 16, shadowColor: C.violet, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.24, shadowRadius: 10, elevation: 5 }}>
                 <LinearGradient colors={['rgba(180,140,255,0.52)', 'rgba(124,58,237,0.20)', 'rgba(70,20,160,0.36)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14, padding: 1.5 }}>
                   <LinearGradient colors={['rgba(124,58,237,0.16)', 'rgba(70,25,150,0.10)', 'rgba(30,8,80,0.22)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 12.5, overflow: 'hidden', padding: 14, alignItems: 'center' }}>
@@ -23584,8 +23595,8 @@ export default function EnigmaGame() {
                   <Text style={{ fontSize: 42 }}>⚖️</Text>
                 </View>
                 <Text style={S.modalTitle}>Host is deciding…</Text>
-                <Text style={S.modalSub}>{game.pendingSolve?.playerName} submitted an answer — waiting for the verdict.</Text>
-                {/* Submitted answer — gold glass */}
+                <Text style={S.modalSub}>{game.pendingSolve?.playerName} submitted an answer, waiting for the verdict.</Text>
+                {/* Submitted answer, gold glass */}
                 <View style={{ alignSelf: 'stretch', borderRadius: 14, marginBottom: 16, shadowColor: C.gold, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.20, shadowRadius: 10, elevation: 5 }}>
                   <LinearGradient colors={['rgba(255,232,160,0.48)', 'rgba(212,168,74,0.18)', 'rgba(140,90,18,0.34)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 14, padding: 1.5 }}>
                     <LinearGradient colors={['rgba(212,168,74,0.14)', 'rgba(60,40,10,0.10)', 'rgba(30,20,5,0.20)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 12.5, overflow: 'hidden', padding: 16, alignItems: 'center' }}>
@@ -23616,13 +23627,13 @@ export default function EnigmaGame() {
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' }}>
             <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => setSolveModalOpen(false)} />
             <View style={S.modal}>
-              <View style={S.modalHandle} />
+              <ModalHandle onClose={() => setSolveModalOpen(false)} />
               <View style={{ alignItems: 'center', marginBottom: 14 }}>
                 <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(124,58,237,0.14)', borderWidth: 2, borderColor: 'rgba(167,139,250,0.40)', alignItems: 'center', justifyContent: 'center', marginBottom: 12, shadowColor: C.violet, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.36, shadowRadius: 14, elevation: 9 }}>
                   <Text style={{ fontSize: 34 }}>💡</Text>
                 </View>
                 <Text style={[S.modalTitle, { textAlign: 'center' }]}>Make Your Guess</Text>
-                <Text style={[S.modalSub, { textAlign: 'center', marginBottom: 0 }]}>Be confident — a wrong guess costs you 5 points!</Text>
+                <Text style={[S.modalSub, { textAlign: 'center', marginBottom: 0 }]}>Be confident, a wrong guess costs you 5 points!</Text>
               </View>
               <GlassInput
                 accent={C.violet}
@@ -23646,7 +23657,7 @@ export default function EnigmaGame() {
         {/* Game content */}
         <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: insets.top }}>
           <View style={{ paddingTop: 8 }}><SimBar /></View>
-          {/* Top bar — home button + category/round glass bar */}
+          {/* Top bar, home button + category/round glass bar */}
           <View style={{ paddingBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <TouchableOpacity
               onPress={goHome}
@@ -23736,13 +23747,13 @@ export default function EnigmaGame() {
               <View style={S.turnDot} />
               <Text style={S.turnText}>
                 {currentQuestioner
-                  ? `${currentQuestioner.name}'s turn${currentQuestioner.id === viewerId ? " — that's you!" : ''}`
+                  ? `${currentQuestioner.name}'s turn${currentQuestioner.id === viewerId ? ", that's you!" : ''}`
                   : 'All guessers are out!'}
               </Text>
             </View>
           )}
 
-          {/* Host secret reveal — violet glass. Tappable to consult the info card. */}
+          {/* Host secret reveal, violet glass. Tappable to consult the info card. */}
           {viewerIsHost && (
             <TouchableOpacity
               activeOpacity={game.hostFacts?.length > 0 ? 0.85 : 1}
@@ -23792,7 +23803,7 @@ export default function EnigmaGame() {
                       </View>
                     ) : q.answer === 'SKIP' ? (
                       <View style={[S.qBadge, { backgroundColor: 'rgba(90,90,136,0.1)', borderColor: 'rgba(90,90,136,0.3)' }]}>
-                        <Text style={{ color: C.dim, fontSize: 14, fontFamily: 'Outfit_700Bold' }}>⏭ Skipped — host timeout</Text>
+                        <Text style={{ color: C.dim, fontSize: 14, fontFamily: 'Outfit_700Bold' }}>⏭ Skipped, host timeout</Text>
                       </View>
                     ) : q.answer === 'PARTLY' ? (
                       <View style={[S.qBadge, { backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.3)' }]}>
@@ -23882,7 +23893,7 @@ export default function EnigmaGame() {
                     />
                   </View>
                   <PremiumButton
-                    label="💡 I Know It — Solve!"
+                    label="💡 I Know It, Solve!"
                     textStyle={{ fontSize: 14 }}
                     onPress={() => { setSolveInput(''); setSolveModalOpen(true); }}
                   />
@@ -23902,7 +23913,7 @@ export default function EnigmaGame() {
             ) : (
               <View style={{ paddingVertical: 12, paddingHorizontal: 14, alignItems: 'center', backgroundColor: 'rgba(124,58,237,0.06)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(124,58,237,0.20)' }}>
                 <Text style={[S.tCaption, { color: C.muted, textAlign: 'center' }]}>
-                  👑 You're the host — watch and answer questions as they come in.
+                  👑 You're the host, watch and answer questions as they come in.
                 </Text>
               </View>
             )}
@@ -23924,7 +23935,7 @@ export default function EnigmaGame() {
       <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <SimBar />
-          {/* Winner block — gold glass */}
+          {/* Winner block, gold glass */}
           <View style={{ borderRadius: 24, shadowColor: C.gold, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.40, shadowRadius: 24, elevation: 14, marginVertical: 16 }}>
             <LinearGradient colors={['rgba(255,232,160,0.72)', 'rgba(212,168,74,0.30)', 'rgba(140,90,18,0.50)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 1.5 }}>
               <LinearGradient colors={['rgba(212,168,74,0.24)', 'rgba(120,80,15,0.14)', 'rgba(50,30,5,0.28)']} locations={[0, 0.5, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 22.5, overflow: 'hidden', padding: 28, alignItems: 'center' }}>
@@ -23937,16 +23948,16 @@ export default function EnigmaGame() {
                 <View style={{ width: 48, height: 1, backgroundColor: 'rgba(212,168,74,0.40)', marginVertical: 12 }} />
                 <Text style={{ fontSize: 11, color: 'rgba(255,220,140,0.75)', letterSpacing: 2.5, textTransform: 'uppercase', fontFamily: F.sansBold, textAlign: 'center', lineHeight: 18 }}>
                   {abandoned
-                    ? `Round ended — no points awarded.\n${host?.name || 'Next player'} is the new host.`
+                    ? `Round ended, no points awarded.\n${host?.name || 'Next player'} is the new host.`
                     : hostWon
-                      ? 'defended the secret — nobody cracked it!'
+                      ? 'defended the secret, nobody cracked it!'
                       : 'cracked the secret!'}
                 </Text>
               </LinearGradient>
             </LinearGradient>
           </View>
 
-          {/* Secret reveal — violet glass */}
+          {/* Secret reveal, violet glass */}
           <View style={{ borderRadius: 16, shadowColor: C.violet, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.28, shadowRadius: 14, elevation: 8, marginBottom: 16 }}>
             <LinearGradient colors={['rgba(180,140,255,0.58)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.38)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.5 }}>
               <LinearGradient colors={['rgba(124,58,237,0.18)', 'rgba(70,25,150,0.11)', 'rgba(30,8,80,0.22)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 14.5, overflow: 'hidden', padding: 18, alignItems: 'center' }}>
@@ -23982,7 +23993,7 @@ export default function EnigmaGame() {
             })}
           </View>
 
-          {/* Review the round's questions & answers — shared transcript, asker names shown */}
+          {/* Review the round's questions & answers, shared transcript, asker names shown */}
           <QAReview questions={game.questions} accent="violet" showAsker />
 
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 16 }}>
