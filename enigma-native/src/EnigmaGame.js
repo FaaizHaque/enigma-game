@@ -21336,11 +21336,26 @@ export default function EnigmaGame() {
             </View>
           </TouchableOpacity>
 
-          {/* Browse public rooms link — Scholar only (Junior is private-only) */}
+          {/* Browse public rooms — Scholar only (Junior is private-only) */}
           {tier !== 'junior' && (
-            <TouchableOpacity onPress={() => setScreen('rooms')} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 16, marginTop: 6 }}>
-              <Text style={{ fontFamily: F.sansMed, fontSize: 13, color: C.dim }}>🌐</Text>
-              <Text style={{ fontFamily: F.sansMed, fontSize: 13, color: C.dim, letterSpacing: 0.3 }}>Browse public rooms</Text>
+            <TouchableOpacity onPress={() => setScreen('rooms')} activeOpacity={0.85} style={{ marginTop: 14 }}>
+              <View style={{ borderRadius: 18, shadowColor: C.violet, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.22, shadowRadius: 12, elevation: 6 }}>
+                <LinearGradient colors={['rgba(160,130,235,0.42)', 'rgba(110,60,210,0.18)', 'rgba(60,25,140,0.30)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 18, padding: 1.4 }}>
+                  <LinearGradient colors={['rgba(124,58,237,0.16)', 'rgba(70,25,150,0.10)', 'rgba(30,8,80,0.20)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 16.6, overflow: 'hidden', padding: 18 }}>
+                    <LinearGradient colors={['rgba(180,140,255,0.16)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 46 }} />
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                      <View style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: 'rgba(124,58,237,0.18)', borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.40)', alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 24 }}>🌐</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontFamily: F.serifBold, fontSize: 17, color: C.violet2, letterSpacing: 0.5, marginBottom: 3 }}>Browse Public Rooms</Text>
+                        <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, lineHeight: 18 }}>Jump into an open game waiting for players</Text>
+                      </View>
+                      <Text style={{ color: C.violet2, fontSize: 22 }}>›</Text>
+                    </View>
+                  </LinearGradient>
+                </LinearGradient>
+              </View>
             </TouchableOpacity>
           )}
           {tier === 'junior' && (
