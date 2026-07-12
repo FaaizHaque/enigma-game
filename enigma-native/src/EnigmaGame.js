@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 import * as LinkingExpo from 'expo-linking';
 import Constants from 'expo-constants';
+import * as Speech from 'expo-speech';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './config/supabase';
 import { genCode, getInitials, fuzzyMatch } from './utils/helpers';
@@ -18714,6 +18715,120 @@ function MascotIcon({ size = 72, uid = 'm', pulse = true, mood = 'idle', reactKe
   );
 }
 
+// Full-body Iris for the intro screen: head + torso + arms + legs, with a gentle
+// idle float and a "bow" (dip + lean) that plays on mount / whenever bowKey changes.
+function IrisFullBody({ size = 150, bowKey = 0 }) {
+  const uid = 'irisfb';
+  const dip = useRef(new Animated.Value(0)).current;
+  const floatV = useRef(new Animated.Value(0)).current;
+  const blink = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const f = Animated.loop(Animated.sequence([
+      Animated.timing(floatV, { toValue: 1, duration: 1900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      Animated.timing(floatV, { toValue: 0, duration: 1900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+    ]));
+    const b = Animated.loop(Animated.sequence([
+      Animated.timing(blink, { toValue: 0.5, duration: 1500, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      Animated.timing(blink, { toValue: 1, duration: 1500, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+    ]));
+    f.start(); b.start();
+    return () => { f.stop(); b.stop(); };
+  }, []);
+
+  // Bow: dip down + lean forward, hold, then spring back. Repeats on bowKey change.
+  useEffect(() => {
+    dip.setValue(0);
+    Animated.sequence([
+      Animated.delay(300),
+      Animated.timing(dip, { toValue: 1, duration: 480, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      Animated.delay(320),
+      Animated.spring(dip, { toValue: 0, friction: 5, tension: 90, useNativeDriver: true }),
+    ]).start();
+  }, [bowKey]);
+
+  const w = size, h = size * 1.25;
+  const translateY = Animated.add(
+    floatV.interpolate({ inputRange: [0, 1], outputRange: [0, -5] }),
+    dip.interpolate({ inputRange: [0, 1], outputRange: [0, 12] })
+  );
+  const rotate = dip.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-9deg'] });
+
+  return (
+    <Animated.View style={{ width: w, height: h, transform: [{ translateY }, { rotate }] }}>
+      <Svg width={w} height={h} viewBox="0 0 120 150">
+        <Defs>
+          <RadialGradient id={`${uid}-body`} cx="38%" cy="30%" r="80%">
+            <Stop offset="0%" stopColor="#b7a0ff" />
+            <Stop offset="42%" stopColor="#7c4ddb" />
+            <Stop offset="78%" stopColor="#4a1f9e" />
+            <Stop offset="100%" stopColor="#2a0f5e" />
+          </RadialGradient>
+          <RadialGradient id={`${uid}-glow`} cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor="#a78bfa" stopOpacity="0.5" />
+            <Stop offset="60%" stopColor="#7c3aed" stopOpacity="0.18" />
+            <Stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
+          </RadialGradient>
+          <SvgLinearGradient id={`${uid}-visor`} x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0%" stopColor="#1a0b3e" />
+            <Stop offset="100%" stopColor="#0a0420" />
+          </SvgLinearGradient>
+          <RadialGradient id={`${uid}-eye`} cx="50%" cy="42%" r="65%">
+            <Stop offset="0%" stopColor="#eafffe" />
+            <Stop offset="35%" stopColor="#7df0ff" />
+            <Stop offset="75%" stopColor="#2bb9e6" />
+            <Stop offset="100%" stopColor="#0e7fb8" />
+          </RadialGradient>
+          <RadialGradient id={`${uid}-tip`} cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor="#eafffe" />
+            <Stop offset="55%" stopColor="#7df0ff" />
+            <Stop offset="100%" stopColor="#2bb9e6" />
+          </RadialGradient>
+        </Defs>
+
+        {/* Ambient glow */}
+        <Circle cx="60" cy="80" r="58" fill={`url(#${uid}-glow)`} />
+
+        {/* Legs + feet */}
+        <Rect x="50" y="104" width="8" height="18" rx="4" fill={`url(#${uid}-body)`} />
+        <Rect x="62" y="104" width="8" height="18" rx="4" fill={`url(#${uid}-body)`} />
+        <Ellipse cx="52" cy="123" rx="9" ry="4.5" fill="#3a1f7a" />
+        <Ellipse cx="68" cy="123" rx="9" ry="4.5" fill="#3a1f7a" />
+
+        {/* Arms */}
+        <Rect x="32" y="72" width="7.5" height="22" rx="3.75" fill={`url(#${uid}-body)`} />
+        <Circle cx="35.75" cy="95" r="4.5" fill="#5a2eaf" />
+        <Rect x="80" y="72" width="7.5" height="22" rx="3.75" fill={`url(#${uid}-body)`} />
+        <Circle cx="83.75" cy="95" r="4.5" fill="#5a2eaf" />
+
+        {/* Torso */}
+        <Rect x="42" y="62" width="36" height="44" rx="17" fill={`url(#${uid}-body)`} stroke="#c9b6ff" strokeWidth="1" strokeOpacity="0.3" />
+        <Ellipse cx="53" cy="70" rx="11" ry="5" fill="#ffffff" opacity="0.14" />
+        {/* Chest light */}
+        <Circle cx="60" cy="84" r="4.5" fill={`url(#${uid}-tip)`} opacity="0.9" />
+
+        {/* Antenna */}
+        <Line x1="60" y1="18" x2="60" y2="10" stroke="#8b6bdf" strokeWidth="2.4" strokeLinecap="round" />
+        <ACircle cx="60" cy="9" r="4" fill={`url(#${uid}-tip)`} opacity={blink} />
+
+        {/* Head */}
+        <Circle cx="60" cy="42" r="25" fill={`url(#${uid}-body)`} stroke="#c9b6ff" strokeWidth="1" strokeOpacity="0.35" />
+        <Ellipse cx="52" cy="27" rx="12" ry="6" fill="#ffffff" opacity="0.2" />
+        <Circle cx="36" cy="42" r="4" fill="#5a2eaf" stroke="#b7a0ff" strokeWidth="0.7" strokeOpacity="0.4" />
+        <Circle cx="84" cy="42" r="4" fill="#5a2eaf" stroke="#b7a0ff" strokeWidth="0.7" strokeOpacity="0.4" />
+        <Rect x="43" y="32" width="34" height="21" rx="10.5" fill={`url(#${uid}-visor)`} stroke="#3a1f7a" strokeWidth="1" />
+        <G>
+          <AEllipse cx="52" cy="42" rx="4.6" ry="6" fill={`url(#${uid}-eye)`} opacity={blink} />
+          <AEllipse cx="68" cy="42" rx="4.6" ry="6" fill={`url(#${uid}-eye)`} opacity={blink} />
+          <Circle cx="50.6" cy="39.6" r="1.5" fill="#ffffff" opacity="0.95" />
+          <Circle cx="66.6" cy="39.6" r="1.5" fill="#ffffff" opacity="0.95" />
+        </G>
+        <Path d="M53 50 Q60 54.5 67 50" stroke="#7df0ff" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.85" />
+      </Svg>
+    </Animated.View>
+  );
+}
+
 // Grabber at the top of a bottom-sheet modal. Tap it to dismiss (like other apps).
 function ModalHandle({ onClose }) {
   if (!onClose) return <View style={S.modalHandle} />;
@@ -19616,6 +19731,10 @@ export default function EnigmaGame() {
   const [hostMood, setHostMood] = useState('idle');
   const [hostLine, setHostLine] = useState('');
   const [hostReactKey, setHostReactKey] = useState(0);
+  // Host intro screen: Iris's varied greeting + a key that retriggers her bow.
+  const [hostGreeting, setHostGreeting] = useState('');
+  const [introBowKey, setIntroBowKey] = useState(0);
+  const introRoundRef = useRef(0);
   const [wallet, setWallet] = useState(DEFAULT_WALLET);
   const [coinBonusNote, setCoinBonusNote] = useState(0);
   const [muted, setMutedState] = useState(false);
@@ -19844,12 +19963,29 @@ export default function EnigmaGame() {
 
   // ─── Animated host (Iris), speech + mood for Solo / Daily ──────────────────
   const HOST_NAME = 'Iris';
-  const hostWelcome = () => {
-    setHostMood('idle');
-    setHostLine(`Hi! I'm ${HOST_NAME}. I've hidden a secret, ask me yes/no questions!`);
-    setHostReactKey((k) => k + 1);
-  };
   const hostThinking = () => { setHostMood('thinking'); setHostLine('Hmm, let me think…'); };
+
+  // Iris's welcome on the intro screen — a varied greeting each round (Option 1),
+  // spoken aloud via TTS unless the player has muted sound.
+  const IRIS_GREETINGS = [
+    `Welcome! I'm ${HOST_NAME}, your host.`,
+    'New secret locked in. Ready to play?',
+    "Round's up! Let's see what you've got.",
+    "I've hidden another one. Can you crack it?",
+    'Back for more? I love it. Here we go!',
+  ];
+  const speakIfOn = (text) => {
+    if (muted) return;
+    try { Speech.stop(); Speech.speak(text, { rate: 0.98, pitch: 1.06 }); } catch {}
+  };
+  const stopSpeech = () => { try { Speech.stop(); } catch {} };
+  const beginHostIntro = () => {
+    const g = IRIS_GREETINGS[introRoundRef.current % IRIS_GREETINGS.length];
+    introRoundRef.current += 1;
+    setHostGreeting(g);
+    setIntroBowKey((k) => k + 1);
+    speakIfOn(g);
+  };
   const hostUnclear = () => {
     setHostMood('idle');
     setHostLine("Hmm, I didn't catch that, try rephrasing?");
@@ -19926,6 +20062,58 @@ export default function EnigmaGame() {
       <Text style={{ fontSize: 13, color: C.gold, fontFamily: F.sansSemi, letterSpacing: 0.2 }}>Tips</Text>
     </TouchableOpacity>
   ) : null);
+
+  // Host intro screen — Iris bows + greets, then "Let's Play" enters the clean
+  // play screen. Shared by Solo and Daily (the challenge is already picked).
+  const HostIntroView = ({ challenge, title, accent, backTo, onPlay }) => (
+    <View style={[S.flex, { backgroundColor: '#05050f' }]}>
+      <PremiumBackground />
+      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24, paddingHorizontal: 16, flexGrow: 1 }}>
+        {/* Header */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+          <TouchableOpacity onPress={() => { stopSpeech(); setScreen(backTo); }}>
+            <Text style={S.backBtn}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={[S.tH3, { color: C.text, letterSpacing: 1 }]}>{title}</Text>
+          {miniMute()}
+        </View>
+
+        {/* Category chip */}
+        <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 10 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: `${accent}55`, backgroundColor: `${accent}18`, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7 }}>
+            <Text style={{ fontSize: 15 }}>{challenge?.categoryIcon}</Text>
+            <Text style={{ fontFamily: F.sansBold, fontSize: 13, color: accent, letterSpacing: 0.3 }}>{challenge?.categoryLabel}</Text>
+          </View>
+        </View>
+
+        {/* Iris bows + greets, then the challenge line */}
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          <View style={{ alignItems: 'center', marginBottom: 20 }}>
+            <IrisFullBody size={148} bowKey={introBowKey} />
+            <View style={{ marginTop: 4, backgroundColor: 'rgba(124,58,237,0.12)', borderWidth: 1, borderColor: 'rgba(167,139,250,0.42)', borderRadius: 18, paddingHorizontal: 20, paddingVertical: 14, maxWidth: 330 }}>
+              <Text style={{ fontFamily: F.serifBold, fontSize: 18, color: C.text, textAlign: 'center', lineHeight: 25 }}>{hostGreeting}</Text>
+            </View>
+          </View>
+
+          <View style={[S.infoCard, { alignItems: 'center', paddingVertical: 20, marginBottom: 24 }]}>
+            <Text style={{ fontFamily: F.sansSemi, fontSize: 15, color: C.muted, textAlign: 'center', lineHeight: 23 }}>
+              I've locked a secret in my mind. Can you crack it in <Text style={{ color: accent, fontFamily: F.sansBold }}>20 questions</Text>?
+            </Text>
+          </View>
+        </View>
+
+        {/* Let's Play */}
+        <TouchableOpacity onPress={onPlay} activeOpacity={0.85}>
+          <View style={{ borderRadius: 16, shadowColor: C.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 12 }}>
+            <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 16, paddingVertical: 18, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
+              <Text style={{ fontFamily: F.sansBold, fontSize: 18, color: '#1a0f00', letterSpacing: 0.5 }}>Let's Play</Text>
+              <Text style={{ fontFamily: F.serifBold, fontSize: 20, color: '#1a0f00' }}>→</Text>
+            </LinearGradient>
+          </View>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
+  );
 
   // Pass-and-play switcher: only active when demo players are present, so it
   // never appears (or pollutes shared state) in a real multiplayer game.
@@ -20457,9 +20645,18 @@ export default function EnigmaGame() {
     setSoloResult(null);
     setSoloHintsUsed(0);
     setSoloBonusUsed(false);
-    setSoloStartTime(Date.now());
     setSoloLoading(false);
-    hostWelcome();
+    beginHostIntro();
+    setScreen('solo_intro');
+  };
+
+  // "Let's Play" from the Solo intro — start the clock and enter the clean play screen.
+  const startSoloPlay = () => {
+    stopSpeech();
+    setSoloStartTime(Date.now());
+    setHostMood('idle');
+    setHostLine("Ask away! I'm ready.");
+    setHostReactKey((k) => k + 1);
     setScreen('solo_game');
   };
 
@@ -20754,8 +20951,17 @@ export default function EnigmaGame() {
     setDailySolveOpen(false);
     setDailyResult(null);
     setDailyHintsUsed(0);
+    beginHostIntro();
+    setScreen('daily_intro');
+  };
+
+  // "Let's Play" from the Daily intro — start the clock and enter the play screen.
+  const startDailyPlay = () => {
+    stopSpeech();
     setDailyStartTime(Date.now());
-    hostWelcome();
+    setHostMood('idle');
+    setHostLine("Ask away! I'm ready.");
+    setHostReactKey((k) => k + 1);
     setScreen('daily_game');
   };
 
@@ -21713,6 +21919,14 @@ export default function EnigmaGame() {
     );
   }
 
+  // ─── HOST INTRO (Iris welcomes, then "Let's Play") ────────────────────────
+  if (screen === 'solo_intro' && soloChallenge) {
+    return <HostIntroView challenge={soloChallenge} title="Solo Mode" accent="#a78bfa" backTo="solo_setup" onPlay={startSoloPlay} />;
+  }
+  if (screen === 'daily_intro' && dailyChallenge) {
+    return <HostIntroView challenge={dailyChallenge} title="Daily Challenge" accent={C.gold} backTo="daily_setup" onPlay={startDailyPlay} />;
+  }
+
   // ─── DAILY GAME ───────────────────────────────────────────────────────────
   if (screen === 'daily_game' && dailyChallenge) {
     const qCount = dailyQuestions.filter(q => !q.type).length;
@@ -21885,7 +22099,7 @@ export default function EnigmaGame() {
         </View>
 
         {/* Animated host, reacts to each answer once questioning starts */}
-        {qCount > 0 && <HostStrip mood={hostMood} line={hostLine} reactKey={hostReactKey} accent="#d4a84a" />}
+        <HostStrip mood={hostMood} line={hostLine} reactKey={hostReactKey} accent="#d4a84a" />
 
         {/* Q&A feed + input */}
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
@@ -21896,120 +22110,6 @@ export default function EnigmaGame() {
           onContentSizeChange={() => feedScrollRef.current?.scrollToEnd({ animated: true })}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Dialogue card, Daily Challenge host */}
-          {dailyQuestions.length === 0 && (
-            <View style={{ marginBottom: 16 }}>
-              <View style={{
-                borderRadius: 24,
-                shadowColor: C.gold,
-                shadowOffset: { width: 0, height: 14 },
-                shadowOpacity: 0.40,
-                shadowRadius: 28,
-                elevation: 14,
-              }}>
-                <LinearGradient
-                  colors={['rgba(255,232,160,0.65)', 'rgba(212,168,74,0.22)', 'rgba(130,85,14,0.55)']}
-                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                  style={{ borderRadius: 24, padding: 1.5 }}
-                >
-                  <LinearGradient
-                    colors={['rgba(45,30,8,0.96)', 'rgba(30,20,5,0.93)', 'rgba(12,8,3,0.97)']}
-                    locations={[0, 0.55, 1]}
-                    start={{ x: 0, y: 0 }} end={{ x: 0.85, y: 1 }}
-                    style={{ borderRadius: 23, overflow: 'hidden' }}
-                  >
-                    {/* Cinematic top-light sweep */}
-                    <LinearGradient
-                      colors={['rgba(255,210,90,0.22)', 'rgba(212,168,74,0.07)', 'transparent']}
-                      style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 90 }}
-                    />
-                    {/* Left-edge accent glow */}
-                    <LinearGradient
-                      colors={['rgba(255,225,140,0.30)', 'transparent']}
-                      start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                      style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 3 }}
-                    />
-
-                    {/* Status bar */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingTop: 20 }}>
-                      <View style={{
-                        width: 7, height: 7, borderRadius: 3.5,
-                        backgroundColor: C.gold,
-                        shadowColor: C.gold, shadowRadius: 6, shadowOpacity: 1, elevation: 3,
-                      }} />
-                      <Text style={{ fontSize: 10, color: 'rgba(255,210,130,0.72)', fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase' }}>
-                        Daily Challenge · Worldwide
-                      </Text>
-                    </View>
-
-                    {/* Avatar medallion */}
-                    <View style={{ alignItems: 'center', paddingTop: 22, paddingBottom: 18 }}>
-                      <View style={{
-                        width: 84, height: 84, borderRadius: 42,
-                        shadowColor: C.gold, shadowOffset: { width: 0, height: 6 },
-                        shadowOpacity: 0.65, shadowRadius: 16, elevation: 10,
-                      }}>
-                        <View style={{
-                          width: 84, height: 84, borderRadius: 42,
-                          borderWidth: 1.5, borderColor: 'rgba(255,210,100,0.52)',
-                          overflow: 'hidden',
-                        }}>
-                          <LinearGradient
-                            colors={['rgba(212,168,74,0.48)', 'rgba(45,28,6,0.90)']}
-                            start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                            style={StyleSheet.absoluteFillObject}
-                          />
-                          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                            <Text style={{ fontSize: 44 }}>🌍</Text>
-                          </View>
-                        </View>
-                      </View>
-                    </View>
-
-                    {/* Copy */}
-                    <View style={{ paddingHorizontal: 22, paddingBottom: 22, alignItems: 'center' }}>
-                      <Text style={{
-                        fontFamily: 'Cinzel_700Bold', fontSize: 18, color: C.gold,
-                        letterSpacing: 0.8, textAlign: 'center', lineHeight: 27,
-                        textShadowColor: 'rgba(212,168,74,0.55)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 10,
-                        marginBottom: 10,
-                      }}>
-                        One Secret. Everyone. Today.
-                      </Text>
-                      <Text style={{ fontSize: 14, color: 'rgba(225,195,145,0.88)', fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 22 }}>
-                        The same mystery challenges players worldwide.
-                      </Text>
-
-                      {/* Separator */}
-                      <LinearGradient
-                        colors={['transparent', 'rgba(212,168,74,0.45)', 'transparent']}
-                        start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                        style={{ width: '100%', height: 1, marginVertical: 18 }}
-                      />
-
-                      {/* Info row */}
-                      <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', gap: 12 }}>
-                        <Text style={{ flex: 1, fontSize: 13, color: 'rgba(220,195,140,0.82)', fontFamily: 'Outfit_400Regular', lineHeight: 20 }}>
-                          Ask yes/no questions, you have{' '}
-                          <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text>{' '}
-                          to crack the secret.
-                        </Text>
-                        <View style={{
-                          backgroundColor: 'rgba(212,168,74,0.10)',
-                          borderWidth: 1, borderColor: 'rgba(212,168,74,0.42)',
-                          borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8,
-                          alignItems: 'center',
-                        }}>
-                          <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, color: C.gold, lineHeight: 20 }}>20</Text>
-                          <Text style={{ fontSize: 9, color: 'rgba(212,168,74,0.65)', fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>ASKS</Text>
-                        </View>
-                      </View>
-                    </View>
-                  </LinearGradient>
-                </LinearGradient>
-              </View>
-            </View>
-          )}
           {dailyQuestions.map((q, i) => {
             if (q.type === 'hint') {
               return <HintCard key={q.id} hintNum={q.hintNum} text={q.text} />;
@@ -22502,132 +22602,11 @@ export default function EnigmaGame() {
         </View>
 
         {/* Animated host, reacts to each answer once questioning starts */}
-        {qCount > 0 && <HostStrip mood={hostMood} line={hostLine} reactKey={hostReactKey} accent="#a78bfa" />}
+        <HostStrip mood={hostMood} line={hostLine} reactKey={hostReactKey} accent="#a78bfa" />
 
         {/* Q&A feed + input (input lives in scroll so it sits right below the card) */}
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
           <ScrollView ref={feedScrollRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 16 }} onContentSizeChange={() => feedScrollRef.current?.scrollToEnd({ animated: true })} keyboardShouldPersistTaps="handled">
-            {/* Dialogue card, premium AI game host */}
-            {qCount === 0 && (
-              <View style={{ marginBottom: 16 }}>
-                {/* Outer glow wrapper */}
-                <View style={{
-                  borderRadius: 24,
-                  shadowColor: '#7c3aed',
-                  shadowOffset: { width: 0, height: 14 },
-                  shadowOpacity: 0.5,
-                  shadowRadius: 28,
-                  elevation: 14,
-                }}>
-                  {/* Gradient accent border ring */}
-                  <LinearGradient
-                    colors={['rgba(216,180,254,0.60)', 'rgba(124,58,237,0.22)', 'rgba(70,30,140,0.50)']}
-                    start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                    style={{ borderRadius: 24, padding: 1.5 }}
-                  >
-                    {/* Glass body */}
-                    <LinearGradient
-                      colors={['rgba(28,14,60,0.95)', 'rgba(18,9,44,0.92)', 'rgba(8,5,22,0.97)']}
-                      locations={[0, 0.55, 1]}
-                      start={{ x: 0, y: 0 }} end={{ x: 0.85, y: 1 }}
-                      style={{ borderRadius: 23, overflow: 'hidden' }}
-                    >
-                      {/* Cinematic top-light sweep */}
-                      <LinearGradient
-                        colors={['rgba(167,139,250,0.26)', 'rgba(124,58,237,0.08)', 'transparent']}
-                        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 90 }}
-                      />
-                      {/* Left-edge accent glow */}
-                      <LinearGradient
-                        colors={['rgba(216,180,254,0.28)', 'transparent']}
-                        start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                        style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 3 }}
-                      />
-
-                      {/* Status bar */}
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingTop: 20 }}>
-                        <View style={{
-                          width: 7, height: 7, borderRadius: 3.5,
-                          backgroundColor: '#a78bfa',
-                          shadowColor: '#7c3aed', shadowRadius: 6, shadowOpacity: 1, elevation: 3,
-                        }} />
-                        <Text style={{ fontSize: 10, color: 'rgba(200,175,255,0.72)', fontFamily: 'Outfit_700Bold', letterSpacing: 3, textTransform: 'uppercase' }}>
-                          Iris · Your Host
-                        </Text>
-                      </View>
-
-                      {/* Avatar medallion */}
-                      <View style={{ alignItems: 'center', paddingTop: 22, paddingBottom: 18 }}>
-                        {/* Shadow halo */}
-                        <View style={{
-                          width: 84, height: 84, borderRadius: 42,
-                          shadowColor: '#7c3aed', shadowOffset: { width: 0, height: 6 },
-                          shadowOpacity: 0.75, shadowRadius: 16, elevation: 10,
-                        }}>
-                          <View style={{
-                            width: 84, height: 84, borderRadius: 42,
-                            borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.50)',
-                            overflow: 'hidden',
-                          }}>
-                            <LinearGradient
-                              colors={['rgba(124,58,237,0.55)', 'rgba(30,14,70,0.90)']}
-                              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                              style={StyleSheet.absoluteFillObject}
-                            />
-                            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                              <MascotIcon size={74} uid="host" />
-                            </View>
-                          </View>
-                        </View>
-                      </View>
-
-                      {/* Copy */}
-                      <View style={{ paddingHorizontal: 22, paddingBottom: 22, alignItems: 'center' }}>
-                        <Text style={{
-                          fontFamily: 'Cinzel_700Bold', fontSize: 18, color: '#fff',
-                          letterSpacing: 0.8, textAlign: 'center', lineHeight: 27,
-                          textShadowColor: 'rgba(124,58,237,0.65)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 10,
-                          marginBottom: 10,
-                        }}>
-                          I've locked a secret in my mind.
-                        </Text>
-                        <Text style={{ fontSize: 14, color: 'rgba(185,165,230,0.90)', fontFamily: 'Outfit_400Regular', textAlign: 'center', lineHeight: 22 }}>
-                          Ask yes/no questions to close in on it.
-                        </Text>
-
-                        {/* Separator */}
-                        <LinearGradient
-                          colors={['transparent', 'rgba(167,139,250,0.42)', 'transparent']}
-                          start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                          style={{ width: '100%', height: 1, marginVertical: 18 }}
-                        />
-
-                        {/* Category + question budget row */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', gap: 12 }}>
-                          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                            <Text style={{ fontSize: 24 }}>{soloChallenge.categoryIcon}</Text>
-                            <View>
-                              <Text style={{ fontSize: 10, color: 'rgba(200,175,255,0.65)', fontFamily: 'Outfit_700Bold', letterSpacing: 2, textTransform: 'uppercase' }}>Target</Text>
-                              <Text style={{ fontSize: 15, color: '#fff', fontFamily: 'Outfit_600SemiBold', marginTop: 1 }}>{soloChallenge.categoryLabel}</Text>
-                            </View>
-                          </View>
-                          {/* Question budget chip */}
-                          <View style={{
-                            backgroundColor: 'rgba(212,168,74,0.10)',
-                            borderWidth: 1, borderColor: 'rgba(212,168,74,0.38)',
-                            borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8,
-                            alignItems: 'center',
-                          }}>
-                            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 17, color: C.gold, lineHeight: 20 }}>20</Text>
-                            <Text style={{ fontSize: 9, color: 'rgba(212,168,74,0.65)', fontFamily: 'Outfit_700Bold', letterSpacing: 1.5 }}>ASKS</Text>
-                          </View>
-                        </View>
-                      </View>
-                    </LinearGradient>
-                  </LinearGradient>
-                </View>
-              </View>
-            )}
 
             {/* Q&A entries */}
             {soloQuestions.map((q, idx) => {
