@@ -22001,9 +22001,11 @@ export default function EnigmaGame() {
               >
                 <Text style={S.btnGoldText}>Submit Answer</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[S.btnOutline, { marginTop: 10 }]} onPress={() => setDailySolveOpen(false)}>
-                <Text style={S.btnOutlineText}>Ask More Questions First</Text>
-              </TouchableOpacity>
+              {!limitReached && (
+                <TouchableOpacity style={[S.btnOutline, { marginTop: 10 }]} onPress={() => setDailySolveOpen(false)}>
+                  <Text style={S.btnOutlineText}>Ask More Questions First</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
           </KeyboardAvoidingView>
