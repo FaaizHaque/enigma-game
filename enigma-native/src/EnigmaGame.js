@@ -21787,8 +21787,10 @@ export default function EnigmaGame() {
         <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 36 }]}>
           <View style={S.screenHeader}>
-            <TouchableOpacity onPress={() => setScreen('modes')}>
-              <Text style={S.backBtn}>← Back</Text>
+            <TouchableOpacity onPress={() => setScreen('modes')} activeOpacity={0.8}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(167,139,250,0.35)', backgroundColor: 'rgba(124,58,237,0.1)' }}>
+              <Text style={{ fontSize: 18, color: C.violet2 }}>←</Text>
+              <Text style={{ fontSize: 15, color: C.violet2, fontFamily: F.sansBold }}>Back</Text>
             </TouchableOpacity>
           </View>
 
@@ -21797,7 +21799,7 @@ export default function EnigmaGame() {
             <View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: 'rgba(124,58,237,0.14)', borderWidth: 2, borderColor: 'rgba(167,139,250,0.38)', alignItems: 'center', justifyContent: 'center', marginBottom: 18, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 18, elevation: 10 }}>
               <Text style={{ fontSize: 36 }}>👥</Text>
             </View>
-            <Text style={{ fontFamily: F.serifBlack, fontSize: 26, color: C.text, letterSpacing: 1.5, marginBottom: 8 }}>MULTIPLAYER</Text>
+            <Text style={{ fontFamily: F.serifBlack, fontSize: 26, color: C.violet2, letterSpacing: 1.5, marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>MULTIPLAYER</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', width: '70%', marginBottom: 10 }}>
               <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(124,58,237,0.25)' }} />
               <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: 'rgba(167,139,250,0.45)', marginHorizontal: 8 }} />
@@ -22337,11 +22339,15 @@ export default function EnigmaGame() {
       <PremiumBackground />
       <ScrollView style={S.flex} contentContainerStyle={[S.screen, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 32 }]}>
         <View style={S.screenHeader}>
-          <TouchableOpacity onPress={() => setScreen('modes')}><Text style={S.backBtn}>← Back</Text></TouchableOpacity>
+          <TouchableOpacity onPress={() => setScreen('modes')} activeOpacity={0.8}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(52,208,88,0.35)', backgroundColor: 'rgba(52,208,88,0.08)' }}>
+            <Text style={{ fontSize: 18, color: C.success }}>←</Text>
+            <Text style={{ fontSize: 15, color: C.success, fontFamily: F.sansBold }}>Back</Text>
+          </TouchableOpacity>
         </View>
         <View style={{ alignItems: 'center', paddingVertical: 20 }}>
           <View style={{ marginBottom: 10 }}><MascotIcon size={88} uid="setup" /></View>
-          <Text style={[S.tH1, { letterSpacing: 1.5 }]}>Solo Mode</Text>
+          <Text style={[S.tH1, { letterSpacing: 1.5, color: C.success, textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }]}>Solo Mode</Text>
           <Text style={[S.tBodySm, { marginTop: 6, textAlign: 'center' }]}>
             The AI hides a secret. You have 20 questions to crack it.
           </Text>
@@ -22467,8 +22473,13 @@ export default function EnigmaGame() {
             </LinearGradient>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={S.btnGold} onPress={startSoloChallenge}>
-            <Text style={S.btnGoldText}>Start Game →</Text>
+          <TouchableOpacity onPress={startSoloChallenge} activeOpacity={0.85}>
+            <View style={{ borderRadius: 14, shadowColor: C.success, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 12 }}>
+              <LinearGradient colors={['#5fe08b', '#34d058', '#159a3f']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 14, paddingVertical: 17, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
+                <Text style={{ fontFamily: F.sansBold, fontSize: 17, color: '#05230f', letterSpacing: 0.5 }}>Start Game</Text>
+                <Text style={{ fontFamily: F.serifBold, fontSize: 19, color: '#05230f' }}>→</Text>
+              </LinearGradient>
+            </View>
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -22930,8 +22941,10 @@ export default function EnigmaGame() {
         <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <View style={S.screenHeader}>
-            <TouchableOpacity onPress={() => setScreen('multi_home')}>
-              <Text style={S.backBtn}>← Back</Text>
+            <TouchableOpacity onPress={() => setScreen('multi_home')} activeOpacity={0.8}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(167,139,250,0.35)', backgroundColor: 'rgba(124,58,237,0.1)' }}>
+              <Text style={{ fontSize: 18, color: C.violet2 }}>←</Text>
+              <Text style={{ fontSize: 15, color: C.violet2, fontFamily: F.sansBold }}>Back</Text>
             </TouchableOpacity>
           </View>
           <Text style={S.h2}>Create Game</Text>
@@ -22995,8 +23008,10 @@ export default function EnigmaGame() {
         <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <View style={S.screenHeader}>
-            <TouchableOpacity onPress={() => setScreen('multi_home')}>
-              <Text style={S.backBtn}>← Back</Text>
+            <TouchableOpacity onPress={() => setScreen('multi_home')} activeOpacity={0.8}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(167,139,250,0.35)', backgroundColor: 'rgba(124,58,237,0.1)' }}>
+              <Text style={{ fontSize: 18, color: C.violet2 }}>←</Text>
+              <Text style={{ fontSize: 15, color: C.violet2, fontFamily: F.sansBold }}>Back</Text>
             </TouchableOpacity>
           </View>
           <Text style={S.h2}>Join Game</Text>
@@ -23039,9 +23054,9 @@ export default function EnigmaGame() {
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
           <View style={[S.screenHeader, { alignItems: 'center' }]}>
             <TouchableOpacity onPress={() => setScreen('multi_home')} activeOpacity={0.8}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.06)' }}>
-              <Text style={{ fontSize: 18, color: C.text, marginTop: -1 }}>←</Text>
-              <Text style={{ fontSize: 16, color: C.text, fontFamily: F.sansBold }}>Back</Text>
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(167,139,250,0.4)', backgroundColor: 'rgba(124,58,237,0.1)' }}>
+              <Text style={{ fontSize: 18, color: C.violet2, marginTop: -1 }}>←</Text>
+              <Text style={{ fontSize: 16, color: C.violet2, fontFamily: F.sansBold }}>Back</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={loadPublicRooms} disabled={loadingRooms} activeOpacity={0.8}
               style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(167,139,250,0.4)', backgroundColor: 'rgba(124,58,237,0.1)' }}>
