@@ -18569,6 +18569,7 @@ function CalendarGlyph({ size = 30 }) {
 // it stays crisp at any size and animates a soft glowing "thinking" pulse.
 const AEllipse = Animated.createAnimatedComponent(Ellipse);
 const ACircle = Animated.createAnimatedComponent(Circle);
+const AG = Animated.createAnimatedComponent(G);
 
 // Host moods drive the eye colour + mouth shape (and a one-shot reaction motion).
 const MOOD_STYLES = {
@@ -18722,6 +18723,7 @@ function IrisFullBody({ size = 150, bowKey = 0 }) {
   const dip = useRef(new Animated.Value(0)).current;
   const floatV = useRef(new Animated.Value(0)).current;
   const blink = useRef(new Animated.Value(1)).current;
+  const wave = useRef(new Animated.Value(0)).current; // right-arm wave (degrees)
 
   useEffect(() => {
     const f = Animated.loop(Animated.sequence([
@@ -18736,23 +18738,34 @@ function IrisFullBody({ size = 150, bowKey = 0 }) {
     return () => { f.stop(); b.stop(); };
   }, []);
 
-  // Bow: dip down + lean forward, hold, then spring back. Repeats on bowKey change.
+  // Greeting: a gentle dip/nod (native View transform) + a hand wave (SVG arm
+  // rotation, non-native). Both replay whenever bowKey changes.
   useEffect(() => {
     dip.setValue(0);
+    wave.setValue(0);
     Animated.sequence([
-      Animated.delay(300),
-      Animated.timing(dip, { toValue: 1, duration: 480, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-      Animated.delay(320),
+      Animated.delay(250),
+      Animated.timing(dip, { toValue: 1, duration: 420, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      Animated.delay(200),
       Animated.spring(dip, { toValue: 0, friction: 5, tension: 90, useNativeDriver: true }),
+    ]).start();
+    Animated.sequence([
+      Animated.delay(850),
+      Animated.timing(wave, { toValue: -38, duration: 170, useNativeDriver: false }),
+      Animated.timing(wave, { toValue: -8, duration: 170, useNativeDriver: false }),
+      Animated.timing(wave, { toValue: -38, duration: 170, useNativeDriver: false }),
+      Animated.timing(wave, { toValue: -8, duration: 170, useNativeDriver: false }),
+      Animated.timing(wave, { toValue: 0, duration: 200, useNativeDriver: false }),
     ]).start();
   }, [bowKey]);
 
   const w = size, h = size * 1.25;
   const translateY = Animated.add(
     floatV.interpolate({ inputRange: [0, 1], outputRange: [0, -5] }),
-    dip.interpolate({ inputRange: [0, 1], outputRange: [0, 12] })
+    dip.interpolate({ inputRange: [0, 1], outputRange: [0, 11] })
   );
-  const rotate = dip.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-9deg'] });
+  // Subtle tilt only — a soft nod rather than an awkward sideways lean.
+  const rotate = dip.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-3deg'] });
 
   return (
     <Animated.View style={{ width: w, height: h, transform: [{ translateY }, { rotate }] }}>
@@ -18795,11 +18808,14 @@ function IrisFullBody({ size = 150, bowKey = 0 }) {
         <Ellipse cx="52" cy="123" rx="9" ry="4.5" fill="#3a1f7a" />
         <Ellipse cx="68" cy="123" rx="9" ry="4.5" fill="#3a1f7a" />
 
-        {/* Arms */}
+        {/* Left arm (static) */}
         <Rect x="32" y="72" width="7.5" height="22" rx="3.75" fill={`url(#${uid}-body)`} />
         <Circle cx="35.75" cy="95" r="4.5" fill="#5a2eaf" />
-        <Rect x="80" y="72" width="7.5" height="22" rx="3.75" fill={`url(#${uid}-body)`} />
-        <Circle cx="83.75" cy="95" r="4.5" fill="#5a2eaf" />
+        {/* Right arm — waves hello, pivoting at the shoulder */}
+        <AG rotation={wave} originX={83.75} originY={73}>
+          <Rect x="80" y="72" width="7.5" height="22" rx="3.75" fill={`url(#${uid}-body)`} />
+          <Circle cx="83.75" cy="95" r="4.5" fill="#5a2eaf" />
+        </AG>
 
         {/* Torso */}
         <Rect x="42" y="62" width="36" height="44" rx="17" fill={`url(#${uid}-body)`} stroke="#c9b6ff" strokeWidth="1" strokeOpacity="0.3" />
@@ -19980,7 +19996,17 @@ export default function EnigmaGame() {
   ];
   const speakIfOn = (text) => {
     if (muted) return;
-    try { Speech.stop(); Speech.speak(text, { rate: 0.98, pitch: 1.06 }); } catch {}
+    // Calm pace; speak the opening word, pause, then the rest ("Welcome" … "I'm Iris, your host").
+    const opts = { rate: 0.8, pitch: 1.05 };
+    try {
+      Speech.stop();
+      const m = text.match(/^(.*?[.!?])\s+(.*)$/);
+      if (m) {
+        Speech.speak(m[1], { ...opts, onDone: () => { if (!muted) setTimeout(() => { try { Speech.speak(m[2], opts); } catch {} }, 350); } });
+      } else {
+        Speech.speak(text, opts);
+      }
+    } catch {}
   };
   const stopSpeech = () => { try { Speech.stop(); } catch {} };
   const beginHostIntro = () => {
@@ -20074,34 +20100,36 @@ export default function EnigmaGame() {
       <PremiumBackground />
       <ScrollView contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24, paddingHorizontal: 16, flexGrow: 1 }}>
         {/* Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-          <TouchableOpacity onPress={() => { stopSpeech(); setScreen(backTo); }}>
-            <Text style={S.backBtn}>← Back</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <TouchableOpacity onPress={() => { stopSpeech(); setScreen(backTo); }} activeOpacity={0.8}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.05)' }}>
+            <Text style={{ fontSize: 18, color: C.text }}>←</Text>
+            <Text style={{ fontSize: 15, color: C.text, fontFamily: F.sansBold }}>Back</Text>
           </TouchableOpacity>
           <Text style={[S.tH3, { color: C.text, letterSpacing: 1 }]}>{title}</Text>
           {miniMute()}
         </View>
 
-        {/* Category chip */}
-        <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 10 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: `${accent}55`, backgroundColor: `${accent}18`, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7 }}>
-            <Text style={{ fontSize: 15 }}>{challenge?.categoryIcon}</Text>
-            <Text style={{ fontFamily: F.sansBold, fontSize: 13, color: accent, letterSpacing: 0.3 }}>{challenge?.categoryLabel}</Text>
+        {/* Category chip — enlarged */}
+        <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1.5, borderColor: `${accent}66`, backgroundColor: `${accent}1f`, borderRadius: 24, paddingHorizontal: 20, paddingVertical: 11 }}>
+            <Text style={{ fontSize: 26 }}>{challenge?.categoryIcon}</Text>
+            <Text style={{ fontFamily: F.sansBold, fontSize: 19, color: accent, letterSpacing: 0.3 }}>{challenge?.categoryLabel}</Text>
           </View>
         </View>
 
-        {/* Iris bows + greets, then the challenge line */}
+        {/* Iris waves + greets, then the challenge line */}
         <View style={{ flex: 1, justifyContent: 'center' }}>
-          <View style={{ alignItems: 'center', marginBottom: 20 }}>
-            <IrisFullBody size={148} bowKey={introBowKey} />
-            <View style={{ marginTop: 4, backgroundColor: 'rgba(124,58,237,0.12)', borderWidth: 1, borderColor: 'rgba(167,139,250,0.42)', borderRadius: 18, paddingHorizontal: 20, paddingVertical: 14, maxWidth: 330 }}>
-              <Text style={{ fontFamily: F.serifBold, fontSize: 18, color: C.text, textAlign: 'center', lineHeight: 25 }}>{hostGreeting}</Text>
+          <View style={{ alignItems: 'center', marginBottom: 18 }}>
+            <IrisFullBody size={230} bowKey={introBowKey} />
+            <View style={{ marginTop: 2, backgroundColor: 'rgba(124,58,237,0.12)', borderWidth: 1, borderColor: 'rgba(167,139,250,0.42)', borderRadius: 18, paddingHorizontal: 22, paddingVertical: 15, maxWidth: 340 }}>
+              <Text style={{ fontFamily: F.serifBold, fontSize: 19, color: C.text, textAlign: 'center', lineHeight: 26 }}>{hostGreeting}</Text>
             </View>
           </View>
 
           <View style={[S.infoCard, { alignItems: 'center', paddingVertical: 20, marginBottom: 24 }]}>
-            <Text style={{ fontFamily: F.sansSemi, fontSize: 15, color: C.muted, textAlign: 'center', lineHeight: 23 }}>
-              I've locked a secret in my mind. Can you crack it in <Text style={{ color: accent, fontFamily: F.sansBold }}>20 questions</Text>?
+            <Text style={{ fontFamily: F.sansSemi, fontSize: 17, color: C.muted, textAlign: 'center', lineHeight: 25 }}>
+              I've locked a secret in my mind. Can you crack it in <Text style={{ color: accent, fontFamily: F.sansBold }}>{'20 questions'}</Text>?
             </Text>
           </View>
         </View>
@@ -20375,10 +20403,8 @@ export default function EnigmaGame() {
     const newGame = { ...game, theme: selectedTheme, status: 'secret_entry' };
     setGame(newGame);
     setSecretSource('library');
-    // Auto-deal the first secret so the host lands on a ready-to-use card.
-    const library = tier === 'junior' ? JUNIOR_LIBRARY : CONTENT_LIBRARY;
-    const lib = library[selectedTheme.id] || [];
-    setDealtSecrets(lib.length ? [lib[Math.floor(Math.random() * lib.length)]] : []);
+    // Don't pre-reveal a secret — the host taps "Deal a Secret" to get their first.
+    setDealtSecrets([]);
     setScreen('secret');
     await syncGame(newGame);
   };
@@ -22963,29 +22989,32 @@ export default function EnigmaGame() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
         <PremiumBackground />
         <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
-          <View style={S.screenHeader}>
-            <TouchableOpacity onPress={() => setScreen('modes')}>
-              <Text style={S.backBtn}>← Back</Text>
+          <View style={[S.screenHeader, { alignItems: 'center' }]}>
+            <TouchableOpacity onPress={() => setScreen('multi_home')} activeOpacity={0.8}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.06)' }}>
+              <Text style={{ fontSize: 18, color: C.text, marginTop: -1 }}>←</Text>
+              <Text style={{ fontSize: 16, color: C.text, fontFamily: F.sansBold }}>Back</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={loadPublicRooms} disabled={loadingRooms}>
-              <Text style={{ fontSize: 13, color: loadingRooms ? C.dim : C.violet2, fontFamily: 'Outfit_600SemiBold' }}>
+            <TouchableOpacity onPress={loadPublicRooms} disabled={loadingRooms} activeOpacity={0.8}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(167,139,250,0.4)', backgroundColor: 'rgba(124,58,237,0.1)' }}>
+              <Text style={{ fontSize: 16, color: loadingRooms ? C.dim : C.violet2, fontFamily: F.sansBold }}>
                 {loadingRooms ? 'Refreshing…' : '↻ Refresh'}
               </Text>
             </TouchableOpacity>
           </View>
           <Text style={S.h2}>Public Rooms</Text>
-          <Text style={[S.muted, { marginBottom: 18 }]}>Jump into a room that's waiting for players.</Text>
+          <Text style={[S.muted, { marginBottom: 18, fontSize: 15 }]}>Jump into a room that's waiting for players.</Text>
 
           {/* Playing as, reuse the name + avatar already chosen on the home screen */}
           <View style={{ borderRadius: 16, marginBottom: 22 }}>
             <LinearGradient colors={['rgba(124,58,237,0.24)', 'rgba(60,30,130,0.14)', 'rgba(28,14,80,0.20)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderWidth: 1, borderColor: 'rgba(167,139,250,0.32)', borderRadius: 16 }}>
               <PlayerAvatar p={{ avatarIdx: selectedAvatarIdx }} size={52} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 10, color: C.violet2, letterSpacing: 2, textTransform: 'uppercase', fontFamily: F.sansBold }}>Playing as</Text>
-                <Text style={{ fontSize: 19, color: C.text, fontFamily: F.sansBold, marginTop: 2 }}>{nameInput.trim() || 'Player'}</Text>
+                <Text style={{ fontSize: 12, color: C.violet2, letterSpacing: 2, textTransform: 'uppercase', fontFamily: F.sansBold }}>Playing as</Text>
+                <Text style={{ fontSize: 20, color: C.text, fontFamily: F.sansBold, marginTop: 2 }}>{nameInput.trim() || 'Player'}</Text>
               </View>
-              <TouchableOpacity onPress={() => setScreen('home')} style={{ paddingVertical: 8, paddingHorizontal: 13, borderRadius: 10, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)' }}>
-                <Text style={{ fontSize: 12, color: C.muted, fontFamily: F.sansSemi }}>Change</Text>
+              <TouchableOpacity onPress={() => setScreen('home')} style={{ paddingVertical: 9, paddingHorizontal: 15, borderRadius: 10, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)' }}>
+                <Text style={{ fontSize: 14, color: C.muted, fontFamily: F.sansSemi }}>Change</Text>
               </TouchableOpacity>
             </LinearGradient>
           </View>
@@ -22993,13 +23022,13 @@ export default function EnigmaGame() {
           {loadingRooms && publicRooms.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
               <Text style={{ fontSize: 32, marginBottom: 8 }}>⏳</Text>
-              <Text style={S.muted}>Looking for open rooms…</Text>
+              <Text style={[S.muted, { fontSize: 15 }]}>Looking for open rooms…</Text>
             </View>
           ) : publicRooms.length === 0 ? (
             <View style={[S.card, { alignItems: 'center', paddingVertical: 32, paddingHorizontal: 20 }]}>
               <Text style={{ fontSize: 42, marginBottom: 12 }}>🪐</Text>
-              <Text style={[S.h2, { textAlign: 'center', fontSize: 17, marginBottom: 8 }]}>No open rooms right now</Text>
-              <Text style={[S.muted, { textAlign: 'center', marginBottom: 20, lineHeight: 20 }]}>Be the first, create a public room and friends can join from here.</Text>
+              <Text style={[S.h2, { textAlign: 'center', fontSize: 19, marginBottom: 8 }]}>No open rooms right now</Text>
+              <Text style={[S.muted, { textAlign: 'center', marginBottom: 20, lineHeight: 21, fontSize: 15 }]}>Be the first, create a public room and friends can join from here.</Text>
               <TouchableOpacity onPress={() => createGame(true)} activeOpacity={0.85} style={{ alignSelf: 'stretch' }}>
                 <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 14, paddingVertical: 15, alignItems: 'center' }}>
                   <Text style={{ fontFamily: F.sansBold, fontSize: 15, color: '#1a0f00', letterSpacing: 0.3 }}>+ Create Public Room</Text>
@@ -23297,7 +23326,7 @@ export default function EnigmaGame() {
           {viewerIsHost ? (
             <>
               <Text style={[S.h2, { letterSpacing: 0.5 }]}>Choose Your Secret</Text>
-              <Text style={[S.muted, { marginBottom: 18 }]}>Guessers will try to unravel it in 20 questions.</Text>
+              <Text style={[S.muted, { marginBottom: 18, fontSize: 15 }]}>Guessers will try to unravel it in 20 questions.</Text>
 
               {/* Source tabs, segmented glass */}
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
@@ -23310,13 +23339,13 @@ export default function EnigmaGame() {
                     <TouchableOpacity key={tab.id} style={{ flex: 1 }} activeOpacity={0.85} onPress={() => setSecretSource(tab.id)}>
                       {on ? (
                         <LinearGradient colors={['rgba(255,232,160,0.55)', 'rgba(212,168,74,0.22)', 'rgba(140,90,18,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 12, padding: 1.2 }}>
-                          <View style={{ borderRadius: 11, backgroundColor: 'rgba(212,168,74,0.14)', paddingVertical: 12, alignItems: 'center' }}>
-                            <Text style={{ fontSize: 13, fontFamily: F.sansBold, color: C.gold }}>{tab.label}</Text>
+                          <View style={{ borderRadius: 11, backgroundColor: 'rgba(212,168,74,0.14)', paddingVertical: 13, alignItems: 'center' }}>
+                            <Text style={{ fontSize: 15, fontFamily: F.sansBold, color: C.gold }}>{tab.label}</Text>
                           </View>
                         </LinearGradient>
                       ) : (
-                        <View style={{ borderRadius: 12, borderWidth: 1, borderColor: C.border2, backgroundColor: C.card, paddingVertical: 13, alignItems: 'center' }}>
-                          <Text style={{ fontSize: 13, fontFamily: F.sansSemi, color: C.muted }}>{tab.label}</Text>
+                        <View style={{ borderRadius: 12, borderWidth: 1, borderColor: C.border2, backgroundColor: C.card, paddingVertical: 14, alignItems: 'center' }}>
+                          <Text style={{ fontSize: 15, fontFamily: F.sansSemi, color: C.muted }}>{tab.label}</Text>
                         </View>
                       )}
                     </TouchableOpacity>
@@ -23326,7 +23355,7 @@ export default function EnigmaGame() {
 
               {secretSource === 'library' ? (
                 <>
-                  <Text style={[S.muted, { marginBottom: 14 }]}>We deal you a random secret with private facts, guessers never see the library. Don't know one well? Deal another (up to {MP_DEAL_CAP}), then host the one you know best.</Text>
+                  <Text style={[S.muted, { marginBottom: 16, fontSize: 15, lineHeight: 22 }]}>Tap below to be dealt a random secret with private facts — guessers never see the library. Don't know one well? Deal another (up to {MP_DEAL_CAP}), then host the one you know best. Or write your own secret.</Text>
                   {dealtSecrets.map((item, i) => (
                     <View key={i} style={{ marginBottom: 12 }}>
                       <View style={{ borderRadius: 16, shadowColor: C.gold, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.18, shadowRadius: 10, elevation: 5 }}>
@@ -23335,25 +23364,25 @@ export default function EnigmaGame() {
                             <LinearGradient colors={['rgba(255,232,160,0.16)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 36 }} />
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                               <View style={{ backgroundColor: 'rgba(212,168,74,0.18)', borderWidth: 1, borderColor: 'rgba(255,220,140,0.40)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 }}>
-                                <Text style={{ fontSize: 10, color: C.gold, fontFamily: F.sansBold, letterSpacing: 0.5 }}>SECRET {i + 1}</Text>
+                                <Text style={{ fontSize: 11, color: C.gold, fontFamily: F.sansBold, letterSpacing: 0.5 }}>SECRET {i + 1}</Text>
                               </View>
                             </View>
-                            <Text style={{ fontFamily: F.serifBold, fontSize: 19, color: C.text, marginBottom: 4, letterSpacing: 0.3 }}>{item.secret}</Text>
-                            <Text style={[S.tCaption, { color: 'rgba(255,220,140,0.75)', marginBottom: 12 }]}>{item.hint}</Text>
+                            <Text style={{ fontFamily: F.serifBold, fontSize: 23, color: C.text, marginBottom: 5, letterSpacing: 0.3 }}>{item.secret}</Text>
+                            <Text style={{ fontSize: 15, color: 'rgba(255,220,140,0.78)', marginBottom: 12, fontFamily: F.sans, lineHeight: 21 }}>{item.hint}</Text>
                             {(item.facts || []).length > 0 && (
-                              <View style={{ backgroundColor: 'rgba(0,0,0,0.18)', borderRadius: 10, padding: 12, marginBottom: 14 }}>
-                                <Text style={{ fontSize: 10, color: C.goldDim, fontFamily: F.sansBold, letterSpacing: 1.5, marginBottom: 8 }}>YOUR PRIVATE FACTS</Text>
+                              <View style={{ backgroundColor: 'rgba(0,0,0,0.18)', borderRadius: 10, padding: 13, marginBottom: 14 }}>
+                                <Text style={{ fontSize: 11, color: C.goldDim, fontFamily: F.sansBold, letterSpacing: 1.5, marginBottom: 9 }}>YOUR PRIVATE FACTS</Text>
                                 {item.facts.map((f, fi) => (
-                                  <View key={fi} style={{ flexDirection: 'row', gap: 8, marginBottom: fi < item.facts.length - 1 ? 7 : 0 }}>
-                                    <Text style={{ color: C.gold, fontSize: 13 }}>•</Text>
-                                    <Text style={{ flex: 1, color: 'rgba(255,244,220,0.92)', fontSize: 13, lineHeight: 19, fontFamily: F.sans }}>{f}</Text>
+                                  <View key={fi} style={{ flexDirection: 'row', gap: 8, marginBottom: fi < item.facts.length - 1 ? 8 : 0 }}>
+                                    <Text style={{ color: C.gold, fontSize: 14 }}>•</Text>
+                                    <Text style={{ flex: 1, color: 'rgba(255,244,220,0.92)', fontSize: 14.5, lineHeight: 21, fontFamily: F.sans }}>{f}</Text>
                                   </View>
                                 ))}
                               </View>
                             )}
                             <TouchableOpacity onPress={() => lockSecret(item.secret, '', item.facts)} activeOpacity={0.85}>
-                              <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 11, paddingVertical: 13, alignItems: 'center' }}>
-                                <Text style={{ color: '#1a0f00', fontSize: 14, fontFamily: F.sansBold, letterSpacing: 0.3 }}>Host this secret → Start Round</Text>
+                              <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 11, paddingVertical: 14, alignItems: 'center' }}>
+                                <Text style={{ color: '#1a0f00', fontSize: 15.5, fontFamily: F.sansBold, letterSpacing: 0.3 }}>Host this secret → Start Round</Text>
                               </LinearGradient>
                             </TouchableOpacity>
                           </LinearGradient>
@@ -23363,12 +23392,14 @@ export default function EnigmaGame() {
                   ))}
                   {dealtSecrets.length < MP_DEAL_CAP ? (
                     <TouchableOpacity onPress={dealSecret} activeOpacity={0.85}
-                      style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(212,168,74,0.35)', backgroundColor: 'rgba(212,168,74,0.06)', marginBottom: 4 }}>
-                      <Text style={{ fontSize: 16 }}>🎲</Text>
-                      <Text style={{ color: C.gold, fontSize: 14, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>Deal another  ·  {MP_DEAL_CAP - dealtSecrets.length} left</Text>
+                      style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 15, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(212,168,74,0.4)', backgroundColor: 'rgba(212,168,74,0.08)', marginBottom: 4 }}>
+                      <Text style={{ fontSize: 18 }}>🎲</Text>
+                      <Text style={{ color: C.gold, fontSize: 15.5, fontFamily: F.sansBold, letterSpacing: 0.3 }}>
+                        {dealtSecrets.length === 0 ? 'Deal a Secret' : `Deal another  ·  ${MP_DEAL_CAP - dealtSecrets.length} left`}
+                      </Text>
                     </TouchableOpacity>
                   ) : (
-                    <Text style={[S.tCaption, { color: C.dim, textAlign: 'center', paddingVertical: 8 }]}>That's all {MP_DEAL_CAP}, host the secret you know best, or switch to “Write My Own”.</Text>
+                    <Text style={[S.tCaption, { color: C.dim, textAlign: 'center', paddingVertical: 8, fontSize: 13.5 }]}>That's all {MP_DEAL_CAP}, host the secret you know best, or switch to “Write My Own”.</Text>
                   )}
                 </>
               ) : (
