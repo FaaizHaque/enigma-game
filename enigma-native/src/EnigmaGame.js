@@ -24056,7 +24056,10 @@ export default function EnigmaGame() {
             })}
           </View>
 
-          <SolveButton label="Play Again" onPress={goHome} />
+          <SolveButton label="🏠 Home" onPress={() => leaveSession()} />
+          <TouchableOpacity style={[S.btnOutline, { marginTop: 12 }]} onPress={() => { leaveSession(); setScreen('modes'); }}>
+            <Text style={S.btnOutlineText}>← Back to Modes</Text>
+          </TouchableOpacity>
         </ScrollView>
       </View>
     );
