@@ -19749,7 +19749,7 @@ export default function EnigmaGame() {
   const gameRef = useRef(game);
   const prevRoomCodeRef = useRef(null);
   const [guesserSecsLeft, setGuesserSecsLeft] = useState(60);
-  const [hostSecsLeft, setHostSecsLeft] = useState(60);
+  const [hostSecsLeft, setHostSecsLeft] = useState(30);
   const [timeoutToast, setTimeoutToast] = useState(null);
   const [hostWarningData, setHostWarningData] = useState(null);
   const [hostWarningSecsLeft, setHostWarningSecsLeft] = useState(10);
@@ -19774,7 +19774,7 @@ export default function EnigmaGame() {
     Animated.timing(guesserBarAnim, { toValue: guesserSecsLeft / 60, duration: 950, useNativeDriver: false }).start();
   }, [guesserSecsLeft]);
   useEffect(() => {
-    Animated.timing(hostBarAnim, { toValue: hostSecsLeft / 60, duration: 950, useNativeDriver: false }).start();
+    Animated.timing(hostBarAnim, { toValue: hostSecsLeft / 30, duration: 950, useNativeDriver: false }).start();
   }, [hostSecsLeft]);
   useEffect(() => {
     Animated.timing(hostWarnBarAnim, { toValue: hostWarningSecsLeft / 10, duration: 950, useNativeDriver: false }).start();
@@ -19879,19 +19879,23 @@ export default function EnigmaGame() {
       }
     }, 1000);
     return () => clearInterval(iv);
-  }, [screen, game?.currentQuestionerIndex, viewerId]);
+    // Depend on the pending-question state too: when the current guesser asks,
+    // a question goes pending and this must pause (not keep ticking while the
+    // host answers), then resume for the next guesser once it's resolved.
+  }, [screen, game?.currentQuestionerIndex, viewerId, game?.questions?.some(q => q.answer === null)]);
 
-  // Host primary timer: 60s, on expiry opens the 10s warning modal
+  // Host answer timer: 30s (answering is instant — the host sees the secret),
+  // on expiry opens the 10s warning modal.
   useEffect(() => {
-    if (!game || screen !== 'game') { setHostSecsLeft(60); setHostWarningData(null); return; }
+    if (!game || screen !== 'game') { setHostSecsLeft(30); setHostWarningData(null); return; }
     const vwr = game.players.find(p => p.id === viewerId);
-    if (!vwr?.isHost) { setHostSecsLeft(60); setHostWarningData(null); return; }
+    if (!vwr?.isHost) { setHostSecsLeft(30); setHostWarningData(null); return; }
     const pq = game.questions.find(q => q.answer === null);
-    if (!pq) { setHostSecsLeft(60); setHostWarningData(null); return; }
+    if (!pq) { setHostSecsLeft(30); setHostWarningData(null); return; }
 
     setHostWarningData(null);
-    let secs = 60;
-    setHostSecsLeft(60);
+    let secs = 30;
+    setHostSecsLeft(30);
     const iv = setInterval(() => {
       secs--;
       setHostSecsLeft(secs);
@@ -23681,9 +23685,9 @@ export default function EnigmaGame() {
               <LinearGradient colors={['rgba(180,140,255,0.55)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.5 }}>
                 <LinearGradient colors={['rgba(124,58,237,0.18)', 'rgba(70,25,150,0.12)', 'rgba(30,8,80,0.24)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 14.5, overflow: 'hidden', paddingVertical: 13, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                   <LinearGradient colors={['rgba(180,140,255,0.18)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 30 }} />
-                  <Text style={{ fontSize: 22 }}>{game.theme?.icon}</Text>
-                  <Text style={{ fontFamily: F.serifBold, fontSize: 17, color: C.violet2, flex: 1, letterSpacing: 0.3 }} numberOfLines={1}>{game.theme?.label}</Text>
-                  <View style={{ backgroundColor: 'rgba(200,168,74,0.16)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}>
+                  <Text style={{ fontSize: 20 }}>{game.theme?.icon}</Text>
+                  <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: C.violet2, flex: 1, letterSpacing: 0.2 }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{game.theme?.label}</Text>
+                  <View style={{ backgroundColor: 'rgba(200,168,74,0.16)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 8, paddingHorizontal: 9, paddingVertical: 4, flexShrink: 0 }}>
                     <Text style={{ fontFamily: F.serifBold, fontSize: 12, color: C.gold }}>Round {game.round}</Text>
                   </View>
                 </LinearGradient>
@@ -23779,8 +23783,10 @@ export default function EnigmaGame() {
             </TouchableOpacity>
           )}
 
-          {/* Q Feed */}
-          <ScrollView ref={feedScrollRef} style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 8 }}>
+          {/* Q Feed — grows from the bottom (chat-style) and auto-scrolls to newest */}
+          <ScrollView ref={feedScrollRef} style={{ flex: 1 }} showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', paddingBottom: 8 }}
+            onContentSizeChange={() => feedScrollRef.current?.scrollToEnd({ animated: true })}>
             {game.questions.length === 0 ? (
               <View style={{ alignItems: 'center', paddingVertical: 40 }}>
                 <Text style={[S.tBodySm, { color: C.dim, textAlign: 'center', lineHeight: 22 }]}>
