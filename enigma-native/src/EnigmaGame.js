@@ -20506,6 +20506,24 @@ export default function EnigmaGame() {
     await syncGame(newGame);
   };
 
+  // "Play Again" from the final standings — a fresh game with the same players:
+  // scores reset to 0, round back to 1, current host keeps the chair. Host-only;
+  // syncing status → theme_select pulls every player into the new game.
+  const playAgainMultiplayer = async () => {
+    if (!game) return;
+    const players = game.players.map((p) => ({ ...p, score: 0, isEliminated: false }));
+    const newGame = {
+      ...game, players, round: 1, theme: null, secretAnswer: '',
+      hostHint: '', hostFacts: null, questions: [], currentQuestionerIndex: 0,
+      status: 'theme_select', pendingSolve: null, roundWinnerId: undefined,
+      hostConsecutiveMisses: 0, hostAbandoned: false, abandonedHostName: undefined,
+    };
+    setGame(newGame);
+    setSelectedTheme(null);
+    setScreen('theme');
+    await syncGame(newGame);
+  };
+
   // Remove the current viewer from the live session and update remote state
   // so the other players see the correct outcome.
   const leaveSession = async () => {
@@ -24056,7 +24074,19 @@ export default function EnigmaGame() {
             })}
           </View>
 
-          <SolveButton label="🏠 Home" onPress={() => leaveSession()} />
+          {viewerIsHost ? (
+            <>
+              <SolveButton label="🔁 Play Again" onPress={playAgainMultiplayer} />
+              <TouchableOpacity style={[S.btnOutline, { marginTop: 12 }]} onPress={() => leaveSession()}>
+                <Text style={S.btnOutlineText}>🏠 Home</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <SolveButton label="🏠 Home" onPress={() => leaveSession()} />
+              <Text style={[S.tCaption, { color: C.dim, textAlign: 'center', marginTop: 10 }]}>Only the host can start a new game.</Text>
+            </>
+          )}
           <TouchableOpacity style={[S.btnOutline, { marginTop: 12 }]} onPress={() => { leaveSession(); setScreen('modes'); }}>
             <Text style={S.btnOutlineText}>← Back to Modes</Text>
           </TouchableOpacity>
