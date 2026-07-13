@@ -21523,24 +21523,55 @@ export default function EnigmaGame() {
     // Multiplayer is tier-aware: the host's tier fixes the room's content, and
     // Junior is private-only (no public lobby, and cross-tier joins are blocked)
     // so a Junior player can never land in a Scholar room.
+
+    // Per-card colour palettes. Daily's gold is softened; Discoveries gets its
+    // own cyan identity. Titles use a bright shade + a dark shadow for punch.
+    const CARDS = {
+      daily: { rim: ['rgba(230,195,110,0.60)', 'rgba(180,140,60,0.28)', 'rgba(110,80,25,0.42)'], body: ['rgba(150,115,45,0.24)', 'rgba(90,65,20,0.15)', 'rgba(45,32,10,0.30)'], topGlow: 'rgba(255,225,150,0.16)', hair: 'rgba(255,225,150,0.14)', medFill: 'rgba(212,168,74,0.16)', medBorder: 'rgba(255,220,140,0.45)', title: '#ecc76a', sub: 'rgba(240,215,160,0.82)', shadow: '#b8862f' },
+      multi: { rim: ['rgba(190,155,255,0.62)', 'rgba(124,58,237,0.30)', 'rgba(76,24,170,0.46)'], body: ['rgba(124,58,237,0.22)', 'rgba(80,30,180,0.14)', 'rgba(40,10,90,0.28)'], topGlow: 'rgba(200,160,255,0.20)', hair: 'rgba(180,140,255,0.16)', medFill: 'rgba(124,58,237,0.20)', medBorder: 'rgba(167,139,250,0.46)', title: '#c4a6ff', sub: 'rgba(205,195,235,0.82)', shadow: '#7c3aed' },
+      solo: { rim: ['rgba(120,255,175,0.60)', 'rgba(34,197,94,0.30)', 'rgba(12,110,44,0.46)'], body: ['rgba(34,197,94,0.18)', 'rgba(20,120,55,0.12)', 'rgba(5,60,20,0.26)'], topGlow: 'rgba(100,255,160,0.18)', hair: 'rgba(100,255,160,0.15)', medFill: 'rgba(34,197,94,0.18)', medBorder: 'rgba(120,230,150,0.46)', title: '#63e08d', sub: 'rgba(160,240,185,0.82)', shadow: '#34d058' },
+      disc: { rim: ['rgba(120,220,255,0.60)', 'rgba(34,170,220,0.30)', 'rgba(15,90,140,0.46)'], body: ['rgba(34,190,230,0.18)', 'rgba(20,110,150,0.12)', 'rgba(5,50,80,0.26)'], topGlow: 'rgba(120,225,255,0.18)', hair: 'rgba(120,225,255,0.15)', medFill: 'rgba(34,190,230,0.16)', medBorder: 'rgba(130,225,255,0.46)', title: '#63d2f0', sub: 'rgba(170,228,246,0.82)', shadow: '#22a0c8' },
+    };
+    const ModeCard = ({ a, icon, title, subtitle, onPress }) => (
+      <TouchableOpacity onPress={onPress} activeOpacity={0.85}>
+        <View style={{ borderRadius: 20, shadowColor: a.shadow, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.34, shadowRadius: 16, elevation: 10 }}>
+          <LinearGradient colors={a.rim} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 2.5 }}>
+            <LinearGradient colors={a.body} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 17.5, overflow: 'hidden', padding: 18 }}>
+              <LinearGradient colors={[a.topGlow, 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 46 }} />
+              <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 16.5, borderWidth: 1, borderColor: a.hair }} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+                <View style={{ width: 54, height: 54, borderRadius: 27, backgroundColor: a.medFill, borderWidth: 1.5, borderColor: a.medBorder, alignItems: 'center', justifyContent: 'center' }}>
+                  {icon}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontFamily: F.serifBold, fontSize: 20, color: a.title, letterSpacing: 0.4, marginBottom: 4, textShadowColor: 'rgba(0,0,0,0.6)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>{title}</Text>
+                  <Text style={{ fontFamily: F.sans, fontSize: 14, color: a.sub, lineHeight: 20 }}>{subtitle}</Text>
+                </View>
+                <Text style={{ color: a.title, fontSize: 24 }}>›</Text>
+              </View>
+            </LinearGradient>
+          </LinearGradient>
+        </View>
+      </TouchableOpacity>
+    );
     return (
       <View style={[S.flex, { backgroundColor: '#05050f', paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
       <PremiumBackground />
         {/* Back + identity, enlarged for visibility */}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, paddingHorizontal: 20 }}>
           <TouchableOpacity onPress={() => setScreen('home')} activeOpacity={0.8}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.05)' }}>
-            <Text style={{ fontSize: 17, color: C.text, marginTop: -1 }}>←</Text>
-            <Text style={{ fontSize: 14, color: C.text, fontFamily: F.sansSemi }}>Back</Text>
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 9, paddingHorizontal: 15, borderRadius: 22, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.06)' }}>
+            <Text style={{ fontSize: 19, color: C.text, marginTop: -1 }}>←</Text>
+            <Text style={{ fontSize: 16, color: C.text, fontFamily: F.sansBold }}>Back</Text>
           </TouchableOpacity>
-          <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row', justifyContent: 'flex-end', gap: 10 }}>
-            <TouchableOpacity onPress={() => setScreen('tier_select')} activeOpacity={0.85} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: tier === 'junior' ? 'rgba(255,107,53,0.16)' : 'rgba(124,58,237,0.18)', borderWidth: 1.5, borderColor: tier === 'junior' ? 'rgba(255,107,53,0.55)' : 'rgba(167,139,250,0.55)', borderRadius: 22, paddingHorizontal: 13, paddingVertical: 8 }}>
-              <Text style={{ fontSize: 15 }}>{tier === 'junior' ? '🌟' : '📚'}</Text>
-              <Text style={{ fontSize: 14, color: tier === 'junior' ? '#ff6b35' : C.violet2, fontFamily: F.sansBold }}>{tier === 'junior' ? 'Junior' : 'Scholar'}</Text>
-              <Text style={{ fontSize: 12, color: tier === 'junior' ? '#ff6b35' : C.violet2 }}>⇄</Text>
+          <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row', justifyContent: 'flex-end', gap: 11 }}>
+            <TouchableOpacity onPress={() => setScreen('tier_select')} activeOpacity={0.85} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: tier === 'junior' ? 'rgba(255,107,53,0.18)' : 'rgba(124,58,237,0.20)', borderWidth: 1.5, borderColor: tier === 'junior' ? 'rgba(255,107,53,0.6)' : 'rgba(167,139,250,0.6)', borderRadius: 22, paddingHorizontal: 14, paddingVertical: 9 }}>
+              <Text style={{ fontSize: 17 }}>{tier === 'junior' ? '🌟' : '📚'}</Text>
+              <Text style={{ fontSize: 15.5, color: tier === 'junior' ? '#ff6b35' : C.violet2, fontFamily: F.sansBold }}>{tier === 'junior' ? 'Junior' : 'Scholar'}</Text>
+              <Text style={{ fontSize: 13, color: tier === 'junior' ? '#ff6b35' : C.violet2 }}>⇄</Text>
             </TouchableOpacity>
-            <PlayerAvatar p={{ avatarIdx: selectedAvatarIdx }} size={38} />
-            <Text style={{ fontSize: 15, color: C.text, fontFamily: F.sansSemi, maxWidth: 92 }} numberOfLines={1}>{nameInput.trim()}</Text>
+            <PlayerAvatar p={{ avatarIdx: selectedAvatarIdx }} size={42} />
+            <Text style={{ fontSize: 16.5, color: C.text, fontFamily: F.sansBold, maxWidth: 96 }} numberOfLines={1}>{nameInput.trim()}</Text>
           </View>
         </View>
 
@@ -21557,111 +21588,36 @@ export default function EnigmaGame() {
             <Text style={{ marginHorizontal: 8, fontSize: 12, color: C.goldDim }}>✦</Text>
             <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(212,168,74,0.30)' }} />
           </View>
-          <Text style={{ fontFamily: F.sansSemi, fontSize: 15, color: C.muted, letterSpacing: 0.3, textAlign: 'center' }}>Three ways to test your wits</Text>
+          <Text style={{ fontFamily: F.sansSemi, fontSize: 15, color: C.muted, letterSpacing: 0.3, textAlign: 'center' }}>Play, learn, and explore</Text>
         </View>
 
-        {/* Three cards, glass morphism (thicker rims, larger type) */}
+        {/* Four uniform cards, each with its own colour */}
         <View style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-evenly' }}>
+          <ModeCard a={CARDS.daily} onPress={() => setScreen('daily_setup')}
+            icon={<CalendarGlyph size={28} />}
+            title="Daily Challenge"
+            subtitle="One secret, 20 questions. Crack today's mystery!" />
 
-          {/* Daily Challenge, gold glass */}
-          <TouchableOpacity onPress={() => setScreen('daily_setup')} activeOpacity={0.85}>
-            <View style={{ borderRadius: 22, shadowColor: C.gold, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.42, shadowRadius: 22, elevation: 12 }}>
-              <LinearGradient colors={['rgba(255,236,170,0.92)', 'rgba(212,168,74,0.55)', 'rgba(150,98,22,0.70)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 3 }}>
-                <LinearGradient colors={['rgba(212,168,74,0.26)', 'rgba(120,80,15,0.15)', 'rgba(50,30,5,0.30)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 19.5, overflow: 'hidden', padding: 20 }}>
-                  <LinearGradient colors={['rgba(255,232,160,0.30)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 56 }} />
-                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 18.5, borderWidth: 1, borderColor: 'rgba(255,232,160,0.20)' }} />
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16 }}>
-                    <LinearGradient colors={[C.gold2, C.gold, C.goldDim]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 6, paddingHorizontal: 9, paddingVertical: 4 }}>
-                      <Text style={{ color: '#1a0f00', fontSize: 11, fontFamily: F.sansBold, letterSpacing: 1.5 }}>DAILY</Text>
-                    </LinearGradient>
-                    <Text style={{ fontSize: 12, color: 'rgba(255,220,140,0.70)', fontFamily: F.sans, letterSpacing: 0.5 }}>
-                      {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-                    </Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-                    <View style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: 'rgba(212,168,74,0.15)', borderWidth: 1.5, borderColor: 'rgba(255,220,140,0.50)', alignItems: 'center', justifyContent: 'center' }}>
-                      <CalendarGlyph size={30} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontFamily: F.serifBold, fontSize: 21, color: C.gold, letterSpacing: 0.5, marginBottom: 5 }}>Daily Challenge</Text>
-                      <Text style={{ fontFamily: F.sans, fontSize: 15, color: 'rgba(255,220,140,0.80)', lineHeight: 21 }}>One secret. 20 questions. Crack today's mystery!</Text>
-                    </View>
-                  </View>
-                  <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 12, paddingVertical: 14, alignItems: 'center' }}>
-                    <Text style={{ color: '#1a0f00', fontSize: 15, fontFamily: F.sansBold, letterSpacing: 0.5 }}>Play Today's Challenge →</Text>
-                  </LinearGradient>
-                </LinearGradient>
-              </LinearGradient>
-            </View>
-          </TouchableOpacity>
+          <ModeCard a={CARDS.multi} onPress={() => setScreen('multi_home')}
+            icon={<Text style={{ fontSize: 28 }}>👥</Text>}
+            title="Multiplayer"
+            subtitle={tier === 'junior' ? 'Private room with family & friends. One host, everyone guesses.' : 'Public or private room. One host sets the secret, everyone guesses.'} />
 
-          {/* Multiplayer, violet glass */}
-          <TouchableOpacity onPress={() => setScreen('multi_home')} activeOpacity={0.85}>
-            <View style={{ borderRadius: 20, shadowColor: C.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.40, shadowRadius: 18, elevation: 10 }}>
-              <LinearGradient colors={['rgba(190,155,255,0.90)', 'rgba(124,58,237,0.52)', 'rgba(76,24,170,0.68)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 3 }}>
-                <LinearGradient colors={['rgba(124,58,237,0.22)', 'rgba(80,30,180,0.14)', 'rgba(40,10,90,0.28)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 17.5, overflow: 'hidden', padding: 20 }}>
-                  <LinearGradient colors={['rgba(200,160,255,0.24)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 50 }} />
-                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 16.5, borderWidth: 1, borderColor: 'rgba(180,140,255,0.17)' }} />
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-                    <View style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: 'rgba(124,58,237,0.20)', borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.42)', alignItems: 'center', justifyContent: 'center' }}>
-                      <Text style={{ fontSize: 30 }}>👥</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontFamily: F.serifBold, fontSize: 21, color: C.violet2, letterSpacing: 0.5, marginBottom: 5 }}>Multiplayer</Text>
-                      <Text style={{ fontFamily: F.sans, fontSize: 15, color: C.muted, lineHeight: 21 }}>{tier === 'junior' ? 'Private room with family & friends. One host sets the secret, everyone guesses.' : 'Public or private room. One host sets the secret, everyone guesses.'}</Text>
-                    </View>
-                    <Text style={{ color: C.violet2, fontSize: 24 }}>›</Text>
-                  </View>
-                </LinearGradient>
-              </LinearGradient>
-            </View>
-          </TouchableOpacity>
+          <ModeCard a={CARDS.solo} onPress={() => setScreen('solo_setup')}
+            icon={<MascotIcon size={44} uid="mode-solo" pulse={false} />}
+            title="Solo Mode"
+            subtitle="A secret is chosen for you. 20 questions to figure it out." />
 
-          {/* Solo, emerald glass */}
-          <TouchableOpacity onPress={() => setScreen('solo_setup')} activeOpacity={0.85}>
-            <View style={{ borderRadius: 20, shadowColor: C.success, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.38, shadowRadius: 16, elevation: 10 }}>
-              <LinearGradient colors={['rgba(120,255,175,0.88)', 'rgba(34,197,94,0.50)', 'rgba(12,110,44,0.66)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 3 }}>
-                <LinearGradient colors={['rgba(34,197,94,0.18)', 'rgba(20,120,55,0.12)', 'rgba(5,60,20,0.25)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 17.5, overflow: 'hidden', padding: 20 }}>
-                  <LinearGradient colors={['rgba(100,255,160,0.22)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 50 }} />
-                  <View style={{ position: 'absolute', top: 1, left: 1, right: 1, bottom: 1, borderRadius: 16.5, borderWidth: 1, borderColor: 'rgba(100,255,160,0.15)' }} />
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-                    <MascotIcon size={54} uid="mode-solo" pulse={false} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontFamily: F.serifBold, fontSize: 21, color: C.success, letterSpacing: 0.5, marginBottom: 5 }}>Solo Mode</Text>
-                      <Text style={{ fontFamily: F.sans, fontSize: 15, color: 'rgba(100,255,160,0.78)', lineHeight: 21 }}>A secret is chosen for you. 20 questions to figure it out.</Text>
-                    </View>
-                    <Text style={{ color: C.success, fontSize: 24 }}>›</Text>
-                  </View>
-                </LinearGradient>
-              </LinearGradient>
-            </View>
-          </TouchableOpacity>
-
-          {/* My Discoveries, slim pill; tier-aware collection of fact cards */}
           {(() => {
             const dTier = tier === 'junior' ? 'junior' : 'scholar';
             const count = (discoveries[dTier] || []).length;
-            const accent = tier === 'junior' ? '#ff6b35' : C.violet2;
-            const rim = tier === 'junior' ? 'rgba(255,107,53,0.38)' : 'rgba(167,139,250,0.38)';
-            const fill = tier === 'junior' ? 'rgba(255,107,53,0.10)' : 'rgba(124,58,237,0.10)';
             return (
-              <TouchableOpacity onPress={() => setScreen('discoveries')} activeOpacity={0.85}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 16, borderWidth: 1, borderColor: rim, backgroundColor: fill, paddingHorizontal: 18, paddingVertical: 14 }}>
-                  <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: fill, borderWidth: 1, borderColor: rim, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ fontSize: 22 }}>🧠</Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontFamily: F.serifBold, fontSize: 17, color: accent, letterSpacing: 0.4 }}>My Discoveries</Text>
-                    <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, marginTop: 2 }}>
-                      {count > 0 ? `${count} secret${count === 1 ? '' : 's'} discovered, tap to browse` : 'Fact cards you unlock will collect here'}
-                    </Text>
-                  </View>
-                  <Text style={{ color: accent, fontSize: 22 }}>›</Text>
-                </View>
-              </TouchableOpacity>
+              <ModeCard a={CARDS.disc} onPress={() => setScreen('discoveries')}
+                icon={<Text style={{ fontSize: 26 }}>🧠</Text>}
+                title="My Discoveries"
+                subtitle={count > 0 ? `${count} secret${count === 1 ? '' : 's'} discovered. Tap to browse.` : 'Fact cards you unlock will collect here.'} />
             );
           })()}
-
         </View>
       </View>
     );
