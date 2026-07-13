@@ -21896,47 +21896,78 @@ export default function EnigmaGame() {
   if (screen === 'daily_setup') {
     const today = new Date();
     const dateStr = today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    const st = dailyStreak || { current: 0, best: 0 };
+    const howRows = [
+      { icon: '🌍', text: 'One secret a day — the same for everyone worldwide.' },
+      { icon: '❓', text: '20 questions; the AI host answers Yes, No, or Partly.' },
+      { icon: '🏆', text: 'Solve in fewer questions to earn more stars.' },
+    ];
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[S.flex, { backgroundColor: '#05050f' }]}>
+      <View style={[S.flex, { backgroundColor: '#05050f' }]}>
         <PremiumBackground />
-        <ScrollView contentContainerStyle={[S.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 32 }]}>
-          <View style={S.screenHeader}>
-            <TouchableOpacity onPress={() => setScreen('modes')}>
-              <Text style={S.backBtn}>← Back</Text>
-            </TouchableOpacity>
+        <ScrollView contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 22, paddingHorizontal: 20, flexGrow: 1 }}>
+          {/* Header — gold Back pill */}
+          <TouchableOpacity onPress={() => setScreen('modes')} activeOpacity={0.8}
+            style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(212,168,74,0.35)', backgroundColor: 'rgba(212,168,74,0.08)', marginBottom: 6 }}>
+            <Text style={{ fontSize: 18, color: C.gold }}>←</Text>
+            <Text style={{ fontSize: 15, color: C.gold, fontFamily: F.sansBold }}>Back</Text>
+          </TouchableOpacity>
+
+          {/* Hero */}
+          <View style={{ alignItems: 'center', marginTop: 8, marginBottom: 18 }}>
+            <View style={{ width: 86, height: 86, borderRadius: 43, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: 'rgba(255,220,140,0.45)', backgroundColor: 'rgba(212,168,74,0.12)', shadowColor: C.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 10 }}>
+              <CalendarGlyph size={42} />
+            </View>
+            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 28, color: C.gold, letterSpacing: 1.5, marginTop: 14, textShadowColor: 'rgba(212,168,74,0.4)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 10 }}>Daily Challenge</Text>
+            <Text style={{ fontFamily: F.sansSemi, fontSize: 14, color: 'rgba(255,220,140,0.8)', marginTop: 6, letterSpacing: 0.5 }}>{dateStr}</Text>
           </View>
 
-          <View style={{ alignItems: 'center', paddingVertical: 24 }}>
-            <CalendarGlyph size={52} />
-            <Text style={[S.tH1, { color: C.gold, marginTop: 12, letterSpacing: 2 }]}>
-              Daily Challenge
-            </Text>
-            <Text style={[S.tBodySm, { color: C.muted, marginTop: 6 }]}>{dateStr}</Text>
+          {/* Streak strip */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 13, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(212,168,74,0.3)', backgroundColor: 'rgba(212,168,74,0.07)', paddingHorizontal: 16, paddingVertical: 14, marginBottom: 15 }}>
+            <Text style={{ fontSize: 28 }}>🔥</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: F.sansBold, fontSize: 17, color: C.gold }}>{st.current > 0 ? `${st.current}-day streak` : 'Start your streak'}</Text>
+              <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, marginTop: 1 }}>{st.current > 0 ? `Best: ${st.best} days · play daily to keep it alive` : 'Play today, return tomorrow to build it up'}</Text>
+            </View>
           </View>
 
-          <View style={[S.infoCard, { marginBottom: 24 }]}>
-            <Text style={{ color: C.text, fontFamily: 'Outfit_600SemiBold', fontSize: 14, marginBottom: 8 }}>How it works</Text>
-            <Text style={[S.bodyText, { lineHeight: 22 }]}>
-              {'• A secret is chosen for today, same for everyone worldwide.\n'}
-              {'• You have '}
-              <Text style={{ color: C.gold, fontFamily: 'Outfit_700Bold' }}>20 questions</Text>
-              {' to figure it out.\n'}
-              {'• The AI host answers '}
-              <Text style={{ color: C.success, fontFamily: 'Outfit_700Bold' }}>Yes</Text>
-              {', '}
-              <Text style={{ color: C.danger, fontFamily: 'Outfit_700Bold' }}>No</Text>
-              {' or '}
-              <Text style={{ color: C.warn, fontFamily: 'Outfit_700Bold' }}>Partly</Text>
-              {'.\n'}
-              {'• Tap Solve when you know the answer!'}
-            </Text>
+          {/* How it works — icon rows */}
+          <View style={{ borderRadius: 16, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.03)', padding: 16, marginBottom: 15 }}>
+            <Text style={{ fontFamily: F.sansBold, fontSize: 12, color: C.goldDim, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>How it works</Text>
+            {howRows.map((r, i) => (
+              <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 13, marginBottom: i < howRows.length - 1 ? 13 : 0 }}>
+                <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(212,168,74,0.1)', borderWidth: 1, borderColor: 'rgba(212,168,74,0.28)', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ fontSize: 18 }}>{r.icon}</Text>
+                </View>
+                <Text style={{ flex: 1, fontFamily: F.sans, fontSize: 14.5, color: C.text, lineHeight: 20 }}>{r.text}</Text>
+              </View>
+            ))}
           </View>
 
-          <TouchableOpacity style={S.btnGold} onPress={startDailyChallenge}>
-            <Text style={S.btnGoldText}>Start Challenge →</Text>
+          {/* Star tiers */}
+          <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
+            {[['⭐⭐⭐', '5 or fewer'], ['⭐⭐', '10 or fewer'], ['⭐', '15 or fewer']].map(([s, q], i) => (
+              <View key={i} style={{ flex: 1, alignItems: 'center', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(212,168,74,0.25)', backgroundColor: 'rgba(212,168,74,0.05)', paddingVertical: 11 }}>
+                <Text style={{ fontSize: 13 }}>{s}</Text>
+                <Text style={{ fontFamily: F.sansBold, fontSize: 12.5, color: C.gold, marginTop: 5 }}>{q}</Text>
+                <Text style={{ fontFamily: F.sans, fontSize: 10, color: C.dim, marginTop: 1 }}>questions</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Spacer fills any remaining room so the button sits near the bottom */}
+          <View style={{ flex: 1, minHeight: 6 }} />
+
+          <TouchableOpacity onPress={startDailyChallenge} activeOpacity={0.85}>
+            <View style={{ borderRadius: 16, shadowColor: C.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 12 }}>
+              <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 16, paddingVertical: 18, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
+                <Text style={{ fontFamily: F.sansBold, fontSize: 18, color: '#1a0f00', letterSpacing: 0.5 }}>Start Challenge</Text>
+                <Text style={{ fontFamily: F.serifBold, fontSize: 20, color: '#1a0f00' }}>→</Text>
+              </LinearGradient>
+            </View>
           </TouchableOpacity>
         </ScrollView>
-      </KeyboardAvoidingView>
+      </View>
     );
   }
 
