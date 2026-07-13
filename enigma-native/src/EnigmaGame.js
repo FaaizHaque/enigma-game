@@ -18811,10 +18811,13 @@ function IrisFullBody({ size = 150, bowKey = 0 }) {
         {/* Left arm (static) */}
         <Rect x="32" y="72" width="7.5" height="22" rx="3.75" fill={`url(#${uid}-body)`} />
         <Circle cx="35.75" cy="95" r="4.5" fill="#5a2eaf" />
-        {/* Right arm — waves hello, pivoting at the shoulder */}
-        <AG rotation={wave} originX={83.75} originY={73}>
-          <Rect x="80" y="72" width="7.5" height="22" rx="3.75" fill={`url(#${uid}-body)`} />
-          <Circle cx="83.75" cy="95" r="4.5" fill="#5a2eaf" />
+        {/* Right shoulder joint sits on the body and masks the arm's pivot so the
+            arm stays visually attached while it waves. */}
+        <Circle cx="76" cy="75" r="5.5" fill={`url(#${uid}-body)`} />
+        {/* Right arm — waves, hinged at the shoulder */}
+        <AG rotation={wave} originX={76} originY={74}>
+          <Rect x="72.5" y="74" width="7" height="21" rx="3.5" fill={`url(#${uid}-body)`} />
+          <Circle cx="76" cy="95" r="4.5" fill="#5a2eaf" />
         </AG>
 
         {/* Torso */}
@@ -19994,41 +19997,52 @@ export default function EnigmaGame() {
     "I've hidden another one. Can you crack it?",
     'Back for more? I love it. Here we go!',
   ];
-  const speakIfOn = (text) => {
+  // Speak `text` (unless muted). For a two-sentence greeting it says the opening
+  // ("Welcome!"), pauses, then the rest, slowly. Short reactions just speak once.
+  const speakIfOn = (text, rate = 0.72) => {
     if (muted) return;
-    // Calm pace; speak the opening word, pause, then the rest ("Welcome" … "I'm Iris, your host").
-    const opts = { rate: 0.8, pitch: 1.05 };
+    const opts = { rate, pitch: 1.05 };
     try {
       Speech.stop();
-      const m = text.match(/^(.*?[.!?])\s+(.*)$/);
+      const m = text.match(/^(.*?[.!?])\s+(.+)$/);
       if (m) {
-        Speech.speak(m[1], { ...opts, onDone: () => { if (!muted) setTimeout(() => { try { Speech.speak(m[2], opts); } catch {} }, 350); } });
+        Speech.speak(m[1], { ...opts, onDone: () => { if (!muted) setTimeout(() => { try { Speech.speak(m[2], opts); } catch {} }, 650); } });
       } else {
         Speech.speak(text, opts);
       }
     } catch {}
   };
   const stopSpeech = () => { try { Speech.stop(); } catch {} };
-  const beginHostIntro = () => {
-    const g = IRIS_GREETINGS[introRoundRef.current % IRIS_GREETINGS.length];
-    introRoundRef.current += 1;
+  // Pick Iris's greeting. Daily: a fixed welcome, or "welcome back" once the
+  // player has played the daily before. Solo: cycles the list, but only ADVANCES
+  // when a round actually starts (see startSoloPlay), so re-entering the intro
+  // without playing keeps the same message.
+  const beginHostIntro = (mode) => {
+    const g = mode === 'daily'
+      ? (dailyStreak?.lastPlayedDate
+          ? "Welcome back! Let's crack today's new secret."
+          : `Welcome! I'm ${HOST_NAME}, your host. Ready for today's secret?`)
+      : IRIS_GREETINGS[introRoundRef.current % IRIS_GREETINGS.length];
     setHostGreeting(g);
     setIntroBowKey((k) => k + 1);
     speakIfOn(g);
   };
   const hostUnclear = () => {
+    const line = "Hmm, I didn't catch that. Try rephrasing?";
     setHostMood('idle');
-    setHostLine("Hmm, I didn't catch that, try rephrasing?");
+    setHostLine(line);
     setHostReactKey((k) => k + 1);
+    speakIfOn(line, 0.9);
   };
   const hostSay = (answer, idx) => {
     const YES = ['Yes!', "That's right!", 'Correct!', 'Indeed!'];
-    const NO = ['Nope!', 'Not quite…', 'Afraid not.', 'No, sorry!'];
-    const PARTLY = ['Sort of…', 'Partly!', 'In a way…', 'Kind of!'];
-    if (answer === 'YES') { setHostMood('yes'); setHostLine(YES[idx % YES.length]); }
-    else if (answer === 'NO') { setHostMood('no'); setHostLine(NO[idx % NO.length]); }
-    else { setHostMood('partly'); setHostLine(PARTLY[idx % PARTLY.length]); }
+    const NO = ['Nope!', 'Not quite.', 'Afraid not.', 'No, sorry!'];
+    const PARTLY = ['Sort of.', 'Partly!', 'In a way.', 'Kind of!'];
+    const line = answer === 'YES' ? YES[idx % YES.length] : answer === 'NO' ? NO[idx % NO.length] : PARTLY[idx % PARTLY.length];
+    setHostMood(answer === 'YES' ? 'yes' : answer === 'NO' ? 'no' : 'partly');
+    setHostLine(line);
     setHostReactKey((k) => k + 1);
+    speakIfOn(line, 0.96);
   };
 
   // Build + open a category's "Useful Tip" card (used by the 💡 button and auto-show).
@@ -20694,13 +20708,16 @@ export default function EnigmaGame() {
     setSoloHintsUsed(0);
     setSoloBonusUsed(false);
     setSoloLoading(false);
-    beginHostIntro();
+    beginHostIntro('solo');
     setScreen('solo_intro');
   };
 
   // "Let's Play" from the Solo intro — start the clock and enter the clean play screen.
   const startSoloPlay = () => {
     stopSpeech();
+    // Advance the greeting only now (a round actually begins), so re-entering the
+    // intro without playing keeps the same message.
+    introRoundRef.current += 1;
     setSoloStartTime(Date.now());
     setHostMood('idle');
     setHostLine("Ask away! I'm ready.");
@@ -20999,7 +21016,7 @@ export default function EnigmaGame() {
     setDailySolveOpen(false);
     setDailyResult(null);
     setDailyHintsUsed(0);
-    beginHostIntro();
+    beginHostIntro('daily');
     setScreen('daily_intro');
   };
 
