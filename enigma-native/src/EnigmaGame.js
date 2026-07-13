@@ -18905,7 +18905,6 @@ function CalendarGlyph({ size = 30 }) {
 // it stays crisp at any size and animates a soft glowing "thinking" pulse.
 const AEllipse = Animated.createAnimatedComponent(Ellipse);
 const ACircle = Animated.createAnimatedComponent(Circle);
-const AG = Animated.createAnimatedComponent(G);
 
 // A proper gold coin (crisp at any size, unlike the dull silver 🪙 emoji).
 function CoinIcon({ size = 18 }) {
@@ -19104,8 +19103,9 @@ function IrisFullBody({ size = 150, bowKey = 0 }) {
     return () => { f.stop(); b.stop(); };
   }, []);
 
-  // Greeting: a gentle dip/nod (native View transform) + a hand wave (SVG arm
-  // rotation, non-native). Both replay whenever bowKey changes.
+  // Greeting: a gentle dip/nod, then a real hand wave — the arm raises up beside
+  // the head and waggles side-to-side before lowering. Replays on bowKey change.
+  // 0deg = arm hanging down; negative = swinging outward/up on her right side.
   useEffect(() => {
     dip.setValue(0);
     wave.setValue(0);
@@ -19116,16 +19116,23 @@ function IrisFullBody({ size = 150, bowKey = 0 }) {
       Animated.spring(dip, { toValue: 0, friction: 5, tension: 90, useNativeDriver: true }),
     ]).start();
     Animated.sequence([
-      Animated.delay(850),
-      Animated.timing(wave, { toValue: -38, duration: 170, useNativeDriver: false }),
-      Animated.timing(wave, { toValue: -8, duration: 170, useNativeDriver: false }),
-      Animated.timing(wave, { toValue: -38, duration: 170, useNativeDriver: false }),
-      Animated.timing(wave, { toValue: -8, duration: 170, useNativeDriver: false }),
-      Animated.timing(wave, { toValue: 0, duration: 200, useNativeDriver: false }),
+      Animated.delay(700),
+      Animated.timing(wave, { toValue: -150, duration: 380, easing: Easing.out(Easing.quad), useNativeDriver: true }), // raise
+      Animated.timing(wave, { toValue: -122, duration: 240, easing: Easing.inOut(Easing.quad), useNativeDriver: true }), // waggle right
+      Animated.timing(wave, { toValue: -170, duration: 260, easing: Easing.inOut(Easing.quad), useNativeDriver: true }), // waggle left
+      Animated.timing(wave, { toValue: -122, duration: 260, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      Animated.timing(wave, { toValue: -170, duration: 260, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      Animated.timing(wave, { toValue: -150, duration: 200, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      Animated.delay(120),
+      Animated.timing(wave, { toValue: 0, duration: 380, easing: Easing.in(Easing.quad), useNativeDriver: true }), // lower
     ]).start();
   }, [bowKey]);
 
   const w = size, h = size * 1.25;
+  // viewBox is 120×150 and w/h keep that ratio, so one SVG unit = size/120 px.
+  const s = size / 120;
+  const ARM_W = 12 * s, ARM_L = 27 * s;
+  const armRotate = wave.interpolate({ inputRange: [-180, 180], outputRange: ['-180deg', '180deg'] });
   const translateY = Animated.add(
     floatV.interpolate({ inputRange: [0, 1], outputRange: [0, -5] }),
     dip.interpolate({ inputRange: [0, 1], outputRange: [0, 11] })
@@ -19177,14 +19184,9 @@ function IrisFullBody({ size = 150, bowKey = 0 }) {
         {/* Left arm (static) */}
         <Rect x="32" y="72" width="7.5" height="22" rx="3.75" fill={`url(#${uid}-body)`} />
         <Circle cx="35.75" cy="95" r="4.5" fill="#5a2eaf" />
-        {/* Right shoulder joint sits on the body and masks the arm's pivot so the
-            arm stays visually attached while it waves. */}
+        {/* Right shoulder joint — drawn on the body; the waving arm (a native
+            overlay, see below) pivots exactly on this ball so it never detaches. */}
         <Circle cx="76" cy="75" r="5.5" fill={`url(#${uid}-body)`} />
-        {/* Right arm — waves, hinged at the shoulder */}
-        <AG rotation={wave} originX={76} originY={74}>
-          <Rect x="72.5" y="74" width="7" height="21" rx="3.5" fill={`url(#${uid}-body)`} />
-          <Circle cx="76" cy="95" r="4.5" fill="#5a2eaf" />
-        </AG>
 
         {/* Torso */}
         <Rect x="42" y="62" width="36" height="44" rx="17" fill={`url(#${uid}-body)`} stroke="#c9b6ff" strokeWidth="1" strokeOpacity="0.3" />
@@ -19210,6 +19212,35 @@ function IrisFullBody({ size = 150, bowKey = 0 }) {
         </G>
         <Path d="M53 50 Q60 54.5 67 50" stroke="#7df0ff" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.85" />
       </Svg>
+
+      {/* Right arm — a native overlay so the wave pivots at the shoulder.
+          (Animated rotation on an SVG <G> ignores originX/originY and spins the
+          arm around the viewBox corner, detaching it — hence this approach.)
+          The view is twice the arm's length tall with the arm drawn in the bottom
+          half, so its centre — the rotation origin RN uses — IS the shoulder. */}
+      <Animated.View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          left: 76 * s - ARM_W / 2,
+          top: 74 * s - ARM_L,
+          width: ARM_W,
+          height: ARM_L * 2,
+          transform: [{ rotate: armRotate }],
+        }}
+      >
+        <Svg width={ARM_W} height={ARM_L} viewBox="0 0 12 27" style={{ position: 'absolute', top: ARM_L, left: 0 }}>
+          <Defs>
+            <SvgLinearGradient id={`${uid}-armg`} x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0%" stopColor="#9b7ae8" />
+              <Stop offset="60%" stopColor="#6a3fc9" />
+              <Stop offset="100%" stopColor="#4a1f9e" />
+            </SvgLinearGradient>
+          </Defs>
+          <Rect x="2.5" y="0" width="7" height="21" rx="3.5" fill={`url(#${uid}-armg)`} />
+          <Circle cx="6" cy="21.5" r="4.5" fill="#5a2eaf" />
+        </Svg>
+      </Animated.View>
     </Animated.View>
   );
 }
