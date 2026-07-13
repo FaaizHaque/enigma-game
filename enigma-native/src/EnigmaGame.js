@@ -18613,6 +18613,16 @@ const fetchSecretImage = async (secret, override) => {
 
 const SERVER_URL = Constants.expoConfig?.extra?.serverUrl || 'https://enigma-game-production.up.railway.app';
 
+// Solo rank ladder — climbs by all-time points, topping out at Sherlock.
+const SOLO_RANKS = [
+  { min: 7500, name: 'Sherlock',  icon: '🧠', color: '#f4c542' },
+  { min: 3000, name: 'Inspector', icon: '🎩', color: '#a78bfa' },
+  { min: 1000, name: 'Detective', icon: '🕵️', color: '#34d058' },
+  { min: 250,  name: 'Sleuth',    icon: '🔍', color: '#4fc3f7' },
+  { min: 0,    name: 'Rookie',    icon: '🔰', color: '#9aa3b2' },
+];
+const soloRankFor = (pts) => SOLO_RANKS.find((r) => (pts || 0) >= r.min) || SOLO_RANKS[SOLO_RANKS.length - 1];
+
 // Appended to shared result text. Set to the App Store / TestFlight link when live.
 const SHARE_URL = Constants.expoConfig?.extra?.shareUrl || '';
 
@@ -20110,6 +20120,13 @@ export default function EnigmaGame() {
   const [hostGreeting, setHostGreeting] = useState('');
   const [introBowKey, setIntroBowKey] = useState(0);
   const introRoundRef = useRef(0);
+  // Solo leaderboard
+  const [lbScope, setLbScope] = useState('week');      // 'week' | 'all'
+  const [lbRows, setLbRows] = useState([]);
+  const [lbMe, setLbMe] = useState(null);
+  const [lbLoading, setLbLoading] = useState(false);
+  const [lbReturn, setLbReturn] = useState('modes');   // screen to return to
+  const [myTotalPoints, setMyTotalPoints] = useState(0); // all-time, for the rank title
   const [wallet, setWallet] = useState(DEFAULT_WALLET);
   const [coinBonusNote, setCoinBonusNote] = useState(0);
   const [muted, setMutedState] = useState(false);
@@ -21220,6 +21237,47 @@ export default function EnigmaGame() {
     });
   };
 
+  // Report a finished solo round to the leaderboard (fire-and-forget). The server
+  // computes the points. Junior sends first name only for privacy.
+  const recordSoloScore = (solved, questionsUsed, hintsUsed) => {
+    if (!playerId) return;
+    const libTier = tier === 'junior' ? 'junior' : 'scholar';
+    const full = nameInput.trim() || 'Player';
+    const name = libTier === 'junior' ? (full.split(' ')[0] || 'Player') : full;
+    fetch(`${SERVER_URL}/api/solo-result`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId, playerName: name, avatarIdx: selectedAvatarIdx, tier: libTier, solved, questionsUsed, hintsUsed }),
+    }).catch(() => {});
+  };
+
+  const fetchSoloLeaderboard = async (scope) => {
+    const libTier = tier === 'junior' ? 'junior' : 'scholar';
+    setLbLoading(true);
+    try {
+      const res = await fetch(`${SERVER_URL}/api/solo-leaderboard/${libTier}?scope=${scope}&playerId=${playerId || ''}`);
+      const data = await res.json();
+      setLbRows(data.rows || []);
+      setLbMe(data.me || null);
+      if (scope === 'all') setMyTotalPoints(data.me?.points || 0);
+    } catch {
+      setLbRows([]); setLbMe(null);
+    } finally {
+      setLbLoading(false);
+    }
+  };
+
+  const openSoloLeaderboard = (returnTo = 'modes') => {
+    setLbReturn(returnTo);
+    setLbScope('week');
+    setScreen('solo_leaderboard');
+    fetchSoloLeaderboard('week');
+    // Grab all-time standing too, so the rank title (Rookie…Sherlock) is correct
+    // even while viewing the weekly board.
+    const libTier = tier === 'junior' ? 'junior' : 'scholar';
+    fetch(`${SERVER_URL}/api/solo-leaderboard/${libTier}?scope=all&playerId=${playerId || ''}`)
+      .then((r) => r.json()).then((d) => setMyTotalPoints(d.me?.points || 0)).catch(() => {});
+  };
+
   const finishSoloChallenge = (guess) => {
     if (!guess.trim() || !soloChallenge) return;
     const isCorrect = fuzzyMatch(guess.trim(), soloChallenge.secret) ||
@@ -21245,6 +21303,7 @@ export default function EnigmaGame() {
       [libTier]: new Set([...prev[libTier], soloChallenge.secret]),
     }));
     recordDiscovery(libTier, soloChallenge, isCorrect);
+    recordSoloScore(isCorrect, questionsUsed, soloHintsUsed);
   };
 
   // Give up, end the round unsolved and reveal the answer on the result screen.
@@ -22687,6 +22746,91 @@ export default function EnigmaGame() {
     );
   }
 
+  // ─── SOLO LEADERBOARD ─────────────────────────────────────────────────────
+  if (screen === 'solo_leaderboard') {
+    const accent = '#34d058';
+    const myRank = soloRankFor(myTotalPoints);
+    const medal = (r) => (r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : `${r}`);
+    return (
+      <View style={[S.flex, { backgroundColor: '#05050f' }]}>
+        <PremiumBackground />
+        <ScrollView contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24, paddingHorizontal: 18 }}>
+          {/* Header */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <TouchableOpacity onPress={() => setScreen(lbReturn)} activeOpacity={0.8}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(52,208,88,0.35)', backgroundColor: 'rgba(52,208,88,0.08)' }}>
+              <Text style={{ fontSize: 18, color: accent }}>←</Text>
+              <Text style={{ fontSize: 15, color: accent, fontFamily: F.sansBold }}>Back</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => fetchSoloLeaderboard(lbScope)} disabled={lbLoading} activeOpacity={0.8}>
+              <Text style={{ fontSize: 15, color: lbLoading ? C.dim : accent, fontFamily: F.sansBold }}>{lbLoading ? 'Refreshing…' : '↻ Refresh'}</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Title */}
+          <View style={{ alignItems: 'center', marginBottom: 16 }}>
+            <Text style={{ fontSize: 40, marginBottom: 6 }}>🏆</Text>
+            <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 25, color: accent, letterSpacing: 1, textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 5 }}>Solo Leaderboard</Text>
+            <Text style={{ fontFamily: F.sansSemi, fontSize: 13, color: C.muted, marginTop: 6 }}>{tier === 'junior' ? 'Junior' : 'Scholar'} · solve in fewer questions to earn more points</Text>
+          </View>
+
+          {/* Your standing */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 13, borderRadius: 16, borderWidth: 1, borderColor: `${myRank.color}55`, backgroundColor: `${myRank.color}14`, paddingHorizontal: 16, paddingVertical: 14, marginBottom: 16 }}>
+            <Text style={{ fontSize: 30 }}>{myRank.icon}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: F.sansBold, fontSize: 17, color: myRank.color }}>{myRank.name}</Text>
+              <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, marginTop: 1 }}>{myTotalPoints} all-time points{lbMe ? (lbScope === 'week' ? ` · #${lbMe.rank} this week` : ` · #${lbMe.rank} all-time`) : ''}</Text>
+            </View>
+          </View>
+
+          {/* Scope tabs */}
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+            {[{ id: 'week', label: 'This Week' }, { id: 'all', label: 'All-Time' }].map((t) => {
+              const on = lbScope === t.id;
+              return (
+                <TouchableOpacity key={t.id} style={{ flex: 1 }} activeOpacity={0.85}
+                  onPress={() => { setLbScope(t.id); fetchSoloLeaderboard(t.id); }}>
+                  <View style={{ borderRadius: 12, borderWidth: 1, borderColor: on ? accent : C.border2, backgroundColor: on ? 'rgba(52,208,88,0.14)' : C.card, paddingVertical: 12, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 14, fontFamily: on ? F.sansBold : F.sansSemi, color: on ? accent : C.muted }}>{t.label}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {/* Rows */}
+          {lbLoading && lbRows.length === 0 ? (
+            <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+              <Text style={{ fontSize: 30, marginBottom: 8 }}>⏳</Text>
+              <Text style={[S.muted, { fontSize: 14 }]}>Loading the board…</Text>
+            </View>
+          ) : lbRows.length === 0 ? (
+            <View style={[S.infoCard, { alignItems: 'center', paddingVertical: 34 }]}>
+              <Text style={{ fontSize: 40, marginBottom: 10 }}>🎯</Text>
+              <Text style={[S.tH2, { fontSize: 17, textAlign: 'center', marginBottom: 6 }]}>No scores yet {lbScope === 'week' ? 'this week' : ''}</Text>
+              <Text style={[S.tBodySm, { color: C.muted, textAlign: 'center', lineHeight: 20 }]}>Solve a solo secret to put yourself on the board.</Text>
+            </View>
+          ) : (
+            lbRows.map((r) => {
+              const isMe = r.playerId === playerId;
+              const a = av(r.avatarIdx);
+              return (
+                <View key={r.playerId} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 13, borderWidth: 1, borderColor: isMe ? accent : C.border2, backgroundColor: isMe ? 'rgba(52,208,88,0.1)' : 'rgba(255,255,255,0.03)', paddingVertical: 10, paddingHorizontal: 13, marginBottom: 8 }}>
+                  <Text style={{ width: 30, textAlign: 'center', fontSize: r.rank <= 3 ? 20 : 15, fontFamily: F.sansBold, color: r.rank <= 3 ? C.text : C.dim }}>{medal(r.rank)}</Text>
+                  <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 18 }}>{a.emoji}</Text>
+                  </View>
+                  <Text style={{ flex: 1, fontFamily: F.sansSemi, fontSize: 15, color: C.text }} numberOfLines={1}>{r.name}{isMe ? ' (you)' : ''}</Text>
+                  <Text style={{ fontFamily: F.sansBold, fontSize: 16, color: accent }}>{r.points}</Text>
+                </View>
+              );
+            })
+          )}
+        </ScrollView>
+      </View>
+    );
+  }
+
   // ─── SOLO SETUP ──────────────────────────────────────────────────────────
   if (screen === 'solo_setup') {
     const isJunior = tier === 'junior';
@@ -22699,6 +22843,11 @@ export default function EnigmaGame() {
             style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(52,208,88,0.35)', backgroundColor: 'rgba(52,208,88,0.08)' }}>
             <Text style={{ fontSize: 18, color: C.success }}>←</Text>
             <Text style={{ fontSize: 15, color: C.success, fontFamily: F.sansBold }}>Back</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => openSoloLeaderboard('solo_setup')} activeOpacity={0.8}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(52,208,88,0.35)', backgroundColor: 'rgba(52,208,88,0.08)' }}>
+            <Text style={{ fontSize: 15 }}>🏆</Text>
+            <Text style={{ fontSize: 15, color: C.success, fontFamily: F.sansBold }}>Ranks</Text>
           </TouchableOpacity>
         </View>
         <View style={{ alignItems: 'center', paddingVertical: 20 }}>
@@ -23278,6 +23427,9 @@ export default function EnigmaGame() {
 
         <TouchableOpacity style={S.btnGold} onPress={startSoloChallenge}>
           <Text style={S.btnGoldText}>Play Again →</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[S.btnOutline, { marginTop: 10, borderColor: 'rgba(52,208,88,0.4)', backgroundColor: 'rgba(52,208,88,0.06)' }]} onPress={() => openSoloLeaderboard('solo_result')}>
+          <Text style={[S.btnOutlineText, { color: '#34d058' }]}>🏆 Leaderboard</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[S.btnOutline, { marginTop: 10 }]} onPress={() => setScreen('solo_setup')}>
           <Text style={S.btnOutlineText}>Change Category</Text>

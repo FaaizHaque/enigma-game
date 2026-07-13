@@ -298,6 +298,81 @@ app.get("/api/daily-leaderboard/:date", async (req, res) => {
   }
 });
 
+// ─── Solo Leaderboard ─────────────────────────────────────────────────────────
+// Points are computed here (server-authoritative) from the star tiers players
+// already see, plus a small no-hints bonus. Kept intentionally simple.
+const soloPoints = (solved, q, hints) => {
+  if (!solved) return 0;
+  let p = q <= 5 ? 100 : q <= 10 ? 60 : q <= 15 ? 40 : 20;
+  if (!hints) p += 10;
+  return p;
+};
+
+// The current week's Monday (UTC) as YYYY-MM-DD — matches Postgres date_trunc('week').
+const mondayUTC = () => {
+  const d = new Date();
+  const dow = (d.getUTCDay() + 6) % 7; // 0 = Monday
+  d.setUTCDate(d.getUTCDate() - dow);
+  return d.toISOString().slice(0, 10);
+};
+
+// Record a finished solo round and bank its points.
+app.post("/api/solo-result", async (req, res) => {
+  const { playerId, playerName, avatarIdx = 0, tier, solved, questionsUsed, hintsUsed } = req.body;
+  if (!playerId || !tier) return res.status(400).json({ error: "playerId and tier are required" });
+  const points = soloPoints(!!solved, Number(questionsUsed) || 0, Number(hintsUsed) || 0);
+  try {
+    if (points > 0) {
+      await supabase.rpc("record_solo_score", {
+        p_player_id: playerId,
+        p_tier: tier === "junior" ? "junior" : "scholar",
+        p_name: playerName || null,
+        p_avatar: Number(avatarIdx) || 0,
+        p_points: points,
+      });
+    }
+    res.json({ points });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Read a tier's leaderboard. scope=week (default) | all. Optional playerId returns
+// the caller's own row so they can see their standing even if outside the top 50.
+app.get("/api/solo-leaderboard/:tier", async (req, res) => {
+  const tier = req.params.tier === "junior" ? "junior" : "scholar";
+  const scope = req.query.scope === "all" ? "all" : "week";
+  const playerId = req.query.playerId;
+  try {
+    let q = supabase
+      .from("solo_scores")
+      .select("player_id, player_name, avatar_idx, total_points, week_points, week_start")
+      .eq("tier", tier);
+    if (scope === "week") {
+      q = q.eq("week_start", mondayUTC()).order("week_points", { ascending: false });
+    } else {
+      q = q.order("total_points", { ascending: false });
+    }
+    const { data } = await q.limit(200);
+    const all = (data || []).map((r, i) => ({
+      rank: i + 1,
+      playerId: r.player_id,
+      name: r.player_name || "Player",
+      avatarIdx: r.avatar_idx || 0,
+      points: scope === "week" ? r.week_points : r.total_points,
+    }));
+    const rows = all.slice(0, 50);
+    let me = null;
+    if (playerId) {
+      const found = all.find((r) => r.playerId === playerId);
+      if (found) me = found;
+    }
+    res.json({ rows, me });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ─── Start ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
