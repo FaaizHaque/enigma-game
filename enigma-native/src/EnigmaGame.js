@@ -22749,7 +22749,7 @@ export default function EnigmaGame() {
             <Text style={[S.tBodySm, { color: C.muted, marginTop: 10, textAlign: 'center' }]}>{flourish}</Text>
           )}
           {!solved && (
-            <Text style={[S.tBodySm, { color: C.muted, marginTop: 8 }]}>{`Used all ${questionsUsed} questions`}</Text>
+            <Text style={[S.tBodySm, { color: C.muted, marginTop: 8 }]}>{`Used ${questionsUsed} of ${20 + (soloBonusUsed ? 2 : 0)} questions`}</Text>
           )}
           {/* Coins earned (Junior) */}
           {tier === 'junior' && (
