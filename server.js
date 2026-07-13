@@ -321,17 +321,27 @@ app.post("/api/solo-result", async (req, res) => {
   const { playerId, playerName, avatarIdx = 0, tier, solved, questionsUsed, hintsUsed } = req.body;
   if (!playerId || !tier) return res.status(400).json({ error: "playerId and tier are required" });
   const points = soloPoints(!!solved, Number(questionsUsed) || 0, Number(hintsUsed) || 0);
+  const t = tier === "junior" ? "junior" : "scholar";
   try {
+    let total = null;
     if (points > 0) {
       await supabase.rpc("record_solo_score", {
         p_player_id: playerId,
-        p_tier: tier === "junior" ? "junior" : "scholar",
+        p_tier: t,
         p_name: playerName || null,
         p_avatar: Number(avatarIdx) || 0,
         p_points: points,
       });
+      // Return the new all-time total so the client can detect a rank-up.
+      const { data } = await supabase
+        .from("solo_scores")
+        .select("total_points")
+        .eq("player_id", playerId)
+        .eq("tier", t)
+        .maybeSingle();
+      total = data ? data.total_points : points;
     }
-    res.json({ points });
+    res.json({ points, total });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

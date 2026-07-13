@@ -20127,6 +20127,7 @@ export default function EnigmaGame() {
   const [lbLoading, setLbLoading] = useState(false);
   const [lbReturn, setLbReturn] = useState('modes');   // screen to return to
   const [myTotalPoints, setMyTotalPoints] = useState(0); // all-time, for the rank title
+  const [rankUp, setRankUp] = useState(null);          // new rank object when the player just ranked up
   const [wallet, setWallet] = useState(DEFAULT_WALLET);
   const [coinBonusNote, setCoinBonusNote] = useState(0);
   const [muted, setMutedState] = useState(false);
@@ -20440,6 +20441,42 @@ export default function EnigmaGame() {
       persistTipsSeen(next);
     }
   }, [screen, soloChallenge?.categoryId, dailyChallenge?.categoryId, game?.theme?.id, viewerIsHost, tipsSeen]);
+
+  // Rank-up celebration (Phase 2) — pops when the player crosses into a new rank.
+  const rankUpAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (rankUp) {
+      rankUpAnim.setValue(0);
+      Animated.spring(rankUpAnim, { toValue: 1, friction: 5, tension: 80, useNativeDriver: true }).start();
+      if (!muted) sounds.win();
+    }
+  }, [rankUp]);
+  const isSherlock = rankUp?.name === 'Sherlock';
+  const rankColor = rankUp?.color || '#f4c542';
+  const rankUpModal = (
+    <Modal visible={!!rankUp} transparent animationType="fade" onRequestClose={() => setRankUp(null)}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.82)', alignItems: 'center', justifyContent: 'center', padding: 28 }}>
+        <Animated.View style={{ width: '100%', maxWidth: 360, opacity: rankUpAnim, transform: [{ scale: rankUpAnim.interpolate({ inputRange: [0, 1], outputRange: [0.82, 1] }) }] }}>
+          <View style={{ borderRadius: 24, shadowColor: rankColor, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.6, shadowRadius: 28, elevation: 18 }}>
+            <LinearGradient colors={[`${rankColor}cc`, `${rankColor}44`, 'rgba(18,18,38,0.92)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 2 }}>
+              <View style={{ borderRadius: 22, backgroundColor: '#0b0b1a', overflow: 'hidden', paddingVertical: 30, paddingHorizontal: 24, alignItems: 'center' }}>
+                <View style={{ position: 'absolute', top: 22, width: 150, height: 150, borderRadius: 75, backgroundColor: `${rankColor}22` }} />
+                <Text style={{ fontSize: 11, letterSpacing: 3, color: rankColor, fontFamily: F.sansBold, marginBottom: 8 }}>{isSherlock ? '★ TOP RANK ★' : 'RANK UP!'}</Text>
+                <Text style={{ fontSize: 70, marginBottom: 6 }}>{rankUp?.icon}</Text>
+                <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: 30, color: rankColor, letterSpacing: 1, textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }}>{rankUp?.name}</Text>
+                <Text style={{ fontFamily: F.sans, fontSize: 14, color: C.muted, textAlign: 'center', marginTop: 10, lineHeight: 20 }}>
+                  {isSherlock ? "You've reached the pinnacle. The game is afoot!" : `You've climbed to ${rankUp?.name}. Keep solving to reach the next rank.`}
+                </Text>
+                <TouchableOpacity style={[S.btnGold, { marginTop: 22, alignSelf: 'stretch' }]} onPress={() => setRankUp(null)}>
+                  <Text style={S.btnGoldText}>Continue</Text>
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
+          </View>
+        </Animated.View>
+      </View>
+    </Modal>
+  );
 
   // Shared "Useful Tip" modal, dropped into each play screen; only the active one mounts.
   const tipModal = (
@@ -21239,15 +21276,26 @@ export default function EnigmaGame() {
 
   // Report a finished solo round to the leaderboard (fire-and-forget). The server
   // computes the points. Junior sends first name only for privacy.
-  const recordSoloScore = (solved, questionsUsed, hintsUsed) => {
+  const recordSoloScore = async (solved, questionsUsed, hintsUsed) => {
     if (!playerId) return;
     const libTier = tier === 'junior' ? 'junior' : 'scholar';
     const full = nameInput.trim() || 'Player';
     const name = libTier === 'junior' ? (full.split(' ')[0] || 'Player') : full;
-    fetch(`${SERVER_URL}/api/solo-result`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerId, playerName: name, avatarIdx: selectedAvatarIdx, tier: libTier, solved, questionsUsed, hintsUsed }),
-    }).catch(() => {});
+    try {
+      const res = await fetch(`${SERVER_URL}/api/solo-result`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId, playerName: name, avatarIdx: selectedAvatarIdx, tier: libTier, solved, questionsUsed, hintsUsed }),
+      });
+      const data = await res.json();
+      if (data && data.points > 0 && data.total != null) {
+        const before = soloRankFor(data.total - data.points);
+        const after = soloRankFor(data.total);
+        setMyTotalPoints(data.total);
+        // Ranked up if the new tier's threshold is higher — celebrate after the
+        // result screen has settled.
+        if (after.min > before.min) setTimeout(() => setRankUp(after), 900);
+      }
+    } catch {}
   };
 
   const fetchSoloLeaderboard = async (scope) => {
@@ -22774,12 +22822,21 @@ export default function EnigmaGame() {
             <Text style={{ fontFamily: F.sansSemi, fontSize: 13, color: C.muted, marginTop: 6 }}>{tier === 'junior' ? 'Junior' : 'Scholar'} · solve in fewer questions to earn more points</Text>
           </View>
 
-          {/* Your standing */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 13, borderRadius: 16, borderWidth: 1, borderColor: `${myRank.color}55`, backgroundColor: `${myRank.color}14`, paddingHorizontal: 16, paddingVertical: 14, marginBottom: 16 }}>
-            <Text style={{ fontSize: 30 }}>{myRank.icon}</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: F.sansBold, fontSize: 17, color: myRank.color }}>{myRank.name}</Text>
-              <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, marginTop: 1 }}>{myTotalPoints} all-time points{lbMe ? (lbScope === 'week' ? ` · #${lbMe.rank} this week` : ` · #${lbMe.rank} all-time`) : ''}</Text>
+          {/* Your standing — Sherlock gets a prestige glow + badge */}
+          <View style={{ borderRadius: 16, marginBottom: 16, ...(myRank.name === 'Sherlock' ? { shadowColor: myRank.color, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.55, shadowRadius: 18, elevation: 12 } : {}) }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 13, borderRadius: 16, borderWidth: myRank.name === 'Sherlock' ? 1.5 : 1, borderColor: `${myRank.color}${myRank.name === 'Sherlock' ? '99' : '55'}`, backgroundColor: `${myRank.color}${myRank.name === 'Sherlock' ? '20' : '14'}`, paddingHorizontal: 16, paddingVertical: 14 }}>
+              <Text style={{ fontSize: 32 }}>{myRank.icon}</Text>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ fontFamily: F.sansBold, fontSize: 18, color: myRank.color }}>{myRank.name}</Text>
+                  {myRank.name === 'Sherlock' && (
+                    <View style={{ borderRadius: 8, borderWidth: 1, borderColor: `${myRank.color}88`, backgroundColor: `${myRank.color}22`, paddingHorizontal: 7, paddingVertical: 2 }}>
+                      <Text style={{ fontSize: 9, color: myRank.color, fontFamily: F.sansBold, letterSpacing: 1 }}>★ TOP RANK</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, marginTop: 1 }}>{myTotalPoints} all-time points{lbMe ? (lbScope === 'week' ? ` · #${lbMe.rank} this week` : ` · #${lbMe.rank} all-time`) : ''}</Text>
+              </View>
             </View>
           </View>
 
@@ -22814,13 +22871,19 @@ export default function EnigmaGame() {
             lbRows.map((r) => {
               const isMe = r.playerId === playerId;
               const a = av(r.avatarIdx);
+              // On the All-Time board, points = the rank basis, so show each player's rank.
+              const rowRank = lbScope === 'all' ? soloRankFor(r.points) : null;
+              const isTop = rowRank?.name === 'Sherlock';
               return (
-                <View key={r.playerId} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 13, borderWidth: 1, borderColor: isMe ? accent : C.border2, backgroundColor: isMe ? 'rgba(52,208,88,0.1)' : 'rgba(255,255,255,0.03)', paddingVertical: 10, paddingHorizontal: 13, marginBottom: 8 }}>
-                  <Text style={{ width: 30, textAlign: 'center', fontSize: r.rank <= 3 ? 20 : 15, fontFamily: F.sansBold, color: r.rank <= 3 ? C.text : C.dim }}>{medal(r.rank)}</Text>
+                <View key={r.playerId} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 13, borderWidth: 1, borderColor: isMe ? accent : (isTop ? `${rowRank.color}88` : C.border2), backgroundColor: isMe ? 'rgba(52,208,88,0.1)' : (isTop ? `${rowRank.color}1a` : 'rgba(255,255,255,0.03)'), paddingVertical: 10, paddingHorizontal: 13, marginBottom: 8 }}>
+                  <Text style={{ width: 28, textAlign: 'center', fontSize: r.rank <= 3 ? 20 : 15, fontFamily: F.sansBold, color: r.rank <= 3 ? C.text : C.dim }}>{medal(r.rank)}</Text>
                   <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}>
                     <Text style={{ fontSize: 18 }}>{a.emoji}</Text>
                   </View>
-                  <Text style={{ flex: 1, fontFamily: F.sansSemi, fontSize: 15, color: C.text }} numberOfLines={1}>{r.name}{isMe ? ' (you)' : ''}</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: F.sansSemi, fontSize: 15, color: C.text }} numberOfLines={1}>{r.name}{isMe ? ' (you)' : ''}</Text>
+                    {rowRank && <Text style={{ fontFamily: F.sans, fontSize: 11, color: rowRank.color, marginTop: 1 }}>{rowRank.icon} {rowRank.name}</Text>}
+                  </View>
                   <Text style={{ fontFamily: F.sansBold, fontSize: 16, color: accent }}>{r.points}</Text>
                 </View>
               );
@@ -23290,6 +23353,7 @@ export default function EnigmaGame() {
     return (
       <View style={[S.flex, { backgroundColor: '#05050f' }]}>
       <PremiumBackground />
+      {rankUpModal}
       <ScrollView style={S.flex} contentContainerStyle={[S.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 32 }]}>
         <View style={[S.screenHeader, { marginBottom: 4 }]}>
           <TouchableOpacity
