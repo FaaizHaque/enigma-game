@@ -19181,6 +19181,12 @@ function IrisFullBody({ size = 150, bowKey = 0 }) {
             <Stop offset="55%" stopColor="#7df0ff" />
             <Stop offset="100%" stopColor="#2bb9e6" />
           </RadialGradient>
+          {/* Arm shading — same gradient the overlay right arm uses, so the pair match */}
+          <SvgLinearGradient id={`${uid}-arm`} x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0%" stopColor="#9b7ae8" />
+            <Stop offset="60%" stopColor="#6a3fc9" />
+            <Stop offset="100%" stopColor="#4a1f9e" />
+          </SvgLinearGradient>
         </Defs>
 
         {/* Ambient glow */}
@@ -19192,8 +19198,8 @@ function IrisFullBody({ size = 150, bowKey = 0 }) {
         <Ellipse cx="52" cy="123" rx="9" ry="4.5" fill="#3a1f7a" />
         <Ellipse cx="68" cy="123" rx="9" ry="4.5" fill="#3a1f7a" />
 
-        {/* Left arm (static) */}
-        <Rect x="32" y="72" width="7.5" height="22" rx="3.75" fill={`url(#${uid}-body)`} />
+        {/* Left arm (static) — same shading as the waving right arm */}
+        <Rect x="32" y="72" width="7.5" height="22" rx="3.75" fill={`url(#${uid}-arm)`} />
         <Circle cx="35.75" cy="95" r="4.5" fill="#5a2eaf" />
         {/* Right shoulder joint — bridges the torso edge and the waving arm (a
             native overlay, see below) that pivots on it, so it never detaches. */}
