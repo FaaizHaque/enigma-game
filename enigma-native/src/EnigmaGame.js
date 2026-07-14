@@ -2296,7 +2296,7 @@ const JUNIOR_THEMES = [
 const CATEGORY_TIPS = {
   // Scholar
   personality: { tagline: 'First, pin down:', tags: ['Gender', 'Era (alive or historical)', 'Field'] },
-  event:       { tagline: 'First, pin down:', tags: ['Century', 'Type (war / discovery / disaster)', 'Region'] },
+  event:       { tagline: 'First, pin down:', tags: ['Era — ask "more than X years ago?"', 'Type (war / discovery / disaster)', 'Region'] },
   object:      { tagline: 'First, pin down:', tags: ['Real or mythical', 'Material', 'Purpose'] },
   place:       { tagline: 'First, pin down:', tags: ['Natural or man-made', 'Continent', 'City or landmark'] },
   invention:   { tagline: 'First, pin down:', tags: ['Field (transport, medicine, comms…)', 'Era (before/after 1900)', 'Device or method'] },
