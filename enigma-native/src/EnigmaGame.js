@@ -2296,7 +2296,7 @@ const JUNIOR_THEMES = [
 const CATEGORY_TIPS = {
   // Scholar
   personality: { tagline: 'First, pin down:', tags: ['Gender', 'Era (alive or historical)', 'Field'] },
-  event:       { tagline: 'First, pin down:', tags: ['Era — ask "more than X years ago?"', 'Type (war / discovery / disaster)', 'Region'] },
+  event:       { tagline: 'First, pin down:', tags: ['Era — e.g. "19th century?", "more than X years ago?"', 'Type (war / discovery / disaster)', 'Region'] },
   object:      { tagline: 'First, pin down:', tags: ['Real or mythical', 'Material', 'Purpose'] },
   place:       { tagline: 'First, pin down:', tags: ['Natural or man-made', 'Continent', 'City or landmark'] },
   invention:   { tagline: 'First, pin down:', tags: ['Field (transport, medicine, comms…)', 'Era (before/after 1900)', 'Device or method'] },
@@ -18909,35 +18909,40 @@ const ACircle = Animated.createAnimatedComponent(Circle);
 // A proper gold coin (crisp at any size, unlike the dull silver 🪙 emoji).
 function CoinIcon({ size = 20 }) {
   const uid = 'coin';
-  // Bold shapes + high contrast so it still reads as a shiny gold coin at 16-20px.
-  const star = 'M50 31 L54.4 41.9 L66.2 42.8 L57.1 50.3 L60 61.8 L50 55.5 L40 61.8 L42.9 50.3 L33.8 42.8 L45.6 41.9 Z';
+  // Embossed gold coin that survives tiny sizes. The trick is CONTRAST between a
+  // bright raised rim and a deeper recessed face — at 20px similar tones melt
+  // into an orange blob, which is what the previous versions did.
+  const star = 'M50 33 L53.9 42.7 L64.3 43.4 L56.3 50 L58.8 60.1 L50 54.6 L41.2 60.1 L43.7 50 L35.7 43.4 L46.1 42.7 Z';
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <Defs>
-        <RadialGradient id={`${uid}-face`} cx="35%" cy="28%" r="80%">
-          <Stop offset="0%" stopColor="#fff6cf" />
-          <Stop offset="40%" stopColor="#ffd34d" />
-          <Stop offset="75%" stopColor="#e8a81e" />
-          <Stop offset="100%" stopColor="#a86f0a" />
+        {/* Bright raised rim */}
+        <RadialGradient id={`${uid}-rim`} cx="32%" cy="25%" r="85%">
+          <Stop offset="0%" stopColor="#fff3b0" />
+          <Stop offset="45%" stopColor="#ffd452" />
+          <Stop offset="80%" stopColor="#e2a51f" />
+          <Stop offset="100%" stopColor="#b57c0d" />
         </RadialGradient>
-        <RadialGradient id={`${uid}-inner`} cx="40%" cy="32%" r="75%">
-          <Stop offset="0%" stopColor="#ffe9a3" />
-          <Stop offset="65%" stopColor="#f7c23a" />
-          <Stop offset="100%" stopColor="#cf941a" />
+        {/* Deeper recessed face — noticeably darker than the rim */}
+        <RadialGradient id={`${uid}-face`} cx="38%" cy="30%" r="80%">
+          <Stop offset="0%" stopColor="#f2b830" />
+          <Stop offset="60%" stopColor="#d2951a" />
+          <Stop offset="100%" stopColor="#9a660a" />
         </RadialGradient>
       </Defs>
-      {/* Thickness — dark edge peeking below gives the coin real 3D depth */}
-      <Circle cx="50" cy="54" r="46" fill="#7c4a06" />
-      {/* Coin face */}
-      <Circle cx="50" cy="48" r="46" fill={`url(#${uid}-face)`} stroke="#7a4b06" strokeWidth="2" />
-      {/* Inner ring */}
-      <Circle cx="50" cy="48" r="34" fill={`url(#${uid}-inner)`} stroke="#b07d12" strokeWidth="2.5" />
-      {/* Embossed star — dark base offset down, bright star on top */}
-      <G y={2.2}><Path d={star} fill="#9c690a" /></G>
-      <Path d={star} fill="#ffe27a" />
-      {/* Top-left gleam + a small sparkle */}
-      <Ellipse cx="37" cy="30" rx="16" ry="8" fill="#ffffff" opacity="0.4" />
-      <Path d="M70 22 L71.8 26.7 L76.5 28.5 L71.8 30.3 L70 35 L68.2 30.3 L63.5 28.5 L68.2 26.7 Z" fill="#ffffff" opacity="0.9" />
+      {/* Thickness — dark edge peeking below for 3D depth */}
+      <Circle cx="50" cy="53" r="47" fill="#6b3e04" />
+      {/* Raised rim */}
+      <Circle cx="50" cy="48" r="47" fill={`url(#${uid}-rim)`} stroke="#5f3804" strokeWidth="2" />
+      {/* Recessed face, with a dark inset line where it drops from the rim */}
+      <Circle cx="50" cy="48" r="33" fill={`url(#${uid}-face)`} stroke="#7e5208" strokeWidth="2" />
+      {/* Embossed star — dark stamped base, bright raised top */}
+      <G y={2}><Path d={star} fill="#6f4405" /></G>
+      <Path d={star} fill="#ffe083" />
+      {/* Crescent shine along the top-left rim */}
+      <Path d="M11.4 37.6 A40 40 0 0 1 39.6 9.4" stroke="#ffffff" strokeWidth="5.5" strokeLinecap="round" fill="none" opacity="0.55" />
+      {/* Sparkle glint */}
+      <Path d="M73 20 L75 25 L80 27 L75 29 L73 34 L71 29 L66 27 L71 25 Z" fill="#ffffff" opacity="0.95" />
     </Svg>
   );
 }
@@ -21943,7 +21948,7 @@ export default function EnigmaGame() {
                 </View>
               )}
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,224,140,0.10)', borderWidth: 1, borderColor: 'rgba(255,224,140,0.3)', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5 }}>
-                <CoinIcon size={21} />
+                <CoinIcon size={24} />
                 <Text style={{ fontSize: 14, color: C.gold, fontFamily: F.sansBold }}>{wallet.coins}</Text>
               </View>
             </View>
@@ -23230,7 +23235,7 @@ export default function EnigmaGame() {
           {tier === 'junior' && (
             <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 10 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,224,140,0.10)', borderWidth: 1, borderColor: 'rgba(255,224,140,0.3)', borderRadius: 20, paddingHorizontal: 13, paddingVertical: 5 }}>
-                <CoinIcon size={21} />
+                <CoinIcon size={24} />
                 <Text style={{ fontSize: 14, color: C.gold, fontFamily: F.sansBold }}>{wallet.coins}</Text>
                 <Text style={{ fontSize: 11, color: C.goldDim, fontFamily: F.sansMed }}>coins</Text>
               </View>
@@ -23328,7 +23333,7 @@ export default function EnigmaGame() {
                   disabled={wallet.coins < COIN_BONUS_COST}
                   style={{ opacity: wallet.coins < COIN_BONUS_COST ? 0.5 : 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,224,140,0.4)', backgroundColor: 'rgba(255,224,140,0.08)', marginBottom: 12 }}
                 >
-                  <CoinIcon size={23} />
+                  <CoinIcon size={26} />
                   <Text style={{ color: C.gold, fontFamily: F.sansBold, fontSize: 15 }}>
                     {wallet.coins < COIN_BONUS_COST ? `Need ${COIN_BONUS_COST} coins for +2 questions` : `Spend ${COIN_BONUS_COST} coins for +2 questions`}
                   </Text>
@@ -23448,7 +23453,7 @@ export default function EnigmaGame() {
           {/* Coins earned (Junior) */}
           {tier === 'junior' && (
             <View style={{ marginTop: 14, flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,224,140,0.4)', backgroundColor: 'rgba(255,224,140,0.08)', paddingHorizontal: 16, paddingVertical: 8 }}>
-              <CoinIcon size={23} />
+              <CoinIcon size={26} />
               <Text style={{ fontSize: 14, color: C.gold, fontFamily: F.sansBold }}>
                 {coinsEarned > 0 ? `+${coinsEarned} coins` : 'No coins this time'}
               </Text>
