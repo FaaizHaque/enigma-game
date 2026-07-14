@@ -24361,101 +24361,59 @@ export default function EnigmaGame() {
         {/* Game content */}
         <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: insets.top }}>
           <View style={{ paddingTop: 8 }}><SimBar /></View>
-          {/* Top bar, home button + category/round glass bar */}
-          <View style={{ paddingBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <TouchableOpacity
-              onPress={goHome}
-              style={{ width: 44, height: 44, borderRadius: 12, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <Text style={{ fontSize: 20 }}>🏠</Text>
+          {/* Match header — home/mute/tips + one chip: category · round · questions-left, with a progress underline */}
+          <View style={{ paddingBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <TouchableOpacity onPress={goHome}
+              style={{ width: 40, height: 40, borderRadius: 11, borderWidth: 1, borderColor: C.border2, backgroundColor: 'rgba(255,255,255,0.04)', alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ fontSize: 18 }}>🏠</Text>
             </TouchableOpacity>
-            {miniMute({ width: 44, height: 44, borderRadius: 12 })}
+            {miniMute({ width: 40, height: 40, borderRadius: 11 })}
             {!viewerIsHost && CATEGORY_TIPS[game.theme?.id] && (
               <TouchableOpacity onPress={() => openTips(game.theme?.id)}
-                style={{ width: 44, height: 44, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(212,168,74,0.38)', backgroundColor: 'rgba(212,168,74,0.08)', alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontSize: 20 }}>💡</Text>
+                style={{ width: 40, height: 40, borderRadius: 11, borderWidth: 1, borderColor: 'rgba(212,168,74,0.38)', backgroundColor: 'rgba(212,168,74,0.08)', alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontSize: 18 }}>💡</Text>
               </TouchableOpacity>
             )}
-            <View style={{ flex: 1, borderRadius: 16, shadowColor: C.violet, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.30, shadowRadius: 12, elevation: 7 }}>
-              <LinearGradient colors={['rgba(180,140,255,0.55)', 'rgba(124,58,237,0.22)', 'rgba(70,20,160,0.40)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 16, padding: 1.5 }}>
-                <LinearGradient colors={['rgba(124,58,237,0.18)', 'rgba(70,25,150,0.12)', 'rgba(30,8,80,0.24)']} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ borderRadius: 14.5, overflow: 'hidden', paddingVertical: 13, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                  <LinearGradient colors={['rgba(180,140,255,0.18)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 30 }} />
-                  <Text style={{ fontSize: 20 }}>{game.theme?.icon}</Text>
-                  <Text style={{ fontFamily: F.serifBold, fontSize: 16, color: C.violet2, flex: 1, letterSpacing: 0.2 }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{game.theme?.label}</Text>
-                  <View style={{ backgroundColor: 'rgba(200,168,74,0.16)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 8, paddingHorizontal: 9, paddingVertical: 4, flexShrink: 0 }}>
-                    <Text style={{ fontFamily: F.serifBold, fontSize: 12, color: C.gold }}>Round {game.round}</Text>
-                  </View>
-                </LinearGradient>
-              </LinearGradient>
-            </View>
-          </View>
-
-          {/* Progress bar */}
-          <View style={{ marginBottom: 10 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-              <Text style={{ fontSize: 13, color: C.muted, fontFamily: F.sansSemi, letterSpacing: 0.3 }}>Questions Remaining</Text>
-              <Text style={{ fontSize: 13, color: qLeft <= 5 ? C.danger : C.gold, fontFamily: F.sansBold }}>{qLeft} / 20</Text>
-            </View>
-            <View style={{ height: 5, backgroundColor: C.border2, borderRadius: 3, overflow: 'hidden' }}>
-              <LinearGradient
-                colors={qLeft <= 5 ? ['#ff7a6e', C.danger] : [C.gold2, C.gold]}
-                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                style={{ height: 5, width: `${(answeredQs / 20) * 100}%`, borderRadius: 3 }}
-              />
-            </View>
-          </View>
-
-          {/* Player strip */}
-          <ScrollView
-            horizontal showsHorizontalScrollIndicator={false}
-            style={{ marginBottom: 8 }}
-            contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 2, gap: 8 }}
-          >
-            {game.players.map((p) => {
-              const a = av(p.avatarIdx);
-              const isCur = currentQuestioner?.id === p.id && !p.isHost;
-              return (
-                <View
-                  key={p.id}
-                  style={{
-                    flexDirection: 'row', alignItems: 'center', gap: 8,
-                    borderRadius: 13, paddingVertical: 6, paddingHorizontal: 10,
-                    borderWidth: 1.5,
-                    borderColor: isCur ? C.violet2 : C.border2,
-                    backgroundColor: isCur ? 'rgba(124,58,237,0.16)' : 'rgba(255,255,255,0.03)',
-                    ...(isCur ? { shadowColor: C.violet, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 6 } : {}),
-                  }}
-                >
-                  <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Text style={{ fontSize: 16 }}>{a.emoji}</Text>
-                  </View>
-                  <View style={{ flexShrink: 1 }}>
-                    <Text style={{ fontSize: 11, color: isCur ? C.violet2 : C.muted, fontFamily: F.sansSemi, maxWidth: 60 }} numberOfLines={1}>
-                      {p.isHost ? '👑 ' : ''}{p.name.split(' ')[0]}
-                    </Text>
-                    <Text style={{ fontFamily: F.serifBold, fontSize: 12, color: C.gold }}>{p.score} pts</Text>
-                  </View>
+            <View style={{ flex: 1, borderRadius: 13, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(167,139,250,0.35)', backgroundColor: 'rgba(124,58,237,0.13)' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 9 }}>
+                <Text style={{ fontSize: 18 }}>{game.theme?.icon}</Text>
+                <Text style={{ flex: 1, fontFamily: F.serifBold, fontSize: 15, color: C.violet2, letterSpacing: 0.2 }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{game.theme?.label}</Text>
+                <View style={{ backgroundColor: 'rgba(200,168,74,0.16)', borderWidth: 1, borderColor: C.goldDim, borderRadius: 7, paddingHorizontal: 8, paddingVertical: 3 }}>
+                  <Text style={{ fontFamily: F.serifBold, fontSize: 11, color: C.gold }}>R{game.round}</Text>
                 </View>
-              );
-            })}
-          </ScrollView>
+                <View style={{ borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.13)', paddingLeft: 9 }}>
+                  <Text style={{ fontFamily: F.sansBold, fontSize: 14, color: qLeft <= 5 ? C.danger : C.gold }}>{qLeft}<Text style={{ fontSize: 10, color: C.dim, fontFamily: F.sansMed }}> left</Text></Text>
+                </View>
+              </View>
+              <View style={{ height: 3, backgroundColor: 'rgba(0,0,0,0.3)' }}>
+                <LinearGradient colors={qLeft <= 5 ? ['#ff7a6e', C.danger] : [C.gold2, C.gold]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ height: 3, width: `${(answeredQs / 20) * 100}%` }} />
+              </View>
+            </View>
+          </View>
 
-          {/* Turn banner */}
-          {pendingQ && viewerIsHost ? (
-            <View style={[S.turnBanner, { borderColor: 'rgba(245,158,11,0.5)', backgroundColor: 'rgba(245,158,11,0.06)', marginBottom: 8 }]}>
-              <View style={[S.turnDot, { backgroundColor: C.warn }]} />
-              <Text style={[S.turnText, { color: C.warn }]}>A question awaits your answer!</Text>
-            </View>
-          ) : (
-            <View style={[S.turnBanner, { marginBottom: 8 }]}>
-              <View style={S.turnDot} />
-              <Text style={S.turnText}>
-                {currentQuestioner
-                  ? `${currentQuestioner.name}'s turn${currentQuestioner.id === viewerId ? ", that's you!" : ''}`
-                  : 'All guessers are out!'}
-              </Text>
-            </View>
-          )}
+          {/* Players + turn — compact avatar pills; the current asker is ringed, so
+              this row is also the turn indicator. Fixed height so it can't stretch
+              and leave a void (a horizontal ScrollView otherwise grows vertically). */}
+          <View style={{ height: 76, marginBottom: 4 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ alignItems: 'flex-start', gap: 6, paddingHorizontal: 2, paddingTop: 8 }}>
+              {game.players.map((p) => {
+                const a = av(p.avatarIdx);
+                const isCur = currentQuestioner?.id === p.id && !p.isHost;
+                const isMe = p.id === viewerId;
+                return (
+                  <View key={p.id} style={{ alignItems: 'center', width: 62 }}>
+                    <View style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center', borderWidth: isCur ? 2.5 : 1.5, borderColor: isCur ? C.violet2 : (isMe ? 'rgba(167,139,250,0.45)' : 'rgba(255,255,255,0.08)'), ...(isCur ? { shadowColor: C.violet, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.7, shadowRadius: 8, elevation: 7 } : {}) }}>
+                      <Text style={{ fontSize: 24 }}>{a.emoji}</Text>
+                      {p.isHost && <View style={{ position: 'absolute', top: -8 }}><Text style={{ fontSize: 14 }}>👑</Text></View>}
+                    </View>
+                    <Text style={{ fontSize: 10, color: isCur ? C.violet2 : C.muted, fontFamily: isCur ? F.sansBold : F.sansMed, marginTop: 3 }} numberOfLines={1}>{p.name.split(' ')[0]}</Text>
+                    <Text style={{ fontSize: 11, color: C.gold, fontFamily: F.sansBold, lineHeight: 13 }}>{p.score}</Text>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
 
           {/* Host secret reveal, violet glass. Tappable to consult the info card. */}
           {viewerIsHost && (
@@ -24582,12 +24540,12 @@ export default function EnigmaGame() {
                       <Animated.View style={{ height: 3, width: guesserBarAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }), backgroundColor: guesserSecsLeft <= 10 ? C.danger : C.gold, borderRadius: 2 }} />
                     </View>
                   </View>
-                  <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
                     <GlassInput
                       accent={C.violet}
                       containerStyle={{ flex: 1 }}
                       style={{ paddingVertical: 12, fontSize: 14 }}
-                      placeholder="Ask a yes/no question..." placeholderTextColor={C.dim}
+                      placeholder="Your turn — ask a yes/no question…" placeholderTextColor={C.dim}
                       value={questionInput} onChangeText={setQuestionInput}
                       onSubmitEditing={submitQuestion} returnKeyType="send"
                     />
@@ -24598,11 +24556,19 @@ export default function EnigmaGame() {
                       disabled={!questionInput.trim()}
                     />
                   </View>
-                  <PremiumButton
-                    label="💡 I Know It, Solve!"
-                    textStyle={{ fontSize: 14 }}
-                    onPress={() => { setSolveInput(''); setSolveModalOpen(true); }}
-                  />
+                  {/* Clear separation + a distinct gold "commit" colour so Solve is
+                      never mistaken for the violet ask/send. */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 12 }}>
+                    <View style={{ flex: 1, height: 1, backgroundColor: C.border }} />
+                    <Text style={{ fontSize: 11, color: C.dim, fontFamily: F.sansMed, letterSpacing: 1.5 }}>OR</Text>
+                    <View style={{ flex: 1, height: 1, backgroundColor: C.border }} />
+                  </View>
+                  <TouchableOpacity onPress={() => { setSolveInput(''); setSolveModalOpen(true); }} activeOpacity={0.85}>
+                    <LinearGradient colors={[C.gold2, C.gold, '#a07020']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 13, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
+                      <Text style={{ fontSize: 15 }}>💡</Text>
+                      <Text style={{ fontFamily: F.sansBold, fontSize: 15, color: '#1a0f00', letterSpacing: 0.3 }}>I Know It — Solve!</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
                 </View>
               ) : (
                 <View style={{ flexDirection: 'row', gap: 8 }}>
