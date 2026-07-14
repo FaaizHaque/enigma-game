@@ -19190,9 +19190,9 @@ function IrisFullBody({ size = 150, bowKey = 0 }) {
         {/* Left arm (static) */}
         <Rect x="32" y="72" width="7.5" height="22" rx="3.75" fill={`url(#${uid}-body)`} />
         <Circle cx="35.75" cy="95" r="4.5" fill="#5a2eaf" />
-        {/* Right shoulder joint — drawn on the body; the waving arm (a native
-            overlay, see below) pivots exactly on this ball so it never detaches. */}
-        <Circle cx="76" cy="75" r="5.5" fill={`url(#${uid}-body)`} />
+        {/* Right shoulder joint — bridges the torso edge and the waving arm (a
+            native overlay, see below) that pivots on it, so it never detaches. */}
+        <Circle cx="80.5" cy="75.5" r="4.8" fill={`url(#${uid}-body)`} />
 
         {/* Torso */}
         <Rect x="42" y="62" width="36" height="44" rx="17" fill={`url(#${uid}-body)`} stroke="#c9b6ff" strokeWidth="1" strokeOpacity="0.3" />
@@ -19223,13 +19223,15 @@ function IrisFullBody({ size = 150, bowKey = 0 }) {
           (Animated rotation on an SVG <G> ignores originX/originY and spins the
           arm around the viewBox corner, detaching it — hence this approach.)
           The view is twice the arm's length tall with the arm drawn in the bottom
-          half, so its centre — the rotation origin RN uses — IS the shoulder. */}
+          half, so its centre — the rotation origin RN uses — IS the shoulder.
+          At rest (0deg) the arm mirrors the static left arm exactly: hanging just
+          outside the torso, same size, same height. */}
       <Animated.View
         pointerEvents="none"
         style={{
           position: 'absolute',
-          left: 76 * s - ARM_W / 2,
-          top: 74 * s - ARM_L,
+          left: 83.75 * s - ARM_W / 2,
+          top: 72 * s - ARM_L,
           width: ARM_W,
           height: ARM_L * 2,
           transform: [{ rotate: armRotate }],
@@ -19243,8 +19245,8 @@ function IrisFullBody({ size = 150, bowKey = 0 }) {
               <Stop offset="100%" stopColor="#4a1f9e" />
             </SvgLinearGradient>
           </Defs>
-          <Rect x="2.5" y="0" width="7" height="21" rx="3.5" fill={`url(#${uid}-armg)`} />
-          <Circle cx="6" cy="21.5" r="4.5" fill="#5a2eaf" />
+          <Rect x="2.25" y="0" width="7.5" height="22" rx="3.75" fill={`url(#${uid}-armg)`} />
+          <Circle cx="6" cy="22.5" r="4.5" fill="#5a2eaf" />
         </Svg>
       </Animated.View>
     </Animated.View>
@@ -19929,6 +19931,28 @@ export default function EnigmaGame() {
   // Load which category tips have already auto-shown (local-only)
   useEffect(() => { loadTipsSeen().then(setTipsSeen); }, []);
 
+  // Pick Iris's voice once: the warmest female English voice installed on the
+  // device (preferring Enhanced quality), instead of the robotic default.
+  useEffect(() => {
+    (async () => {
+      try {
+        const voices = await Speech.getAvailableVoicesAsync();
+        const en = (voices || []).filter((v) => (v.language || '').toLowerCase().startsWith('en'));
+        const FEMALE = ['samantha', 'ava', 'allison', 'nicky', 'zoe', 'serena', 'kate', 'martha', 'karen', 'moira', 'tessa', 'susan', 'stephanie'];
+        // Search in preference order so the sweetest-sounding match wins.
+        let best = null;
+        for (const name of FEMALE) {
+          const matches = en.filter((v) => (v.name || '').toLowerCase().includes(name) || (v.identifier || '').toLowerCase().includes(name));
+          if (matches.length) {
+            best = matches.find((v) => (v.quality || '').toLowerCase().includes('enhanced')) || matches[0];
+            break;
+          }
+        }
+        if (best) irisVoiceRef.current = best.identifier;
+      } catch {}
+    })();
+  }, []);
+
   // Load daily streak once on mount (local-only)
   useEffect(() => { loadDailyStreak().then(setDailyStreak); }, []);
 
@@ -20157,6 +20181,7 @@ export default function EnigmaGame() {
   const [hostGreeting, setHostGreeting] = useState('');
   const [introBowKey, setIntroBowKey] = useState(0);
   const introRoundRef = useRef(0);
+  const irisVoiceRef = useRef(null); // best available female TTS voice id
   // Solo leaderboard
   const [lbScope, setLbScope] = useState('week');      // 'week' | 'all'
   const [lbRows, setLbRows] = useState([]);
@@ -20412,7 +20437,7 @@ export default function EnigmaGame() {
   // ("Welcome!"), pauses, then the rest, slowly. Short reactions just speak once.
   const speakIfOn = (text, rate = 0.72) => {
     if (muted) return;
-    const opts = { rate, pitch: 1.05 };
+    const opts = { rate, pitch: 1.12, ...(irisVoiceRef.current ? { voice: irisVoiceRef.current } : {}) };
     try {
       Speech.stop();
       const m = text.match(/^(.*?[.!?])\s+(.+)$/);
@@ -20443,7 +20468,7 @@ export default function EnigmaGame() {
     setHostMood('idle');
     setHostLine(line);
     setHostReactKey((k) => k + 1);
-    speakIfOn(line, 0.9);
+    speakIfOn(line, 0.82);
   };
   const hostSay = (answer, idx) => {
     const YES = ['Yes!', "That's right!", 'Correct!', 'Indeed!'];
@@ -20453,7 +20478,7 @@ export default function EnigmaGame() {
     setHostMood(answer === 'YES' ? 'yes' : answer === 'NO' ? 'no' : 'partly');
     setHostLine(line);
     setHostReactKey((k) => k + 1);
-    speakIfOn(line, 0.96);
+    speakIfOn(line, 0.82);
   };
 
   // Build + open a category's "Useful Tip" card (used by the 💡 button and auto-show).
