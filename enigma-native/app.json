@@ -24,7 +24,8 @@
         "CFBundleDisplayName": "20Q",
         "UIStatusBarStyle": "UIStatusBarStyleLightContent",
         "UIRequiresFullScreen": true,
-        "NSFaceIDUsageDescription": "Used for secure authentication"
+        "NSFaceIDUsageDescription": "Used for secure authentication",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
