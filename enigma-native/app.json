@@ -17,7 +17,7 @@
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.enigmagame.app",
+      "bundleIdentifier": "com.haquegames.20Q",
       "buildNumber": "5",
       "requireFullScreen": true,
       "infoPlist": {
